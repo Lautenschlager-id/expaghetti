@@ -1,26 +1,3 @@
-table.tostring = function(list, depth, stop)
-	depth = depth or 1
-	stop = stop or 0
-
-	local out = {}
-	
-	for k, v in next, list do
-		out[#out + 1] = ""
-		local t = type(v)
-		if t == "table" then
-			out[#out] = out[#out] .. ((stop > 0 and depth > stop) and tostring(v) or table.tostring(v, depth + 1, stop - 1))
-		elseif t == "number" or t == "boolean" then
-			out[#out] = out[#out] .. tostring(v)
-		elseif t == "string" then
-			out[#out] = out[#out] .. string.format("%q", v)
-		else
-			out[#out] = out[#out] .. "nil"
-		end
-	end
-	
-	return "{\n" .. table.concat(out, ",") .. "\n" .. string.rep("\t", depth - 1) .. "}"
-end
-
 local utf8 = require("utf8")
 local util = require("util")
 local enum = require("enum")
@@ -85,7 +62,7 @@ local buildRegex = function(regex, isUTF8)
 				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then
 					break -- handled in the next condition
 				elseif char == enum.magic.RANGE then
-					setHandler:range(lastChar, nextChar)	
+					setHandler:range(lastChar, nextChar)
 				else
 					setHandler:push(char)
 				end
