@@ -1,3 +1,26 @@
+table.tostring = function(list, depth, stop)
+	depth = depth or 1
+	stop = stop or 0
+
+	local out = {}
+	
+	for k, v in next, list do
+		out[#out + 1] = ""
+		local t = type(v)
+		if t == "table" then
+			out[#out] = out[#out] .. ((stop > 0 and depth > stop) and tostring(v) or table.tostring(v, depth + 1, stop - 1))
+		elseif t == "number" or t == "boolean" then
+			out[#out] = out[#out] .. tostring(v)
+		elseif t == "string" then
+			out[#out] = out[#out] .. string.format("%q", v)
+		else
+			out[#out] = out[#out] .. "nil"
+		end
+	end
+	
+	return "{\n" .. table.concat(out, ",") .. "\n" .. string.rep("\t", depth - 1) .. "}"
+end
+
 local utf8 = require("utf8")
 local util = require("util")
 local enum = require("enum")
@@ -6,34 +29,45 @@ local setFactory = require("handler/set")
 
 local magicSet = util.createSet(util.toArray(enum.magic))
 
-local match = function(str, regex, isUTF8)
-	local strLen, regexLen
+local buildRegex = function(regex, isUTF8)
+	local len
 	if isUTF8 then
-		str, strLen = utf8(str)
-		regex, regexLen = utf8(regex)
+		regex, len = utf8(regex)
 	else
-		str, strLen = util.strToTbl(str)
-		regex, regexLen = util.strToTbl(regex)
+		regex, len = util.strToTbl(regex)
 	end
 
 	local lastChar, nextChar
 	local isEscaped, isMagic, char
-	local skip = false
 
 	local setHandler = setFactory:new()
 
-	for i = 1, regexLen do
-		repeat
-			if skip then
-				skip = false
-				break
-			end
+	-- Transforms character classes into sets
+	local i, setLen = 1
+	while i <= len do
+		char = regex[i]
 
+		isEscaped = lastChar and lastChar == enum.magic.ESCAPE
+		if isEscaped and enum.class[char] then
+			setLen = util.insert(regex, i - 1,  enum.class[char], 2) -- 'pos - 1' because of the magic escape
+			i = i + setLen
+			len = len + setLen
+		end
+
+		lastChar = char -- Could be handled when transformed but it's worthless
+		i = i + 1
+	end
+
+	-- Builds the regex
+	i = 1
+	lastChar = nil
+	while i <= len do
+		repeat
 			char = regex[i]
 			nextChar = regex[i + 1]
 
 			isMagic = magicSet[char]
-			isEscaped = lastChar and lastChar == '%'
+			isEscaped = lastChar and lastChar == enum.magic.ESCAPE
 
 			if not isEscaped and isMagic then
 				if char == enum.magic.OPEN_SET then
@@ -51,15 +85,29 @@ local match = function(str, regex, isUTF8)
 				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then
 					break -- handled in the next condition
 				elseif char == enum.magic.RANGE then
-					setHandler:range(lastChar, nextChar)
+					setHandler:range(lastChar, nextChar)	
 				else
 					setHandler:push(char)
 				end
 			end
 		until true
 		lastChar = char
+		i = i + 1
 	end
 end
 
+local match = function(str, regex, isUTF8)
+	regex = buildRegex(regex, isUTF8)
+
+	local len
+	if isUTF8 then
+		str, len = utf8(str)
+	else
+		str, len = util.strToTbl(str)
+	end
+
+	-- TODO
+end
+
 -- Debugging
-match("abacate", "[abc][^m][0-9a][a-zA-Z69]", false)
+match("abacate", "oi%aoi%d%L%u", false)
