@@ -1,6 +1,7 @@
 local enum = require("enum")
 
 local strbyte = string.byte
+local strchar = string.char
 
 local set = { }
 set.__index = set
@@ -12,12 +13,8 @@ set.new = function(self)
 		stack = {
 			--[[
 				[i] = {
-					_index → int,
 					_negated → bool,
-					_rangeIndex → int,
-					_min → arr<int>,
-					_max → arr<int>,
-					... → str
+					[char] = true -- Hash system for performance
 				}
 			]]
 		}
@@ -27,11 +24,7 @@ end
 set.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		_index = 0,
-		_negated = false,
-		_rangeIndex = 0,
-		_min = { },
-		_max = { }
+		_negated = false
 	}
 
 	self.isOpen = true
@@ -42,9 +35,7 @@ set.close = function(self)
 end
 
 set.push = function(self, char)
-	local this = self.stack[self._index]
-	this._index = this._index + 1
-	this[this._index] = char
+	self.stack[self._index][char] = true
 end
 
 set.negate = function(self)
@@ -52,12 +43,10 @@ set.negate = function(self)
 end
 
 set.range = function(self, min, max)
-	min, max = strbyte(min), strbyte(max)
-
 	local this = self.stack[self._index]
-	this._rangeIndex = this._rangeIndex + 1
-	this._min[this._rangeIndex] = min
-	this._max[this._rangeIndex] = max
+	for b = strbyte(min), strbyte(max) do
+		this[strchar(b)] = true
+	end
 end
 
 return set
