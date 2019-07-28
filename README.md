@@ -17,3 +17,8 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Allow mixing Set and Range `[a-z0-9@_!]`
 - [x] Transform character class into set `%a`→`[a-zA-Z]`
 - [x] Syntax documentation
+- [x] Create Group `(abc)`
+- [x] Create Non-capturing group `(?:abc)`
+- [x] Create Positive lookahead group `(?=abc)`
+- [x] Create Negative lookahead group `(?!abc)`
+- [x] Create the special character class `%cX`

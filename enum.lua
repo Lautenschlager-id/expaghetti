@@ -7,6 +7,12 @@ local enum = {
 		CLOSE_SET = ']', -- [abc]
 		NEGATED_SET = '^', -- [^abc]
 		RANGE = '-', -- [0-9]
+		OPEN_GROUP = '(', -- (abc)
+		CLOSE_GROUP = ')', -- (abc)
+		GROUP_BEHAVIOR = '?', -- (?xabc)
+		NON_CAPTURING_GROUP = ':', -- (?:abc)
+		POS_LOOKAHEAD = '=', -- (?=abc)
+		NEG_LOOKAHEAD = '!' -- (?!abc)
 	},
 	class = {
 		-- %x
@@ -24,8 +30,10 @@ local enum = {
 		L = "[^a-z]",
 		S = "[^\f\n\r\t ]",
 		U = "[^A-Z]",
-		W = "[^a-zA-Z0-9_]",
-		-- Others
+		W = "[^a-zA-Z0-9_]"
+	},
+	specialClass = {
+		controlChar = 'c',
 		['.'] = "[^\n\r]" -- Not working yet
 	}
 }

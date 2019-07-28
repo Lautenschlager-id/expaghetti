@@ -43,6 +43,9 @@ local insert = function(src, pos, tbl, ignore)
 	for i = pos, pos + tblLen - 1 do
 		src[i] = tbl[i - pos + 1]
 	end
+	if tblLen < ignore then
+			
+	end
 
 	return realLen
 end

@@ -1,10 +1,9 @@
-local enum = require("enum")
-
 local strbyte = string.byte
 local strchar = string.char
 
 local set = { }
 set.__index = set
+set.__tostring = "set"
 
 set.new = function(self)
 	return setmetatable({
@@ -35,17 +34,34 @@ set.close = function(self)
 end
 
 set.push = function(self, char)
+	if not self.isOpen then return end
 	self.stack[self._index][char] = true
 end
 
 set.negate = function(self)
+	if not self.isOpen then return end
 	self.stack[self._index]._negated = true
 end
 
 set.range = function(self, min, max)
+	if not self.isOpen then return end
 	local this = self.stack[self._index]
 	for b = strbyte(min), strbyte(max) do
 		this[strchar(b)] = true
+	end
+end
+
+set.get = function(self)
+	if not self.isOpen then return end
+	return self.stack[self._index]
+end
+
+set.match = function(self, char)
+	local this = self.stack[self._index]
+	if this._negated then
+		return not this[char]
+	else
+		return this[char]
 	end
 end
 
