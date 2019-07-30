@@ -27,20 +27,28 @@ set.open = function(self)
 	}
 
 	self.isOpen = true
+
+	return self
 end
 
 set.close = function(self)
 	self.isOpen = false
+
+	return self
 end
 
 set.push = function(self, char)
 	if not self.isOpen then return end
 	self.stack[self._index][char] = true
+
+	return self
 end
 
 set.negate = function(self)
 	if not self.isOpen then return end
 	self.stack[self._index]._negated = true
+
+	return self
 end
 
 set.range = function(self, min, max)
@@ -49,6 +57,8 @@ set.range = function(self, min, max)
 	for b = strbyte(min), strbyte(max) do
 		this[strchar(b)] = true
 	end
+
+	return self
 end
 
 set.get = function(self)

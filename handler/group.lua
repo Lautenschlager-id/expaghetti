@@ -28,10 +28,14 @@ group.open = function(self)
 
 	self.watchEffect = false
 	self.isOpen = true
+
+	return self
 end
 
 group.close = function(self)
 	self.isOpen = false
+
+	return self
 end
 
 group.push = function(self, char)
@@ -39,11 +43,15 @@ group.push = function(self, char)
 	local this = self.stack[self._index]
 	this._index = this._index + 1
 	this[this._index] = char
+
+	return self
 end
 
 group.setEffect = function(self, effect)
 	if not self.isOpen then return end
 	self.stack[self._index]._effect = effect
+
+	return self
 end
 
 group.get = function(self)

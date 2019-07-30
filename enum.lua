@@ -1,4 +1,28 @@
-local util = require("util")
+local util = require("helper/util")
+
+local newSet
+do
+	local setHandler = require("handler/set"):new()
+	newSet = function(range, push, negate)
+		setHandler:open()
+
+		if range then
+			for i = 1, #range, 2 do
+				setHandler:range(range[i], range[i + 1])
+			end
+		end
+		if push then
+			for i = 1, #push do
+				setHandler:push(push[i])
+			end
+		end
+		if negate then
+			setHandler:negate()
+		end
+
+		return setHandler:get(), setHandler:close()
+	end
+end
 
 local enum = {
 	magic = {
@@ -12,34 +36,31 @@ local enum = {
 		GROUP_BEHAVIOR = '?', -- (?xabc)
 		NON_CAPTURING_GROUP = ':', -- (?:abc)
 		POS_LOOKAHEAD = '=', -- (?=abc)
-		NEG_LOOKAHEAD = '!' -- (?!abc)
+		NEG_LOOKAHEAD = '!', -- (?!abc)
+		ANY = '.' -- .
 	},
 	class = {
 		-- %x
-		a = "[a-zA-Z]",
-		d = "[0-9]",
-		h = "[0-9a-fA-F]",
-		l = "[a-z]",
-		s = "[\f\n\r\t ]",
-		u = "[A-Z]",
-		w = "[a-zA-Z0-9_]",
+		a = newSet({ 'a','z', 'A','Z' }), -- [a-zA-Z]
+		d = newSet({ '0','9' }), -- [0-9]
+		h = newSet({ '0','9', 'a','f', 'A','F' }), -- [0-9a-fA-F]
+		l = newSet({ 'a','z' }), -- [a-z]
+		s = newSet(nil, { '\f', '\n', '\r', '\t', ' ' }), -- [\f\n\r\t ]
+		u = newSet({ 'A','Z' }), -- [A-Z]
+		w = newSet({ '0','9', 'a','z', 'A','Z' }, { '_' }), -- [0-9a-zA-Z_]
 		-- %X
-		A = "[^a-zA-Z]",
-		D = "[^0-9]",
-		H = "[^0-9a-fA-F]",
-		L = "[^a-z]",
-		S = "[^\f\n\r\t ]",
-		U = "[^A-Z]",
-		W = "[^a-zA-Z0-9_]"
+		A = newSet({ 'a','z', 'A','Z' }, nil, true), -- [^a-zA-Z]
+		D = newSet({ '0','9' }, nil, true), -- [^0-9]
+		H = newSet({ '0','9', 'a','f', 'A','F' }, nil, true), -- [^0-9a-fA-F]
+		L = newSet({ 'a','z' }, nil, true), -- [^a-z]
+		S = newSet(nil, { '\f', '\n', '\r', '\t', ' ' }, true), -- [^\f\n\r\t ]
+		U = newSet({ 'A','Z' }, nil, true), -- [^A-Z]
+		W = newSet({ 'a','z', 'A','Z', '0','9' }, { '_' }, true) -- [^0-9a-zA-Z_]
 	},
 	specialClass = {
-		controlChar = 'c',
-		['.'] = "[^\n\r]" -- Not working yet
+		controlChar = 'c', -- %cX
+		any = newSet(nil, { '\n', '\r' }, true) -- [^\n\r]
 	}
 }
-
-for k in next, enum.class do
-	enum.class[k] = util.strToTbl(enum.class[k])
-end
 
 return enum

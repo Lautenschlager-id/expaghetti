@@ -1,7 +1,8 @@
-local utf8 = require("utf8")
-local util = require("util")
+local utf8 = require("helper/utf8")
+local util = require("helper/util")
 local enum = require("enum")
 
+local queueFactory = require("queue")
 local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 
@@ -10,6 +11,19 @@ local strchar = string.char
 local strupper = string.upper
 
 local magicSet = util.createSet(util.toArray(enum.magic))
+
+local charToCtrlChar
+do
+	local A, Z = strbyte('AZ', 1, 2)
+	local Aminus = A - 1
+
+	charToCtrlChar = function(char)
+		local tmp = strbyte(strupper(char))
+		if tmp >= A and tmp <= Z then -- A to Z
+			return strchar(tmp - Aminus)
+		end
+	end
+end
 
 local buildRegex
 buildRegex = function(regex, isUTF8)
@@ -29,35 +43,9 @@ buildRegex = function(regex, isUTF8)
 	local lastChar, nextChar
 	local isEscaped, isMagic, char
 
+	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
-
-	-- Transforms character classes into sets
-	local i, setLen = 1
-	while i <= len do
-		char = regex[i]
-
-		isEscaped = lastChar and lastChar == enum.magic.ESCAPE
-		if isEscaped then
-			if enum.class[char] then
-				setLen = util.insert(regex, i - 1,  enum.class[char], 2) -- 'pos - 1' because of the magic escape
-			elseif char == enum.specialClass.controlChar and regex[i + 1] then
-				local tmp = strbyte(strupper(regex[i + 1]))
-				if tmp >= 65 and tmp <= 90 then -- A to Z
-					setLen = util.insert(regex, i - 1, { strchar(tmp - 64) }, 3) -- %cI = \009
-					-- util.insert doesn't seem to work as expected when 'ignore' > '#tbl' and has to be reworked.
-				end
-			end
-		end
-		if setLen then
-			i = i + setLen
-			len = len + setLen
-			setLen = nil
-		end
-
-		lastChar = char -- Could be handled when transformed but it's worthless
-		i = i + 1
-	end
 
 	-- Builds the regex
 	i = 1
@@ -70,21 +58,29 @@ buildRegex = function(regex, isUTF8)
 			isMagic = magicSet[char]
 			isEscaped = lastChar and lastChar == enum.magic.ESCAPE
 
-			if not isEscaped and isMagic then
+			if isEscaped then
+				if enum.class[char] then
+					char = enum.class[char] -- set
+				elseif char == enum.specialClass.controlChar and nextChar then
+					char = charToCtrlChar(nextChar) -- %cI = \009
+				end
+			elseif isMagic then -- and not escaped
 				if char == enum.magic.OPEN_SET and not groupHandler.isOpen then
 					setHandler:open()
 					break
 				elseif char == enum.magic.CLOSE_SET and not groupHandler.isOpen then
-					setHandler:get() -- TODO add to the task queue
+					queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
 					setHandler:close()
 					break
 				elseif char == enum.magic.OPEN_GROUP then
 					groupHandler:open()
 					break
 				elseif char == enum.magic.CLOSE_GROUP then
-					buildRegex(groupHandler:get(), isUTF8) -- TODO add to the task queue
+					queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
 					groupHandler:close()
 					break
+				elseif char == enum.magic.ANY then
+					char = enum.specialClass.any
 				end
 			end
 
@@ -109,6 +105,8 @@ buildRegex = function(regex, isUTF8)
 				else
 					groupHandler:push(char)
 				end
+			else
+				queueHandler:push(char)
 			end
 		until true
 		lastChar = char
