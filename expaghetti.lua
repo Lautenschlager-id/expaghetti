@@ -61,7 +61,10 @@ buildRegex = function(regex, isUTF8)
 			if isEscaped then
 				if enum.class[char] then
 					char = enum.class[char] -- set
-				elseif char == enum.specialClass.controlChar and nextChar then
+				elseif char == enum.specialClass.controlChar then
+					if not nextChar then
+						--error("Missing %c parameter")
+					end
 					char = charToCtrlChar(nextChar) -- %cI = \009
 				end
 			elseif isMagic then -- and not escaped
@@ -73,7 +76,7 @@ buildRegex = function(regex, isUTF8)
 					setHandler:close()
 					break
 				elseif char == enum.magic.OPEN_GROUP then
-					groupHandler:open()
+					groupHandler:open() -- Is it ready for nested groups?
 					break
 				elseif char == enum.magic.CLOSE_GROUP then
 					queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
@@ -98,10 +101,14 @@ buildRegex = function(regex, isUTF8)
 				if lastChar == enum.magic.OPEN_GROUP and char == enum.magic.GROUP_BEHAVIOR then -- (?
 					groupHandler.watchEffect = true
 				elseif groupHandler.watchEffect then
-					if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POS_LOOKAHEAD or char == enum.magic.NEG_LOOKAHEAD then -- (?:), (?=), (?!)
-						groupHandler:setEffect(char)
+					if char == enum.magic.LOOKBEHIND then -- (?<=), (?<!)
+						groupHandler:setBehind()
+					else
+						if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POS_LOOKAHEAD or char == enum.magic.NEG_LOOKAHEAD then -- (?:), (?=), (?!)
+							groupHandler:setEffect(char)
+						end
+						groupHandler.watchEffect = false
 					end
-					groupHandler.watchEffect = false
 				else
 					groupHandler:push(char)
 				end

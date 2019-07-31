@@ -37,6 +37,7 @@ local enum = {
 		NON_CAPTURING_GROUP = ':', -- (?:abc)
 		POS_LOOKAHEAD = '=', -- (?=abc)
 		NEG_LOOKAHEAD = '!', -- (?!abc)
+		LOOKBEHIND = '<', -- (?<=abc) and (?<!abc)
 		ANY = '.' -- .
 	},
 	class = {

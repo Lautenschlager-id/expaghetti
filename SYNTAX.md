@@ -4,6 +4,7 @@
 - [Sets <sub>\[abc\]</sub>](#sets)
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)
+- [Groups <sub>\(abc\)</sub>](#groups)
 
 ---
 
@@ -34,6 +35,13 @@ By using an upper case class, the expected behavior will be exactly the opposite
 | %u    | Matches upper case letters, equivalent to `[A-Z]`.                                                                                                 |
 | %w    | Matches any alphanumeric character, equivalent to `[a-zA-Z0-9_]` or `[%a%d_]`.                                                                     |
 
+## Groups
+Groups combine a sequence of expressions to be manipulated together.<br>
+They also work like captures, which are returned as data extraction.
+
+- **\(abc\)** → Normal groups will agroup expressions and return their values.
+- **\(?:abc\)** → Non-capturing groups will agroup expressions but won't return their values.
+
 ---
 
 # TODO
@@ -44,9 +52,10 @@ By using an upper case class, the expected behavior will be exactly the opposite
 `[\s\S]`, `%uFFFF`, `%u{FFFF}`, `%cZ`
 ##### Groups
 ###### Numeric reference
-###### Non-capturing groups
 ###### Positive lookahead
 ###### Negative lookahead
+###### Positive lookbehind
+###### Negative lookbehind
 ##### Quantifiers
 ##### Flags
 `i`, `g`, `m`, `u`, `y`

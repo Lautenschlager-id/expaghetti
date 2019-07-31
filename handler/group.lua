@@ -22,6 +22,7 @@ end
 group.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
+		_behind = nil,
 		_effect = nil,
 		_index = 0
 	}
@@ -50,6 +51,13 @@ end
 group.setEffect = function(self, effect)
 	if not self.isOpen then return end
 	self.stack[self._index]._effect = effect
+
+	return self
+end
+
+group.setBehind = function(self)
+	if not self.isOpen then return end
+	self.stack[self._index]._behind = true
 
 	return self
 end

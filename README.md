@@ -24,3 +24,5 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create Queue (pattern root to create the sequence tree)
 - [x] Create the special character class `.`
 - [x] Logical improvements
+- [x] Create Positive lookbehind group `(?<=abc)`
+- [x] Create Negative lookbehind group `(?<!abc)`

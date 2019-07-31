@@ -21,6 +21,10 @@ set.new = function(self)
 end
 
 set.open = function(self)
+	if self.isOpen then
+		--error("Cannot nest sets")
+	end
+
 	self._index = self._index + 1
 	self.stack[self._index] = {
 		_negated = false
