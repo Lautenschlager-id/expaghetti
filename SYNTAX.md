@@ -11,14 +11,14 @@
 ## Sets
 Sets delimit a range of unique characters for the regular expression.
 
-- **\[abc\]** → Normal sets will check whether the character is `a`, `b` or `c`.
-- **\[^abc\]** → Negated sets will check whether the character is NOT `a`, `b` and `c`.
+- **\[abc\]** → Normal set will check whether the character is `a`, `b` or `c`.
+- **\[^abc\]** → Negated set will check whether the character is NOT `a`, `b` and `c`.
 
 ### Ranges
 Ranges delimit a wider set of unique characters based on their bytes and can only be used inside sets.
 
-- **\[0-9\]** → Normal ranges will check whether the character is `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8` or `9`, or more precisely, if its byte is within the values `48` and `57`.
-- **[abc0-9]** → Ranges can be mixed with normal sets, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is withing `48` and `57`.
+- **\[0-9\]** → Normal range will check whether the character is `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8` or `9`, or more precisely, if its byte is within the values `48` and `57`.
+- **[abc0-9]** → Range can be mixed with normal set, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is withing `48` and `57`.
 
 ## Character classes
 Character classes delimit specific sets without the need of typing them directly.<br>
@@ -39,8 +39,8 @@ By using an upper case class, the expected behavior will be exactly the opposite
 Groups combine a sequence of expressions to be manipulated together.<br>
 They also work like captures, which are returned as data extraction.
 
-- **\(abc\)** → Normal groups will agroup expressions and return their values.
-- **\(?:abc\)** → Non-capturing groups will agroup expressions but won't return their values.
+- **\(abc\)** → Normal group will agroup `a`, `b` and `c` and return it as a single value.
+- **\(?:abc\)** → Non-capturing group will agroup `a`, `b` and `c` but won't return it.
 
 ---
 
@@ -49,7 +49,7 @@ They also work like captures, which are returned as data extraction.
 ##### Magic characters
 ^, +, -, \*, \[, \], \(, \), \{, \}, ?, ., %, \|, $
 ##### Character classes
-`[\s\S]`, `%uFFFF`, `%u{FFFF}`, `%cZ`
+`[\s\S]`, `%uFFFF`, `%u{FFFF}`
 ##### Groups
 ###### Numeric reference
 ###### Positive lookahead
