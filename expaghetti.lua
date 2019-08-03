@@ -5,6 +5,7 @@ local enum = require("enum")
 local queueFactory = require("queue")
 local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
+local quantifierFactory = require("handler/quantifier")
 
 local strbyte = string.byte
 local strchar = string.char
@@ -46,6 +47,7 @@ buildRegex = function(regex, isUTF8)
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
+	local quantifierHandler = quantifierFactory:new()
 
 	-- Builds the regex
 	i = 1
@@ -84,18 +86,33 @@ buildRegex = function(regex, isUTF8)
 					break
 				elseif char == enum.magic.ANY then
 					char = enum.specialClass.any
+				elseif char == enum.magic.OPEN_QUANTIFIER and not groupHandler.isOpen and not setHandler.isOpen then
+					quantifierHandler:open()
+					break
+				elseif char == enum.magic.CLOSE_QUANTIFIER and not groupHandler.isOpen and not setHandler.isOpen then
+					queueHandler:push(quantifierHandler:get()) -- quantifier
+					print(quantifierHandler:get()[1], quantifierHandler:get()[2], quantifierHandler:get()[3])
+					quantifierHandler:close()
+					break
 				end
 			end
 
 			if setHandler.isOpen then
 				if char == enum.magic.NEGATED_SET then -- [^]
 					setHandler:negate()
-				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then -- l-m ↓
+				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then -- l-n ↓
 					break -- handled in the next condition
 				elseif char == enum.magic.RANGE then -- l-n
 					setHandler:range(lastChar, nextChar)
 				else
 					setHandler:push(char)
+				end
+			elseif quantifierHandler.isOpen then
+				if char == enum.magic.QUANTIFIER_SEPARATOR then -- x,y
+					quantifierHandler:next()
+					break
+				else
+					quantifierHandler:push(char)
 				end
 			elseif groupHandler.isOpen then
 				if lastChar == enum.magic.OPEN_GROUP and char == enum.magic.GROUP_BEHAVIOR then -- (?
@@ -104,7 +121,7 @@ buildRegex = function(regex, isUTF8)
 					if char == enum.magic.LOOKBEHIND then -- (?<=), (?<!)
 						groupHandler:setBehind()
 					else
-						if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POS_LOOKAHEAD or char == enum.magic.NEG_LOOKAHEAD then -- (?:), (?=), (?!)
+						if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POSITIVE_LOOKAHEAD or char == enum.magic.NEGATIVE_LOOKAHEAD then -- (?:), (?=), (?!)
 							groupHandler:setEffect(char)
 						end
 						groupHandler.watchEffect = false
@@ -135,4 +152,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("a(?:bsdb[^a-z])a", false)
+buildRegex("abacate{,2}", false)

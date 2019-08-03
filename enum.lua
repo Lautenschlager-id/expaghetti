@@ -35,10 +35,13 @@ local enum = {
 		CLOSE_GROUP = ')', -- (abc)
 		GROUP_BEHAVIOR = '?', -- (?xabc)
 		NON_CAPTURING_GROUP = ':', -- (?:abc)
-		POS_LOOKAHEAD = '=', -- (?=abc)
-		NEG_LOOKAHEAD = '!', -- (?!abc)
+		POSITIVE_LOOKAHEAD = '=', -- (?=abc)
+		NEGATIVE_LOOKAHEAD = '!', -- (?!abc)
 		LOOKBEHIND = '<', -- (?<=abc) and (?<!abc)
-		ANY = '.' -- .
+		ANY = '.', -- .
+		OPEN_QUANTIFIER = '{', -- {1,2}
+		CLOSE_QUANTIFIER = '}', -- {1,2}
+		QUANTIFIER_SEPARATOR = ',' -- {1,2}
 	},
 	class = {
 		-- %x

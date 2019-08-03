@@ -1,7 +1,4 @@
-local bit32 = bit32
-if not bit32 then
-	bit32 = require("helper/bit32")
-end
+local bit32 = require("helper/bit32")
 
 local rshift = bit32.rshift
 local strsub, strbyte = string.sub, string.byte

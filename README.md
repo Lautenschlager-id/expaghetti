@@ -2,8 +2,9 @@
 
 **The library `expaghetti` is under heavy development.**
 
-It aims towards allowing Lua developers to use Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.<br>
-It currently works on any 5.x version.
+It aims towards allowing Lua developers to use Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.
+
+It currently works on any Lua 5.x version.
 
 Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghetti. 
 
@@ -26,3 +27,4 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Logical improvements
 - [x] Create Positive lookbehind group `(?<=abc)`
 - [x] Create Negative lookbehind group `(?<!abc)`
+- [x] Create Quantifier `{x,y}`

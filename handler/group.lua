@@ -25,6 +25,7 @@ group.open = function(self)
 		_behind = nil,
 		_effect = nil,
 		_index = 0
+		-- Probably needs a special isOpen ?!
 	}
 
 	self.watchEffect = false

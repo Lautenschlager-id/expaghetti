@@ -5,6 +5,7 @@
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)
 - [Groups <sub>\(abc\)</sub>](#groups)
+- [Quantifiers <sub>{1,2}</sub>](#quantifiers)
 
 ---
 
@@ -18,7 +19,7 @@ Sets delimit a range of unique characters for the regular expression.
 Ranges delimit a wider set of unique characters based on their bytes and can only be used inside sets.
 
 - **\[0-9\]** → Normal range will check whether the character is `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8` or `9`, or more precisely, if its byte is within the values `48` and `57`.
-- **[abc0-9]** → Range can be mixed with normal set, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is withing `48` and `57`.
+- **\[abc0-9\]** → Range can be mixed with normal set, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is withing `48` and `57`.
 
 ## Character classes
 Character classes delimit specific sets without the need of typing them directly.<br>
@@ -42,6 +43,14 @@ They also work like captures, which are returned as data extraction.
 - **\(abc\)** → Normal group will agroup `a`, `b` and `c` and return it as a single value.
 - **\(?:abc\)** → Non-capturing group will agroup `a`, `b` and `c` but won't return it.
 
+## Quantifiers
+Quantifiers will match consecutive expressions in a specified quantity.
+
+- **{2,}** → Matches two or more occurrences of the expression.
+- **{,2}** → Matches a maximum of two occurrences of the expression.
+- **{2}** → Matches exactly two occurrences of the expression.
+- **{1,2}** → Matches one or two occurrences of the expression.
+
 ---
 
 # TODO
@@ -56,6 +65,5 @@ They also work like captures, which are returned as data extraction.
 ###### Negative lookahead
 ###### Positive lookbehind
 ###### Negative lookbehind
-##### Quantifiers
 ##### Flags
 `i`, `g`, `m`, `u`, `y`
