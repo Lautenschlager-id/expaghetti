@@ -1,9 +1,9 @@
 <p align="center"><img src="https://i.imgur.com/Pc4Rzwe.png" height="300" /></p>
 
-The library `expaghetti` is under heavy development.
+**The library `expaghetti` is under heavy development.**
 
 It aims towards allowing Lua developers to use Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.<br>
-It currently works on Lua 5.2 and 5.3, a bitwise wrapper might be needed for 5.1 support.
+It currently works on any 5.x version.
 
 Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghetti. 
 

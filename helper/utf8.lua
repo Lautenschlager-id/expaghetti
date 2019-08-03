@@ -1,34 +1,23 @@
-local rshift = bit32 and bit32.rshift
+local bit32 = bit32
+if not bit32 then
+	bit32 = require("helper/bit32")
+end
+
+local rshift = bit32.rshift
 local strsub, strbyte = string.sub, string.byte
 
-local charLength = ( -- Gets the quantity of bytes of a character.
-	_VERSION == "Lua 5.3" and
-		function(byte)
-			if byte >> 7 == 0x00 then
-				return 1
-			elseif byte >> 5 == 0x06 then
-				return 2
-			elseif byte >> 4 == 0x0E then
-				return 3
-			elseif byte >> 3 == 0x1E then
-				return 4
-			end
-			return 0
-		end
-	or
-		function(byte)
-			if rshift(byte, 7) == 0x00 then
-				return 1
-			elseif rshift(byte, 5) == 0x06 then
-				return 2
-			elseif rshift(byte, 4) == 0x0E then
-				return 3
-			elseif rshift(byte, 3) == 0x1E then
-				return 4
-			end
-			return 0
-		end
-)
+local charLength = function(byte) -- Gets the quantity of bytes of a character.
+	if rshift(byte, 7) == 0x00 then
+		return 1
+	elseif rshift(byte, 5) == 0x06 then
+		return 2
+	elseif rshift(byte, 4) == 0x0E then
+		return 3
+	elseif rshift(byte, 3) == 0x1E then
+		return 4
+	end
+	return 0
+end
 
 return function(str) -- Transforms a Lua string into a table with the given string split by UTF8 characters.
 	local new = { }
