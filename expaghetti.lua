@@ -98,7 +98,7 @@ buildRegex = function(regex, isUTF8)
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
 						elseif char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_MORE or (char == enum.magic.OPTIONAL and (lastChar ~= enum.magic.ONE_OR_MORE and lastChar ~= enum.magic.ZERO_OR_MORE)) then -- + or * or exp?, not lazy
-							queueHandler:push(operatorHandler:new(char, (nextChar == enum.magic.LAZY)))
+							queueHandler:push(operatorHandler:push(char):isLazy(nextChar == enum.magic.LAZY):get())
 							break
 						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_MORE) then -- lazy of +, *
 							break -- Handled above
@@ -162,4 +162,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("abacate{,2}", false)
+buildRegex("abacate{,2}+?10", false)

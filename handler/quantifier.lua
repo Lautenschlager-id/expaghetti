@@ -24,7 +24,9 @@ quantifier.open = function(self)
 
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		_index = 1
+		_index = 1,
+		[1] = nil,
+		[2] = nil
 	}
 
 	self.isOpen = true
