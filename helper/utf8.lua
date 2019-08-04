@@ -1,3 +1,5 @@
+-- Based on Luvit's ustring
+
 local bit32 = require("helper/bit32")
 
 local rshift = bit32.rshift

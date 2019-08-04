@@ -41,7 +41,12 @@ local enum = {
 		ANY = '.', -- .
 		OPEN_QUANTIFIER = '{', -- {1,2}
 		CLOSE_QUANTIFIER = '}', -- {1,2}
-		QUANTIFIER_SEPARATOR = ',' -- {1,2}
+		QUANTIFIER_SEPARATOR = ',', -- {1,2}
+		ONE_OR_MORE = '+', -- a+
+		ZERO_OR_MORE = '*', -- a*
+		LAZY = '?', -- a+?
+		OPTIONAL = '?', -- a?
+		OR = "|", -- a|b -- not working yet
 	},
 	class = {
 		-- %x

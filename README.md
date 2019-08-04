@@ -6,7 +6,7 @@ It aims towards allowing Lua developers to use Regular Expressions without the n
 
 It currently works on any Lua 5.x version.
 
-Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghetti. 
+Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghetti.
 
 ---
 
@@ -28,3 +28,7 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create Positive lookbehind group `(?<=abc)`
 - [x] Create Negative lookbehind group `(?<!abc)`
 - [x] Create Quantifier `{x,y}`
+- [x] Create 1,N operator `a+`
+- [x] Create 0,N operator `a*`
+- [x] Create optional operator `a?`
+- [x] Create lazy operator `a+?`
