@@ -1,6 +1,3 @@
-local strbyte = string.byte
-local strchar = string.char
-
 local set = { }
 set.__index = set
 set.__tostring = "set"
@@ -13,6 +10,9 @@ set.new = function(self)
 			--[[
 				[i] = {
 					_negated → bool,
+					_rangeIndex → int,
+					_min → arr<string>,	
+					_max → arr<string>,
 					[char] = true -- Hash system for performance
 				}
 			]]
@@ -27,7 +27,10 @@ set.open = function(self)
 
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		_negated = false
+		_negated = false,
+		_rangeIndex = 0,
+		_min = { },	
+		_max = { }
 	}
 
 	self.isOpen = true
@@ -58,9 +61,9 @@ end
 set.range = function(self, min, max)
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
-	for b = strbyte(min), strbyte(max) do
-		this[strchar(b)] = true
-	end
+	this._rangeIndex = this._rangeIndex + 1
+	this._min[this._rangeIndex] = min -- Lua can perform string comparisons natively
+	this._max[this._rangeIndex] = max
 
 	return self
 end
@@ -72,10 +75,20 @@ end
 
 set.match = function(self, char)
 	local this = self.stack[self._index]
+	local found = this[char]
+	if not found and this._rangeIndex > 0 then
+		for i = 1, this._rangeIndex do
+			if char >= this._min[i] and char <= this._max[i] then
+				found = true
+				break
+			end
+		end
+	end
+
 	if this._negated then
-		return not this[char]
+		return not found
 	else
-		return this[char]
+		return found
 	end
 end
 
