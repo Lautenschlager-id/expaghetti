@@ -57,9 +57,9 @@ Quantifiers will match consecutive expressions in a specified quantity.
 # TODO
 
 ##### Magic characters
-^, ~~+, -, \*, \[, \], \(, \), \{, \}, ?, ., %,~~ \|, $
+~~^, +, -, \*, \[, \], \(, \), \{, \}, ?, ., %, \|, $~~
 ##### Character classes
-`[\s\S]`, ~~`%u{FFFF}`~~
+`[\s\S]`, `\b`, `\B`, ~~`%u{FFFF}`~~
 ##### Groups
 ###### Position
 ###### Numeric reference

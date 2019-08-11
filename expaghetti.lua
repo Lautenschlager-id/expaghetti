@@ -7,6 +7,7 @@ local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
 local operatorFactory = require("handler/operator")
+local boundaryFactory = require("handler/boundary")
 
 local strbyte = string.byte
 local strchar = string.char
@@ -45,16 +46,19 @@ buildRegex = function(regex, isUTF8)
 	local lastChar, nextChar
 	local isEscaped, isMagic, char
 	local i, nextI = 1
+	local isOr = false
 
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
 	local quantifierHandler = quantifierFactory:new()
 	local operatorHandler = operatorFactory:new()
+	local boundaryHandler = boundaryFactory:new()
 
 	-- Builds the regex
 	while i <= len do
 		nextI = 1
+
 		repeat
 			char = regex[i]
 			nextChar = regex[i + 1]
@@ -62,27 +66,29 @@ buildRegex = function(regex, isUTF8)
 			isMagic = magicSet[char]
 			isEscaped = lastChar and lastChar == enum.magic.ESCAPE
 
-			if isEscaped and not groupHandler.isOpen then
-				if enum.class[char] then
-					char = enum.class[char] -- set
-				elseif char == enum.specialClass.controlChar then
-					if not nextChar then
-						--error("Missing %c parameter")
-					end
-					char = charToCtrlChar(nextChar) -- %cI = \009
-				elseif char == enum.specialClass.encode then
-					if not regex[i + 4] then
-						--error("Missing %e parameters")
-					end
-
-					for c = 1, 4 do
-						if not setHandler.match(enum.class.h, regex[i + c]) then
-							--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
+			if isEscaped then
+				if not groupHandler.isOpen then
+					if enum.class[char] then
+						char = enum.class[char] -- set
+					elseif char == enum.specialClass.controlChar then
+						if not nextChar then
+							--error("Missing %c parameter")
 						end
-					end
+						char = charToCtrlChar(nextChar) -- %cI = \009
+					elseif char == enum.specialClass.encode then
+						if not regex[i + 4] then
+							--error("Missing %e parameters")
+						end
 
-					char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
-					nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
+						for c = 1, 4 do
+							if not setHandler.match(enum.class.h, regex[i + c]) then
+								--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
+							end
+						end
+
+						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
+						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
+					end
 				end
 			elseif isMagic then -- and not escaped
 				if char == enum.magic.OPEN_GROUP then
@@ -115,6 +121,16 @@ buildRegex = function(regex, isUTF8)
 							break
 						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_MORE) then -- lazy of +, *
 							break -- Handled above
+						elseif char == enum.magic.BEGINNING then
+							queueHandler:push(boundaryHandler:push(char):get())
+							break
+						elseif char == enum.magic.END then
+							queueHandler:push(boundaryHandler:push(char):get())
+							break
+						elseif char == enum.magic.OR then
+							isOr = true
+							queueHandler:push(operatorHandler:push(char):get())
+							break
 						end
 					end
 				end
@@ -156,9 +172,32 @@ buildRegex = function(regex, isUTF8)
 				queueHandler:push(char)
 			end
 		until true
+
 		lastChar = char
 		i = i + nextI
 	end
+
+	-- Builds the or object
+	if isOr then
+		i = 1
+		local tree = { type = "or", [i] = { } } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
+
+		local j, exp, texp = 0
+		for e = 1, queueHandler._index do
+			exp, texp = queueHandler:get(e)
+			if texp == "table" and exp.operator == enum.magic.OR then
+				i = i + 1
+				tree[i] = { }
+				j = 0
+			else
+				j = j + 1	
+				tree[i][j] = exp
+			end
+		end
+
+		return tree
+	end
+	return queueHandler
 end
 
 local match = function(str, regex, isUTF8)
@@ -175,4 +214,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("%e0106test", false)
+buildRegex("ab(ac|bd)|fg", false)

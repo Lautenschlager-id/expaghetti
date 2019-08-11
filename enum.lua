@@ -46,7 +46,6 @@ local enum = {
 		ZERO_OR_MORE = '*', -- a*
 		ZERO_OR_ONE = '?', -- a?
 		LAZY = '?', -- a+?
-		-- not working yet
 		BEGINNING = '^', -- ^a
 		END = '$', -- a$
 		OR = '|', -- a|b
@@ -54,17 +53,21 @@ local enum = {
 	class = {
 		-- %x
 		a = newSet({ 'a','z', 'A','Z' }), -- [a-zA-Z]
+		b = nil, -- ^|$|%W
 		d = newSet({ '0','9' }), -- [0-9]
 		h = newSet({ '0','9', 'a','f', 'A','F' }), -- [0-9a-fA-F]
 		l = newSet({ 'a','z' }), -- [a-z]
+		p = newSet({ '!','/', ':','@', '[','`', '{','~' }), -- [!-/:-@[-`{-~]
 		s = newSet(nil, { '\f', '\n', '\r', '\t', ' ' }), -- [\f\n\r\t ]
 		u = newSet({ 'A','Z' }), -- [A-Z]
 		w = newSet({ '0','9', 'a','z', 'A','Z' }, { '_' }), -- [0-9a-zA-Z_]
 		-- %X
 		A = newSet({ 'a','z', 'A','Z' }, nil, true), -- [^a-zA-Z]
+		B = nil, -- not ^|$|%W
 		D = newSet({ '0','9' }, nil, true), -- [^0-9]
 		H = newSet({ '0','9', 'a','f', 'A','F' }, nil, true), -- [^0-9a-fA-F]
 		L = newSet({ 'a','z' }, nil, true), -- [^a-z]
+		P = newSet({ '!','/', ':','@', '[','`', '{','~' }, nil, true), -- [^!-/:-@[-`{-~]
 		S = newSet(nil, { '\f', '\n', '\r', '\t', ' ' }, true), -- [^\f\n\r\t ]
 		U = newSet({ 'A','Z' }, nil, true), -- [^A-Z]
 		W = newSet({ 'a','z', 'A','Z', '0','9' }, { '_' }, true) -- [^0-9a-zA-Z_]

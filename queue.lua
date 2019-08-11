@@ -15,11 +15,13 @@ queue.push = function(self, data)
 end
 
 queue.get = function(self, index)
+	local exp
 	if index then
-		return self.stack[index]
+		exp = self.stack[index]
 	else
-		return self.stack[self._index]
+		exp = self.stack[self._index]
 	end
+	return exp, type(exp)
 end
 
 return queue

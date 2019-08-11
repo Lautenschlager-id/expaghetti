@@ -16,6 +16,7 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create Negated Set `[^abc]`
 - [x] Create Range `[a-z]`
 - [x] Allow mixing Set and Range `[a-z0-9@_!]`
+- [x] Create character class
 - [x] Syntax documentation
 - [x] Create Group `(abc)`
 - [x] Create Non-capturing group `(?:abc)`
@@ -31,4 +32,8 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create 0,N operator `a*`
 - [x] Create 0,1 operator `a?`
 - [x] Create lazy operator `a+?`
+- [x] Create %h's alias `%x`
 - [x] Create the codepoint character class `%eFFFF`
+- [x] Create the punctuation character class `%p`
+- [x] Create boundaries `^` and `$`
+- [x] Create or operator `|`
