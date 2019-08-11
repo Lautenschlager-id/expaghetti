@@ -34,7 +34,7 @@ buildRegex = function(regex, isUTF8)
 	local len
 	if type(regex) == "string" then
 		if isUTF8 then
-			regex, len = utf8(regex)
+			regex, len = utf8.create(regex)
 		else
 			regex, len = util.strToTbl(regex)
 		end
@@ -44,6 +44,7 @@ buildRegex = function(regex, isUTF8)
 
 	local lastChar, nextChar
 	local isEscaped, isMagic, char
+	local i, nextI = 1
 
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
@@ -52,9 +53,8 @@ buildRegex = function(regex, isUTF8)
 	local operatorHandler = operatorFactory:new()
 
 	-- Builds the regex
-	i = 1
-	lastChar = nil
 	while i <= len do
+		nextI = 1
 		repeat
 			char = regex[i]
 			nextChar = regex[i + 1]
@@ -62,7 +62,7 @@ buildRegex = function(regex, isUTF8)
 			isMagic = magicSet[char]
 			isEscaped = lastChar and lastChar == enum.magic.ESCAPE
 
-			if isEscaped then
+			if isEscaped and not groupHandler.isOpen then
 				if enum.class[char] then
 					char = enum.class[char] -- set
 				elseif char == enum.specialClass.controlChar then
@@ -70,6 +70,19 @@ buildRegex = function(regex, isUTF8)
 						--error("Missing %c parameter")
 					end
 					char = charToCtrlChar(nextChar) -- %cI = \009
+				elseif char == enum.specialClass.encode then
+					if not regex[i + 4] then
+						--error("Missing %e parameters")
+					end
+
+					for c = 1, 4 do
+						if not setHandler.match(enum.class.h, regex[i + c]) then
+							--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
+						end
+					end
+
+					char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
+					nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
 				end
 			elseif isMagic then -- and not escaped
 				if char == enum.magic.OPEN_GROUP then
@@ -97,7 +110,7 @@ buildRegex = function(regex, isUTF8)
 							break
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
-						elseif char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_MORE or (char == enum.magic.OPTIONAL and (lastChar ~= enum.magic.ONE_OR_MORE and lastChar ~= enum.magic.ZERO_OR_MORE)) then -- + or * or exp?, not lazy
+						elseif char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_MORE or (char == enum.magic.ZERO_OR_ONE and (lastChar ~= enum.magic.ONE_OR_MORE and lastChar ~= enum.magic.ZERO_OR_MORE)) then -- + or * or exp?, not lazy
 							queueHandler:push(operatorHandler:push(char):isLazy(nextChar == enum.magic.LAZY):get())
 							break
 						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_MORE) then -- lazy of +, *
@@ -144,7 +157,7 @@ buildRegex = function(regex, isUTF8)
 			end
 		until true
 		lastChar = char
-		i = i + 1
+		i = i + nextI
 	end
 end
 
@@ -153,7 +166,7 @@ local match = function(str, regex, isUTF8)
 
 	local len
 	if isUTF8 then
-		str, len = utf8(str)
+		str, len = utf8.create(str)
 	else
 		str, len = util.strToTbl(str)
 	end
@@ -162,4 +175,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("abacate{,2}+?10", false)
+buildRegex("%e0106test", false)

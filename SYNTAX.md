@@ -25,16 +25,17 @@ Ranges delimit a wider set of unique characters based on their bytes and can onl
 Character classes delimit specific sets without the need of typing them directly.<br>
 By using an upper case class, the expected behavior will be exactly the opposite of the real effect, reading `%A` as `anything but %a`.
 
-| Class | Effect                                                                                                                                             |
-| :-:   | -                                                                                                                                                  |  
-| %a    | Matches insensitive case letters, equivalent to `[a-zA-Z]`.                                                                                        |
-| %c`X` | Matches an escaped control character, and the parameter `X` needs to be a letter within `A` and `Z`. <sub>assuming `A`=`\001` and `Z`=`\026`</sub> |
-| %d    | Matches integer numbers, equivalent to `[0-9]`.                                                                                                    |
-| %h    | Matches an hexadecial number, equivalent to `[0-9a-fA-F]`.                                                                                         |
-| %l    | Matches lower case letters, equivalent to `[a-z]`.                                                                                                 |
-| %s    | Matches any whitespace character, equivalent to `[\f\n\r\t ]`.                                                                                     |
-| %u    | Matches upper case letters, equivalent to `[A-Z]`.                                                                                                 |
-| %w    | Matches any alphanumeric character, equivalent to `[a-zA-Z0-9_]` or `[%a%d_]`.                                                                     |
+| Class    | Effect                                                                                                                                                        |
+| :-:      | -                                                                                                                                                             |  
+| %a       | Matches insensitive case letters, equivalent to `[a-zA-Z]`.                                                                                                   |
+| %c`X`    | Matches an escaped control character, and the parameter `X` needs to be a letter within `A` and `Z`. <sub>assuming `A`=`\001` and `Z`=`\026`</sub>            |
+| %d       | Matches integer numbers, equivalent to `[0-9]`.                                                                                                               |
+| %e`FFFF` | Matches an unicode character, and the parameter `FFFF` needs to be (a codepoint) exactly four valid hexadecimal characters. <sub>equivalent of `\uFFFF`</sub> |
+| %h or %x | Matches an hexadecial number, equivalent to `[0-9a-fA-F]`.                                                                                                    |
+| %l       | Matches lower case letters, equivalent to `[a-z]`.                                                                                                            |
+| %s       | Matches any whitespace character, equivalent to `[\f\n\r\t ]`.                                                                                                |
+| %u       | Matches upper case letters, equivalent to `[A-Z]`.                                                                                                            |
+| %w       | Matches any alphanumeric character, equivalent to `[a-zA-Z0-9_]` or `[%a%d_]`.                                                                                |
 
 ## Groups
 Groups combine a sequence of expressions to be manipulated together.<br>
@@ -56,10 +57,11 @@ Quantifiers will match consecutive expressions in a specified quantity.
 # TODO
 
 ##### Magic characters
-^, +, -, \*, \[, \], \(, \), \{, \}, ?, ., %, \|, $
+^, ~~+, -, \*, \[, \], \(, \), \{, \}, ?, ., %,~~ \|, $
 ##### Character classes
-`[\s\S]`, `%uFFFF`, `%u{FFFF}`
+`[\s\S]`, ~~`%u{FFFF}`~~
 ##### Groups
+###### Position
 ###### Numeric reference
 ###### Positive lookahead
 ###### Negative lookahead

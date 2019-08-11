@@ -44,9 +44,12 @@ local enum = {
 		QUANTIFIER_SEPARATOR = ',', -- {1,2}
 		ONE_OR_MORE = '+', -- a+
 		ZERO_OR_MORE = '*', -- a*
+		ZERO_OR_ONE = '?', -- a?
 		LAZY = '?', -- a+?
-		OPTIONAL = '?', -- a?
-		OR = "|", -- a|b -- not working yet
+		-- not working yet
+		BEGINNING = '^', -- ^a
+		END = '$', -- a$
+		OR = '|', -- a|b
 	},
 	class = {
 		-- %x
@@ -68,8 +71,11 @@ local enum = {
 	},
 	specialClass = {
 		controlChar = 'c', -- %cX
-		any = newSet(nil, { '\n', '\r' }, true) -- [^\n\r]
+		any = newSet(nil, { '\n', '\r' }, true), -- [^\n\r]
+		encode = 'e', -- %uFFFF, but %e (encode) because %u exists for the uppercase set.
 	}
 }
+enum.class.x = enum.class.h
+enum.class.X = enum.class.H
 
 return enum

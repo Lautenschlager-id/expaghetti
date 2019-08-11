@@ -73,8 +73,8 @@ set.get = function(self)
 	return self.stack[self._index]
 end
 
-set.match = function(self, char)
-	local this = self.stack[self._index]
+set.match = function(this, char) -- Maybe make this function static? (set, char)
+	--local this = self.stack[self._index]
 	local found = this[char]
 	if not found and this._rangeIndex > 0 then
 		for i = 1, this._rangeIndex do

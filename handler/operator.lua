@@ -8,7 +8,7 @@ operator.new = function(self)
 		stack = {
 			--[[
 				[i] = {
-					char → string,
+					operator → string,
 					isLazy → bool
 				}
 			]]
@@ -27,7 +27,7 @@ operator.push = function(self, char)
 end
 
 operator.isLazy = function(self, lazy)
-	self.stack[self._index].isLazy = lazy -- Not checking yet about LAZY==OPTIONAL
+	self.stack[self._index].isLazy = lazy -- Not checking yet about LAZY==ZERO_OR_ONE
 
 	return self
 end

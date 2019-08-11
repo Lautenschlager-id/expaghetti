@@ -24,11 +24,11 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create the special character class `%cX`
 - [x] Create Queue (pattern root to create the sequence tree)
 - [x] Create the special character class `.`
-- [x] Logical improvements
 - [x] Create Positive lookbehind group `(?<=abc)`
 - [x] Create Negative lookbehind group `(?<!abc)`
 - [x] Create Quantifier `{x,y}`
 - [x] Create 1,N operator `a+`
 - [x] Create 0,N operator `a*`
-- [x] Create optional operator `a?`
+- [x] Create 0,1 operator `a?`
 - [x] Create lazy operator `a+?`
+- [x] Create the codepoint character class `%eFFFF`
