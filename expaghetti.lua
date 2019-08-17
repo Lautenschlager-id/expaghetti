@@ -30,7 +30,7 @@ do
 end
 
 local buildRegex
-buildRegex = function(regex, isUTF8, aa)
+buildRegex = function(regex, isUTF8)
 	if not regex then return end
 
 	local len
@@ -96,7 +96,7 @@ buildRegex = function(regex, isUTF8, aa)
 					groupHandler:open() -- Is it ready for nested groups?
 					break
 				elseif char == enum.magic.CLOSE_GROUP then
-					queueHandler:push(buildRegex(groupHandler:get(), isUTF8, 1)) -- queue (Should the queue accept queues?)
+					queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
 					groupHandler:close()
 					break
 				elseif not groupHandler.isOpen then -- It gets handled later
