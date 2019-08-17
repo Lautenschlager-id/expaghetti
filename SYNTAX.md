@@ -1,6 +1,6 @@
 ![/!\\](https://i.imgur.com/HQ188PK.png) **The examples used in this documentation are not working yet, because the library is still under development.**
 
-# Sumary
+# Summary
 - [Sets <sub>\[abc\]</sub>](#sets)
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)

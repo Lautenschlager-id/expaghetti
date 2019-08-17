@@ -8,6 +8,7 @@ local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
 local operatorFactory = require("handler/operator")
 local boundaryFactory = require("handler/boundary")
+local exporFactory = require("handler/expor")
 
 local strbyte = string.byte
 local strchar = string.char
@@ -29,7 +30,7 @@ do
 end
 
 local buildRegex
-buildRegex = function(regex, isUTF8)
+buildRegex = function(regex, isUTF8, aa)
 	if not regex then return end
 
 	local len
@@ -46,7 +47,6 @@ buildRegex = function(regex, isUTF8)
 	local lastChar, nextChar
 	local isEscaped, isMagic, char
 	local i, nextI = 1
-	local isOr = false
 
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
@@ -54,6 +54,7 @@ buildRegex = function(regex, isUTF8)
 	local quantifierHandler = quantifierFactory:new()
 	local operatorHandler = operatorFactory:new()
 	local boundaryHandler = boundaryFactory:new()
+	local exporHandler = exporFactory:new()
 
 	-- Builds the regex
 	while i <= len do
@@ -95,7 +96,7 @@ buildRegex = function(regex, isUTF8)
 					groupHandler:open() -- Is it ready for nested groups?
 					break
 				elseif char == enum.magic.CLOSE_GROUP then
-					queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
+					queueHandler:push(buildRegex(groupHandler:get(), isUTF8, 1)) -- queue (Should the queue accept queues?)
 					groupHandler:close()
 					break
 				elseif not groupHandler.isOpen then -- It gets handled later
@@ -128,8 +129,7 @@ buildRegex = function(regex, isUTF8)
 							queueHandler:push(boundaryHandler:push(char):get())
 							break
 						elseif char == enum.magic.OR then
-							isOr = true
-							queueHandler:push(operatorHandler:push(char):get())
+							exporHandler:push(queueHandler._index)
 							break
 						end
 					end
@@ -177,26 +177,11 @@ buildRegex = function(regex, isUTF8)
 		i = i + nextI
 	end
 
-	-- Builds the or object
-	if isOr then
-		i = 1
-		local tree = { type = "or", [i] = { } } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
-
-		local j, exp, texp = 0
-		for e = 1, queueHandler._index do
-			exp, texp = queueHandler:get(e)
-			if texp == "table" and exp.operator == enum.magic.OR then
-				i = i + 1
-				tree[i] = { }
-				j = 0
-			else
-				j = j + 1	
-				tree[i][j] = exp
-			end
-		end
-
-		return tree
+	if exporHandler:exists() then
+		-- Builds the or object
+		return exporHandler:generate(queueHandler)
 	end
+
 	return queueHandler
 end
 

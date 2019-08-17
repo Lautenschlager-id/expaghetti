@@ -37,3 +37,7 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create the punctuation character class `%p`
 - [x] Create boundaries `^` and `$`
 - [x] Create or operator `|`
+- [x] Make or operator OOP
+- [x] Allow empty string in or structure (empty table)
+- [x?] Create `%b` (not %W)
+- [ ] Create `%B`

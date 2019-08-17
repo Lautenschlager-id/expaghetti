@@ -1,6 +1,8 @@
 local util = require("helper/util")
 
-local newSet
+local boundaryHandler = require("handler/boundary"):new()
+
+local newSet, newExpOr
 do
 	local setHandler = require("handler/set"):new()
 	newSet = function(range, push, negate)
@@ -21,6 +23,21 @@ do
 		end
 
 		return setHandler:get(), setHandler:close()
+	end
+
+	local queueFactory = require("queue")
+	local exporFactory = require("handler/expor")
+	newExpOr = function(exp, negate)
+		local queueHandler = queueFactory:new()
+		local exporHandler = exporFactory:new()
+
+		for i = 1, #exp do
+			queueHandler:push(exp[i])
+			exporHandler:push(i)
+		end
+
+		-- no "negate" implementation yet
+		return exporHandler:generate(queueHandler)
 	end
 end
 
@@ -53,7 +70,6 @@ local enum = {
 	class = {
 		-- %x
 		a = newSet({ 'a','z', 'A','Z' }), -- [a-zA-Z]
-		b = nil, -- ^|$|%W
 		d = newSet({ '0','9' }), -- [0-9]
 		h = newSet({ '0','9', 'a','f', 'A','F' }), -- [0-9a-fA-F]
 		l = newSet({ 'a','z' }), -- [a-z]
@@ -63,7 +79,6 @@ local enum = {
 		w = newSet({ '0','9', 'a','z', 'A','Z' }, { '_' }), -- [0-9a-zA-Z_]
 		-- %X
 		A = newSet({ 'a','z', 'A','Z' }, nil, true), -- [^a-zA-Z]
-		B = nil, -- not ^|$|%W
 		D = newSet({ '0','9' }, nil, true), -- [^0-9]
 		H = newSet({ '0','9', 'a','f', 'A','F' }, nil, true), -- [^0-9a-fA-F]
 		L = newSet({ 'a','z' }, nil, true), -- [^a-z]
@@ -78,6 +93,8 @@ local enum = {
 		encode = 'e', -- %uFFFF, but %e (encode) because %u exists for the uppercase set.
 	}
 }
+enum.class.b = newExpOr({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }) -- ^|$|%W
+enum.class.B = newExpOr({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }, true) -- not ^|$|%W
 enum.class.x = enum.class.h
 enum.class.X = enum.class.H
 
