@@ -6,7 +6,6 @@ local queueFactory = require("queue")
 local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
-local operatorFactory = require("handler/operator")
 local boundaryFactory = require("handler/boundary")
 local exporFactory = require("handler/expor")
 
@@ -52,7 +51,6 @@ buildRegex = function(regex, isUTF8)
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
 	local quantifierHandler = quantifierFactory:new()
-	local operatorHandler = operatorFactory:new()
 	local boundaryHandler = boundaryFactory:new()
 	local exporHandler = exporFactory:new()
 
@@ -71,12 +69,12 @@ buildRegex = function(regex, isUTF8)
 				if not groupHandler.isOpen then
 					if enum.class[char] then
 						char = enum.class[char] -- set
-					elseif char == enum.specialClass.controlChar then
+					elseif char == enum.specialClass.controlChar then -- %c
 						if not nextChar then
 							--error("Missing %c parameter")
 						end
 						char = charToCtrlChar(nextChar) -- %cI = \009
-					elseif char == enum.specialClass.encode then
+					elseif char == enum.specialClass.encode then -- %eFFFF = char(0xFFFF)
 						if not regex[i + 4] then
 							--error("Missing %e parameters")
 						end
@@ -89,24 +87,39 @@ buildRegex = function(regex, isUTF8)
 
 						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
 						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
+					elseif not setHandler.isOpen then
+						if setHandler.match(enum.class.d, char) then -- %1 (group reference)
+							-- What to do with %0?
+							char = { type = "capture_reference", value = (char * 1) }
+						end
 					end
 				end
 			elseif isMagic then -- and not escaped
-				if char == enum.magic.OPEN_GROUP then
+				if char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
 					groupHandler:open() -- Is it ready for nested groups?
 					break
-				elseif char == enum.magic.CLOSE_GROUP then
-					queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
+				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
+					if groupHandler._index == 0 then -- (), pos capture
+						if not groupHandler._effect then -- not (?:!=<)
+							queueHandler:push({ type = "pos_capture" })
+						end
+					else
+						queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
+					end
 					groupHandler:close()
 					break
 				elseif not groupHandler.isOpen then -- It gets handled later
 					if char == enum.magic.OPEN_SET then
-						setHandler:open()
-						break
+						if not setHandler.isOpen then -- sets can have [ ] too
+							setHandler:open()
+							break
+						end
 					elseif char == enum.magic.CLOSE_SET then
-						queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
-						setHandler:close()
-						break
+						if setHandler.isOpen and setHandler._index > 0 then -- sets can have ] if it's right after the opening [
+							queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
+							setHandler:close()
+							break
+						end
 					elseif not setHandler.isOpen then
 						if char == enum.magic.OPEN_QUANTIFIER then
 							quantifierHandler:open()
@@ -117,10 +130,17 @@ buildRegex = function(regex, isUTF8)
 							break
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
-						elseif char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_MORE or (char == enum.magic.ZERO_OR_ONE and (lastChar ~= enum.magic.ONE_OR_MORE and lastChar ~= enum.magic.ZERO_OR_MORE)) then -- + or * or exp?, not lazy
-							queueHandler:push(operatorHandler:push(char):isLazy(nextChar == enum.magic.LAZY):get())
+						elseif char == enum.magic.ZERO_OR_MORE or char == enum.magic.ONE_OR_MORE then -- + or *
+							quantifierHandler:open():push((char == enum.magic.ONE_OR_MORE and 1 or 0)):isLazy(nextChar == enum.magic.LAZY)
+							queueHandler:push(quantifierHandler:get())
+							quantifierHandler:close()
 							break
-						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_MORE) then -- lazy of +, *
+						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE) then -- lazy of +, *
+							break -- Not linking with the if below because its flexible enough to have a different representative character.
+						elseif char == enum.magic.ZERO_OR_ONE and not (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE) then -- exp?, not lazy
+							quantifierHandler:open():push(0):next():push(1)
+							queueHandler:push(quantifierHandler:get())
+							quantifierHandler:close()
 							break -- Handled above
 						elseif char == enum.magic.BEGINNING then
 							queueHandler:push(boundaryHandler:push(char):get())
@@ -157,7 +177,7 @@ buildRegex = function(regex, isUTF8)
 				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then -- l-n ↓
 					break -- handled in the next condition
 				elseif char == enum.magic.RANGE then -- l-n
-					setHandler:range(lastChar, nextChar)
+					setHandler:range(lastChar, nextChar) -- it might be necessary to rework on ranges because of %e
 				else
 					setHandler:push(char)
 				end
@@ -199,4 +219,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("ab(ac|bd)|fg", false)
+buildRegex("yo+?", false)

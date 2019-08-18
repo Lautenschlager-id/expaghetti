@@ -1,13 +1,37 @@
 ![/!\\](https://i.imgur.com/HQ188PK.png) **The examples used in this documentation are not working yet, because the library is still under development.**
 
 # Summary
+- [Magic characters <sub>\(\)\[\]\{\}</sub>](#magic-characters)
 - [Sets <sub>\[abc\]</sub>](#sets)
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)
 - [Groups <sub>\(abc\)</sub>](#groups)
 - [Quantifiers <sub>{1,2}</sub>](#quantifiers)
+	- [Lazy <sub>x+?</sub>](#lazy)
 
 ---
+
+## Magic characters
+Magic characters have a special behavior unless specified that they need to be literal characters.
+
+| Character | Effect                                                                                                                           |
+| :-:       | -                                                                                                                                |
+| ^         | Matches the beginning of the string. If set after a `[`, its behavior is changed and negates an entire (set)[#sets].             |
+| $         | Matches the end of the string.                                                                                                   |
+| [         | Opens a [set](#sets).                                                                                                            |
+| ]         | Closes a [set](#sets).                                                                                                           |
+| -         | Delimits a [range](#ranges) and only is special inside [sets](#sets).                                                            |
+| (         | Opens a [group](#groups).                                                                                                        |
+| )         | Closes a [group](#groups).                                                                                                       |
+| .         | Represents any character but break lines.                                                                                        |
+| %         | Escapes magic characters to behave as literal characters or triggers [classes](#character-classes).                              |
+| {         | Opens a [quantifier](#quantifiers).                                                                                              |
+| }         | Closes a [quantifier](#quantifiers).                                                                                             |
+| ,         | Splits the arguments of a [quantifier](#quantifiers) and only is special inside [quantifiers](#quantifiers).                     |
+| *         | Matches zero or more occurrences of the preceding expression.                                                                    |
+| +         | Matches one or more occurrences of the preceding expression.                                                                     |
+| ?         | Matches zero or one occurrences of the preceding expression. If set after `*` or `+`, its behavior is switched to [lazy](#lazy). |
+| \|        | Splits/transforms the whole expression into alternatives, where only one needs to match.                                         |
 
 ## Sets
 Sets delimit a range of unique characters for the regular expression.
@@ -36,6 +60,8 @@ By using an upper case class, the expected behavior will be exactly the opposite
 | %s       | Matches any whitespace character, equivalent to `[\f\n\r\t ]`.                                                                                                |
 | %u       | Matches upper case letters, equivalent to `[A-Z]`.                                                                                                            |
 | %w       | Matches any alphanumeric character, equivalent to `[a-zA-Z0-9_]` or `[%a%d_]`.                                                                                |
+| %%       | Represents the literal character '%'.                                                                                                                         |
+| %magic   | Represents the [magic character](#magic-characters) as literal.                                                                                               |
 
 ## Groups
 Groups combine a sequence of expressions to be manipulated together.<br>
@@ -43,6 +69,8 @@ They also work like captures, which are returned as data extraction.
 
 - **\(abc\)** → Normal group will agroup `a`, `b` and `c` and return it as a single value.
 - **\(?:abc\)** → Non-capturing group will agroup `a`, `b` and `c` but won't return it.
+- **\(\)** → Position capture group will return the position of the string where it matches.
+- **%n** → Capture group by reference will match exactly what the Nth group has matched. <sub>0 <= n <= 9</sub>
 
 ## Quantifiers
 Quantifiers will match consecutive expressions in a specified quantity.
@@ -51,18 +79,23 @@ Quantifiers will match consecutive expressions in a specified quantity.
 - **{,2}** → Matches a maximum of two occurrences of the expression.
 - **{2}** → Matches exactly two occurrences of the expression.
 - **{1,2}** → Matches one or two occurrences of the expression.
+- **\*** → Matches zero or more occurences of the expression. <sub>{0,}</sub>
+- **+** → Matches one or more occurences of the expression. <sub>{1,}</sub>
+- **?** → Matches zero or one occurences of the expression. <sub>{0,1}</sub>
+
+### Lazy
+The lazy operator `?` changes the behavior of the operators * and +, which essentially behave to match _as many as possible_ occurences of an expression, to match _as few as possible_ occurrences of an expression.
+
+- **<.+>** @ `<testing> this out>` → Matches `<testing> this out>`.
+- **<.+?>** @ `<testing> this out>` → Matches `<testing>`.
 
 ---
 
 # TODO
 
-##### Magic characters
-~~^, +, -, \*, \[, \], \(, \), \{, \}, ?, ., %, \|, $~~
 ##### Character classes
-`[\s\S]`, `\b`, `\B`, ~~`%u{FFFF}`~~
+`[\s\S]`, `\b`, `\B`
 ##### Groups
-###### Position
-###### Numeric reference
 ###### Positive lookahead
 ###### Negative lookahead
 ###### Positive lookbehind

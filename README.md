@@ -2,11 +2,15 @@
 
 **The library `expaghetti` is under heavy development.**
 
-It aims towards allowing Lua developers to use Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.
+It aims towards allowing Lua developers to use (bizarre) Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.
 
-It currently works on any Lua 5.x version.
+It currently works on any Lua 5.x version, and is intended to be released with this support.
 
 Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghetti.
+
+And last, but not less important,
+<p align="center"><i>"Premature optimization is the root of all evil."</i></p>
+<p align="right">- Donald Knuth</p>
 
 ---
 
@@ -39,5 +43,8 @@ Please read [SYNTAX](SYNTAX.md) to learn more about the syntax used in expaghett
 - [x] Create or operator `|`
 - [x] Make or operator OOP
 - [x] Allow empty string in or structure (empty table)
-- [x?] Create `%b` (not %W)
-- [ ] Create `%B`
+- [ ] Create `%b` (not %W)
+- [ ] Create `%B` (missing !)
+- [x] Create position capture `()`
+- [x] Create capture reference `%1`
+- [x] Make operators become quantifiers

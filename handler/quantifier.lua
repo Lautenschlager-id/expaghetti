@@ -25,6 +25,7 @@ quantifier.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
 		_index = 1,
+		isLazy = false,
 		[1] = nil,
 		[2] = nil
 	}
@@ -44,6 +45,12 @@ quantifier.next = function(self) -- adds +1 to the index when x,y
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
 	this._index = this._index + 1
+
+	return self
+end
+
+quantifier.isLazy = function(self, lazy)
+	self.stack[self._index].isLazy = lazy -- Not checking yet about LAZY==ZERO_OR_ONE (???)
 
 	return self
 end
