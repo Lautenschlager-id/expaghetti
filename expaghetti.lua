@@ -114,7 +114,7 @@ buildRegex = function(regex, isUTF8)
 							setHandler:open()
 							break
 						end
-					elseif char == enum.magic.CLOSE_SET then print(1)
+					elseif char == enum.magic.CLOSE_SET then
 						if setHandler.isOpen and setHandler:hasValue() then -- sets can have ] if it's right after the opening [
 							queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
 							setHandler:close()
