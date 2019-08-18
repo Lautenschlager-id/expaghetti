@@ -23,6 +23,7 @@ end
 set.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
+		_hasValue = false,
 		_negated = false,
 		_rangeIndex = 0,
 		_min = { },	
@@ -42,7 +43,9 @@ end
 
 set.push = function(self, char)
 	if not self.isOpen then return end
-	self.stack[self._index][char] = true
+	local this = self.stack[self._index]
+	this._hasValue = true
+	this[char] = true
 
 	return self
 end
@@ -57,11 +60,16 @@ end
 set.range = function(self, min, max)
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
+	this._hasValue = true
 	this._rangeIndex = this._rangeIndex + 1
 	this._min[this._rangeIndex] = min -- Lua can perform string comparisons natively
 	this._max[this._rangeIndex] = max
 
 	return self
+end
+
+set.hasValue = function(self)
+	return self.stack[self._index]._hasValue
 end
 
 set.get = function(self)

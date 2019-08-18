@@ -114,8 +114,8 @@ buildRegex = function(regex, isUTF8)
 							setHandler:open()
 							break
 						end
-					elseif char == enum.magic.CLOSE_SET then
-						if setHandler.isOpen and setHandler._index > 0 then -- sets can have ] if it's right after the opening [
+					elseif char == enum.magic.CLOSE_SET then print(1)
+						if setHandler.isOpen and setHandler:hasValue() then -- sets can have ] if it's right after the opening [
 							queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
 							setHandler:close()
 							break
@@ -219,4 +219,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("yo+?", false)
+buildRegex("[]a]b", false)
