@@ -15,7 +15,7 @@ Magic characters have a special behavior unless specified that they need to be l
 
 | Character | Effect                                                                                                                           |
 | :-:       | -                                                                                                                                |
-| ^         | Matches the beginning of the string. If set after a `[`, its behavior is changed and negates an entire (set)[#sets].             |
+| ^         | Matches the beginning of the string. If set after a `[`, its behavior is changed and negates an entire [set](#sets).             |
 | $         | Matches the end of the string.                                                                                                   |
 | [         | Opens a [set](#sets).                                                                                                            |
 | ]         | Closes a [set](#sets).                                                                                                           |

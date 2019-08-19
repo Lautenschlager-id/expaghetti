@@ -225,4 +225,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("()1", false)
+buildRegex("[ab%d]", false)
