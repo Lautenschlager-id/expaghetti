@@ -95,16 +95,22 @@ buildRegex = function(regex, isUTF8)
 					end
 				end
 			elseif isMagic then -- and not escaped
-				if char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
+				if char == enum.magic.ESCAPE then
+					-- This is temporary. % needs a 100% rewrite for better control.
+					if (enum.class[nextChar] or nextChar == enum.specialClass.controlChar or nextChar == enum.specialClass.encode or nextChar == char or
+						(not setHandler.isOpen and setHandler.match(enum.class.d, nextChar))) then
+						break
+					end
+				elseif char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
 					groupHandler:open() -- Is it ready for nested groups?
 					break
 				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
-					if groupHandler._index == 0 then -- (), pos capture
+					if groupHandler:hasValue() then -- (), pos capture
+						queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
+					else
 						if not groupHandler._effect then -- not (?:!=<)
 							queueHandler:push({ type = "pos_capture" })
 						end
-					else
-						queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
 					end
 					groupHandler:close()
 					break
@@ -219,4 +225,4 @@ local match = function(str, regex, isUTF8)
 end
 
 -- Debugging
-buildRegex("[]a]b", false)
+buildRegex("()1", false)

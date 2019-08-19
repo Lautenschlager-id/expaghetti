@@ -10,7 +10,6 @@
 	- [Lazy <sub>x+?</sub>](#lazy)
 
 ---
-
 ## Magic characters
 Magic characters have a special behavior unless specified that they need to be literal characters.
 
@@ -90,7 +89,63 @@ The lazy operator `?` changes the behavior of the operators * and +, which essen
 - **<.+?>** @ `<testing> this out>` → Matches `<testing>`.
 
 ---
+# Tree
+The regex is built as a tree in the following format:
 
+```Lua
+{
+	{ -- Boundary
+		boundary = '' -- The boundary character: ^ or $
+	},
+	{ -- Set
+		_hasValue = false, -- Whether the set is still empty
+		_negated = false, -- Whether it's a negated set
+		_rangeIndex = 1, -- The number of ranges in the set
+		_min = { -- The list of minimum values of the ranges
+			[1] = '', -- Minimum value of the first range
+		},
+		_max = { -- The list of maximum values of the ranges
+			[1] = '', -- Maximum value of the first range
+		},
+		_setIndex = 1, -- The number of sets (character classes) in the set
+		_sets = { -- The list of sets (character classes)
+			[1] = ... -- The set that represents the first character class
+		},
+		[c] = true -- Literal character as index
+	},
+	{ -- Group
+		_hasValue = false, -- Whether the group is still empty
+		_behind = false, -- Whether the ground is a lookbehind
+		_effect = "", -- The group effect, if there's any: ':' (non-capturing), '=' (positive lookahead), '!' (negative lookahead)
+		_index = 2, -- The number of characters in the group expression
+		[1] = '', -- Literal character of the expression
+		[2] = { ... }, -- An object, like sets or quantifiers.
+	},
+	{ -- Quantifier
+		_index = 1, -- The current index of the quantifer: 1 or 2
+		isLazy = false, -- Whether the quantifier is lazy or greedy
+		[1] = nil, -- The minimum value of the quantifier, if set
+		[2] = nil -- The maximum value of the quantifier, if set
+	},
+	{ -- Or
+		type = "or", -- Constant value to identify the objects
+		exp = { -- A list of alternative expressions, trees
+			[1] = { ... }, -- Expression 1
+			[2] = { ... } -- Expression 2
+		}
+	},
+	{ -- Position capture
+		type = "pos_capture" -- Constant value to identify the object
+	},
+	{ -- Capture groupd by reference
+		type = "capture_reference", -- Constant value to identify the object
+		value = 0 -- The number of the referenced group: from 0 to 9
+	},
+	[1] = '' -- Literal character
+}
+```
+
+---
 # TODO
 
 ##### Character classes

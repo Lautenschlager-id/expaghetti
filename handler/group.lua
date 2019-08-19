@@ -9,6 +9,8 @@ group.new = function(self)
 		stack = {
 			--[[
 				[i] = {
+					_hasValue → boolean,
+					_behind → boolean, -- lookbehind
 					_effect → string, -- group behavior, :=!...
 					_index → int,
 					[i] → string
@@ -22,7 +24,8 @@ end
 group.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		_behind = nil,
+		_hasValue = false,
+		_behind = false,
 		_effect = nil,
 		_index = 0
 		-- Probably needs a special isOpen ?!
@@ -42,7 +45,9 @@ end
 
 group.push = function(self, char)
 	if not self.isOpen then return end
+
 	local this = self.stack[self._index]
+	this._hasValue = true
 	this._index = this._index + 1
 	this[this._index] = char
 
@@ -61,6 +66,10 @@ group.setBehind = function(self)
 	self.stack[self._index]._behind = true
 
 	return self
+end
+
+group.hasValue = function(self)
+	return self.stack[self._index]._hasValue
 end
 
 group.get = function(self)

@@ -13,6 +13,8 @@ set.new = function(self)
 					_rangeIndex → int,
 					_min → arr<string>,	
 					_max → arr<string>,
+					_setIndex → int,
+					_set → arr<table>
 					[char] = true -- Hash system for performance
 				}
 			]]
@@ -27,7 +29,9 @@ set.open = function(self)
 		_negated = false,
 		_rangeIndex = 0,
 		_min = { },	
-		_max = { }
+		_max = { },
+		_setIndex = 0,
+		_set = { }
 	}
 
 	self.isOpen = true
@@ -45,7 +49,13 @@ set.push = function(self, char)
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
 	this._hasValue = true
-	this[char] = true
+
+	if type(char) == "table" then -- Temporary quickfix
+		this._setIndex = this._setIndex + 1
+		this._set[this._setIndex] = char
+	else
+		this[char] = true
+	end
 
 	return self
 end

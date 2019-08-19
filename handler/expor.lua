@@ -26,7 +26,7 @@ expor.exists = function(self)
 end
 
 expor.generate = function(self, exp)
-	local tree = { type = "or" } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
+	local tree = { } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
 
 	self:push(exp._index) -- [0, #e], not [0, #e - []]
 
@@ -41,7 +41,7 @@ expor.generate = function(self, exp)
 		end
 	end
 
-	return { tree }
+	return { { type = "or", exp = tree } }
 end
 
 return expor
