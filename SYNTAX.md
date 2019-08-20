@@ -93,9 +93,9 @@ The lazy operator `?` changes the behavior of the operators * and +, which essen
 The regex is built as a tree in the following format:
 
 ```Lua
-{
-	{ -- Boundary
-		boundary = '' -- The boundary character: ^ or $
+{ -- Tree
+	{ -- Anchor
+		anchor = '' -- The anchor character: ^, $, %b or %B
 	},
 	{ -- Set
 		_hasValue = false, -- Whether the set is still empty

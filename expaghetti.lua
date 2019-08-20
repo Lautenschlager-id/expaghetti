@@ -6,7 +6,7 @@ local queueFactory = require("queue")
 local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
-local boundaryFactory = require("handler/boundary")
+local anchorFactory = require("handler/anchor")
 local alternateFactory = require("handler/alternate")
 
 local strbyte = string.byte
@@ -51,7 +51,7 @@ buildRegex = function(regex, isUTF8)
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
 	local quantifierHandler = quantifierFactory:new()
-	local boundaryHandler = boundaryFactory:new()
+	local anchorHandler = anchorFactory:new()
 	local alternateHandler = alternateFactory:new()
 
 	-- Builds the regex
@@ -149,10 +149,10 @@ buildRegex = function(regex, isUTF8)
 							quantifierHandler:close()
 							break -- Handled above
 						elseif char == enum.magic.BEGINNING then
-							queueHandler:push(boundaryHandler:push(char):get())
+							queueHandler:push(anchorHandler:push(char):get())
 							break
 						elseif char == enum.magic.END then
-							queueHandler:push(boundaryHandler:push(char):get())
+							queueHandler:push(anchorHandler:push(char):get())
 							break
 						elseif char == enum.magic.ALTERNATE then
 							alternateHandler:push(queueHandler._index)
