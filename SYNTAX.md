@@ -8,29 +8,32 @@
 - [Groups <sub>\(abc\)</sub>](#groups)
 - [Quantifiers <sub>{1,2}</sub>](#quantifiers)
 	- [Lazy <sub>x+?</sub>](#lazy)
+- [Alternators <sub>a|b|c</sub>](#alternators)
+- [Tree](#tree)
+
 
 ---
 ## Magic characters
 Magic characters have a special behavior unless specified that they need to be literal characters.
 
-| Character | Effect                                                                                                                           |
-| :-:       | -                                                                                                                                |
-| ^         | Matches the beginning of the string. If set after a `[`, its behavior is changed and negates an entire [set](#sets).             |
-| $         | Matches the end of the string.                                                                                                   |
-| [         | Opens a [set](#sets).                                                                                                            |
-| ]         | Closes a [set](#sets).                                                                                                           |
-| -         | Delimits a [range](#ranges) and only is special inside [sets](#sets).                                                            |
-| (         | Opens a [group](#groups).                                                                                                        |
-| )         | Closes a [group](#groups).                                                                                                       |
-| .         | Represents any character but break lines.                                                                                        |
-| %         | Escapes magic characters to behave as literal characters or triggers [classes](#character-classes).                              |
-| {         | Opens a [quantifier](#quantifiers).                                                                                              |
-| }         | Closes a [quantifier](#quantifiers).                                                                                             |
-| ,         | Splits the arguments of a [quantifier](#quantifiers) and only is special inside [quantifiers](#quantifiers).                     |
-| *         | Matches zero or more occurrences of the preceding expression.                                                                    |
-| +         | Matches one or more occurrences of the preceding expression.                                                                     |
-| ?         | Matches zero or one occurrences of the preceding expression. If set after `*` or `+`, its behavior is switched to [lazy](#lazy). |
-| \|        | Splits/transforms the whole expression into alternatives, where only one needs to match.                                         |
+| Character | Effect                                                                                                                                |
+| :-:       | -                                                                                                                                     |
+| ^         | Matches the beginning of the string. If set after a `[`, its behavior is changed and negates an entire [set](#sets).                  |
+| $         | Matches the end of the string.                                                                                                        |
+| [         | Opens a [set](#sets).                                                                                                                 |
+| ]         | Closes a [set](#sets).                                                                                                                |
+| -         | Delimits a [range](#ranges) and only is special inside [sets](#sets).                                                                 |
+| (         | Opens a [group](#groups).                                                                                                             |
+| )         | Closes a [group](#groups).                                                                                                            |
+| .         | Represents any character but break lines.                                                                                             |
+| %         | Escapes magic characters to behave as literal characters or triggers [classes](#character-classes).                                   |
+| {         | Opens a [quantifier](#quantifiers).                                                                                                   |
+| }         | Closes a [quantifier](#quantifiers).                                                                                                  |
+| ,         | Splits the arguments of a [quantifier](#quantifiers) and only is special inside [quantifiers](#quantifiers).                          |
+| *         | Matches zero or more occurrences of the preceding expression.                                                                         |
+| +         | Matches one or more occurrences of the preceding expression.                                                                          |
+| ?         | Matches zero or one occurrences of the preceding expression. If set after `*`, `+`, or `?` its behavior is switched to [lazy](#lazy). |
+| \|        | Splits/transforms the whole expression into [alternatives](#alternators), where only one needs to match.                              |
 
 ## Sets
 Sets delimit a range of unique characters for the regular expression.
@@ -51,6 +54,7 @@ By using an upper case class, the expected behavior will be exactly the opposite
 | Class    | Effect                                                                                                                                                        |
 | :-:      | -                                                                                                                                                             |  
 | %a       | Matches insensitive case letters, equivalent to `[a-zA-Z]`.                                                                                                   |
+| %b       | Matches a boundary between an alphanumeric character and a non-alphanumeric character.                                                                        | 
 | %c`X`    | Matches an escaped control character, and the parameter `X` needs to be a letter within `A` and `Z`. <sub>assuming `A`=`\001` and `Z`=`\026`</sub>            |
 | %d       | Matches integer numbers, equivalent to `[0-9]`.                                                                                                               |
 | %e`FFFF` | Matches an unicode character, and the parameter `FFFF` needs to be (a codepoint) exactly four valid hexadecimal characters. <sub>equivalent of `\uFFFF`</sub> |
@@ -83,10 +87,18 @@ Quantifiers will match consecutive expressions in a specified quantity.
 - **?** → Matches zero or one occurences of the expression. <sub>{0,1}</sub>
 
 ### Lazy
-The lazy operator `?` changes the behavior of the operators * and +, which essentially behave to match _as many as possible_ occurences of an expression, to match _as few as possible_ occurrences of an expression.
+The lazy operator `?` changes the behavior of the operators `*` <sub>*?</sub>, `+` <sub>+?</sub>, and `?` <sub>??</sub> which essentially behave to match _as many as possible_ occurences of an expression, to match _as few as possible_ occurrences of an expression.
 
 - **<.+>** @ `<testing> this out>` → Matches `<testing> this out>`.
 - **<.+?>** @ `<testing> this out>` → Matches `<testing>`.
+
+## Alternators
+Alternators will match one of the alternatives set in the expression. Works like a boolean OR operator.<br>
+Use them inside groups to limit their ranges. They will transform the whole expression into alternatives, it's not char-by-char.
+
+- **(a|b|c)** → Matches `a`, `b`, or `c`.
+- **hi|b|c** → Matches `hi`, `b`, or `c`.
+- **h(i|ey|)** → Matches `hi`, `hey`, and `h`
 
 ---
 # Tree

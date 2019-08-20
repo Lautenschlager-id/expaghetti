@@ -36,6 +36,7 @@ do
 	local strrep = string.rep
 	local strformat = string.format
 	local tblconcat = table.concat
+	local strfind = string.find
 	table.tostring = function(list, indent, numIndex, _depth, _stop)
 		_depth = _depth or 1
 		_stop = _stop or 0
@@ -45,7 +46,7 @@ do
 	
 		for k, v in next, list do
 			counter = counter + 1
-			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (k .. " = ") or numIndex and ("[" .. k .. "] = ") or ''))
+			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
 			local t = type(v)
 			if t == "table" then
 				out[counter] = out[counter] .. ((_stop > 0 and _depth > _stop) and tostring(v) or table.tostring(v, indent, numIndex, _depth + 1, _stop - 1))

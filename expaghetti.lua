@@ -136,18 +136,16 @@ buildRegex = function(regex, isUTF8)
 							break
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
-						elseif char == enum.magic.ZERO_OR_MORE or char == enum.magic.ONE_OR_MORE then -- + or *
+						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_ONE) then -- lazy of +, *, ?
+							break -- Not linking with the if below because its flexible enough to have a different representative character.
+						elseif char == enum.magic.ZERO_OR_MORE or char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_ONE then -- +, *, ?
 							quantifierHandler:open():push((char == enum.magic.ONE_OR_MORE and 1 or 0)):isLazy(nextChar == enum.magic.LAZY)
+							if char == enum.magic.ZERO_OR_ONE then
+								quantifierHandler:next():push(1)
+							end
 							queueHandler:push(quantifierHandler:get())
 							quantifierHandler:close()
 							break
-						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE) then -- lazy of +, *
-							break -- Not linking with the if below because its flexible enough to have a different representative character.
-						elseif char == enum.magic.ZERO_OR_ONE and not (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE) then -- exp?, not lazy
-							quantifierHandler:open():push(0):next():push(1)
-							queueHandler:push(quantifierHandler:get())
-							quantifierHandler:close()
-							break -- Handled above
 						elseif char == enum.magic.BEGINNING then
 							queueHandler:push(anchorHandler:push(char):get())
 							break
@@ -224,5 +222,7 @@ local match = function(str, regex, isUTF8)
 	-- TODO
 end
 
--- Debugging
-buildRegex("[ab%d]", false)
+-----------------> DEBUG ONLY <-----------------
+local tree = buildRegex("ab+a*?d??", false)
+print(table.tostring(tree, true, true))
+-----------------<            >-----------------
