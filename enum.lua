@@ -2,7 +2,7 @@ local util = require("helper/util")
 
 local boundaryHandler = require("handler/boundary"):new()
 
-local newSet, newExpOr
+local newSet, newAlternate
 do
 	local setHandler = require("handler/set"):new()
 	newSet = function(range, push, negate)
@@ -26,18 +26,18 @@ do
 	end
 
 	local queueFactory = require("queue")
-	local exporFactory = require("handler/expor")
-	newExpOr = function(exp, negate)
+	local alternateFactory = require("handler/alternate")
+	newAlternate = function(exp, negate)
 		local queueHandler = queueFactory:new()
-		local exporHandler = exporFactory:new()
+		local alternateHandler = alternateFactory:new()
 
 		for i = 1, #exp do
 			queueHandler:push(exp[i])
-			exporHandler:push(i)
+			alternateHandler:push(i)
 		end
 
 		-- no "negate" implementation yet
-		return exporHandler:generate(queueHandler)
+		return alternateHandler:generate(queueHandler)
 	end
 end
 
@@ -65,7 +65,7 @@ local enum = {
 		LAZY = '?', -- a+?
 		BEGINNING = '^', -- ^a
 		END = '$', -- a$
-		OR = '|', -- a|b
+		ALTERNATE = '|', -- a|b
 	},
 	class = {
 		-- %x
@@ -93,8 +93,8 @@ local enum = {
 		encode = 'e', -- %uFFFF, but %e (encode) because %u exists for the uppercase set.
 	}
 }
-enum.class.b = newExpOr({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }) -- ^|$|%W
-enum.class.B = newExpOr({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }, true) -- not ^|$|%W
+enum.class.b = newAlternate({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }) -- ^|$|%W
+enum.class.B = newAlternate({ boundaryHandler:push(enum.magic.BEGINNING):get(), boundaryHandler:push(enum.magic.END):get(), enum.class.W }, true) -- not ^|$|%W
 enum.class.x = enum.class.h
 enum.class.X = enum.class.H
 

@@ -48,3 +48,4 @@ And last, but not less important,
 - [x] Create position capture `()`
 - [x] Create capture reference `%1`
 - [x] Make operators become quantifiers
+- [x] Rename OR to ALTERNATE

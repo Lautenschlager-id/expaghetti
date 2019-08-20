@@ -127,8 +127,8 @@ The regex is built as a tree in the following format:
 		[1] = nil, -- The minimum value of the quantifier, if set
 		[2] = nil -- The maximum value of the quantifier, if set
 	},
-	{ -- Or
-		type = "or", -- Constant value to identify the objects
+	{ -- Alternate
+		type = "alternate", -- Constant value to identify the objects
 		exp = { -- A list of alternative expressions, trees
 			[1] = { ... }, -- Expression 1
 			[2] = { ... } -- Expression 2

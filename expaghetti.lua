@@ -7,7 +7,7 @@ local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
 local boundaryFactory = require("handler/boundary")
-local exporFactory = require("handler/expor")
+local alternateFactory = require("handler/alternate")
 
 local strbyte = string.byte
 local strchar = string.char
@@ -52,7 +52,7 @@ buildRegex = function(regex, isUTF8)
 	local groupHandler = groupFactory:new()
 	local quantifierHandler = quantifierFactory:new()
 	local boundaryHandler = boundaryFactory:new()
-	local exporHandler = exporFactory:new()
+	local alternateHandler = alternateFactory:new()
 
 	-- Builds the regex
 	while i <= len do
@@ -154,8 +154,8 @@ buildRegex = function(regex, isUTF8)
 						elseif char == enum.magic.END then
 							queueHandler:push(boundaryHandler:push(char):get())
 							break
-						elseif char == enum.magic.OR then
-							exporHandler:push(queueHandler._index)
+						elseif char == enum.magic.ALTERNATE then
+							alternateHandler:push(queueHandler._index)
 							break
 						end
 					end
@@ -203,9 +203,9 @@ buildRegex = function(regex, isUTF8)
 		i = i + nextI
 	end
 
-	if exporHandler:exists() then
+	if alternateHandler:exists() then
 		-- Builds the or object
-		return exporHandler:generate(queueHandler)
+		return alternateHandler:generate(queueHandler)
 	end
 
 	return queueHandler

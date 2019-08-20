@@ -1,8 +1,8 @@
-local expor = { }
-expor.__index = expor
-expor.__tostring = "expor" -- "expression or"
+local alternate = { }
+alternate.__index = alternate
+alternate.__tostring = "alternate"
 
-expor.new = function(self)
+alternate.new = function(self)
 	return setmetatable({
 		_index = 0,
 		stack = {
@@ -14,18 +14,18 @@ expor.new = function(self)
 	}, self)
 end
 
-expor.push = function(self, position)
+alternate.push = function(self, position)
 	self._index = self._index + 1
 	self.stack[self._index] = position
 
 	return self
 end
 
-expor.exists = function(self)
+alternate.exists = function(self)
 	return self._index > 0
 end
 
-expor.generate = function(self, exp)
+alternate.generate = function(self, exp)
 	local tree = { } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
 
 	self:push(exp._index) -- [0, #e], not [0, #e - []]
@@ -41,7 +41,7 @@ expor.generate = function(self, exp)
 		end
 	end
 
-	return { { type = "or", exp = tree } }
+	return { { type = "alternate", exp = tree } }
 end
 
-return expor
+return alternate
