@@ -129,7 +129,6 @@ The regex is built as a tree in the following format:
 	},
 	{ -- Group
 		type = "group", -- Group's object name
-		_hasValue = false, -- Whether the group is still empty
 		_behind = false, -- Whether the ground is a lookbehind
 		_effect = "", -- The group effect, if there's any: ':' (non-capturing), '=' (positive lookahead), '!' (negative lookahead)
 		_index = 2, -- The number of characters in the group expression

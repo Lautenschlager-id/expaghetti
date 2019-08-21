@@ -223,6 +223,6 @@ local match = function(str, regex, isUTF8)
 end
 
 -----------------> DEBUG ONLY <-----------------
-local tree = buildRegex("%w[a][^a][]a]%bd^(f)(g|h)(?:i)(?<=j)kl+m*o??pqrstuv{1,5}wxyzl|")
+local tree = buildRegex("[%doi]", false)
 print(table.tostring(tree, true, true))
 -----------------<            >-----------------

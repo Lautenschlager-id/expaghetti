@@ -10,7 +10,6 @@ group.new = function(self)
 		stack = {
 			--[[
 				[i] = {
-					_hasValue → boolean,
 					_behind → boolean, -- lookbehind
 					_effect → string, -- group behavior, :=!...
 					_index → int,
@@ -26,7 +25,6 @@ group.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
 		type = enum_type_group,
-		_hasValue = false,
 		_behind = false,
 		_effect = nil,
 		_index = 0
@@ -49,7 +47,6 @@ group.push = function(self, char)
 	if not self.isOpen then return end
 
 	local this = self.stack[self._index]
-	this._hasValue = true
 	this._index = this._index + 1
 	this[this._index] = char
 
@@ -71,7 +68,7 @@ group.setBehind = function(self)
 end
 
 group.hasValue = function(self)
-	return self.stack[self._index]._hasValue
+	return self.stack[self._index]._index > 0
 end
 
 group.get = function(self)

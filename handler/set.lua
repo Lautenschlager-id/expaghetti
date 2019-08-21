@@ -92,6 +92,14 @@ end
 set.match = function(this, char) -- Maybe make this function static? (set, char)
 	--local this = self.stack[self._index]
 	local found = this[char]
+	if not found and this._setIndex > 0 then
+		for i = 1, this._setIndex do
+			if set.match(this._set[i], char) then
+				found = true
+				break
+			end
+		end
+	end
 	if not found and this._rangeIndex > 0 then
 		for i = 1, this._rangeIndex do
 			if char >= this._min[i] and char <= this._max[i] then
