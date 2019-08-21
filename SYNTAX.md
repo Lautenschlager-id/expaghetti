@@ -87,7 +87,7 @@ Quantifiers will match consecutive expressions in a specified quantity.
 - **?** → Matches zero or one occurences of the expression. <sub>{0,1}</sub>
 
 ### Lazy
-The lazy operator `?` changes the behavior of the operators `*` <sub>*?</sub>, `+` <sub>+?</sub>, and `?` <sub>??</sub> which essentially behave to match _as many as possible_ occurences of an expression, to match _as few as possible_ occurrences of an expression.
+The lazy operator `?` changes the behavior of the operators `*` <sub>\*?</sub>, `+` <sub>+?</sub>, and `?` <sub>??</sub> which essentially behave to match _as many as possible_ occurences of an expression, to match _as few as possible_ occurrences of an expression.
 
 - **<.+>** @ `<testing> this out>` → Matches `<testing> this out>`.
 - **<.+?>** @ `<testing> this out>` → Matches `<testing>`.
@@ -107,9 +107,11 @@ The regex is built as a tree in the following format:
 ```Lua
 { -- Tree
 	{ -- Anchor
+		type = "anchor", -- Anchor's object name
 		anchor = '' -- The anchor character: ^, $, %b or %B
 	},
 	{ -- Set
+		type = "set", -- Set's object name
 		_hasValue = false, -- Whether the set is still empty
 		_negated = false, -- Whether it's a negated set
 		_rangeIndex = 1, -- The number of ranges in the set
@@ -126,6 +128,7 @@ The regex is built as a tree in the following format:
 		[c] = true -- Literal character as index
 	},
 	{ -- Group
+		type = "group", -- Group's object name
 		_hasValue = false, -- Whether the group is still empty
 		_behind = false, -- Whether the ground is a lookbehind
 		_effect = "", -- The group effect, if there's any: ':' (non-capturing), '=' (positive lookahead), '!' (negative lookahead)
@@ -134,23 +137,24 @@ The regex is built as a tree in the following format:
 		[2] = { ... }, -- An object, like sets or quantifiers.
 	},
 	{ -- Quantifier
+		type = "quantifier", -- Quantifier's object name
 		_index = 1, -- The current index of the quantifer: 1 or 2
 		isLazy = false, -- Whether the quantifier is lazy or greedy
 		[1] = nil, -- The minimum value of the quantifier, if set
 		[2] = nil -- The maximum value of the quantifier, if set
 	},
 	{ -- Alternate
-		type = "alternate", -- Constant value to identify the objects
+		type = "alternate", -- Alternate's object name
 		exp = { -- A list of alternative expressions, trees
 			[1] = { ... }, -- Expression 1
 			[2] = { ... } -- Expression 2
 		}
 	},
 	{ -- Position capture
-		type = "pos_capture" -- Constant value to identify the object
+		type = "position_capture", -- Position Capture's object name
 	},
-	{ -- Capture groupd by reference
-		type = "capture_reference", -- Constant value to identify the object
+	{ -- Capture group by reference
+		type = "capture_reference", -- Capture Group's object name
 		value = 0 -- The number of the referenced group: from 0 to 9
 	},
 	[1] = '' -- Literal character
@@ -161,7 +165,7 @@ The regex is built as a tree in the following format:
 # TODO
 
 ##### Character classes
-`[\s\S]`, `\b`, `\B`
+`[\s\S]`
 ##### Groups
 ###### Positive lookahead
 ###### Negative lookahead

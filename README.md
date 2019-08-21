@@ -43,8 +43,8 @@ And last, but not less important,
 - [x] Create or operator `|`
 - [x] Make or operator OOP
 - [x] Allow empty string in or structure (empty table)
-- [ ] Create `%b` (not %W)
-- [ ] Create `%B` (missing !)
+- [x] Create `%b` as anchor
+- [x] Create `%B` as anchor
 - [x] Create position capture `()`
 - [x] Create capture reference `%1`
 - [x] Make operators become quantifiers

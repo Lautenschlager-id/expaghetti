@@ -6,7 +6,6 @@ local queueFactory = require("queue")
 local setFactory = require("handler/set")
 local groupFactory = require("handler/group")
 local quantifierFactory = require("handler/quantifier")
-local anchorFactory = require("handler/anchor")
 local alternateFactory = require("handler/alternate")
 
 local strbyte = string.byte
@@ -51,7 +50,6 @@ buildRegex = function(regex, isUTF8)
 	local setHandler = setFactory:new()
 	local groupHandler = groupFactory:new()
 	local quantifierHandler = quantifierFactory:new()
-	local anchorHandler = anchorFactory:new()
 	local alternateHandler = alternateFactory:new()
 
 	-- Builds the regex
@@ -87,6 +85,10 @@ buildRegex = function(regex, isUTF8)
 
 						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
 						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
+					elseif char == enum.specialClass.boundary then
+						char = enum.anchor.BOUNDARY
+					elseif char == enum.specialClass.notBoundary then
+						char = enum.anchor.NOTBOUNDARY
 					elseif not setHandler.isOpen then
 						if setHandler.match(enum.class.d, char) then -- %1 (group reference)
 							-- What to do with %0?
@@ -109,7 +111,7 @@ buildRegex = function(regex, isUTF8)
 						queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
 					else
 						if not groupHandler._effect then -- not (?:!=<)
-							queueHandler:push({ type = "pos_capture" })
+							queueHandler:push({ type = "position_capture" })
 						end
 					end
 					groupHandler:close()
@@ -147,11 +149,9 @@ buildRegex = function(regex, isUTF8)
 							quantifierHandler:close()
 							break
 						elseif char == enum.magic.BEGINNING then
-							queueHandler:push(anchorHandler:push(char):get())
-							break
+							char = enum.anchor.BEGINNING
 						elseif char == enum.magic.END then
-							queueHandler:push(anchorHandler:push(char):get())
-							break
+							char = enum.anchor.END
 						elseif char == enum.magic.ALTERNATE then
 							alternateHandler:push(queueHandler._index)
 							break
@@ -223,6 +223,6 @@ local match = function(str, regex, isUTF8)
 end
 
 -----------------> DEBUG ONLY <-----------------
-local tree = buildRegex("ab+a*?d??", false)
+local tree = buildRegex("%w[a][^a][]a]%bd^(f)(g|h)(?:i)(?<=j)kl+m*o??pqrstuv{1,5}wxyzl|")
 print(table.tostring(tree, true, true))
 -----------------<            >-----------------

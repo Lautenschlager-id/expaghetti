@@ -1,4 +1,4 @@
-local bit32 = require("helper/bit32")
+local bit32 = require("bit32")
 local utf8 = utf8 or { }
 
 do

@@ -1,6 +1,7 @@
+local enum_type_quantifier = "quantifier"
+
 local quantifier = { }
 quantifier.__index = quantifier
-quantifier.__tostring = "quantifier"
 
 quantifier.new = function(self)
 	return setmetatable({
@@ -24,6 +25,7 @@ quantifier.open = function(self)
 
 	self._index = self._index + 1
 	self.stack[self._index] = {
+		type = enum_type_quantifier,
 		_index = 1,
 		isLazy = false,
 		[1] = nil,

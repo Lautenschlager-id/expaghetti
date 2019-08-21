@@ -1,6 +1,7 @@
+local enum_type_alternate = "alternate"
+
 local alternate = { }
 alternate.__index = alternate
-alternate.__tostring = "alternate"
 
 alternate.new = function(self)
 	return setmetatable({
@@ -41,7 +42,7 @@ alternate.generate = function(self, exp)
 		end
 	end
 
-	return { { type = "alternate", exp = tree } }
+	return { { type = enum_type_alternate, exp = tree } }
 end
 
 return alternate

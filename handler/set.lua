@@ -1,6 +1,7 @@
+local enum_type_set = "set"
+
 local set = { }
 set.__index = set
-set.__tostring = "set"
 
 set.new = function(self)
 	return setmetatable({
@@ -25,6 +26,7 @@ end
 set.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
+		type = enum_type_set,
 		_hasValue = false,
 		_negated = false,
 		_rangeIndex = 0,
