@@ -6,6 +6,7 @@ group.__index = group
 group.new = function(self)
 	return setmetatable({
 		_index = 0,
+		nest = 0,
 		isOpen = false,
 		stack = {
 			--[[

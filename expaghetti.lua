@@ -99,23 +99,29 @@ buildRegex = function(regex, isUTF8)
 			elseif isMagic then -- and not escaped
 				if char == enum.magic.ESCAPE then
 					-- This is temporary. % needs a 100% rewrite for better control.
-					if (enum.class[nextChar] or nextChar == enum.specialClass.controlChar or nextChar == enum.specialClass.encode or nextChar == char or
+					if groupHandler.nest == 0 and (enum.class[nextChar] or magicSet[nextChar] or nextChar == enum.specialClass.controlChar or nextChar == enum.specialClass.encode or nextChar == char or
 						(not setHandler.isOpen and setHandler.match(enum.class.d, nextChar))) then
 						break
 					end
 				elseif char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
-					groupHandler:open() -- Is it ready for nested groups?
-					break
-				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
-					if groupHandler:hasValue() then -- (), pos capture
-						queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
-					else
-						if not groupHandler._effect then -- not (?:!=<)
-							queueHandler:push({ type = "position_capture" })
-						end
+					groupHandler.nest = groupHandler.nest + 1
+					if groupHandler.nest == 1 then
+						groupHandler:open()
+						break
 					end
-					groupHandler:close()
-					break
+				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
+					groupHandler.nest = groupHandler.nest - 1
+					if groupHandler.nest == 0 then
+						if groupHandler:hasValue() then -- (), pos capture
+							queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
+						else
+							if not groupHandler._effect then -- not (?:!=<)
+								queueHandler:push({ type = "position_capture" })
+							end
+						end
+						groupHandler:close()
+						break
+					end
 				elseif not groupHandler.isOpen then -- It gets handled later
 					if char == enum.magic.OPEN_SET then
 						if not setHandler.isOpen then -- sets can have [ ] too
@@ -223,6 +229,6 @@ local match = function(str, regex, isUTF8)
 end
 
 -----------------> DEBUG ONLY <-----------------
-local tree = buildRegex("[%doi]", false)
+local tree = buildRegex("a(b(%)))c", false)
 print(table.tostring(tree, true, true))
 -----------------<            >-----------------
