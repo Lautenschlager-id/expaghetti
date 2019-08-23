@@ -6,7 +6,7 @@
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)
 - [Groups <sub>\(abc\)</sub>](#groups)
-- [Quantifiers <sub>{1,2}</sub>](#quantifiers)
+- [Quantifiers <sub>{1,2}</	sub>](#quantifiers)
 	- [Lazy <sub>x+?</sub>](#lazy)
 - [Alternators <sub>a|b|c</sub>](#alternators)
 - [Tree](#tree)
@@ -159,16 +159,3 @@ The regex is built as a tree in the following format:
 	[1] = '' -- Literal character
 }
 ```
-
----
-# TODO
-
-##### Character classes
-`[\s\S]`
-##### Groups
-###### Positive lookahead
-###### Negative lookahead
-###### Positive lookbehind
-###### Negative lookbehind
-##### Flags
-`i`, `g`, `m`, `u`, `y`
