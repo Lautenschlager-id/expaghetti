@@ -43,8 +43,9 @@ buildRegex = function(regex, isUTF8)
 	end
 
 	local lastChar, nextChar
-	local isEscaped, isMagic, char
+	local isEscaped, isMagic, char = false, false
 	local i, nextI = 1
+	local tmpGroup
 
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
@@ -58,52 +59,51 @@ buildRegex = function(regex, isUTF8)
 
 		repeat
 			char = regex[i]
-			nextChar = regex[i + 1]
+			if not groupHandler.isOpen and char == enum.magic.ESCAPE and not isEscaped then
+				if i == len then
+					--error("malformed pattern (ends with '%')")
+				end
+				isEscaped = true
+				break
+			end
 
+			nextChar = regex[i + 1]
 			isMagic = magicSet[char]
-			isEscaped = lastChar and lastChar == enum.magic.ESCAPE
 
 			if isEscaped then
-				if not groupHandler.isOpen then
-					if enum.class[char] then
-						char = enum.class[char] -- set
-					elseif char == enum.specialClass.controlChar then -- %c
-						if not nextChar then
-							--error("Missing %c parameter")
-						end
-						char = charToCtrlChar(nextChar) -- %cI = \009
-					elseif char == enum.specialClass.encode then -- %eFFFF = char(0xFFFF)
-						if not regex[i + 4] then
-							--error("Missing %e parameters")
-						end
+				isEscaped = false
+				if enum.class[char] then
+					char = enum.class[char] -- set
+				elseif char == enum.specialClass.controlChar then -- %c
+					if not nextChar then
+						--error("Missing %c parameter")
+					end
+					char = charToCtrlChar(nextChar) -- %cI = \009
+				elseif char == enum.specialClass.encode then -- %eFFFF = char(0xFFFF)
+					if not regex[i + 4] then
+						--error("Missing %e parameters")
+					end
 
-						for c = 1, 4 do
-							if not setHandler.match(enum.class.h, regex[i + c]) then
-								--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
-							end
+					for c = 1, 4 do
+						if not setHandler.match(enum.class.h, regex[i + c]) then
+							--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
 						end
+					end
 
-						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
-						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
-					elseif char == enum.specialClass.boundary then
-						char = enum.anchor.BOUNDARY
-					elseif char == enum.specialClass.notBoundary then
-						char = enum.anchor.NOTBOUNDARY
-					elseif not setHandler.isOpen then
-						if setHandler.match(enum.class.d, char) then -- %1 (group reference)
-							-- What to do with %0?
-							char = { type = "capture_reference", value = (char * 1) }
-						end
+					char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
+					nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
+				elseif char == enum.specialClass.boundary then
+					char = enum.anchor.BOUNDARY
+				elseif char == enum.specialClass.notBoundary then
+					char = enum.anchor.NOTBOUNDARY
+				elseif not setHandler.isOpen then
+					if setHandler.match(enum.class.d, char) then -- %1 (group reference)
+						-- What to do with %0?
+						char = { type = "capture_reference", value = (char * 1) }
 					end
 				end
 			elseif isMagic then -- and not escaped
-				if char == enum.magic.ESCAPE then
-					-- This is temporary. % needs a 100% rewrite for better control.
-					if groupHandler.nest == 0 and (enum.class[nextChar] or magicSet[nextChar] or nextChar == enum.specialClass.controlChar or nextChar == enum.specialClass.encode or nextChar == char or
-						(not setHandler.isOpen and setHandler.match(enum.class.d, nextChar))) then
-						break
-					end
-				elseif char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
+				if char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
 					groupHandler.nest = groupHandler.nest + 1
 					if groupHandler.nest == 1 then
 						groupHandler:open()
@@ -112,9 +112,12 @@ buildRegex = function(regex, isUTF8)
 				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
 					groupHandler.nest = groupHandler.nest - 1
 					if groupHandler.nest == 0 then
-						if groupHandler:hasValue() then -- (), pos capture
-							queueHandler:push(buildRegex(groupHandler:get(), isUTF8)) -- queue (Should the queue accept queues?)
-						else
+						if groupHandler:hasValue() then -- normal
+							tmpGroup = groupHandler:get()
+							tmpGroup.exp = buildRegex(tmpGroup.exp, isUTF8)
+							queueHandler:push(tmpGroup)
+							tmpGroup = nil -- don't trust lua's gc
+						else -- (), pos capture
 							if not groupHandler._effect then -- not (?:!=<)
 								queueHandler:push({ type = "position_capture" })
 							end
@@ -229,6 +232,6 @@ local match = function(str, regex, isUTF8)
 end
 
 -----------------> DEBUG ONLY <-----------------
-local tree = buildRegex("a(b(%)))c", false)
+local tree = buildRegex("%d %%d %%%d %%%%%d %j %ww [%d%%] (?=a)", false)
 print(table.tostring(tree, true, true))
 -----------------<            >-----------------

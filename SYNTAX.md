@@ -6,7 +6,7 @@
 	- [Ranges <sub>\[^abc\]</sub>](#ranges)
 - [Character classes <sub>%a</sub>](#character-classes)
 - [Groups <sub>\(abc\)</sub>](#groups)
-- [Quantifiers <sub>{1,2}</	sub>](#quantifiers)
+- [Quantifiers <sub>{1,2}</sub>](#quantifiers)
 	- [Lazy <sub>x+?</sub>](#lazy)
 - [Alternators <sub>a|b|c</sub>](#alternators)
 - [Tree](#tree)
@@ -45,7 +45,7 @@ Sets delimit a range of unique characters for the regular expression.
 Ranges delimit a wider set of unique characters based on their bytes and can only be used inside sets.
 
 - **\[0-9\]** → Normal range will check whether the character is `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8` or `9`, or more precisely, if its byte is within the values `48` and `57`.
-- **\[abc0-9\]** → Range can be mixed with normal set, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is withing `48` and `57`.
+- **\[abc0-9\]** → Range can be mixed with normal set, performing a check to determine whether the character is `a`, `b`, `c`, or if its byte is within `48` (0) and `57` (9).
 
 ## Character classes
 Character classes delimit specific sets without the need of typing them directly.<br>
@@ -132,8 +132,10 @@ The regex is built as a tree in the following format:
 		_behind = false, -- Whether the ground is a lookbehind
 		_effect = "", -- The group effect, if there's any: ':' (non-capturing), '=' (positive lookahead), '!' (negative lookahead)
 		_index = 2, -- The number of characters in the group expression
-		[1] = '', -- Literal character of the expression
-		[2] = { ... }, -- An object, like sets or quantifiers.
+		exp = { -- Literal tree (with %w instead of set objects, for example)
+			[1] = '', -- Literal character of the expression
+			...
+		}
 	},
 	{ -- Quantifier
 		type = "quantifier", -- Quantifier's object name

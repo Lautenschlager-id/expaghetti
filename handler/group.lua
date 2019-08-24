@@ -8,16 +8,7 @@ group.new = function(self)
 		_index = 0,
 		nest = 0,
 		isOpen = false,
-		stack = {
-			--[[
-				[i] = {
-					_behind → boolean, -- lookbehind
-					_effect → string, -- group behavior, :=!...
-					_index → int,
-					[i] → string
-				}
-			]]
-		},
+		stack = { },
 		watchEffect = false
 	}, self)
 end
@@ -28,8 +19,8 @@ group.open = function(self)
 		type = enum_type_group,
 		_behind = false,
 		_effect = nil,
-		_index = 0
-		-- Probably needs a special isOpen ?!
+		_index = 0,
+		exp = { }
 	}
 
 	self.watchEffect = false
@@ -49,7 +40,7 @@ group.push = function(self, char)
 
 	local this = self.stack[self._index]
 	this._index = this._index + 1
-	this[this._index] = char
+	this.exp[this._index] = char
 
 	return self
 end

@@ -7,14 +7,7 @@ quantifier.new = function(self)
 	return setmetatable({
 		_index = 0,
 		isOpen = false,
-		stack = {
-			--[[
-				[i] = {
-					_index → int,
-					[i] → int
-				}
-			]]
-		}
+		stack = { }
 	}, self)
 end
 

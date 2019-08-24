@@ -7,19 +7,7 @@ set.new = function(self)
 	return setmetatable({
 		_index = 0,
 		isOpen = false,
-		stack = {
-			--[[
-				[i] = {
-					_negated → bool,
-					_rangeIndex → int,
-					_min → arr<string>,	
-					_max → arr<string>,
-					_setIndex → int,
-					_set → arr<table>
-					[char] = true -- Hash system for performance
-				}
-			]]
-		}
+		stack = { }
 	}, self)
 end
 

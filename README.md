@@ -16,5 +16,6 @@ And last, but not less important,
 - [Parser](https://github.com/Lautenschlager-id/expaghetti/projects/1)
 - [Matcher](https://github.com/Lautenschlager-id/expaghetti/projects/2)
 - [Documentation](https://github.com/Lautenschlager-id/expaghetti/projects/3)
+- [Test](https://github.com/Lautenschlager-id/expaghetti/projects/4)
 
 Feel free to open a new issue _for bug reports, code and solution enhancements, ideas or kind comments_, or pull requests if you can understand _the spaghetti_!

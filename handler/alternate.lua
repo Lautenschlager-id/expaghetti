@@ -8,9 +8,6 @@ alternate.new = function(self)
 		_index = 0,
 		stack = {
 			[0] = 0
-			--[[
-				[i] → int
-			]]
 		}
 	}, self)
 end
