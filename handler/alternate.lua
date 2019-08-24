@@ -23,7 +23,7 @@ alternate.exists = function(self)
 	return self._index > 0
 end
 
-alternate.generate = function(self, exp)
+alternate.build = function(self, exp)
 	local tree = { } -- ab(ac|bd)|fg = { { "a", "b", { { "a", "c" }, { "b", "d" } } }, { "f", "g" } }
 
 	self:push(exp._index) -- [0, #e], not [0, #e - []]
@@ -39,7 +39,7 @@ alternate.generate = function(self, exp)
 		end
 	end
 
-	return { { type = enum_type_alternate, exp = tree } }
+	return { type = enum_type_alternate, exp = tree }
 end
 
 return alternate

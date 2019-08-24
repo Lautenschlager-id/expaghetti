@@ -18,7 +18,7 @@ do
 		return 0
 	end
 
-	-- Based on Luvit's ustring
+	-- Based on luvit/ustring.lua
 	utf8.create = function(str) -- Transforms a Lua string into a table with the given string split by UTF8 characters.
 		local new = { }
 
@@ -56,7 +56,7 @@ if _VERSION < "Lua 5.3" then -- no utf8 native library
 	local floor = math.floor
 	local strchar = string.char
 
-	-- Based on Stepets's utf8
+	-- Based on Stepets/utf8.lua
 	utf8.char = function(unicode)
 		if unicode <= 0x7F then
 			return strchar(unicode)

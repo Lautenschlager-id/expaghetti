@@ -1,5 +1,3 @@
-local strsub = string.sub
-
 local createSet = function(array)
 	local set = { }
 	for i = 1, #array do
@@ -8,15 +6,20 @@ local createSet = function(array)
 	return set
 end
 
-local strToTbl = function(str) -- string.split(str, '.')
-	local tbl = { }
+local strToTbl
+do
+	local strsub = string.sub
 
-	local len = #str
-	for i = 1, len do
-		tbl[i] = strsub(str, i, i)
+	strToTbl = function(str) -- string.split(str, '.')
+		local tbl = { }
+
+		local len = #str
+		for i = 1, len do
+			tbl[i] = strsub(str, i, i)
+		end
+
+		return tbl, len
 	end
-
-	return tbl, len
 end
 
 local toArray = function(tbl)
@@ -31,42 +34,28 @@ local toArray = function(tbl)
 	return arr
 end
 
------------------> DEBUG ONLY <-----------------
+local charToCtrlChar
 do
-	local strrep = string.rep
-	local strformat = string.format
-	local tblconcat = table.concat
-	local strfind = string.find
-	table.tostring = function(list, indent, numIndex, _depth, _stop)
-		_depth = _depth or 1
-		_stop = _stop or 0
+	local strbyte = string.byte
+	local strchar = string.char
+	local strupper = string.upper
 
-		local out = { }
-		local counter = 0
-	
-		for k, v in next, list do
-			counter = counter + 1
-			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
-			local t = type(v)
-			if t == "table" then
-				out[counter] = out[counter] .. ((_stop > 0 and _depth > _stop) and tostring(v) or table.tostring(v, indent, numIndex, _depth + 1, _stop - 1))
-			elseif t == "number" or t == "boolean" then
-				out[counter] = out[counter] .. tostring(v)
-			elseif t == "string" then
-				out[counter] = out[counter] .. strformat("%q", v)
-			else
-				out[counter] = out[counter] .. "nil"
-			end
+	local A, Z = strbyte('AZ', 1, 2)
+	local Aminus = A - 1
+
+	charToCtrlChar = function(char)
+		local tmp = strbyte(strupper(char))
+		if tmp >= A and tmp <= Z then -- A to Z
+			return strchar(tmp - Aminus)
 		end
-	
-		return "{" .. (indent and ("\n" .. tblconcat(out, ",\n") .. "\n") or table.concat(out, ',')) .. (indent and strrep("\t", _depth - 1) or '') .. "}"
 	end
 end
------------------<            >-----------------
+
+
 
 return {
 	createSet = createSet,
 	strToTbl = strToTbl,
 	toArray = toArray,
-	insert = insert
+	charToCtrlChar = charToCtrlChar
 }
