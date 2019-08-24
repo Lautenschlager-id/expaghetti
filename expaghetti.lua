@@ -114,7 +114,7 @@ buildRegex = function(regex, isUTF8)
 					if groupHandler.nest == 0 then
 						if groupHandler:hasValue() then -- normal
 							tmpGroup = groupHandler:get()
-							tmpGroup.exp = buildRegex(tmpGroup.exp, isUTF8)
+							tmpGroup.tree = buildRegex(tmpGroup.tree, isUTF8)
 							queueHandler:push(tmpGroup)
 							tmpGroup = nil -- don't trust lua's gc
 						else -- (), pos capture

@@ -20,7 +20,7 @@ group.open = function(self)
 		_behind = false,
 		_effect = nil,
 		_index = 0,
-		exp = { }
+		tree = { }
 	}
 
 	self.watchEffect = false
@@ -40,7 +40,7 @@ group.push = function(self, char)
 
 	local this = self.stack[self._index]
 	this._index = this._index + 1
-	this.exp[this._index] = char
+	this.tree[this._index] = char
 
 	return self
 end
