@@ -15,8 +15,9 @@ local tblconcat = table.concat
 local cache = { }
 
 local parse
-parse = function(regex, isUTF8)
+parse = function(regex, flags)
 	if not regex then return end
+	flags = util.createSet(flags)
 
 	local rawRegex, len
 	if type(regex) == "string" then
@@ -24,7 +25,7 @@ parse = function(regex, isUTF8)
 			return cache[regex]
 		else
 			rawRegex = regex
-			if isUTF8 then
+			if flags[enum.flag.unicode] then
 				regex, len = utf8.create(regex)
 			else
 				regex, len = util.strToTbl(regex)
@@ -41,7 +42,7 @@ parse = function(regex, isUTF8)
 	local lastChar, nextChar
 	local isEscaped, isMagic, char = false, false
 	local i, nextI = 1
-	local tmpGroup
+	local tmpGroup, tmpNum
 
 	local queueHandler = queueFactory:new()
 	local setHandler = setFactory:new()
@@ -95,9 +96,10 @@ parse = function(regex, isUTF8)
 					elseif char == enum.specialClass.notBoundary then
 						char = enum.anchor.NOTBOUNDARY
 					elseif not setHandler.isOpen then
-						if setHandler.match(enum.class.d, char) then -- %1 (group reference)
+						tmpNum = tonumber(char)
+						if tmpNum then -- %1 (group reference)
 							-- What to do with %0?
-							char = { type = "capture_reference", value = (char * 1) }
+							char = { type = "capture_reference", value = tmpNum }
 						end
 					end
 				end
@@ -113,7 +115,7 @@ parse = function(regex, isUTF8)
 					if groupHandler.nest == 0 then
 						if groupHandler:hasValue() then -- normal
 							tmpGroup = groupHandler:get()
-							tmpGroup.tree = parse(tmpGroup.tree, isUTF8)
+							tmpGroup.tree = parse(tmpGroup.tree, flags)
 							queueHandler:push(tmpGroup)
 							tmpGroup = nil -- don't trust lua's gc
 						else -- (), pos capture
@@ -224,11 +226,5 @@ parse = function(regex, isUTF8)
 	cache[rawRegex] = tree
 	return tree
 end
-
------------------> DEBUG ONLY <-----------------
-local test = require("test/util")
-local tree = parse("(b(%)))(b)(%))", false)
-print(test.tableToString(tree, true, true))
------------------<            >-----------------
 
 return parse

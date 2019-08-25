@@ -5,14 +5,14 @@ do
 	local tblconcat = table.concat
 	local strfind = string.find
 
-	tableToString = function(list, indent, numIndex, _depth, _stop)
+	tableToString = function(tbl, indent, numIndex, _depth, _stop)
 		_depth = _depth or 1
 		_stop = _stop or 0
 
 		local out = { }
 		local counter = 0
 	
-		for k, v in next, list do
+		for k, v in next, tbl do
 			counter = counter + 1
 			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
 			local t = type(v)
@@ -31,6 +31,33 @@ do
 	end
 end
 
+local tableCompare
+do
+	local compare
+	compare = function(src, tmp, _reverse)
+		if (type(src) ~= "table" or type(tmp) ~= "table") then
+			return src == tmp
+		end
+
+		for k, v in next, src do
+			if type(v) == "table" then
+				if type(tmp[k]) ~= "table" or not compare(v, tmp[k]) then
+					return false
+				end
+			else
+				if tmp[k] ~= v then
+					return false
+				end
+			end
+		end
+		return _reverse and true or compare(tmp, src, true)
+	end
+	tableCompare = function(src, tmp, checkMeta)
+		return compare(src, tmp) and (not checkMeta or compare(getmetatable(src), getmetatable(tmp)))
+	end
+end
+
 return {
-	tableToString = tableToString
+	tableToString = tableToString,
+	tableCompare = tableCompare
 }

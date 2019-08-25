@@ -50,21 +50,6 @@ enum.magic = {
 	ALTERNATE = '|', -- a|b
 }
 
-enum.specialClass = {
-	controlChar = 'c', -- %cX
-	any = newSet(nil, { '\n', '\r' }, true), -- [^\n\r]
-	encode = 'e', -- %uFFFF, but %e (encode) because %u exists for the uppercase set.
-	boundary = 'b',
-	notBoundary = 'B'
-}
-
-enum.anchor = {
-	BEGINNING = { type = "anchor", anchor = enum.magic.BEGINNING },
-	END = { type = "anchor", anchor = enum.magic.END },
-	BOUNDARY = { type = "anchor", anchor = enum.specialClass.boundary },
-	NOTBOUNDARY = { type = "anchor", anchor = enum.specialClass.notBoundary }
-}
-
 enum.class = {
 	-- %x
 	a = newSet({ 'a','z', 'A','Z' }), -- [a-zA-Z]
@@ -87,5 +72,24 @@ enum.class = {
 }
 enum.class.x = enum.class.h
 enum.class.X = enum.class.H
+
+enum.specialClass = {
+	controlChar = 'c', -- %cX
+	any = newSet(nil, { '\n', '\r' }, true), -- [^\n\r]
+	encode = 'e', -- %uFFFF, but %e (encode) because %u exists for the uppercase set.
+	boundary = 'b',
+	notBoundary = 'B'
+}
+
+enum.anchor = {
+	BEGINNING = { type = "anchor", anchor = enum.magic.BEGINNING },
+	END = { type = "anchor", anchor = enum.magic.END },
+	BOUNDARY = { type = "anchor", anchor = enum.specialClass.boundary },
+	NOTBOUNDARY = { type = "anchor", anchor = enum.specialClass.notBoundary }
+}
+
+enum.flag = {
+	unicode = 'u',
+}
 
 return enum

@@ -51,8 +51,6 @@ do
 	end
 end
 
-
-
 return {
 	createSet = createSet,
 	strToTbl = strToTbl,

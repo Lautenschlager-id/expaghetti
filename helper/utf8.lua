@@ -41,7 +41,7 @@ do
 				new[index] = char
 
 				charLen = charLength(strbyte(char))
-				if charLength == 1 then
+				if charLen == 1 then
 					index = index + 1
 				end
 				append = append + charLen - 1
