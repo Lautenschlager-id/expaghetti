@@ -17,12 +17,13 @@ local cache = { }
 local parse
 parse = function(regex, flags)
 	if not regex then return end
-	flags = util.createSet(flags)
+	local flagsCode = flags and util.flagsCode(flags) or ''
+	flags = (flags and util.createSet(flags) or { })
 
 	local rawRegex, len
 	if type(regex) == "string" then
-		if cache[regex] then
-			return cache[regex]
+		if cache[regex] and cache[regex][flagsCode] then
+			return cache[regex][flagsCode]
 		else
 			rawRegex = regex
 			if flags[enum.flag.unicode] then
@@ -33,8 +34,8 @@ parse = function(regex, flags)
 		end
 	else
 		rawRegex = tblconcat(regex.tree or regex)
-		if cache[rawRegex] then
-			return cache[rawRegex]
+		if cache[rawRegex] and cache[rawRegex][flagsCode] then
+			return cache[rawRegex][flagsCode]
 		end
 		len = #regex
 	end
@@ -223,7 +224,11 @@ parse = function(regex, flags)
 		tree = queueHandler
 	end
 
-	cache[rawRegex] = tree
+	if not cache[rawRegex] then
+		cache[rawRegex] = { }
+	end
+	cache[rawRegex][flagsCode] = tree
+
 	return tree
 end
 

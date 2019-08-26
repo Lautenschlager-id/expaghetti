@@ -51,9 +51,21 @@ do
 	end
 end
 
+local flagsCode
+do
+	local tblsort = table.sort
+	local tblconcat = table.concat
+
+	flagsCode = function(flags)
+		tblsort(flags)
+		return tblconcat(flags)
+	end
+end
+
 return {
 	createSet = createSet,
 	strToTbl = strToTbl,
 	toArray = toArray,
-	charToCtrlChar = charToCtrlChar
+	charToCtrlChar = charToCtrlChar,
+	flagsCode = flagsCode
 }

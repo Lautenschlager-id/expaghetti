@@ -35,7 +35,7 @@ local tableCompare
 do
 	local compare
 	compare = function(src, tmp, _reverse)
-		if (type(src) ~= "table" or type(tmp) ~= "table") then
+		if type(src) ~= "table" or type(tmp) ~= "table" then
 			return src == tmp
 		end
 
