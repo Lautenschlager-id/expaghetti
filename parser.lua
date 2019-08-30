@@ -10,6 +10,7 @@ local alternateFactory = require("handler/alternate")
 
 local magicSet = util.createSet(util.toArray(enum.magic))
 
+local strlower = string.lower
 local tblconcat = table.concat
 
 local cache = { }
@@ -17,7 +18,8 @@ local cache = { }
 local parse
 parse = function(regex, flags)
 	if not regex then return end
-	local flagsCode = flags and util.flagsCode(flags) or ''
+
+	local flagsCode = (flags and util.flagsCode(flags) or '')
 	flags = (flags and util.createSet(flags) or { })
 
 	local rawRegex, len
@@ -39,6 +41,8 @@ parse = function(regex, flags)
 		end
 		len = #regex
 	end
+
+	local isInsensitive = not not flags[enum.flag.insensitive]
 
 	local lastChar, nextChar
 	local isEscaped, isMagic, char = false, false
@@ -208,7 +212,7 @@ parse = function(regex, flags)
 					quantifierHandler:push(char)
 				end
 			else
-				queueHandler:push(char)
+				queueHandler:push((isInsensitive and type(char) == "string") and strlower(char) or char)
 			end
 		until true
 

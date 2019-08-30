@@ -90,6 +90,7 @@ enum.anchor = {
 
 enum.flag = {
 	unicode = 'u',
+	insensitive = 'i'
 }
 
 return enum

@@ -34,7 +34,7 @@ local toArray = function(tbl)
 	return arr
 end
 
-local charToCtrlChar
+local charToCtrlChar, reverseCase
 do
 	local strbyte = string.byte
 	local strchar = string.char
@@ -48,6 +48,14 @@ do
 		if tmp >= A and tmp <= Z then -- A to Z
 			return strchar(tmp - Aminus)
 		end
+	end
+
+	local strlower = string.lower
+	local a = 'a'
+
+	reverseCase = function(char)
+		local reversed = ((char < a) and strlower(char) or strupper(char))
+		return reversed, char ~= reversed 
 	end
 end
 
@@ -67,5 +75,6 @@ return {
 	strToTbl = strToTbl,
 	toArray = toArray,
 	charToCtrlChar = charToCtrlChar,
-	flagsCode = flagsCode
+	flagsCode = flagsCode,
+	reverseCase = reverseCase
 }

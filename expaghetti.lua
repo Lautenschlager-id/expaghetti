@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local tree = parse("[𝒳-𝒴]", { enum.flag.unicode })
+local tree = parse("[LAUT]enschlager%.id", { enum.flag.insensitive })
 print(test.tableToString(tree, true, true))
 -----------------<            >-----------------
 

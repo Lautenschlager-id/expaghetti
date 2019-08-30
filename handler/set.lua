@@ -1,5 +1,7 @@
 local enum_type_set = "set"
 
+local util = require("../helper/util")
+
 local set = { }
 set.__index = set
 
@@ -77,7 +79,7 @@ set.get = function(self)
 	return self.stack[self._index]
 end
 
-set.match = function(this, char) -- Maybe make this function static? (set, char)
+set.match = function(this, char, isInsensitive) -- Maybe make this function static? (set, char)
 	--local this = self.stack[self._index]
 	local found = this[char]
 	if not found and this._setIndex > 0 then
@@ -98,10 +100,17 @@ set.match = function(this, char) -- Maybe make this function static? (set, char)
 	end
 
 	if this._negated then
-		return not found
-	else
-		return found
+		found = not found
 	end
+
+	if isInsensitive and not found then
+		char, found = util.reverseCase(char)
+		if found then
+			return set.match(this, char, false)
+		end
+	end
+
+	return found
 end
 
 return set
