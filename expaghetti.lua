@@ -2,9 +2,9 @@ local bit32 = require("helper/bit32")
 local utf8 = require("helper/utf8")
 local enum = require("enum")
 
-local parse = require("parser")
+local match = require("matcher")
 
-local match = function(str, exp)
+local _match = function(str, exp)
 	-- TODO
 end
 
@@ -14,8 +14,8 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local tree = parse("[^man]%1!", { enum.flag.insensitive }, { enum.option.DISABLE_SET, enum.option.DISABLE_ESCAPE })
-print(test.tableToString(tree, true, true))
+local matches = { match("test", "t()e()()st") }
+print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 
 return {
@@ -24,7 +24,7 @@ return {
 	parse = parser,
 	flag = enum.flag,
 	gmatch = gmatch,
-	match = match,
+	match = _match,
 	option = enum.option,
 	utf8 = utf8
 }

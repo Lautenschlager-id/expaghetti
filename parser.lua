@@ -36,7 +36,7 @@ parse = function(regex, flags, options)
 			if flagsSet[enum.flag.unicode] then
 				regex, len = utf8.create(regex)
 			else
-				regex, len = util.strToTbl(regex)
+				regex, len = util.strToArr(regex)
 			end
 		end
 	else

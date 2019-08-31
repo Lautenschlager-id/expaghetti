@@ -1,6 +1,5 @@
 local queue = { }
 queue.__index = queue
-queue.__tostring = "queue"
 
 queue.new = function(self)
 	return setmetatable({

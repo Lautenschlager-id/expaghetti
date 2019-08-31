@@ -103,4 +103,8 @@ enum.option = {
 	DISABLE_MAGIC = 'X'
 }
 
+enum.error = {
+	-- TODO
+}
+
 return enum

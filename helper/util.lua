@@ -6,11 +6,11 @@ local createSet = function(array)
 	return set
 end
 
-local strToTbl
+local strToArr
 do
 	local strsub = string.sub
 
-	strToTbl = function(str) -- string.split(str, '.')
+	strToArr = function(str) -- string.split(str, '.')
 		local tbl = { }
 
 		local len = #str
@@ -70,11 +70,19 @@ do
 	end
 end
 
+local unpack
+if _VERSION > "Lua 5.1" then
+	unpack = table.unpack
+else
+	unpack = unpack
+end
+
 return {
 	createSet = createSet,
-	strToTbl = strToTbl,
+	strToArr = strToArr,
 	toArray = toArray,
 	charToCtrlChar = charToCtrlChar,
 	flagsCode = flagsCode,
-	reverseCase = reverseCase
+	reverseCase = reverseCase,
+	unpack = unpack
 }

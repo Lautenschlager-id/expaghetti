@@ -5,9 +5,13 @@ do
 	local tblconcat = table.concat
 	local strfind = string.find
 
-	tableToString = function(tbl, indent, numIndex, _depth, _stop)
+	tableToString = function(tbl, indent, numIndex, stop, _depth, _ref)
+		if _depth and _depth > 1 and _ref == tbl then
+			return tostring(_ref)
+		end
+
 		_depth = _depth or 1
-		_stop = _stop or 0
+		stop = stop or 0
 
 		local out = { }
 		local counter = 0
@@ -17,7 +21,7 @@ do
 			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
 			local t = type(v)
 			if t == "table" then
-				out[counter] = out[counter] .. ((_stop > 0 and _depth > _stop) and tostring(v) or tableToString(v, indent, numIndex, _depth + 1, _stop - 1))
+				out[counter] = out[counter] .. ((stop > 0 and _depth > stop) and tostring(v) or tableToString(v, indent, numIndex, stop - 1, _depth + 1, (_ref or tbl)))
 			elseif t == "number" or t == "boolean" then
 				out[counter] = out[counter] .. tostring(v)
 			elseif t == "string" then
