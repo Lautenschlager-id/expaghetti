@@ -38,7 +38,7 @@ local match = function(str, regex, flags, options)
 		char = str[currentPosition]
 
 		if type(obj) == "string" then
-			if obj ~= char then return end
+			if obj ~= char and (not isInsensitive or (obj ~= util.reverseCase(char))) then return end
 			--tmpChar = char
 			currentPosition = currentPosition + 1
 		else

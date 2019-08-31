@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = { match("testb", "^test[ab]()$") }
+local matches = { match("te[tb", "^tE%[t[ab]()$", { enum.flag.insensitive }) }
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 
