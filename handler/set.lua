@@ -18,7 +18,7 @@ set.open = function(self)
 	self.stack[self._index] = {
 		type = enum_type_set,
 		_hasValue = false,
-		_negated = false,
+		negated = false,
 		_rangeIndex = 0,
 		_min = { },	
 		_max = { },
@@ -54,7 +54,7 @@ end
 
 set.negate = function(self)
 	if not self.isOpen then return end
-	self.stack[self._index]._negated = true
+	self.stack[self._index].negated = true
 
 	return self
 end
@@ -99,7 +99,7 @@ set.match = function(this, char, isInsensitive) -- Maybe make this function stat
 		end
 	end
 
-	if this._negated then
+	if this.negated then
 		found = not found
 	end
 

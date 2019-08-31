@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = { match("test", "t()e()()st") }
+local matches = { match("testb", "^test[ab]()$") }
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 

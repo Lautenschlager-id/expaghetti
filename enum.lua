@@ -90,7 +90,8 @@ enum.anchor = {
 
 enum.flag = {
 	unicode = 'u',
-	insensitive = 'i'
+	insensitive = 'i',
+	multiline = 'm', -- match-only
 }
 
 enum.option = {

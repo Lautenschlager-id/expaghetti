@@ -113,7 +113,7 @@ The regex is built as a tree in the following format:
 	{ -- Set
 		type = "set", -- Set's object name
 		_hasValue = false, -- Whether the set is still empty
-		_negated = false, -- Whether it's a negated set
+		negated = false, -- Whether it's a negated set
 		_rangeIndex = 1, -- The number of ranges in the set
 		_min = { -- The list of minimum values of the ranges
 			[1] = '', -- Minimum value of the first range
