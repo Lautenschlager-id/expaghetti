@@ -93,4 +93,14 @@ enum.flag = {
 	insensitive = 'i'
 }
 
+enum.option = {
+	DISABLE_ANCHOR = '^',
+	DISABLE_SET = '[',
+	DISABLE_GROUP = '(',
+	DISABLE_QUANTIFIER = '{',
+	DISABLE_ALTERNATE = '|',
+	DISABLE_ESCAPE = '%',
+	DISABLE_MAGIC = 'X'
+}
+
 return enum

@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local tree = parse("[LAUT]enschlager%.id", { enum.flag.insensitive })
+local tree = parse("[^man]%1!", { enum.flag.insensitive }, { enum.option.DISABLE_SET, enum.option.DISABLE_ESCAPE })
 print(test.tableToString(tree, true, true))
 -----------------<            >-----------------
 
@@ -25,5 +25,6 @@ return {
 	flag = enum.flag,
 	gmatch = gmatch,
 	match = match,
+	option = enum.option,
 	utf8 = utf8
 }

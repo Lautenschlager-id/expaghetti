@@ -16,11 +16,16 @@ local tblconcat = table.concat
 local cache = { }
 
 local parse
-parse = function(regex, flags)
+parse = function(regex, flags, options)
 	if not regex then return end
 
 	local flagsCode = (flags and util.flagsCode(flags) or '')
-	flags = (flags and util.createSet(flags) or { })
+	local flagsSet = (flags and util.createSet(flags) or { })
+
+	local optionsCode = (options and util.flagsCode(options) or '')
+	local optionsSet = (options and util.createSet(options) or { })
+
+	flagsCode = flagsCode .. optionsCode
 
 	local rawRegex, len
 	if type(regex) == "string" then
@@ -28,7 +33,7 @@ parse = function(regex, flags)
 			return cache[regex][flagsCode]
 		else
 			rawRegex = regex
-			if flags[enum.flag.unicode] then
+			if flagsSet[enum.flag.unicode] then
 				regex, len = utf8.create(regex)
 			else
 				regex, len = util.strToTbl(regex)
@@ -42,7 +47,7 @@ parse = function(regex, flags)
 		len = #regex
 	end
 
-	local isInsensitive = not not flags[enum.flag.insensitive]
+	local isInsensitive = not not flagsSet[enum.flag.insensitive]
 
 	local lastChar, nextChar
 	local isEscaped, isMagic, char = false, false
@@ -73,7 +78,7 @@ parse = function(regex, flags)
 			nextChar = regex[i + 1]
 			isMagic = magicSet[char]
 
-			if isEscaped then
+			if isEscaped and not optionsSet[enum.option.DISABLE_ESCAPE] then
 				isEscaped = groupHandler.isOpen
 				if not isEscaped then -- if it's open then go for literal
 					if enum.class[char] then
@@ -96,11 +101,11 @@ parse = function(regex, flags)
 
 						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
 						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
-					elseif char == enum.specialClass.boundary then
+					elseif char == enum.specialClass.boundary and not optionsSet[enum.option.DISABLE_ANCHOR] then
 						char = enum.anchor.BOUNDARY
-					elseif char == enum.specialClass.notBoundary then
+					elseif char == enum.specialClass.notBoundary and not optionsSet[enum.option.DISABLE_ANCHOR] then
 						char = enum.anchor.NOTBOUNDARY
-					elseif not setHandler.isOpen then
+					elseif not setHandler.isOpen and not optionsSet[enum.option.DISABLE_GROUP] then
 						tmpNum = tonumber(char)
 						if tmpNum then -- %1 (group reference)
 							-- What to do with %0?
@@ -108,19 +113,19 @@ parse = function(regex, flags)
 						end
 					end
 				end
-			elseif isMagic then -- and not escaped
-				if char == enum.magic.OPEN_GROUP and not setHandler.isOpen then
+			elseif isMagic and not optionsSet[enum.option.DISABLE_MAGIC] then -- and not escaped
+				if char == enum.magic.OPEN_GROUP and not setHandler.isOpen and not optionsSet[enum.option.DISABLE_GROUP] then
 					groupHandler.nest = groupHandler.nest + 1
 					if groupHandler.nest == 1 then
 						groupHandler:open()
 						break
 					end
-				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen then
+				elseif char == enum.magic.CLOSE_GROUP and not setHandler.isOpen and not optionsSet[enum.option.DISABLE_GROUP] then
 					groupHandler.nest = groupHandler.nest - 1
 					if groupHandler.nest == 0 then
 						if groupHandler:hasValue() then -- normal
 							tmpGroup = groupHandler:get()
-							tmpGroup.tree = parse(tmpGroup.tree, flags)
+							tmpGroup.tree = parse(tmpGroup.tree, flags, options)
 							queueHandler:push(tmpGroup)
 							tmpGroup = nil -- don't trust lua's gc
 						else -- (), pos capture
@@ -132,22 +137,22 @@ parse = function(regex, flags)
 						break
 					end
 				elseif not groupHandler.isOpen then -- It gets handled later
-					if char == enum.magic.OPEN_SET then
+					if char == enum.magic.OPEN_SET and not optionsSet[enum.option.DISABLE_SET] then
 						if not setHandler.isOpen then -- sets can have [ ] too
 							setHandler:open()
 							break
 						end
-					elseif char == enum.magic.CLOSE_SET then
+					elseif char == enum.magic.CLOSE_SET and not optionsSet[enum.option.DISABLE_SET] then
 						if setHandler.isOpen and setHandler:hasValue() then -- sets can have ] if it's right after the opening [
 							queueHandler:push(setHandler:get()) -- set (Can it detect that it is a set or has to be explict?)
 							setHandler:close()
 							break
 						end
 					elseif not setHandler.isOpen then
-						if char == enum.magic.OPEN_QUANTIFIER then
+						if char == enum.magic.OPEN_QUANTIFIER and not optionsSet[enum.option.DISABLE_QUANTFIFIER] then
 							quantifierHandler:open()
 							break
-						elseif char == enum.magic.CLOSE_QUANTIFIER then
+						elseif char == enum.magic.CLOSE_QUANTIFIER and not optionsSet[enum.option.DISABLE_QUANTFIFIER] then
 							queueHandler:push(quantifierHandler:get()) -- quantifier
 							quantifierHandler:close()
 							break
@@ -163,13 +168,15 @@ parse = function(regex, flags)
 							queueHandler:push(quantifierHandler:get())
 							quantifierHandler:close()
 							break
-						elseif char == enum.magic.BEGINNING then
-							char = enum.anchor.BEGINNING
-						elseif char == enum.magic.END then
-							char = enum.anchor.END
-						elseif char == enum.magic.ALTERNATE then
+						elseif char == enum.magic.ALTERNATE and not optionsSet[enum.option.DISABLE_ALTERNATE] then
 							alternateHandler:push(queueHandler._index)
 							break
+						elseif not optionsSet[enum.option.DISABLE_ANCHOR] then
+							if char == enum.magic.BEGINNING then
+								char = enum.anchor.BEGINNING
+							elseif char == enum.magic.END then
+								char = enum.anchor.END
+							end
 						end
 					end
 				end
