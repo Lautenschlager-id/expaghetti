@@ -87,11 +87,11 @@ local match = function(str, regex, flags, options)
 						nextI = 2
 					elseif obj.type == "group" then
 						if not obj.effect then
-							matchChar = match(str, obj.tree, flags, options)
+							--matchChar = match(str, obj.tree, flags, options)
 							-- TODO: add to %reference
 							if not matchChar then return end
 						elseif obj.effect == enum.magic.NON_CAPTURING_GROUP then
-							if not match(str, obj.tree, flags, options) then return end
+							--if not match(str, obj.tree, flags, options) then return end
 						else
 							-- TODO
 						end
@@ -111,7 +111,7 @@ local match = function(str, regex, flags, options)
 	end
 
 	if matchCounter == 0 then
-		return rawStr -- Assuming it works as ^exp$. (waiting for the matching system)
+		return rawStr -- Assuming it works as ^exp (waiting for the matching system)
 	end
 	return util.unpack(matchHandler:get())
 end
