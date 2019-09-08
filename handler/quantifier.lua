@@ -50,6 +50,10 @@ quantifier.isLazy = function(self, lazy)
 	return self
 end
 
+quantifier.isConst = function(this) -- {x}
+	return this[1] and not this[2] and this._index == 1
+end
+
 quantifier.push = function(self, num)
 	num = tonumber(num)
 	if not num then
@@ -59,7 +63,7 @@ quantifier.push = function(self, num)
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
 	if this[this._index] then
-		this[this._index] = tonumber(this[this._index] .. num)
+		this[this._index] = (this[this._index] .. num) * 1
 	else
 		this[this._index] = num
 	end

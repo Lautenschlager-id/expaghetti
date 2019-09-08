@@ -11,6 +11,8 @@ end
 match.push = function(self, char)
 	self._index = self._index + 1
 	self.stack[self._index] = char
+
+	return self
 end
 
 match.get = function(self, index)

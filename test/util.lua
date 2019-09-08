@@ -38,7 +38,7 @@ end
 local tableCompare
 do
 	local compare
-	compare = function(src, tmp, _reverse)
+	compare = function(src, tmp, _reversed)
 		if type(src) ~= "table" or type(tmp) ~= "table" then
 			return src == tmp
 		end
@@ -54,7 +54,7 @@ do
 				end
 			end
 		end
-		return _reverse and true or compare(tmp, src, true)
+		return _reversed or compare(tmp, src, true)
 	end
 	tableCompare = function(src, tmp, checkMeta)
 		return compare(src, tmp) and (not checkMeta or compare(getmetatable(src), getmetatable(tmp)))

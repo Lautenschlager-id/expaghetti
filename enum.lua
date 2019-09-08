@@ -108,4 +108,9 @@ enum.error = {
 	-- TODO
 }
 
+enum.limit = {
+	QUANTIFIER_MAX = 2 ^ 15,
+	QUANTIFIER_MIN = 0
+}
+
 return enum

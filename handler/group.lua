@@ -18,7 +18,7 @@ group.open = function(self)
 	self.stack[self._index] = {
 		type = enum_type_group,
 		_behind = false,
-		_effect = nil,
+		effect = nil,
 		_index = 0,
 		tree = { }
 	}
@@ -47,7 +47,7 @@ end
 
 group.setEffect = function(self, effect)
 	if not self.isOpen then return end
-	self.stack[self._index]._effect = effect
+	self.stack[self._index].effect = effect
 
 	return self
 end

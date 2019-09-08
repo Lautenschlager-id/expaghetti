@@ -2,9 +2,9 @@ local bit32 = require("helper/bit32")
 local utf8 = require("helper/utf8")
 local enum = require("enum")
 
-local match = require("matcher")
+local _match = require("matcher")
 
-local _match = function(str, exp)
+local match = function(str, exp)
 	-- TODO
 end
 
@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = { match("te[tb", "^tE%[t[ab]()$", { enum.flag.insensitive }) }
+local matches = { _match("te amooo", "te a*mo+()") }
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 
@@ -24,7 +24,7 @@ return {
 	parse = parser,
 	flag = enum.flag,
 	gmatch = gmatch,
-	match = _match,
+	match = match,
 	option = enum.option,
 	utf8 = utf8
 }

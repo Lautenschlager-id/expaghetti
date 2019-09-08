@@ -11,6 +11,18 @@ end
 queue.push = function(self, data)
 	self._index = self._index + 1
 	self.stack[self._index] = data
+
+	return self
+end
+
+queue.switchWithLast = function(self)
+	if self._index < 2 then
+		--error("Nothing to repeat at")
+	end
+
+	self.stack[self._index - 1], self.stack[self._index] = self.stack[self._index], self.stack[self._index- 1]
+
+	return self
 end
 
 queue.get = function(self, index)
