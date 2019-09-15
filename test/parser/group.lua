@@ -38,23 +38,6 @@ test.assertion.object(
 	}
 )
 
--- Position capture
-test.assertion.object(
-	"()",
-	{
-		type = "position_capture"
-	}
-)
-
--- Capture by reference
-test.assertion.object(
-	"%1",
-	{
-		type = "capture_reference",
-		value = 1
-	}
-)
-
 -- Positive lookahead
 test.assertion.object(
 	"(?=abc)",
