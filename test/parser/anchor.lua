@@ -5,8 +5,7 @@ test.assertion.object(
 	{
 		type = "anchor",
 		anchor = '^'
-	},
-	"The anchor '^' has failed."
+	}
 )
 
 test.assertion.object(
@@ -14,8 +13,7 @@ test.assertion.object(
 	{
 		type = "anchor",
 		anchor = '$'
-	},
-	"The anchor '$' has failed."
+	}
 )
 
 test.assertion.object(
@@ -23,8 +21,7 @@ test.assertion.object(
 	{
 		type = "anchor",
 		anchor = 'b'
-	},
-	"The anchor '%b' has failed."
+	}
 )
 
 test.assertion.object(
@@ -32,8 +29,7 @@ test.assertion.object(
 	{
 		type = "anchor",
 		anchor = 'B'
-	},
-	"The anchor '%B' has failed."
+	}
 )
 
 return test.assertion.get()

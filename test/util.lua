@@ -78,16 +78,16 @@ end
 do
 	local parse = require("../parser")
 
-	assertion.object = function(src, comp, msg, checkTree)
+	assertion.object = function(src, comp, checkTree)
 		if assertion.error then return end
 
-		src = parse(src).stack
+		local obj = parse(src).stack
 		if not checkTree then
-			src = src[1]
+			obj = obj[1]
 		end
 
-		if not tableCompare(src, comp) then
-			assertion.error = msg .. "\n\tGot:\n\t\t" .. tableToString(src) .. "\n\tExpected:\n\t\t" .. tableToString(comp)
+		if not tableCompare(obj, comp) then
+			assertion.error = "'" .. src .. "' has failed.\n\tGot:\n\t\t" .. tableToString(obj) .. "\n\tExpected:\n\t\t" .. tableToString(comp)
 		end
 	end
 end
