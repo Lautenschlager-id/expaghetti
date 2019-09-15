@@ -63,7 +63,7 @@ quantifier.push = function(self, num)
 	if not self.isOpen then return end
 	local this = self.stack[self._index]
 	if this[this._index] then
-		this[this._index] = (this[this._index] .. num) * 1
+		this[this._index] = tonumber(this[this._index] .. num)
 	else
 		this[this._index] = num
 	end
