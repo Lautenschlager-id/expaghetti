@@ -183,7 +183,7 @@ parse = function(regex, flags, options)
 			end
 
 			if groupHandler.isOpen then
-				if lastChar == enum.magic.OPEN_GROUP and char == enum.magic.GROUP_BEHAVIOR then -- (?
+				if lastChar == enum.magic.OPEN_GROUP and char == enum.magic.GROUP_BEHAVIOR and not groupHandler:hasValue() then -- (?
 					groupHandler.watchEffect = true
 				elseif groupHandler.watchEffect then
 					if char == enum.magic.LOOKBEHIND then -- (?<=), (?<!)
