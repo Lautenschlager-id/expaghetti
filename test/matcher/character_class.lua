@@ -38,6 +38,10 @@ try('S', { 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 })
 try('U', { 1, 1, 0, 0, 1, 1, 1, 1, 1, 1 })
 try('W', { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 })
 
+-- .
+try('any', { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, enum.specialClass)
+
+
 -- %c
 test.assertion.object(
 	"%cA",
@@ -70,6 +74,11 @@ test.assertion.object(
 	'Ǣ'
 )
 
+test.assertion.object(
+	"%e01e2",
+	'Ǣ'
+)
+
 -- Others
 test.assertion.object(
 	"%%a%%",
@@ -88,11 +97,6 @@ test.assertion.object(
 		')'
 	},
 	true
-)
-
-test.assertion.object(
-	"%e01e2",
-	'Ǣ'
 )
 
 return test.assertion.get()
