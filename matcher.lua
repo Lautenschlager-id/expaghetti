@@ -33,7 +33,8 @@ local match = function(str, regex, flags, options)
 
 	local obj, char
 	local i, currentPosition, nextI = 1, 1
-	local matchChar, tmpRepeat, tmpRepeatCount, tmpChar
+	local matchChar
+	local tmpObj, tmpCurrentPosition, tmpChar, tmpCounter, tmpMaxValue -- Quantifier
 
 	local matchHandler = matchFactory:new()
 
@@ -68,21 +69,30 @@ local match = function(str, regex, flags, options)
 						--matchChar = char
 						currentPosition = currentPosition + 1
 					elseif obj.type == "quantifier" then
-						tmpRepeat = regex:get(i + 1)
-						tmpRepeatCount = currentPosition
+						tmpObj = regex:get(i + 1)
+
+						tmpCurrentPosition = currentPosition
 						tmpChar = char
 
+						tmpCounter = 0
+						tmpMaxValue = (obj[2] or (quantifierFactory.isConst(obj) and obj[1]) or nil)
+
 						repeat
-							--if not match(tmpChar, tmpRepeat)
-							if tmpChar ~= tmpRepeat then break end -- literal char only
+							--if not match(tmpChar, tmpObj)
+							if tmpChar ~= tmpObj then break end -- literal char only
 
-							tmpRepeatCount = tmpRepeatCount + 1
-							tmpChar = str[tmpRepeatCount]
-						until false
+							tmpCurrentPosition = tmpCurrentPosition + 1
+							tmpChar = str[tmpCurrentPosition]
+							tmpCounter = tmpCounter + 1
+						until tmpCounter == tmpMaxValue
 
-						currentPosition, tmpRepeatCount = tmpRepeatCount, (tmpRepeatCount - currentPosition)
+						currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
 
-						if (quantifierFactory.isConst(obj) and tmpRepeatCount ~= obj[1]) or (obj[1] and tmpRepeatCount < obj[1]) or (obj[2] and tmpRepeatCount > obj[2]) then return end
+						if
+							(tmpCurrentPosition < obj[1]) -- Less than the minimum
+						then return end
+
+						--if (quantifierFactory.isConst(obj) and tmpCurrentPosition ~= obj[1]) or (obj[1] and tmpCurrentPosition < obj[1]) or (obj[2] and tmpCurrentPosition > obj[2]) then return end
 
 						nextI = 2
 					elseif obj.type == "group" then
