@@ -69,32 +69,36 @@ local match = function(str, regex, flags, options)
 						--matchChar = char
 						currentPosition = currentPosition + 1
 					elseif obj.type == "quantifier" then
-						tmpObj = regex:get(i + 1)
+						if obj.isLazy then
+							return -- TODO
+						else
+							tmpObj = regex:get(i + 1)
 
-						tmpCurrentPosition = currentPosition
-						tmpChar = char
+							tmpCurrentPosition = currentPosition
+							tmpChar = char
 
-						tmpCounter = 0
-						tmpMaxValue = (obj[2] or (quantifierFactory.isConst(obj) and obj[1]) or nil)
+							tmpCounter = 0
+							tmpMaxValue = (obj[2] or (quantifierFactory.isConst(obj) and obj[1]) or nil)
 
-						repeat
-							--if not match(tmpChar, tmpObj)
-							if tmpChar ~= tmpObj then break end -- literal char only
+							repeat
+								--if not match(tmpChar, tmpObj)
+								if tmpChar ~= tmpObj then break end -- literal char only
 
-							tmpCurrentPosition = tmpCurrentPosition + 1
-							tmpChar = str[tmpCurrentPosition]
-							tmpCounter = tmpCounter + 1
-						until tmpCounter == tmpMaxValue
+								tmpCurrentPosition = tmpCurrentPosition + 1
+								tmpChar = str[tmpCurrentPosition]
+								tmpCounter = tmpCounter + 1
+							until tmpCounter == tmpMaxValue
 
-						currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
+							currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
 
-						if
-							(tmpCurrentPosition < obj[1]) -- Less than the minimum
-						then return end
+							if
+								(tmpCurrentPosition < obj[1]) -- Less than the minimum
+							then return end
 
-						--if (quantifierFactory.isConst(obj) and tmpCurrentPosition ~= obj[1]) or (obj[1] and tmpCurrentPosition < obj[1]) or (obj[2] and tmpCurrentPosition > obj[2]) then return end
+							--if (quantifierFactory.isConst(obj) and tmpCurrentPosition ~= obj[1]) or (obj[1] and tmpCurrentPosition < obj[1]) or (obj[2] and tmpCurrentPosition > obj[2]) then return end
 
-						nextI = 2
+							nextI = 2
+						end
 					elseif obj.type == "group" then
 						if not obj.effect then
 							--matchChar = match(str, obj.tree, flags, options)

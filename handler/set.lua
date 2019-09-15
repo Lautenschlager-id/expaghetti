@@ -110,7 +110,7 @@ set.match = function(this, char, isInsensitive) -- Maybe make this function stat
 		end
 	end
 
-	return found
+	return not not found
 end
 
 return set

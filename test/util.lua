@@ -1,7 +1,8 @@
+local strformat = string.format
+
 local tableToString
 do
 	local strrep = string.rep
-	local strformat = string.format
 	local tblconcat = table.concat
 	local strfind = string.find
 
@@ -66,7 +67,8 @@ do
 end
 
 local assertion = {
-	error = nil
+	error = nil,
+	errorMsg = "'%s' has failed.\n\tGot:\n\t\t%s\n\tExpected:\n\t\t%s"
 }
 
 assertion.get = function()
@@ -87,8 +89,18 @@ do
 		end
 
 		if not tableCompare(obj, comp) then
-			assertion.error = "'" .. src .. "' has failed.\n\tGot:\n\t\t" .. tableToString(obj) .. "\n\tExpected:\n\t\t" .. tableToString(comp)
+			assertion.error = strformat(assertion.errorMsg, src, tableToString(obj, true, true, nil, 3), tableToString(comp, true, true, nil, 3))
 		end
+	end
+
+end
+
+assertion.value = function(f, expected, name, ...)
+	if assertion.error then return end
+
+	local f = f(...)
+	if f ~= expected then
+		assertion.error = strformat(assertion.errorMsg, tostring(name), tostring(f), tostring(expected))
 	end
 end
 
