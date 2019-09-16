@@ -79,7 +79,7 @@ end
 
 do
 	local parse = require("../parser")
-
+	
 	assertion.object = function(src, comp, checkTree)
 		if assertion.error then return end
 
@@ -90,7 +90,9 @@ do
 
 		if not tableCompare(obj, comp) then
 			assertion.error = strformat(assertion.errorMsg, src, tableToString(obj, true, true, nil, 3), tableToString(comp, true, true, nil, 3))
+			return false
 		end
+		return true
 	end
 
 end
@@ -101,7 +103,9 @@ assertion.value = function(f, expected, name, ...)
 	local f = f(...)
 	if f ~= expected then
 		assertion.error = strformat(assertion.errorMsg, tostring(name), tostring(f), tostring(expected))
+		return false
 	end
+	return true
 end
 
 return {

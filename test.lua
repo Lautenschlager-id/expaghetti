@@ -4,6 +4,7 @@ local strsub = string.sub
 local popen = io.popen
 
 local folder = {
+	"util",
 	"parser",
 	"matcher"
 }

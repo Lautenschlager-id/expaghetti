@@ -41,7 +41,6 @@ try('W', { 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 })
 -- .
 try('any', { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, enum.specialClass)
 
-
 -- %c
 test.assertion.object(
 	"%cA",
