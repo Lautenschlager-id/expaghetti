@@ -35,4 +35,11 @@ queue.get = function(self, index)
 	return exp, type(exp)
 end
 
+queue.clear = function(self)
+	self._index = 0
+	self.stack = { }
+
+	return self
+end
+
 return queue

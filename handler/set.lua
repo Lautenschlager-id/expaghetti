@@ -1,5 +1,3 @@
-local enum_type_set = "set"
-
 local util = require("../helper/util")
 
 local set = { }
@@ -16,7 +14,7 @@ end
 set.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		type = enum_type_set,
+		type = "set",
 		_hasValue = false,
 		_negated = false,
 		_rangeIndex = 0,

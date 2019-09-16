@@ -1,5 +1,3 @@
-local enum_type_group = "group"
-
 local group = { }
 group.__index = group
 
@@ -16,7 +14,7 @@ end
 group.open = function(self)
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		type = enum_type_group,
+		type = "group",
 		_behind = false,
 		effect = nil,
 		_index = 0,

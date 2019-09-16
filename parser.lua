@@ -88,6 +88,7 @@ parse = function(regex, flags, options)
 							--error("Missing %c parameter")
 						end
 						char = util.charToCtrlChar(nextChar) -- %cI = \009
+						nextI = 2
 					elseif char == enum.specialClass.encode then -- %eFFFF = char(0xFFFF)
 						if not regex[i + 4] then
 							--error("Missing %e parameters")
@@ -227,12 +228,12 @@ parse = function(regex, flags, options)
 		i = i + nextI
 	end
 
-	local tree
+	local tree = queueHandler
 	if alternateHandler:exists() then
 		-- Builds the or object
-		tree = { alternateHandler:build(queueHandler) }
-	else
-		tree = queueHandler
+		local tmp = alternateHandler:build(queueHandler)
+		queueHandler:clear()
+		queueHandler:push(tmp)
 	end
 
 	if not cache[rawRegex] then

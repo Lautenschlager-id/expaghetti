@@ -1,5 +1,3 @@
-local enum_type_quantifier = "quantifier"
-
 local quantifier = { }
 quantifier.__index = quantifier
 
@@ -18,7 +16,7 @@ quantifier.open = function(self)
 
 	self._index = self._index + 1
 	self.stack[self._index] = {
-		type = enum_type_quantifier,
+		type = "quantifier",
 		_index = 1,
 		isLazy = false,
 		[1] = nil,

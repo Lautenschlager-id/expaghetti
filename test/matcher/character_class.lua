@@ -2,8 +2,6 @@ local test = require("../../test/util")
 local set = require("../../handler/set")
 local enum = require("../../enum")
 
-local strchar = string.char
-
 local try
 do
 	local tries = { 'a', 'z', 'A', 'Z', '0', '9', '@', ')', '\n', ' ' }
@@ -44,17 +42,17 @@ try('any', { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1 }, enum.specialClass)
 -- %c
 test.assertion.object(
 	"%cA",
-	strchar(1)
+	'\001'
 )
 
 test.assertion.object(
 	"%ca",
-	strchar(1)
+	'\001'
 )
 
 test.assertion.object(
 	"%cZ",
-	strchar(26)
+	'\026'
 )
 
 -- %e

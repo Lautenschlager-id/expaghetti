@@ -1,4 +1,4 @@
-local enum_type_alternate = "alternate"
+local queueFactory = require("handler/queue")
 
 local alternate = { }
 alternate.__index = alternate
@@ -28,18 +28,15 @@ alternate.build = function(self, exp)
 
 	self:push(exp._index) -- [0, #e], not [0, #e - []]
 
-	local p
 	for i = 1, self._index do
-		p = 0
-		tree[i] = { }
+		tree[i] = queueFactory:new()
 
 		for j = self.stack[i - 1] + 1, self.stack[i] do
-			p = p + 1
-			tree[i][p] = exp:get(j)
+			tree[i]:push(exp:get(j))
 		end
 	end
 
-	return { type = enum_type_alternate, exp = tree }
+	return { type = "alternate", trees = tree }
 end
 
 return alternate

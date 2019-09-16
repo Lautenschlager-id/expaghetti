@@ -79,7 +79,7 @@ end
 
 do
 	local parse = require("../parser")
-	
+
 	assertion.object = function(src, comp, checkTree)
 		if assertion.error then return end
 

@@ -14,6 +14,7 @@ local tblconcat = table.concat
 local match
 local match = function(str, regex, flags, options)
 	regex = parse(regex, flags, options)
+	if regex._index == 0 then return end
 	
 	local flagsSet = (flags and util.createSet(flags) or { })
 	local isInsensitive = not not flagsSet[enum.flag.insensitive]
