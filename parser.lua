@@ -232,8 +232,7 @@ parse = function(regex, flags, options)
 	if alternateHandler:exists() then
 		-- Builds the or object
 		local tmp = alternateHandler:build(queueHandler)
-		queueHandler:clear()
-		queueHandler:push(tmp)
+		queueHandler:clear():push(tmp)
 	end
 
 	if not cache[rawRegex] then

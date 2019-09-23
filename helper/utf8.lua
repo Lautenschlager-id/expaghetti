@@ -74,7 +74,7 @@ if _VERSION < "Lua 5.3" then -- no utf8 native library
 			unicode = floor(unicode / 0x40)
 			local byte1 = 0x80 + (unicode % 0x40)
 			unicode = floor(unicode / 0x40)
-			
+
 			return strchar((0xF0 + unicode), byte1, byte2, byte3)
 		end
 		error("bad argument #1 to 'char' (value out of range)")

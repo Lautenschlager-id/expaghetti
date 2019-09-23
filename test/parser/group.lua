@@ -139,7 +139,7 @@ test.assertion.object(
 							'a',
 							'b',
 							'c'
-						}		
+						}
 					}
 				},
 				'a',
@@ -175,7 +175,7 @@ test.assertion.object(
 							'a',
 							'b',
 							'c'
-						}		
+						}
 					}
 				},
 				'a',

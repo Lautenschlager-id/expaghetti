@@ -12,10 +12,12 @@ local matchFactory = require("handler/match")
 local tblconcat = table.concat
 
 local match
-local match = function(str, regex, flags, options)
-	regex = parse(regex, flags, options)
-	if regex._index == 0 then return end
-	
+match = function(str, regex, flags, options)
+	if type(regex) == "string" then
+		regex = parse(regex, flags, options)
+	end
+	if regex._index == 0 then return { '' } end
+
 	local flagsSet = (flags and util.createSet(flags) or { })
 	local isInsensitive = not not flagsSet[enum.flag.insensitive]
 
@@ -111,9 +113,14 @@ local match = function(str, regex, flags, options)
 							-- TODO
 						end
 					elseif obj.type == "alternate" then
-						-- TODO
+						local tmp
+						for i = 1, obj.trees._index do
+							matchChar = match(str, obj.trees[i], flags, options)
+							if matchChar then break end
+						end
+						return matchChar
 					end
-				end	
+				end
 			end
 
 			if matchChar then
@@ -126,9 +133,9 @@ local match = function(str, regex, flags, options)
 	end
 
 	if matchCounter == 0 then
-		return rawStr -- Assuming it works as ^exp (waiting for the matching system)
+		return { rawStr } -- Assuming it works as ^exp (waiting for the matching system)
 	end
-	return util.unpack(matchHandler:get())
+	return matchHandler:get()
 end
 
 return match

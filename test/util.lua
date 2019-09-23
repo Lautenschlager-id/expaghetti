@@ -20,7 +20,7 @@ do
 
 		local out = { }
 		local counter = 0
-	
+
 		for k, v in next, tbl do
 			counter = counter + 1
 			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
@@ -35,7 +35,7 @@ do
 				out[counter] = out[counter] .. "nil"
 			end
 		end
-	
+
 		return "{" .. (indent and ("\n" .. tblconcat(out, ",\n") .. "\n") or tblconcat(out, ',')) .. (indent and strrep("\t", _depth - 1) or '') .. "}"
 	end
 end

@@ -35,6 +35,7 @@ alternate.build = function(self, exp)
 			tree[i]:push(exp:get(j))
 		end
 	end
+	tree._index = self._index
 
 	return { type = "alternate", trees = tree }
 end
