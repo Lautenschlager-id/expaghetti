@@ -7,7 +7,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 5,
 			[2] = 9
 		},
@@ -22,7 +22,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 5123,
 			[2] = 12319
 		},
@@ -38,7 +38,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 1,
-			isLazy = false,
+			effect = nil,
 			[1] = 2,
 			[2] = nil
 		},
@@ -54,7 +54,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 5,
 			[2] = nil
 		},
@@ -70,7 +70,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = nil,
 			[2] = 5
 		},
@@ -86,7 +86,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 1,
 			[2] = nil
 		},
@@ -101,7 +101,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 0,
 			[2] = nil
 		},
@@ -116,7 +116,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = false,
+			effect = nil,
 			[1] = 0,
 			[2] = 1
 		},
@@ -132,7 +132,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = true,
+			effect = "?",
 			[1] = 3,
 			[2] = 5
 		},
@@ -147,7 +147,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = true,
+			effect = "?",
 			[1] = 1,
 			[2] = nil
 		},
@@ -162,7 +162,7 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = true,
+			effect = "?",
 			[1] = 0,
 			[2] = nil
 		},
@@ -177,7 +177,68 @@ test.assertion.object(
 		{
 			type = "quantifier",
 			_index = 2,
-			isLazy = true,
+			effect = "?",
+			[1] = 0,
+			[2] = 1
+		},
+		'a'
+	},
+	true
+)
+
+-- Atomic
+test.assertion.object(
+	"a{3,5}+",
+	{
+		{
+			type = "quantifier",
+			_index = 2,
+			effect = "+",
+			[1] = 3,
+			[2] = 5
+		},
+		'a'
+	},
+	true
+)
+
+test.assertion.object(
+	"a++",
+	{
+		{
+			type = "quantifier",
+			_index = 2,
+			effect = "+",
+			[1] = 1,
+			[2] = nil
+		},
+		'a'
+	},
+	true
+)
+
+test.assertion.object(
+	"a*+",
+	{
+		{
+			type = "quantifier",
+			_index = 2,
+			effect = "+",
+			[1] = 0,
+			[2] = nil
+		},
+		'a'
+	},
+	true
+)
+
+test.assertion.object(
+	"a?+",
+	{
+		{
+			type = "quantifier",
+			_index = 2,
+			effect = "+",
 			[1] = 0,
 			[2] = 1
 		},

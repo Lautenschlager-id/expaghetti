@@ -18,7 +18,7 @@ quantifier.open = function(self)
 	self.stack[self._index] = {
 		type = "quantifier",
 		_index = 1,
-		isLazy = false,
+		effect = nil,
 		[1] = nil,
 		[2] = nil
 	}
@@ -42,8 +42,9 @@ quantifier.next = function(self) -- adds +1 to the index when x,y
 	return self
 end
 
-quantifier.isLazy = function(self, lazy)
-	self.stack[self._index].isLazy = lazy -- Not checking yet about LAZY==ZERO_OR_ONE (???)
+quantifier.setEffect = function(self, effect) -- lazy, atomic
+	if not self.isOpen then return end
+	self.stack[self._index].effect = effect
 
 	return self
 end

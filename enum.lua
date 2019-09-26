@@ -44,10 +44,12 @@ enum.magic = {
 	ONE_OR_MORE = '+', -- a+
 	ZERO_OR_MORE = '*', -- a*
 	ZERO_OR_ONE = '?', -- a?
-	LAZY = '?', -- a+?
+	LAZY_QUANTIFIER = '?', -- a+?
 	BEGINNING = '^', -- ^a
 	END = '$', -- a$
 	ALTERNATE = '|', -- a|b
+	ATOMIC_QUANTIFIER = '+', -- a++
+	ATOMIC_GROUP = '>' -- (?>abc)
 }
 
 enum.class = {

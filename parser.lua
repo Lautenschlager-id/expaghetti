@@ -154,15 +154,22 @@ parse = function(regex, flags, options)
 							quantifierHandler:open()
 							break
 						elseif char == enum.magic.CLOSE_QUANTIFIER and not optionsSet[enum.option.DISABLE_QUANTFIFIER] then
-							queueHandler:push(quantifierHandler:isLazy(nextChar == enum.magic.LAZY):get()):switchWithLast() -- quantifier
+							if nextChar == enum.magic.LAZY_QUANTIFIER or nextChar == enum.magic.ATOMIC_QUANTIFIER then
+								quantifierHandler:setEffect(nextChar)
+							end
+							queueHandler:push(quantifierHandler:get()):switchWithLast() -- quantifier
 							quantifierHandler:close()
 							break
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
-						elseif char == enum.magic.LAZY and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_ONE or lastChar == enum.magic.CLOSE_QUANTIFIER) then -- lazy of +, *, ?
+						elseif (char == enum.magic.LAZY_QUANTIFIER or char == enum.magic.ATOMIC_QUANTIFIER) and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_ONE or lastChar == enum.magic.CLOSE_QUANTIFIER) then -- lazy of +, *, ?
 							break -- Not linking with the if below because its flexible enough to have a different representative character.
 						elseif char == enum.magic.ZERO_OR_MORE or char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_ONE then -- +, *, ?
-							quantifierHandler:open():push((char == enum.magic.ONE_OR_MORE and 1 or 0)):isLazy(nextChar == enum.magic.LAZY):next()
+							quantifierHandler:open():push((char == enum.magic.ONE_OR_MORE and 1 or 0))
+							if nextChar == enum.magic.LAZY_QUANTIFIER or nextChar == enum.magic.ATOMIC_QUANTIFIER then
+								quantifierHandler:setEffect(nextChar)
+							end
+							quantifierHandler:next()
 							if char == enum.magic.ZERO_OR_ONE then
 								quantifierHandler:push(1)
 							end
@@ -190,7 +197,7 @@ parse = function(regex, flags, options)
 					if char == enum.magic.LOOKBEHIND then -- (?<=), (?<!)
 						groupHandler:setBehind()
 					else
-						if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POSITIVE_LOOKAHEAD or char == enum.magic.NEGATIVE_LOOKAHEAD then -- (?:), (?=), (?!)
+						if char == enum.magic.NON_CAPTURING_GROUP or char == enum.magic.POSITIVE_LOOKAHEAD or char == enum.magic.NEGATIVE_LOOKAHEAD or char == enum.magic.ATOMIC_GROUP then -- (?:), (?=), (?!), (?>)
 							groupHandler:setEffect(char)
 						end
 						groupHandler.watchEffect = false

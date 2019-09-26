@@ -72,7 +72,9 @@ match = function(str, regex, flags, options)
 						--matchChar = char
 						currentPosition = currentPosition + 1
 					elseif obj.type == "quantifier" then
-						if obj.isLazy then
+						if obj.effect == enum.magic.LAZY_QUANTIFIER then
+							return -- TODO
+						elseif obj.effect == enum.magic.ATOMIC_QUANTIFIER then
 							return -- TODO
 						else
 							tmpObj = regex:get(i + 1)

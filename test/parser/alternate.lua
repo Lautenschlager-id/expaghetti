@@ -5,6 +5,7 @@ test.assertion.object(
 	{
 		type = "alternate",
 		trees = {
+			_index = 2,
 			[1] = {
 				_index = 2,
 				stack = {
@@ -27,6 +28,7 @@ test.assertion.object(
 	{
 		type = "alternate",
 		trees = {
+			_index = 3,
 			[1] = {
 				_index = 1,
 				stack = {
@@ -62,6 +64,7 @@ test.assertion.object(
 					{
 						type = "alternate",
 						trees = {
+							_index = 3,
 							[1] = {
 								_index = 1,
 								stack = {
