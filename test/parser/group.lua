@@ -114,6 +114,25 @@ test.assertion.object(
 	}
 )
 
+-- Atomic
+test.assertion.object(
+	"(?>abc)",
+	{
+		type = "group",
+		_behind = false,
+		effect = '>',
+		_index = 3,
+		tree = {
+			_index = 3,
+			stack = {
+				'a',
+				'b',
+				'c'
+			}
+		}
+	}
+)
+
 -- Nested
 test.assertion.object(
 	"(abc(abc)abc)",
