@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = _match("te aaaaamo", "t++()e()a|te a?mo()|t()")
+local matches = _match("aaaaamo", "a+?m()")
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 

@@ -235,7 +235,6 @@ parse = function(regex, flags, options)
 		i = i + nextI
 	end
 
-	local tree = queueHandler
 	if alternateHandler:exists() then
 		-- Builds the or object
 		local tmp = alternateHandler:build(queueHandler)
@@ -245,9 +244,9 @@ parse = function(regex, flags, options)
 	if not cache[rawRegex] then
 		cache[rawRegex] = { }
 	end
-	cache[rawRegex][flagsCode] = tree
+	cache[rawRegex][flagsCode] = queueHandler
 
-	return tree
+	return queueHandler
 end
 
 return parse

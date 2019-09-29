@@ -37,7 +37,7 @@ match = function(str, regex, flags, options)
 	local obj, char
 	local i, currentPosition, nextI = 1, 1
 	local matchChar
-	local tmpObj, tmpCurrentPosition, tmpChar, tmpCounter, tmpMaxValue -- Quantifier
+	local tmpObj, tmpCurrentPosition, tmpChar, tmpCounter, tmpMaxValue, tmpDelimObj, tmpNextChar -- Quantifier
 
 	local matchHandler = matchFactory:new()
 
@@ -72,18 +72,35 @@ match = function(str, regex, flags, options)
 						--matchChar = char
 						currentPosition = currentPosition + 1
 					elseif obj.type == "quantifier" then
+						tmpObj = regex:get(i + 1) -- Will be iterated
+						tmpMaxValue = (obj[2] or (quantifierFactory.isConst(obj) and obj[1]) or nil) -- Maximum value of the quantifier, nil if N
+						-- Values for manipulation of data
+						tmpCurrentPosition = currentPosition
+						tmpChar = char
+
 						if obj.effect == enum.magic.LAZY_QUANTIFIER then
-							return -- TODO
+							tmpDelimObj = regex:get(i + 2) -- Edge
+							--[[
+							if tmpDelimObj.type == "quantifier" then
+								tmpDelimObj = regex:get(i + 3)
+							end
+							]]
+
+							tmpNextChar = str[tmpCurrentPosition]
+
+							repeat
+								--if not match(tmpChar, tmpObj)
+								if tmpChar ~= tmpObj then break end -- literal char only
+
+								tmpChar = tmpNextChar
+								tmpCurrentPosition = tmpCurrentPosition + 1
+
+								tmpNextChar = str[tmpCurrentPosition]
+							until tmpNextChar == tmpDelimObj -- tmpDelimObj.match(tmpNextChar) would be the essential
+
+							currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
 						elseif obj.effect == enum.magic.ATOMIC_QUANTIFIER then
-							return -- TODO
-						else
-							tmpObj = regex:get(i + 1)
-
-							tmpCurrentPosition = currentPosition
-							tmpChar = char
-
 							tmpCounter = 0
-							tmpMaxValue = (obj[2] or (quantifierFactory.isConst(obj) and obj[1]) or nil)
 
 							repeat
 								--if not match(tmpChar, tmpObj)
@@ -95,15 +112,14 @@ match = function(str, regex, flags, options)
 							until tmpCounter == tmpMaxValue
 
 							currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
-
-							if
-								(tmpCurrentPosition < obj[1]) -- Less than the minimum
-							then return end
-
-							--if (quantifierFactory.isConst(obj) and tmpCurrentPosition ~= obj[1]) or (obj[1] and tmpCurrentPosition < obj[1]) or (obj[2] and tmpCurrentPosition > obj[2]) then return end
-
-							nextI = 2
+						else -- Greedy
+							return -- TODO
 						end
+
+						-- Less than the minimum
+						if (obj[1] and tmpCurrentPosition < obj[1]) then return end
+
+						nextI = 2
 					elseif obj.type == "group" then
 						if not obj.effect then
 							--matchChar = match(str, obj.tree, flags, options)
