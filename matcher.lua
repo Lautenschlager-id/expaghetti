@@ -98,8 +98,7 @@ match = function(str, regex, flags, options)
 								tmpNextChar = str[tmpCurrentPosition]
 							until tmpNextChar == tmpDelimObj -- tmpDelimObj.match(tmpNextChar) would be the essential
 
-							currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
-						elseif obj.effect == enum.magic.ATOMIC_QUANTIFIER then
+						elseif obj.effect == enum.magic.POSSESSIVE_QUANTIFIER then
 							tmpCounter = 0
 
 							repeat
@@ -111,10 +110,11 @@ match = function(str, regex, flags, options)
 								tmpCounter = tmpCounter + 1
 							until tmpCounter == tmpMaxValue
 
-							currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
 						else -- Greedy
 							return -- TODO
 						end
+
+						currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
 
 						-- Less than the minimum
 						if (obj[1] and tmpCurrentPosition < obj[1]) then return end

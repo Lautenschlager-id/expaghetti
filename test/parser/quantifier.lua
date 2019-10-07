@@ -186,7 +186,7 @@ test.assertion.object(
 	true
 )
 
--- Atomic
+-- Possessive
 test.assertion.object(
 	"a{3,5}+",
 	{

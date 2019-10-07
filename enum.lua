@@ -48,7 +48,7 @@ enum.magic = {
 	BEGINNING = '^', -- ^a
 	END = '$', -- a$
 	ALTERNATE = '|', -- a|b
-	ATOMIC_QUANTIFIER = '+', -- a++
+	POSSESSIVE_QUANTIFIER = '+', -- a++
 	ATOMIC_GROUP = '>' -- (?>abc)
 }
 

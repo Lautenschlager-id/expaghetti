@@ -42,7 +42,7 @@ quantifier.next = function(self) -- adds +1 to the index when x,y
 	return self
 end
 
-quantifier.setEffect = function(self, effect) -- lazy, atomic
+quantifier.setEffect = function(self, effect) -- lazy, possessive
 	if not self.isOpen then return end
 	self.stack[self._index].effect = effect
 

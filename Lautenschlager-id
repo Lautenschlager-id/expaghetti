@@ -1,0 +1,25 @@
+[1mdiff --git a/parser.lua b/parser.lua[m
+[1mindex 0f46a56..a5123dd 100644[m
+[1m--- a/parser.lua[m
+[1m+++ b/parser.lua[m
+[36m@@ -235,7 +235,6 @@[m [mparse = function(regex, flags, options)[m
+ 		i = i + nextI[m
+ 	end[m
+ [m
+[31m-	local tree = queueHandler[m
+ 	if alternateHandler:exists() then[m
+ 		-- Builds the or object[m
+ 		local tmp = alternateHandler:build(queueHandler)[m
+[36m@@ -245,9 +244,9 @@[m [mparse = function(regex, flags, options)[m
+ 	if not cache[rawRegex] then[m
+ 		cache[rawRegex] = { }[m
+ 	end[m
+[31m-	cache[rawRegex][flagsCode] = tree[m
+[32m+[m	[32mcache[rawRegex][flagsCode] = queueHandler[m
+ [m
+[31m-	return tree[m
+[32m+[m	[32mreturn queueHandler[m
+ end[m
+ [m
+ return parse[m
+\ No newline at end of file[m
