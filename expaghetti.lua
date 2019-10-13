@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = _match("aaaaammoo", "a+?a()m+?o()")
+local matches = _match("a{1,}", "a%{1,%}??()")
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 

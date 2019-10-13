@@ -35,8 +35,8 @@ checkMany("[a-def]", { 'a', 'b', 'c', 'd', 'e', 'f' })
 checkMany("[a-def]", { 'g', 'j', '0', '9', '@', 'A', 'D' }, true)
 
 -- Set with magic character
-checkMany("[]$^[().{},*+?|]", { '^', '.', '|', '?', '{' }) -- Missing % and -
-checkMany("[]$^[().{},*+?|]", { '@', 'f', '0', '9', '@', 'A', 'D' }, true)
+checkMany("[]$^[()%-.{},*+?%%|]", { ']', '$', '^', '[', '(', ')', '%', '-', '.', '{', '}', ',', '*', '+', '?', '%', '|' })
+checkMany("[]$^[()%-.{},*+?%%|]", { '@', 'f', '0', '9', '@', 'A', 'D' }, true)
 
 -- Set with character classes
 checkMany(enum.class.a, { 'a', 'A', 'b', 'C' }, nil, 'a')
