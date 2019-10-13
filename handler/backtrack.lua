@@ -3,7 +3,7 @@ backtrack.__index = backtrack
 
 backtrack.new = function(self)
 	return setmetatable({
-		_lastIndex = 0,
+		_lastIndex = nil,
 		executing = false,
 		stack = { }
 	}, self)

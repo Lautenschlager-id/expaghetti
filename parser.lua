@@ -210,7 +210,7 @@ parse = function(regex, flags, options)
 					groupHandler:push(char)
 				end
 			elseif setHandler.isOpen then
-				if char == enum.magic.NEGATED_SET then -- [^]
+				if char == enum.magic.NEGATED_SET and not setHandler:hasValue() then -- [^]
 					setHandler:negate()
 				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then -- l-n ↓
 					break -- handled in the next condition

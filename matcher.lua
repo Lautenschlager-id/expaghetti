@@ -10,6 +10,7 @@ local quantifierFactory = require("handler/quantifier")
 local matchFactory = require("handler/match")
 local backtrackFactory = require("handler/backtrack")
 
+local strlower = string.lower
 local tblconcat = table.concat
 
 local match
@@ -52,7 +53,7 @@ match = function(str, regex, flags, options)
 			char = str[currentPosition]
 
 			if type(obj) == "string" then
-				if not char or obj ~= char and (not isInsensitive or (obj ~= util.reverseCase(char))) then
+				if not char or obj ~= char and (not isInsensitive or (obj ~= strlower(char))) then
 					checkBacktracking = true
 					break
 				end
@@ -61,12 +62,12 @@ match = function(str, regex, flags, options)
 			else
 				if obj.type == "anchor" then
 					if obj == enum.anchor.BEGINNING then
-						if currentPosition ~= 1 then
+						if currentPosition ~= 1 then -- add multiline
 							checkBacktracking = true
 							break
 						end
 					elseif obj == enum.anchor.END then
-						if currentPosition ~= len + 1 then
+						if currentPosition ~= len + 1 then -- add multiline
 							checkBacktracking = true
 							break
 						end
@@ -177,6 +178,7 @@ match = function(str, regex, flags, options)
 		if checkBacktracking then
 			checkBacktracking = false
 
+			if not backtrackHandler._lastIndex then return end
 			if backtrackHandler:pop():getLength() == 0 then return end
 			backtrackHandler.executing = true
 
