@@ -50,7 +50,7 @@ parse = function(regex, flags, options)
 	local isInsensitive = not not flagsSet[enum.flag.insensitive]
 
 	local lastChar, nextChar
-	local isEscaped, lastCharWasEscaped, isMagic, char = false, false, false
+	local isEscaped, isLastCharEscaped, isMagic, char = false, false, false
 	local i, nextI = 1
 	local tmpGroup, tmpNum
 
@@ -74,10 +74,10 @@ parse = function(regex, flags, options)
 				isEscaped = true
 				break
 			end
-			if lastCharWasEscaped then
-				lastCharWasEscaped = lastCharWasEscaped - 1
-				if lastCharWasEscaped == 0 then
-					lastCharWasEscaped = false
+			if isLastCharEscaped then
+				isLastCharEscaped = isLastCharEscaped - 1
+				if isLastCharEscaped == 0 then
+					isLastCharEscaped = false
 				end
 			end
 
@@ -87,7 +87,7 @@ parse = function(regex, flags, options)
 			if isEscaped and not optionsSet[enum.option.DISABLE_ESCAPE] then
 				isEscaped = groupHandler.isOpen
 				if not isEscaped then -- if it's open then go for literal
-					lastCharWasEscaped = 2
+					isLastCharEscaped = 2
 
 					if enum.class[char] then
 						char = enum.class[char] -- set
@@ -172,7 +172,7 @@ parse = function(regex, flags, options)
 							break
 						elseif char == enum.magic.ANY then
 							char = enum.specialClass.any
-						elseif (char == enum.magic.LAZY_QUANTIFIER or char == enum.magic.POSSESSIVE_QUANTIFIER) and not lastCharWasEscaped and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_ONE or lastChar == enum.magic.CLOSE_QUANTIFIER) then -- lazy of +, *, ?
+						elseif (char == enum.magic.LAZY_QUANTIFIER or char == enum.magic.POSSESSIVE_QUANTIFIER) and not isLastCharEscaped and (lastChar == enum.magic.ZERO_OR_MORE or lastChar == enum.magic.ONE_OR_MORE or lastChar == enum.magic.ZERO_OR_ONE or lastChar == enum.magic.CLOSE_QUANTIFIER) then -- lazy of +, *, ?
 							break -- Not linking with the if below because its flexible enough to have a different representative character.
 						elseif char == enum.magic.ZERO_OR_MORE or char == enum.magic.ONE_OR_MORE or char == enum.magic.ZERO_OR_ONE then -- +, *, ?
 							quantifierHandler:open():push((char == enum.magic.ONE_OR_MORE and 1 or 0))
@@ -225,7 +225,7 @@ parse = function(regex, flags, options)
 				elseif lastChar == enum.magic.RANGE or nextChar == enum.magic.RANGE then -- l-n ↓
 					break -- handled in the next condition
 				elseif char == enum.magic.RANGE then -- l-n
-					if not lastCharWasEscaped then
+					if not isLastCharEscaped then
 						setHandler:range(lastChar, nextChar) -- it might be necessary to rework on ranges because of %e
 					else
 						setHandler:push(lastChar):push(char):push(nextChar)

@@ -14,7 +14,7 @@ end
 
 -----------------> DEBUG ONLY <-----------------
 local test = require("test/util")
-local matches = _match("a{1,}", "a%{1,%}??()")
+local matches = _match("aaaaaaabacate", "a+aaaaaaa?bacate()")
 print(test.tableToString(matches, true, true))
 -----------------<            >-----------------
 

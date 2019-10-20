@@ -40,7 +40,7 @@ match = function(str, regex, flags, options)
 	local i, currentPosition, nextI = 1, 1
 	local matchChar
 	local tmpObj, tmpCurrentPosition, tmpChar, tmpCounter, tmpMaxValue, tmpDelimObj, tmpNextChar -- Quantifier
-	local checkBacktracking, backtrackingSucceed = false
+	local checkBacktracking, backtrackingPosition = false
 
 	local matchHandler = matchFactory:new()
 	local backtrackHandler = backtrackFactory:new()
@@ -79,10 +79,10 @@ match = function(str, regex, flags, options)
 				elseif obj.type == "position_capture" then
 					matchChar = currentPosition
 				else
-					if not char then
+					--[[if not char then -- many non-capturing indexes can be ignored with this condition
 						checkBacktracking = true
 						break
-					end
+					end]]
 					if obj.type == "set" then
 						if not setFactory.match(obj, char, isInsensitive) then
 							checkBacktracking = true
@@ -131,9 +131,18 @@ match = function(str, regex, flags, options)
 								tmpChar = str[tmpCurrentPosition]
 								tmpCounter = tmpCounter + 1
 							until tmpCounter == tmpMaxValue
-
 						else -- Greedy
-							return -- TODO
+							repeat
+								--if not match(tmpChar, tmpObj)
+								if tmpChar ~= tmpObj then break end -- literal char only
+
+								if not backtrackHandler.executing then
+									backtrackHandler:push(i)
+								end
+
+								tmpCurrentPosition = tmpCurrentPosition + 1
+								tmpChar = str[tmpCurrentPosition]
+							until false
 						end
 
 						currentPosition, tmpCurrentPosition = tmpCurrentPosition, (tmpCurrentPosition - currentPosition)
@@ -160,8 +169,8 @@ match = function(str, regex, flags, options)
 						end
 					elseif obj.type == "alternate" then -- Missing backtracking
 						local tmp
-						for i = 1, obj.trees._index do
-							matchChar = match(str, obj.trees[i], flags, options)
+						for t = 1, obj.trees._index do
+							matchChar = match(str, obj.trees[t], flags, options)
 							if matchChar then break end
 						end
 						return matchChar
@@ -182,12 +191,12 @@ match = function(str, regex, flags, options)
 			if backtrackHandler:pop():getLength() == 0 then return end
 			backtrackHandler.executing = true
 
-			backtrackingSucceed = currentPosition
-			currentPosition = backtrackHandler:get() + 1
+			backtrackingPosition = currentPosition
+			currentPosition = currentPosition - 1
 
 			nextI = 0
-		elseif backtrackingSucceed and currentPosition > backtrackingSucceed then
-			backtrackingSucceed = nil
+		elseif backtrackingPosition and currentPosition >= backtrackingPosition then
+			backtrackingPosition = nil
 			backtrackHandler.executing = false
 		end
 
