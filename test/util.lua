@@ -21,18 +21,20 @@ do
 		local out = { }
 		local counter = 0
 
+		local t
 		for k, v in next, tbl do
 			counter = counter + 1
 			out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(k, "^[%w_]") and (k .. " = ") or ("[" .. strformat("%q", k) .. "] = ")) or numIndex and ("[" .. k .. "] = ") or ''))
-			local t = type(v)
-			if t == "table" then
-				out[counter] = out[counter] .. ((stop > 0 and _depth > stop) and tostring(v) or tableToString(v, indent, numIndex, stop - 1, _depth + 1, (_ref or tbl)))
+
+			t = type(v)
+			if t == "table" and not (stop > 0 and _depth >= stop) then
+				out[counter] = out[counter] .. tableToString(v, indent, numIndex, stop - 1, _depth + 1, (_ref or tbl))
 			elseif t == "number" or t == "boolean" then
 				out[counter] = out[counter] .. tostring(v)
 			elseif t == "string" then
 				out[counter] = out[counter] .. strformat("%q", v)
 			else
-				out[counter] = out[counter] .. "nil"
+				out[counter] = out[counter] .. "type_" .. t
 			end
 		end
 
