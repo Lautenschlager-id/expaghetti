@@ -13,6 +13,10 @@ local backtrackFactory = require("handler/backtrack")
 local strlower = string.lower
 local tblconcat = table.concat
 
+local isBoundary = function(currentPosition, initPos, endPos, lastChar, char)
+	return (currentPosition > initPos and setFactory.match(enum.class.w, lastChar)) ~= (currentPosition < endPos and setFactory.match(enum.class.w, char))
+end
+
 local match
 match = function(str, regex, flags, options)
 	if type(regex) == "string" then
@@ -36,7 +40,7 @@ match = function(str, regex, flags, options)
 		len = #str
 	end
 
-	local obj, char
+	local obj, char, lastChar
 	local i, currentPosition, nextI = 1, 1
 	local matchChar
 	local tmpObj, tmpCurrentPosition, tmpChar, tmpCounter, tmpMaxValue, tmpDelimObj, tmpNextChar -- Quantifier
@@ -51,6 +55,7 @@ match = function(str, regex, flags, options)
 		repeat
 			obj = regex:get(i)
 			char = str[currentPosition]
+			lastChar = str[currentPosition - 1]
 
 			if type(obj) == "string" then
 				if not char or obj ~= char and (not isInsensitive or (obj ~= strlower(char))) then
@@ -72,9 +77,15 @@ match = function(str, regex, flags, options)
 							break
 						end
 					elseif obj == enum.anchor.BOUNDARY then
-						-- TODO
+						if not isBoundary(currentPosition, 1, len + 1, lastChar, char) then
+							checkBacktracking = true
+							break
+						end
 					elseif obj == enum.anchor.NOTBOUNDARY then
-						-- TODO
+						if isBoundary(currentPosition, 1, len + 1, lastChar, char) then
+							checkBacktracking = true
+							break
+						end	
 					end
 				elseif obj.type == "position_capture" then
 					matchChar = currentPosition
@@ -195,7 +206,7 @@ match = function(str, regex, flags, options)
 			currentPosition = currentPosition - 1
 
 			nextI = 0
-		elseif backtrackingPosition and currentPosition >= backtrackingPosition then
+		elseif backtrackingPosition and currentPosition > backtrackingPosition then
 			backtrackingPosition = nil
 			backtrackHandler.executing = false
 		end

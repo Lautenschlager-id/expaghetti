@@ -5,7 +5,7 @@
 
 It aims towards allowing Lua developers to use (bizarre) Regular Expressions without the need of bothering in using thousands of matches with patterns or even lpeg.
 
-It currently works on any Lua 5.x version, and is intended to be released with this support.
+It currently works on any Lua 5.x version, and is intended to be released with such support.
 
 Please read the [Wiki](https://github.com/Lautenschlager-id/expaghetti/wiki) to learn more about the syntax used in expaghetti.
 
