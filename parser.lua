@@ -102,13 +102,15 @@ parse = function(regex, flags, options)
 							--error("Missing %e parameters")
 						end
 
+						local hexChar = "0x"
 						for c = 1, 4 do
 							if not setHandler.match(enum.class.h, regex[i + c]) then
 								--error("Invalid %e #" .. c .. " parameter (not a hexadecimal value)")
 							end
+							hexChar = hexChar .. regex[i + c]
 						end
 
-						char = utf8.char(("0x" .. regex[i + 1] .. regex[i + 2] .. regex[i + 3] .. regex[i + 4]) * 1) -- Faster than tonumber_16 && table.concat
+						char = utf8.char(hexChar * 1) -- Faster than tonumber_16 && table.concat
 						nextI = 5 -- p{1}F{2}F{3}F{4}F{5}
 					elseif char == enum.specialClass.boundary and not optionsSet[enum.option.DISABLE_ANCHOR] then
 						char = enum.anchor.BOUNDARY
