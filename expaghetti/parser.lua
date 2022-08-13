@@ -33,10 +33,11 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('[]')) -- set
-print({parser('[')}) -- invalid
-print(parser(']')) -- literal
-print(parser('[abc]'))
 print(parser('a[bc]d'))
+print(parser('[^]')) -- set
+print({parser('[^')}) -- invalid
+print(parser('^]')) -- literal
+print(parser('[^abc]'))
+print(parser('a[^bc]d'))
 
 return parser

@@ -2,6 +2,7 @@ local Set = { }
 
 local OPEN_SET = '['
 local CLOSE_SET = ']'
+local NEGATE_SET = '^'
 
 Set.is = function(currentCharacter)
 	return currentCharacter == OPEN_SET
@@ -11,13 +12,16 @@ Set.execute = function(currentCharacter, index, expression, tree)
 	--[[
 		{
 			type = "set",
+			hasToNegateMatch = false,
 			[literal] = true,
 		}
 	]]
 	local set = {
 		type = "set",
+		hasToNegateMatch = false,
 	}
 
+	local setIndex = 0
 	repeat
 		index = index + 1
 		currentCharacter = expression[index]
@@ -26,12 +30,16 @@ Set.execute = function(currentCharacter, index, expression, tree)
 			return false, "Invalid regular expression: Missing '" .. CLOSE_SET .. "' to close set"
 		end
 
-		if currentCharacter == CLOSE_SET then
+		if setIndex == 0 and currentCharacter == NEGATE_SET then -- first character of the set
+			set.hasToNegateMatch = true
+		elseif currentCharacter == CLOSE_SET then
 			index = index + 1
 			break
+		else
+			set[currentCharacter] = true
 		end
 
-		set[currentCharacter] = true
+		setIndex = setIndex + 1
 	until false
 
 	tree._index = tree._index + 1
