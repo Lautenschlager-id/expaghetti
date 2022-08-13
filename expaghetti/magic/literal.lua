@@ -1,7 +1,14 @@
 local Literal = { }
 
 Literal.execute = function(currentCharacter, index, expression, tree)
-	tree[index] = {
+	--[[
+		{
+			type = "literal",
+			value = 'a'
+		}
+	]]
+	tree._index = tree._index + 1
+	tree[tree._index] = {
 		type = "literal",
 		value = currentCharacter
 	}
