@@ -148,11 +148,7 @@ Set.execute = function(currentCharacter, index, expression, tree)
 					set.ranges[set.rangeIndex] = nextCharacter
 
 					-- Skip next delim
-					if nextIndex then
-						index = nextIndex
-					else
-						index = index + 1
-					end
+					index = nextIndex or (index + 1)
 				else
 					set[lastCharacter] = true
 					set[currentCharacter] = true
