@@ -117,7 +117,7 @@ Set.execute = function(currentCharacter, index, expression, tree)
 					expression[nextIndex], nextIndex, expression, tree)
 
 				if not nextIndex then
-				-- nextCharacter = error message
+					-- nextCharacter = error message
 					return false, nextCharacter
 				end
 			end
