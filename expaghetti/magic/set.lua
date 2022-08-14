@@ -14,30 +14,15 @@ local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
 ----------------------------------------------------------------------------------------------------
 local Set = { }
 
-local findMagicClosing = function(index, expression)
-	local currentCharacter
-	repeat
-		currentCharacter = expression[index]
-
-		-- expression ended but magic was never closed
-		if not currentCharacter then
-			return false, errorsEnum.unclosedSet
-		elseif currentCharacter == ENUM_CLOSE_SET then
-			return index
-		end
-
-		index = index + 1
-	until false
-end
-
-local getCharacterConsideringEscapedElements = function(character, index, expression, tree)
+local getCharacterConsideringEscapedElements = function(character, index, expression)
 	if not character then
 		return
 	end
 
+	local isEscaped = false
 	if Escaped.is(character) then
 		local value
-		index, value = Escaped.execute(character, index, expression, tree)
+		index, value = Escaped.execute(character, index, expression)
 		if not index then
 			-- value = error message
 			return false, value
@@ -50,9 +35,31 @@ local getCharacterConsideringEscapedElements = function(character, index, expres
 		end
 
 		index = index - 1
+		isEscaped = true
 	end
 
-	return index, character
+	return index, character, isEscaped
+end
+
+local findMagicClosing = function(index, expression)
+	local currentCharacter, isEscaped
+	repeat
+		index, currentCharacter, isEscaped = getCharacterConsideringEscapedElements(
+			expression[index], index, expression, true)
+		if not index and currentCharacter then
+			-- currentCharacter = error message
+			return false, currentCharacter
+		end
+
+		-- expression ended but magic was never closed
+		if not currentCharacter then
+			return false, errorsEnum.unclosedSet
+		elseif not isEscaped and currentCharacter == ENUM_CLOSE_SET then
+			return index
+		end
+
+		index = index + 1
+	until false
 end
 ----------------------------------------------------------------------------------------------------
 Set.is = function(currentCharacter)
@@ -100,7 +107,7 @@ Set.execute = function(currentCharacter, index, expression, tree)
 		classes = { },
 	}
 
-	local lastCharacter, nextCharacter, nextIndex
+	local lastCharacter, nextCharacter, nextIndex, isEscaped
 	local watchForRangeSeparator = false
 	local firstCharacter = index
 	repeat
@@ -110,7 +117,7 @@ Set.execute = function(currentCharacter, index, expression, tree)
 			set.hasToNegateMatch = true
 		else
 			index, currentCharacter =
-				getCharacterConsideringEscapedElements(currentCharacter, index, expression, tree)
+				getCharacterConsideringEscapedElements(currentCharacter, index, expression)
 			if not index then
 				-- currentCharacter = error message
 				return false, currentCharacter
@@ -120,8 +127,8 @@ Set.execute = function(currentCharacter, index, expression, tree)
 			if index + 1 < endIndex then
 				nextIndex = index + 1
 				-- TO DO: Improve how it's checked, or else it will always calculate the value twice
-				nextIndex, nextCharacter = getCharacterConsideringEscapedElements(
-					expression[nextIndex], nextIndex, expression, tree)
+				nextIndex, nextCharacter, isEscaped = getCharacterConsideringEscapedElements(
+					expression[nextIndex], nextIndex, expression)
 
 				if not nextIndex then
 					-- nextCharacter = error message
@@ -160,7 +167,7 @@ Set.execute = function(currentCharacter, index, expression, tree)
 					set[lastCharacter] = true
 					set[currentCharacter] = true
 				end
-			elseif nextCharacter == ENUM_SET_RANGE_SEPARATOR then
+			elseif not isEscaped and nextCharacter == ENUM_SET_RANGE_SEPARATOR then
 				watchForRangeSeparator = true
 			else
 				set[currentCharacter] = true

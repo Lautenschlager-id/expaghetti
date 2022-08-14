@@ -7,11 +7,13 @@ local tonumber = tonumber
 local stringUtils = require("./helpers/string")
 local stringCharToCtrlChar = stringUtils.stringCharToCtrlChar
 ----------------------------------------------------------------------------------------------------
+local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
 local characterClasses = require("./enums/classes")
 ----------------------------------------------------------------------------------------------------
-local ENUM_ESCAPE_CHARACTER = require("./enums/magic").ESCAPE_CHARACTER
+local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
 local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 ----------------------------------------------------------------------------------------------------
 local Escaped = { }
 
@@ -68,15 +70,13 @@ Escaped.execute = function(currentCharacter, index, expression, tree)
 
 	if characterClasses[currentCharacter] then
 		return index, characterClasses[currentCharacter]
-	elseif currentCharacter == ENUM_ESCAPE_CHARACTER then
+	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
 		return index, {
 			type = ENUM_ELEMENT_TYPE_LITERAL,
 			value = currentCharacter
 		}
-	elseif currentCharacter then
-		if Escaped[currentCharacter] then
-			return Escaped[currentCharacter](expression[index], index, expression)
-		end
+	elseif Escaped[currentCharacter] then
+		return Escaped[currentCharacter](expression[index], index, expression)
 	end
 
 	return false, strformat(errorsEnum.invalidEscape, currentCharacter)
