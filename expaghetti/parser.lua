@@ -86,5 +86,4 @@ print(parser('a[%e0070-z]b')) -- valid
 print(parser('a[-%e00FF]b')) -- valid
 print(parser('a[%e00FF-]b')) -- valid
 
-
 return parser
