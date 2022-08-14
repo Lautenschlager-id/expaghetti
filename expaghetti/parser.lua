@@ -53,5 +53,6 @@ print(parser('a[a-b-]c'))
 print(parser('a[-a-b]c'))
 print(parser('a[-bc-d]e'))
 print(parser('a[b-c-d-e-f-g----]h'))
+print(parser('a[----b-c-d-e-f-g]h'))
 
 return parser
