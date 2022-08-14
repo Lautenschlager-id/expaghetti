@@ -33,25 +33,29 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a[b]c'))
-print(parser('a[^b]c'))
-print(parser('a[b-c]d'))
-print(parser('a[bc-de]f'))
-print(parser('a[bc-d]e'))
-print(parser('a[b-cd]e'))
-print(parser('a[bc-de-fg]h'))
-print(parser('a[^b-c]d'))
-print(parser('a[^bc-de]f'))
-print(parser('a[^bc-d]e'))
-print(parser('a[^b-cd]e'))
-print(parser('a[^bc-de-fg]h'))
-print(parser('a[-]b'))
-print(parser('a[b-]c'))
-print(parser('a[-b]c'))
-print(parser('a[-b]c'))
-print(parser('a[a-b-]c'))
-print(parser('a[-a-b]c'))
-print(parser('a[-bc-d]e'))
-print(parser('a[b-c-d-e-f-g----]h'))
+print(parser('a[b]c')) -- valid
+print(parser('a[^b]c')) -- valid
+print(parser('a[b-c]d')) -- valid
+print(parser('a[bc-de]f')) -- valid
+print(parser('a[bc-d]e')) -- valid
+print(parser('a[b-cd]e')) -- valid
+print(parser('a[bc-de-fg]h')) -- valid
+print(parser('a[^b-c]d')) -- valid
+print(parser('a[^bc-de]f')) -- valid
+print(parser('a[^bc-d]e')) -- valid
+print(parser('a[^b-cd]e')) -- valid
+print(parser('a[^bc-de-fg]h')) -- valid
+print(parser('a[-]b')) -- valid
+print(parser('a[b-]c')) -- valid
+print(parser('a[-b]c')) -- valid
+print(parser('a[-b]c')) -- valid
+print(parser('a[a-b-]c')) -- valid
+print(parser('a[-a-b]c')) -- valid
+print(parser('a[-bc-d]e')) -- valid
+print(parser('a[b-c-d-e-f-g----]h')) -- valid
+print(parser('a[----b-c-d-e-f-g]h')) -- valid
+print(parser('a[-bc-de')) -- invalid
+print(parser('a-bc-d]e')) -- valid
+
 
 return parser
