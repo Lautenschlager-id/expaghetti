@@ -18,7 +18,7 @@ local parser = function(expr)
 		if Set.is(currentCharacter) then
 			newIndex, errorMessage = Set.execute(currentCharacter, index, expression, tree)
 		else
-			newIndex = Literal.execute(currentCharacter, index, expression, tree)
+			newIndex, errorMessage = Literal.execute(currentCharacter, index, expression, tree)
 		end
 
 		if errorMessage then
@@ -33,26 +33,16 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a[b]c'))
-print(parser('a[^b]c'))
-print(parser('a[b-c]d'))
-print(parser('a[bc-de]f'))
-print(parser('a[bc-d]e'))
-print(parser('a[b-cd]e'))
-print(parser('a[bc-de-fg]h'))
-print(parser('a[^b-c]d'))
-print(parser('a[^bc-de]f'))
-print(parser('a[^bc-d]e'))
-print(parser('a[^b-cd]e'))
-print(parser('a[^bc-de-fg]h'))
-print(parser('a[-]b'))
-print(parser('a[b-]c'))
-print(parser('a[-b]c'))
-print(parser('a[-b]c'))
-print(parser('a[a-b-]c'))
-print(parser('a[-a-b]c'))
-print(parser('a[-bc-d]e'))
-print(parser('a[b-c-d-e-f-g----]h'))
-print(parser('a[----b-c-d-e-f-g]h'))
+print(parser('a%ab')) -- valid
+print(parser('a%Ub')) -- valid
+print(parser('a%U%%wb')) -- valid
+print(parser('a%cAb')) -- valid
+print(parser('a%c@b')) -- valid
+print(parser('a%c[b')) -- valid
+print(parser('a%c\xFFb')) -- invalid
+print(parser('a%eFFb')) -- invalid
+print(parser('a%e0026b')) -- valid
+print(parser('a%e0126b')) -- invalid
+print(parser('a%e00Fb')) -- valid
 
 return parser

@@ -1,4 +1,5 @@
-local strchar = strchar
+local strchar = string.char
+local pcall = pcall
 local tonumber = tonumber
 
 local stringUtils = require("./helpers/string")
@@ -16,28 +17,34 @@ Escaped.c = function(currentCharacter, index, expression)
 		return false, "Invalid regular expression: Character following \"" .. ESCAPE_CHARACTER .. "c\" must be valid"
 	end
 
-	return index, {
+	return index + 1, {
 		type = "literal",
 		value = ctrlChar
 	}
 end
 
 Escaped.e = function(currentCharacter, index, expression)
-	local hex = "0x"
+	local hex = ""
 
 	-- Must be exactly 4 characters long
 	for paramIndex = 0, 3 do
 		hex = hex .. (expression[index + paramIndex] or '')
 	end
 
-	hex = #hex == 4 and tonumber(hex)
+	hex = #hex == 4 and tonumber("0x" .. hex)
+	if hex then
+		local result
+		result, hex = pcall(strchar, hex)
+		hex = result and hex
+	end
+
 	if not hex then
 		return false, "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"" .. ESCAPE_CHARACTER .. "e\""
 	end
 
 	return index + 4, {
 		type = "literal",
-		value = strchar(hex)
+		value = hex
 	}
 end
 
@@ -67,6 +74,8 @@ Escaped.execute = function(currentCharacter, index, expression, tree)
 			return Escaped[currentCharacter](expression[index], index, expression)
 		end
 	end
+
+	return false, "Invalid regular expression: Invalid escape \"" .. ESCAPE_CHARACTER .. currentCharacter .. "\""
 end
 
-return Literal
+return Escaped

@@ -18,8 +18,10 @@ do
 	local xor = bit32.bxor
 
 	local delimiters = {
-		-- <init_lim><final_lim><xor_by>
-		strbyte("\x20_\x40{~\x40az\x60", 1, -1)
+		-- <init_lim>, <final_lim>, <xor_by>
+		'\x20', '_', 0x40,
+		'{', '~', 0x40,
+		'a', 'z', 0x60
 	}
 	local delimitersLength = #delimiters
 
