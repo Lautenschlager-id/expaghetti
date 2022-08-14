@@ -130,9 +130,11 @@ Set.execute = function(currentCharacter, index, expression, tree)
 			elseif watchForRangeSeparator then
 				watchForRangeSeparator = false
 
-				-- with the first condition checking if the char is a set, then it will fall to this
-				-- and if only the following char is a set, then .type ~= nil
-				-- so it can only be a range when both .type are nil, this nil == nil == true
+				-- having the first condition to check if the char is a set,
+				-- then it won't fall in this condition ever
+				-- and when only the next char is a set, then .type ~= nil
+				-- so the reason for this comparison is that
+				-- it can only be a range when both .type are nil, this nil == nil == true
 				if nextCharacter and (lastCharacter.type == nextCharacter.type == true) then
 					-- Lua can perform string comparisons natively
 					if lastCharacter > nextCharacter then
