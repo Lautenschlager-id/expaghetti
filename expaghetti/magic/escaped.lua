@@ -1,3 +1,6 @@
+local strchar = strchar
+local tonumber = tonumber
+
 local stringUtils = require("./helpers/string")
 local stringCharToCtrlChar = stringUtils.stringCharToCtrlChar
 
@@ -16,6 +19,25 @@ Escaped.c = function(currentCharacter, index, expression)
 	return index, {
 		type = "literal",
 		value = ctrlChar
+	}
+end
+
+Escaped.e = function(currentCharacter, index, expression)
+	local hex = "0x"
+
+	-- Must be exactly 4 characters long
+	for paramIndex = 0, 3 do
+		hex = hex .. (expression[index + paramIndex] or '')
+	end
+
+	hex = #hex == 4 and tonumber(hex)
+	if not hex then
+		return false, "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"" .. ESCAPE_CHARACTER .. "e\""
+	end
+
+	return index + 4, {
+		type = "literal",
+		value = strchar(hex)
 	}
 end
 
