@@ -21,7 +21,7 @@ local parser = function(expr)
 			newIndex, errorMessage = Literal.execute(currentCharacter, index, expression, tree)
 		end
 
-		if errorMessage then
+		if not newIndex or errorMessage then
 			return false, errorMessage
 		end
 
@@ -33,57 +33,16 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a%ab')) -- valid
-print(parser('a%Ub')) -- valid
-print(parser('a%U%%wb')) -- valid
-print(parser('a%cAb')) -- valid
-print(parser('a%c@b')) -- valid
-print(parser('a%c[b')) -- valid
-print(parser('a%c\xFFb')) -- invalid
-print(parser('a%eFFb')) -- invalid
-print(parser('a%e0026b')) -- valid
-print(parser('a%e0126b')) -- invalid
-print(parser('a%e00Fb')) -- valid
-print(parser('a[b]c')) -- valid
-print(parser('a[^b]c')) -- valid
-print(parser('a[b-c]d')) -- valid
-print(parser('a[bc-de]f')) -- valid
-print(parser('a[bc-d]e')) -- valid
-print(parser('a[b-cd]e')) -- valid
-print(parser('a[bc-de-fg]h')) -- valid
-print(parser('a[^b-c]d')) -- valid
-print(parser('a[^bc-de]f')) -- valid
-print(parser('a[^bc-d]e')) -- valid
-print(parser('a[^b-cd]e')) -- valid
-print(parser('a[^bc-de-fg]h')) -- valid
-print(parser('a[-]b')) -- valid
-print(parser('a[b-]c')) -- valid
-print(parser('a[-b]c')) -- valid
-print(parser('a[-b]c')) -- valid
-print(parser('a[a-b-]c')) -- valid
-print(parser('a[-a-b]c')) -- valid
-print(parser('a[-bc-d]e')) -- valid
-print(parser('a[b-c-d-e-f-g----]h')) -- valid
-print(parser('a[----b-c-d-e-f-g]h')) -- valid
-print(parser('a[-bc-de')) -- invalid
-print(parser('a-bc-d]e')) -- valid
-print(parser('a[%z]c')) -- invalid
-print(parser('a[^%c1]c')) -- valid
-print(parser('a[%cA-%cA]d')) -- valid
-print(parser('a[z%cA-%cAf]d')) -- valid
-print(parser('a[%cA-%cAf]d')) -- valid
-print(parser('a[z%cA-%cA]d')) -- valid
-print(parser('a[%cA-cB]d')) -- valid
-print(parser('a[cA-%c1]d')) -- valid
-print(parser('a[%c\xFF]d')) -- invalid
-print(parser('a[%e0070]b')) -- valid
-print(parser('a[2%e00701]b')) -- valid
-print(parser('a[2%eFFFF1]b')) -- invalid
-print(parser('a[%e00AA-%e00FF]b')) -- valid
-print(parser('a[%c2-%e00FF]b')) -- valid
-print(parser('a[a-%e00FF]b')) -- valid
-print(parser('a[%e0070-z]b')) -- valid
-print(parser('a[-%e00FF]b')) -- valid
-print(parser('a[%e00FF-]b')) -- valid
+print(parser('%a%c1%u0070[ab-c][^d]')) -- valid
+print(parser('%%a%%c1%%u0070')) -- valid
+print(parser('%%a%%c1%%u0070%[ab-c%]%[^d%]')) -- valid
+print(parser("[[-]]")) -- valid
+print(parser('[%^a]')) -- valid
+print(parser('[^%%]')) -- valid
+print(parser('[^%]')) -- invalid
+print(parser('[^%]]')) -- valid
+print(parser('[^a%-b]')) -- valid
+print(parser('[^%a%-b]')) -- valid
+print(parser('[%%c1-a]')) -- valid
 
 return parser

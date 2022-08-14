@@ -1,5 +1,8 @@
+----------------------------------------------------------------------------------------------------
 local Escaped = require("./magic/escaped")
-
+----------------------------------------------------------------------------------------------------
+local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+----------------------------------------------------------------------------------------------------
 local Literal = { }
 
 Literal.execute = function(currentCharacter, index, expression, tree)
@@ -22,7 +25,7 @@ Literal.execute = function(currentCharacter, index, expression, tree)
 	]]
 	tree._index = tree._index + 1
 	tree[tree._index] = value or {
-		type = "literal",
+		type = ENUM_ELEMENT_TYPE_LITERAL,
 		value = currentCharacter
 	}
 
