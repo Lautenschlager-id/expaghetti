@@ -1,8 +1,11 @@
+----------------------------------------------------------------------------------------------------
+local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
+----------------------------------------------------------------------------------------------------
 -- %x
 
 -- [a-zA-Z]
 local a = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -17,7 +20,7 @@ local a = {
 }
 -- [0-9]
 local d = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -29,7 +32,7 @@ local d = {
 }
 -- [0-9a-fA-F]
 local h = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -47,7 +50,7 @@ local h = {
 }
 -- [a-z]
 local l = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -59,7 +62,7 @@ local l = {
 }
 -- [!-/:-@[-`{-~]
 local p = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -80,7 +83,7 @@ local p = {
 }
 -- [\f\n\r\t ]
 local s = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -95,7 +98,7 @@ local s = {
 }
 -- [A-Z]
 local u = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -107,7 +110,7 @@ local u = {
 }
 -- [0-9a-zA-Z_]
 local w = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = false,
 
@@ -131,7 +134,7 @@ local x = h
 
 -- [^a-zA-Z]
 local A = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -146,7 +149,7 @@ local A = {
 }
 -- [^0-9]
 local D = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -158,7 +161,7 @@ local D = {
 }
 -- [^0-9a-fA-F]
 local H = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -176,7 +179,7 @@ local H = {
 }
 -- [^a-z]
 local L = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -188,7 +191,7 @@ local L = {
 }
 -- [^!-/:-@[-`{-~]
 local P = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -209,7 +212,7 @@ local P = {
 }
 -- [^\f\n\r\t ]
 local S = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -224,7 +227,7 @@ local S = {
 }
 -- [^A-Z]
 local U = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 
@@ -236,7 +239,7 @@ local U = {
 }
 -- [^0-9a-zA-Z_]
 local W = {
-	type = "set",
+	type = ENUM_ELEMENT_TYPE_SET,
 
 	hasToNegateMatch = true,
 

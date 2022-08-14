@@ -1,30 +1,34 @@
+----------------------------------------------------------------------------------------------------
 local strchar = string.char
+local strformat = string.format
 local pcall = pcall
 local tonumber = tonumber
-
+----------------------------------------------------------------------------------------------------
 local stringUtils = require("./helpers/string")
 local stringCharToCtrlChar = stringUtils.stringCharToCtrlChar
-
-local characterClasses = require("./magic/characterClasses")
-
+----------------------------------------------------------------------------------------------------
+local errorsEnum = require("./enums/errors")
+local characterClasses = require("./enums/classes")
+----------------------------------------------------------------------------------------------------
+local ENUM_ESCAPE_CHARACTER = require("./enums/magic").ESCAPE_CHARACTER
+local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+----------------------------------------------------------------------------------------------------
 local Escaped = { }
-
-local ESCAPE_CHARACTER = '%'
 
 Escaped.c = function(currentCharacter, index, expression)
 	local ctrlChar = stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
-		return false, "Invalid regular expression: Character following \"" .. ESCAPE_CHARACTER .. "c\" must be valid"
+		return false, errorsEnum.invalidParamCtrlChar
 	end
 
 	return index + 1, {
-		type = "literal",
+		type = ENUM_ELEMENT_TYPE_LITERAL,
 		value = ctrlChar
 	}
 end
 
 Escaped.e = function(currentCharacter, index, expression)
-	local hex = ""
+	local hex = ''
 
 	-- Must be exactly 4 characters long
 	for paramIndex = 0, 3 do
@@ -39,17 +43,17 @@ Escaped.e = function(currentCharacter, index, expression)
 	end
 
 	if not hex then
-		return false, "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"" .. ESCAPE_CHARACTER .. "e\""
+		return false, errorsEnum.invalidParamUnicodeChar
 	end
 
 	return index + 4, {
-		type = "literal",
+		type = ENUM_ELEMENT_TYPE_LITERAL,
 		value = hex
 	}
 end
-
+----------------------------------------------------------------------------------------------------
 Escaped.is = function(currentCharacter)
-	return currentCharacter == ESCAPE_CHARACTER
+	return currentCharacter == ENUM_ESCAPE_CHARACTER
 end
 
 Escaped.execute = function(currentCharacter, index, expression, tree)
@@ -57,16 +61,16 @@ Escaped.execute = function(currentCharacter, index, expression, tree)
 	currentCharacter = expression[index]
 
 	if not currentCharacter then
-		return false, "Invalid regular expression: Attempt to escape null"
+		return false, errorsEnum.incompleteEscape
 	end
 
 	index = index + 1
 
 	if characterClasses[currentCharacter] then
 		return index, characterClasses[currentCharacter]
-	elseif currentCharacter == ESCAPE_CHARACTER then
+	elseif currentCharacter == ENUM_ESCAPE_CHARACTER then
 		return index, {
-			type = "literal",
+			type = ENUM_ELEMENT_TYPE_LITERAL,
 			value = currentCharacter
 		}
 	elseif currentCharacter then
@@ -75,7 +79,7 @@ Escaped.execute = function(currentCharacter, index, expression, tree)
 		end
 	end
 
-	return false, "Invalid regular expression: Invalid escape \"" .. ESCAPE_CHARACTER .. currentCharacter .. "\""
+	return false, strformat(errorsEnum.invalidEscape, currentCharacter)
 end
 
 return Escaped
