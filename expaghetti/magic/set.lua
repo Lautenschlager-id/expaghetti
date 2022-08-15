@@ -1,5 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 local Escaped = require("./magic/escaped")
+local Quantifier = require("./magic/Quantifier")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
@@ -91,6 +92,8 @@ Set.execute = function(currentCharacter, index, expression, tree)
 			classIndex = 0,
 			classes = { },
 
+			quantifier = nil,
+
 			[literal1] = true,
 			...
 		}
@@ -180,6 +183,8 @@ Set.execute = function(currentCharacter, index, expression, tree)
 
 	-- skip magic closing
 	index = index + 1
+
+	index = Quantifier.try(index, expression, set)
 
 	tree._index = tree._index + 1
 	tree[tree._index] = set

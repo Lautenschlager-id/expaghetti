@@ -24,9 +24,9 @@ local characters = {
 	--QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
 	--LAZY_QUANTIFIER = '?', -- a+?
 	--POSSESSIVE_QUANTIFIER = '+', -- a++
-	--ONE_OR_MORE_QUANTIFIER = '+', -- a+
-	--ZERO_OR_MORE_QUANTIFIER = '*', -- a*
-	--ZERO_OR_ONE_QUANTIFIER = '?', -- a?
+	ONE_OR_MORE_QUANTIFIER = '+', -- a+
+	ZERO_OR_MORE_QUANTIFIER = '*', -- a*
+	ZERO_OR_ONE_QUANTIFIER = '?', -- a?
 
 	OPEN_SET = '[', -- [abc]
 	CLOSE_SET = ']', -- [abc]

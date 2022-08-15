@@ -33,16 +33,15 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('%a%c1%u0070[ab-c][^d]')) -- valid
-print(parser('%%a%%c1%%u0070')) -- valid
-print(parser('%%a%%c1%%u0070%[ab-c%]%[^d%]')) -- valid
-print(parser("[[-]]")) -- valid
-print(parser('[%^a]')) -- valid
-print(parser('[^%%]')) -- valid
-print(parser('[^%]')) -- invalid
-print(parser('[^%]]')) -- valid
-print(parser('[^a%-b]')) -- valid
-print(parser('[^%a%-b]')) -- valid
-print(parser('[%%c1-a]')) -- valid
+print(parser('a')) -- valid
+print(parser('a+')) -- valid
+print(parser('a*')) -- valid
+print(parser('a?')) -- valid
+print(parser('a%+')) -- valid
+print(parser('a%*')) -- valid
+print(parser('a%?')) -- valid
+print(parser('a+b-c*d?')) -- valid
+print(parser('a+[bcd][^e]f?')) -- valid
+print(parser('[bcd]+[^e]*[?][ ]?')) -- valid
 
 return parser
