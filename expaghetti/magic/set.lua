@@ -74,6 +74,10 @@ Set.execute = function(currentCharacter, index, expression, tree)
 	local endIndex, errorMessage = findMagicClosing(index, expression)
 	if not endIndex then
 		return false, errorMessage
+
+	-- Empty set
+	elseif index == endIndex then
+		return false, errorsEnum.emptySet
 	end
 
 	--[[
