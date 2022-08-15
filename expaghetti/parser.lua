@@ -33,17 +33,35 @@ end
 
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('%a%c1%u0070[ab-c][^d]')) -- valid
-print(parser('%%a%%c1%%u0070')) -- valid
-print(parser('%%a%%c1%%u0070%[ab-c%]%[^d%]')) -- valid
-print(parser("[[-]]")) -- valid
-print(parser('[%^a]')) -- valid
-print(parser('[^%%]')) -- valid
-print(parser('[^%]')) -- invalid
-print(parser('[^%]]')) -- valid
-print(parser('[^a%-b]')) -- valid
-print(parser('[^%a%-b]')) -- valid
-print(parser('[%%c1-a]')) -- valid
-print(parser('a[]a')) -- invalid
+print(parser('a')) -- valid
+print(parser('a+')) -- valid
+print(parser('a*')) -- valid
+print(parser('a?')) -- valid
+print(parser('a%+')) -- valid
+print(parser('a%*')) -- valid
+print(parser('a%?')) -- valid
+print(parser('a+b-c*d?')) -- valid
+print(parser('a+[bcd][^e]f?')) -- valid
+print(parser('[bcd]+[^e]*[?][ ]?')) -- valid
+print(parser('a{')) -- valid (literal)
+print(parser('a}')) -- valid (literal)
+print(parser('a{}')) -- valid (literal)
+print(parser('a{,}')) -- valid (literal)
+print(parser('a%{')) -- valid (literal)
+print(parser('a{%}')) -- valid (literal)
+print(parser('a{%,}')) -- valid (literal)
+print(parser('a{1,}')) -- valid (quantifier)
+print(parser('a{,1}')) -- valid (quantifier)
+print(parser('a{1,1}')) -- valid (quantifier)
+print(parser('a{12345,14535}')) -- valid (quantifier)
+print(parser('a{-12345,14535}')) -- valid (literal)
+print(parser('a{0,0}')) -- valid (literal)
+print(parser('a{,0}')) -- valid (literal)
+print(parser('a%{1,0}')) -- valid
+print(parser('a{1,0}')) -- invalid
+print(parser('a{2,1}')) -- invalid
+print(parser('[a{1,2}]{3,4}')) -- valid (literal + quantifer)
+print(parser('[a{1,2}]{2,1}')) -- invalid
+print(parser('[a{1,2}]?{2,1}')) -- valid (literal + quantifier + literal)
 
 return parser

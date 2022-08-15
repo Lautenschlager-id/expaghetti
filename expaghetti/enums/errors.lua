@@ -18,6 +18,8 @@ local errors = {
 	emptySet = "Empty set",
 
 	unorderedSetRange = "Range out of order in set",
+
+	unorderedCustomQuantifier = "Numbers out of order in quantifier",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

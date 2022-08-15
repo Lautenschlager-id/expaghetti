@@ -19,14 +19,14 @@ local characters = {
 	--GROUP_NAME_OPEN = '<', -- (?<name>abc)
 	--GROUP_NAME_CLOSE = '>', -- (?<name>abc)
 
-	--OPEN_QUANTIFIER = '{', -- {1,2}
-	--CLOSE_QUANTIFIER = '}' -- {1,2}
-	--QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
+	OPEN_QUANTIFIER = '{', -- {1,2}
+	CLOSE_QUANTIFIER = '}', -- {1,2}
+	QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
 	--LAZY_QUANTIFIER = '?', -- a+?
 	--POSSESSIVE_QUANTIFIER = '+', -- a++
-	--ONE_OR_MORE_QUANTIFIER = '+', -- a+
-	--ZERO_OR_MORE_QUANTIFIER = '*', -- a*
-	--ZERO_OR_ONE_QUANTIFIER = '?', -- a?
+	ONE_OR_MORE_QUANTIFIER = '+', -- a+
+	ZERO_OR_MORE_QUANTIFIER = '*', -- a*
+	ZERO_OR_ONE_QUANTIFIER = '?', -- a?
 
 	OPEN_SET = '[', -- [abc]
 	CLOSE_SET = ']', -- [abc]
