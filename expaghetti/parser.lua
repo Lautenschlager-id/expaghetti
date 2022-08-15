@@ -44,5 +44,6 @@ print(parser('[^%]]')) -- valid
 print(parser('[^a%-b]')) -- valid
 print(parser('[^%a%-b]')) -- valid
 print(parser('[%%c1-a]')) -- valid
+print(parser('a[]a')) -- invalid
 
 return parser
