@@ -151,8 +151,8 @@ Set.execute = function(currentCharacter, index, expression, tree)
 				-- then it won't fall in this condition ever
 				-- and when only the next char is a set, then .type ~= nil
 				-- so the reason for this comparison is that
-				-- it can only be a range when both .type are nil, this nil == nil == true
-				if nextCharacter and (lastCharacter.type == nextCharacter.type == true) then
+				-- it can only be a range when both .type are nil
+				if nextCharacter and not (lastCharacter.type or nextCharacter.type) then
 					-- Lua can perform string comparisons natively
 					if lastCharacter > nextCharacter then
 						return false, errorsEnum.unorderedSetRange
@@ -184,7 +184,10 @@ Set.execute = function(currentCharacter, index, expression, tree)
 	-- skip magic closing
 	index = index + 1
 
-	index = Quantifier.try(index, expression, set)
+	index, errorMessage = Quantifier.try(index, expression, set)
+	if errorMessage then
+		return false, errorMessage
+	end
 
 	tree._index = tree._index + 1
 	tree[tree._index] = set

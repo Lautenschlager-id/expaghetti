@@ -43,5 +43,25 @@ print(parser('a%?')) -- valid
 print(parser('a+b-c*d?')) -- valid
 print(parser('a+[bcd][^e]f?')) -- valid
 print(parser('[bcd]+[^e]*[?][ ]?')) -- valid
+print(parser('a{')) -- valid (literal)
+print(parser('a}')) -- valid (literal)
+print(parser('a{}')) -- valid (literal)
+print(parser('a{,}')) -- valid (literal)
+print(parser('a%{')) -- valid (literal)
+print(parser('a{%}')) -- valid (literal)
+print(parser('a{%,}')) -- valid (literal)
+print(parser('a{1,}')) -- valid (quantifier)
+print(parser('a{,1}')) -- valid (quantifier)
+print(parser('a{1,1}')) -- valid (quantifier)
+print(parser('a{12345,14535}')) -- valid (quantifier)
+print(parser('a{-12345,14535}')) -- valid (literal)
+print(parser('a{0,0}')) -- valid (literal)
+print(parser('a{,0}')) -- valid (literal)
+print(parser('a%{1,0}')) -- valid
+print(parser('a{1,0}')) -- invalid
+print(parser('a{2,1}')) -- invalid
+print(parser('[a{1,2}]{3,4}')) -- valid (literal + quantifer)
+print(parser('[a{1,2}]{2,1}')) -- invalid
+print(parser('[a{1,2}]?{2,1}')) -- valid (literal + quantifier + literal)
 
 return parser

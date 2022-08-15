@@ -30,7 +30,11 @@ Literal.execute = function(currentCharacter, index, expression, tree)
 		index = index + 1
 	end
 
-	index = Quantifier.try(index, expression, value)
+	local errorMessage
+	index, errorMessage = Quantifier.try(index, expression, value)
+	if errorMessage then
+		return false, errorMessage
+	end
 
 	tree._index = tree._index + 1
 	tree[tree._index] = value

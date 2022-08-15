@@ -16,6 +16,8 @@ local errors = {
 	unclosedSet = "Missing '" .. magicEnum.CLOSE_SET .. "' to close set",
 
 	unorderedSetRange = "Range out of order in set",
+
+	unorderedCustomQuantifier = "Numbers out of order in quantifier",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "
