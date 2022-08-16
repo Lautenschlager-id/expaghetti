@@ -20,6 +20,8 @@ local errors = {
 	unorderedSetRange = "Range out of order in set",
 
 	unorderedCustomQuantifier = "Numbers out of order in quantifier",
+
+	nothingToRepeat = "Nothing to repeat",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

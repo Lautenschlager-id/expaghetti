@@ -22,11 +22,11 @@ local characters = {
 	OPEN_QUANTIFIER = '{', -- {1,2}
 	CLOSE_QUANTIFIER = '}', -- {1,2}
 	QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
-	--LAZY_QUANTIFIER = '?', -- a+?
-	--POSSESSIVE_QUANTIFIER = '+', -- a++
 	ONE_OR_MORE_QUANTIFIER = '+', -- a+
 	ZERO_OR_MORE_QUANTIFIER = '*', -- a*
 	ZERO_OR_ONE_QUANTIFIER = '?', -- a?
+	LAZY_QUANTIFIER = '?', -- a+?
+	POSSESSIVE_QUANTIFIER = '+', -- a++
 
 	OPEN_SET = '[', -- [abc]
 	CLOSE_SET = ']', -- [abc]

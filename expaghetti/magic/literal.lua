@@ -1,6 +1,5 @@
 ----------------------------------------------------------------------------------------------------
 local Escaped = require("./magic/escaped")
-local Quantifier = require("./magic/Quantifier")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
 ----------------------------------------------------------------------------------------------------
@@ -30,16 +29,10 @@ Literal.execute = function(currentCharacter, index, expression, tree)
 		index = index + 1
 	end
 
-	local errorMessage
-	index, errorMessage = Quantifier.try(index, expression, value)
-	if errorMessage then
-		return false, errorMessage
-	end
-
 	tree._index = tree._index + 1
 	tree[tree._index] = value
 
-	return index
+	return index, value
 end
 
 return Literal
