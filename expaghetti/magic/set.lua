@@ -42,7 +42,9 @@ local getCharacterConsideringEscapedElements = function(character, index, expres
 	return index, character, isEscaped
 end
 
-local findMagicClosing = function(index, expression)
+local findMagicClosingAndElementsList = function(index, expression)
+	local charactersIndex, charactersList, boolEscapedList = 0, { }, { }
+
 	local currentCharacter, isEscaped
 	repeat
 		index, currentCharacter, isEscaped = getCharacterConsideringEscapedElements(
@@ -56,8 +58,12 @@ local findMagicClosing = function(index, expression)
 		if not currentCharacter then
 			return false, errorsEnum.unclosedSet
 		elseif not isEscaped and currentCharacter == ENUM_CLOSE_SET then
-			return index
+			return index, charactersList, boolEscapedList, charactersIndex
 		end
+
+		charactersIndex = charactersIndex + 1
+		charactersList[charactersIndex] = currentCharacter
+		boolEscapedList[charactersIndex] = isEscaped
 
 		index = index + 1
 	until false
@@ -71,9 +77,11 @@ Set.execute = function(currentCharacter, index, expression, tree)
 	-- skip magic opening
 	index = index + 1
 
-	local endIndex, errorMessage = findMagicClosing(index, expression)
+	local endIndex, charactersList, boolEscapedList, charactersIndex =
+		findMagicClosingAndElementsList(index, expression)
 	if not endIndex then
-		return false, errorMessage
+		-- charactersList = error message
+		return false, charactersList
 
 	-- Empty set
 	elseif index == endIndex then
@@ -114,42 +122,26 @@ Set.execute = function(currentCharacter, index, expression, tree)
 		classes = { },
 	}
 
-	local lastCharacter, nextCharacter, nextIndex, isEscaped
-	local watchForRangeSeparator = false
-	local firstCharacter = index
+	local isNextCharacterEscaped, watchingForRangeSeparator
+	local nextCharacter, lastCharacter
+	local elementIndex = 0
 	repeat
-		currentCharacter = expression[index]
+		elementIndex = elementIndex + 1
+		currentCharacter = charactersList[elementIndex]
+
 		-- first character of the set
-		if index == firstCharacter and currentCharacter == ENUM_NEGATE_SET then
+		if elementIndex == 1 and currentCharacter == ENUM_NEGATE_SET then
 			set.hasToNegateMatch = true
+		elseif currentCharacter.type == ENUM_ELEMENT_TYPE_SET then
+			set.classIndex = set.classIndex + 1
+			set.classes[set.classIndex] = currentCharacter
 		else
-			index, currentCharacter =
-				getCharacterConsideringEscapedElements(currentCharacter, index, expression)
-			if not index then
-				-- currentCharacter = error message
-				return false, currentCharacter
-			end
+			nextCharacter = charactersList[elementIndex + 1]
+			isNextCharacterEscaped = boolEscapedList[elementIndex + 1]
 
-			nextCharacter, nextIndex = false
-			if index + 1 < endIndex then
-				nextIndex = index + 1
-				-- TO DO: Improve how it's checked, or else it will always calculate the value twice
-				nextIndex, nextCharacter, isEscaped = getCharacterConsideringEscapedElements(
-					expression[nextIndex], nextIndex, expression)
-
-				if not nextIndex then
-					-- nextCharacter = error message
-					return false, nextCharacter
-				end
-			end
-
-			if currentCharacter.type == ENUM_ELEMENT_TYPE_SET then
-				set.classIndex = set.classIndex + 1
-				set.classes[set.classIndex] = currentCharacter
-
-			-- assume that currentCharacter == ENUM_SET_RANGE_SEPARATOR
-			elseif watchForRangeSeparator then
-				watchForRangeSeparator = false
+			-- assumes that currentCharacter == ENUM_SET_RANGE_SEPARATOR
+			if watchingForRangeSeparator then
+				watchingForRangeSeparator = false
 
 				-- having the first condition to check if the char is a set,
 				-- then it won't fall in this condition ever
@@ -168,26 +160,27 @@ Set.execute = function(currentCharacter, index, expression, tree)
 					set.rangeIndex = set.rangeIndex + 1
 					set.ranges[set.rangeIndex] = nextCharacter
 
-					-- Skip next delim
-					index = nextIndex or (index + 1)
+					-- Skip next element
+					elementIndex = elementIndex + 1
 				else
+					-- For example, `a-%a`, adds `a` and `-`, and executes `%a` in the next iter
 					set[lastCharacter] = true
 					set[currentCharacter] = true
 				end
-			elseif not isEscaped and nextCharacter == ENUM_SET_RANGE_SEPARATOR then
-				watchForRangeSeparator = true
+			elseif not isNextCharacterEscaped and nextCharacter == ENUM_SET_RANGE_SEPARATOR then
+				watchingForRangeSeparator = true
 			else
 				set[currentCharacter] = true
 			end
 		end
 
 		lastCharacter = currentCharacter
-		index = index + 1
-	until index == endIndex
+	until elementIndex == charactersIndex
 
 	-- skip magic closing
-	index = index + 1
+	index = endIndex + 1
 
+	local errorMessage
 	index, errorMessage = Quantifier.try(index, expression, set)
 	if errorMessage then
 		return false, errorMessage
