@@ -11,7 +11,7 @@ local errors = {
 
 	incompleteEscape = "Attempt to escape null",
 
-	invalidEscape = "Invalid escape \"" .. magicEnum.ESCAPE_CHARACTER .. "%s\"",
+	invalidEscape = "Invalid escape \"" .. magicEnum.ESCAPE_CHARACTER .. "%%s\"",
 
 	unclosedSet = "Missing '" .. magicEnum.CLOSE_SET .. "' to close set",
 
