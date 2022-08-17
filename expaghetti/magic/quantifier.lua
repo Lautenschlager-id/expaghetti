@@ -13,7 +13,7 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
-local validateCustomQuantifier = function(index, expression)
+local validateCustomQuantifier = function(index, charactersList)
 	local currentCharacter
 
 	local parameters, currentParameter = {
@@ -23,8 +23,8 @@ local validateCustomQuantifier = function(index, expression)
 
 	repeat
 		index = index + 1
-		currentCharacter = expression[index]
-		if not currentCharacter then
+		currentCharacter = charactersList[index]
+		if not currentCharacter or currentCharacter.type then
 			return false
 		end
 
@@ -44,10 +44,18 @@ local validateCustomQuantifier = function(index, expression)
 	until false
 
 	parameters[1] = tonumber(parameters[1])
-	parameters[2] = tonumber(parameters[2])
-	if (parameters[1] and parameters[2]) and (parameters[1] > parameters[2]) then
-		return false, errorsEnum.unorderedCustomQuantifier
-	elseif not (parameters[1] or parameters[2]) or parameters[2] == 0 then
+
+	-- If no separator was given the regex much exactly that number
+	if currentParameter == 1 then
+		parameters[2] = parameters[1]
+	else
+		parameters[2] = tonumber(parameters[2])
+		if (parameters[1] and parameters[2]) and (parameters[1] > parameters[2]) then
+			return false, errorsEnum.unorderedCustomQuantifier
+		end
+	end
+
+	if not (parameters[1] or parameters[2]) or parameters[2] == 0 then
 		return false
 	end
 
@@ -69,14 +77,14 @@ local validateCustomQuantifier = function(index, expression)
 	}
 end
 ----------------------------------------------------------------------------------------------------
-Quantifier.checkIfAppliesToParentElement = function(index, expression, parentElement)
-	local currentCharacter = expression[index]
+Quantifier.checkIfAppliesToParentElement = function(index, charactersList, parentElement)
+	local currentCharacter = charactersList[index]
 
 	if quantifiersEnum[currentCharacter] then
 		parentElement.quantifier = quantifiersEnum[currentCharacter]
 		return index + 1, parentElement.quantifier
 	elseif currentCharacter == ENUM_OPEN_QUANTIFIER then
-		local newIndex, customQuantifier = validateCustomQuantifier(index, expression)
+		local newIndex, customQuantifier = validateCustomQuantifier(index, charactersList)
 		if newIndex then
 			parentElement.quantifier = customQuantifier
 			return newIndex, customQuantifier
@@ -89,8 +97,8 @@ Quantifier.checkIfAppliesToParentElement = function(index, expression, parentEle
 	return index, false
 end
 
-Quantifier.checkIfHasMode = function(index, expression, quantifier)
-	local quantifierMode = quantifierModesEnum[expression[index]]
+Quantifier.checkIfHasMode = function(index, charactersList, quantifier)
+	local quantifierMode = quantifierModesEnum[charactersList[index]]
 
 	if quantifierMode then
 		quantifier.mode = quantifierMode
@@ -100,9 +108,10 @@ Quantifier.checkIfHasMode = function(index, expression, quantifier)
 	return index
 end
 
-Quantifier.try = function(index, expression, parentElement)
-	local index, quantifier =
-		Quantifier.checkIfAppliesToParentElement(index, expression, parentElement)
+Quantifier.checkForElement = function(index, charactersList, parentElement)
+	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
+		index, charactersList, parentElement)
+
 	if not index then
 		-- quantifier = error message
 		return false, quantifier
@@ -110,12 +119,12 @@ Quantifier.try = function(index, expression, parentElement)
 		return index
 	end
 
-	index = Quantifier.checkIfHasMode(index, expression, quantifier)
+	index = Quantifier.checkIfHasMode(index, charactersList, quantifier)
 
 	-- This is not efficient, but that's the basic way of checking for cases like:
 	-- `a+++`, `a+?*`, ...
-	index, quantifier =
-		Quantifier.checkIfAppliesToParentElement(index, expression, parentElement)
+	index, quantifier = Quantifier.checkIfAppliesToParentElement(
+		index, charactersList, parentElement)
 	if index and quantifier then
 		return false, errorsEnum.nothingToRepeat
 	end
