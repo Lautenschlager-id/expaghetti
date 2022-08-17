@@ -4,8 +4,8 @@ local strformat = string.format
 local pcall = pcall
 local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
-local stringUtils = require("./helpers/string")
-local stringCharToCtrlChar = stringUtils.stringCharToCtrlChar
+local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
+local tblDeepCopy = require("./helpers/table").tblDeepCopy
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
@@ -58,18 +58,20 @@ Escaped.is = function(currentCharacter)
 	return currentCharacter == ENUM_ESCAPE_CHARACTER
 end
 
-Escaped.execute = function(currentCharacter, index, expression, tree)
+Escaped.execute = function(index, expression)
+	-- Skip escape
 	index = index + 1
-	currentCharacter = expression[index]
 
+	local currentCharacter = expression[index]
 	if not currentCharacter then
 		return false, errorsEnum.incompleteEscape
 	end
 
+	-- Returns the index for the next character
 	index = index + 1
 
 	if characterClasses[currentCharacter] then
-		return index, characterClasses[currentCharacter]
+		return index, tblDeepCopy(characterClasses[currentCharacter])
 	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
 		return index, {
 			type = ENUM_ELEMENT_TYPE_LITERAL,
