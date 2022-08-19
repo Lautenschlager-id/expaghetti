@@ -122,6 +122,12 @@ print(parser('(?:a)')) -- valid
 print(parser('(?>a)')) -- valid
 print(parser('(?=a)')) -- valid
 print(parser('(?!a)')) -- valid
-
+print(parser('(?<=a)')) -- valid
+print(parser('(?<!a)')) -- valid
+print(parser('(??a)')) -- invalid
+print(parser('(?<<a)')) -- invalid
+print(parser('(?<!(?!a))')) -- valid
+print(parser('(%?<!(?!a))')) -- valid
+print(parser('(?<!%(?!a%))')) -- valid
 
 return parser

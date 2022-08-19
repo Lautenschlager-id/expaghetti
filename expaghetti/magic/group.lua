@@ -36,6 +36,18 @@ local getGroupBehavior = function(index, charactersList, groupElement)
 	elseif currentCharacter == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
 		groupElement.isNegative = true
+	elseif currentCharacter == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
+		index = index + 1
+		currentCharacter = charactersList[index]
+
+		if currentCharacter == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
+			groupElement.isLookbehind = true
+		elseif currentCharacter == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+			groupElement.isLookbehind = true
+			groupElement.isNegative = true
+		else
+			errorMessage = errorsEnum.invalidGroupBehavior
+		end
 	else
 		errorMessage = errorsEnum.invalidGroupBehavior
 	end
