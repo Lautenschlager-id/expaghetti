@@ -4,7 +4,10 @@ local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local Escaped = require("./magic/escaped")
 local Literal = require("./magic/literal")
 local Set = require("./magic/set")
+local Group = require("./magic/group")
 local Quantifier = require("./magic/Quantifier")
+----------------------------------------------------------------------------------------------------
+local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
 local getElementsList = function(expression, expressionLength)
 	local charactersIndex, charactersList, charactersValueList, boolEscapedList = 0, { }, { }, { }
@@ -38,14 +41,27 @@ local getElementsList = function(expression, expressionLength)
 	return charactersIndex, charactersList, charactersValueList, boolEscapedList
 end
 ----------------------------------------------------------------------------------------------------
-local parser = function(expr)
-	local expression, expressionLength = splitStringByEachChar(expr)
-	local charactersIndex, charactersList, charactersValueList, boolEscapedList =
-		getElementsList(expression, expressionLength)
+local function parser(expr,
+	-- Parameters passed for recursion on (groups)'	parsing
+	isGroup, -- Should be true or else it's going to ignore all the next parameters
+	index, expression, expressionLength,
+	charactersIndex, charactersList, charactersValueList, boolEscapedList)
 
-	if not charactersIndex then
-		-- charactersList = error message
-		return false, charactersList
+	local hasGroupClosed
+	if not isGroup then
+		expression, expressionLength = splitStringByEachChar(expr)
+		charactersIndex, charactersList, charactersValueList, boolEscapedList =
+			getElementsList(expression, expressionLength)
+
+		if not charactersIndex then
+			-- charactersList = error message
+			return false, charactersList
+		end
+
+		index = 1
+		hasGroupClosed = true
+	else
+		hasGroupClosed = false
 	end
 
 	local tree = {
@@ -53,7 +69,8 @@ local parser = function(expr)
 	}
 
 	local nextIndex, errorMessage
-	local index, currentCharacter = 1
+	local currentCharacter
+
 	while index <= charactersIndex do
 		currentCharacter = charactersList[index]
 
@@ -66,6 +83,16 @@ local parser = function(expr)
 			if Set.is(currentCharacter) then
 				index, errorMessage = Set.execute(
 					currentCharacter, index, charactersList, charactersValueList, tree)
+			elseif Group.isOpening(currentCharacter) then
+				index, errorMessage = Group.execute(parser, index, tree, expression, expressionLength, charactersIndex,
+					charactersList, charactersValueList, boolEscapedList)
+			elseif Group.isClosing(currentCharacter) then
+				if isGroup then
+					hasGroupClosed = true
+					break
+				else
+					errorMessage = errorsEnum.noGroupToClose
+				end
 			else
 				index = Literal.execute(currentCharacter, index, charactersList, tree)
 			end
@@ -82,141 +109,26 @@ local parser = function(expr)
 		end
 	end
 
-	return tree
+	if isGroup and not hasGroupClosed then
+		return false, errorsEnum.unterminatedGroup
+	end
+
+	return tree, index
 end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a')) -- valid
-print(parser('a+')) -- valid
-print(parser('a*')) -- valid
-print(parser('a?')) -- valid
-print(parser('a%+')) -- valid
-print(parser('a%*')) -- valid
-print(parser('a%?')) -- valid
-print(parser('a+b-c*d?')) -- valid
-print(parser('a+[bcd][^e]f?')) -- valid
-print(parser('[bcd]+[^e]*[?][ ]?')) -- valid
-print(parser('a{')) -- valid (literal)
-print(parser('a}')) -- valid (literal)
-print(parser('a{}')) -- valid (literal)
-print(parser('a{,}')) -- valid (literal)
-print(parser('a%{')) -- valid (literal)
-print(parser('a{%}')) -- valid (literal)
-print(parser('a{%,}')) -- valid (literal)
-print(parser('a{1,}')) -- valid (quantifier)
-print(parser('a{,1}')) -- valid (quantifier)
-print(parser('a{1,1}')) -- valid (quantifier)
-print(parser('a{12345,14535}')) -- valid (quantifier)
-print(parser('a{-12345,14535}')) -- valid (literal)
-print(parser('a{0,0}')) -- valid (literal)
-print(parser('a{,0}')) -- valid (literal)
-print(parser('a%{1,0}')) -- valid
-print(parser('a{1,0}')) -- invalid
-print(parser('a{2,1}')) -- invalid
-print(parser('[a{1,2}]{3,4}')) -- valid (literal + quantifer)
-print(parser('[a{1,2}]{2,1}')) -- invalid
-print(parser('[a{1,2}]?{2,1}')) -- valid (literal + quantifier + literal)
-print(parser('a++')) -- valid
-print(parser('a*+')) -- valid
-print(parser('a?+')) -- valid
-print(parser('a{13,60}+')) -- valid
-print(parser('a+?')) -- valid
-print(parser('a*?')) -- valid
-print(parser('a??')) -- valid
-print(parser('a{13,60}?')) -- valid
-print(parser('ba++c')) -- valid
-print(parser('ba+?c')) -- valid
-print(parser('ba{1,2}+c')) -- valid
-print(parser('ba{1,2}?c')) -- valid
-print(parser('b[a{1,2}?]??c')) -- valid (literal + quantifier)
-print(parser('a+++')) -- invalid
-print(parser('a+*+')) -- invalid
-print(parser('a+?+')) -- invalid
-print(parser('a++?')) -- invalid
-print(parser('a+*?')) -- invalid
-print(parser('a+??')) -- invalid
-print(parser('a+*')) -- invalid
-print(parser('a*++')) -- invalid
-print(parser('a**+')) -- invalid
-print(parser('a*?+')) -- invalid
-print(parser('a*+?')) -- invalid
-print(parser('a**?')) -- invalid
-print(parser('a*??')) -- invalid
-print(parser('a**')) -- invalid
-print(parser('a?++')) -- invalid
-print(parser('a?*+')) -- invalid
-print(parser('a??+')) -- invalid
-print(parser('a?+?')) -- invalid
-print(parser('a?*?')) -- invalid
-print(parser('a???')) -- invalid
-print(parser('a?*')) -- invalid
-print(parser('a++%+')) -- valid
-print(parser('a+*%+')) -- invalid
-print(parser('a+?%+')) -- valid
-print(parser('a++%?')) -- valid
-print(parser('a+*%?')) -- invalid
-print(parser('a+?%?')) -- valid
-print(parser('a+*%')) -- invalid
-print(parser('a*+%+')) -- valid
-print(parser('a**%+')) -- invalid
-print(parser('a*?%+')) -- valid
-print(parser('a*+%?')) -- valid
-print(parser('a**%?')) -- invalid
-print(parser('a*?%?')) -- valid
-print(parser('a**%')) -- invalid
-print(parser('a?+%+')) -- valid
-print(parser('a?*%+')) -- invalid
-print(parser('a??%+')) -- valid
-print(parser('a?+%?')) -- valid
-print(parser('a?*%?')) -- invalid
-print(parser('a??%?')) -- valid
-print(parser('a?*%')) -- invalid
-print(parser('a{1,1}+')) -- valid
-print(parser('a{1,1}*')) -- invalid
-print(parser('a{1,1}?')) -- valid
-print(parser('a{1,1}{1,1}')) -- invalid
-print(parser('a{1,1}%{1,1}')) -- valid
-print(parser(''))
-print(parser('a[b]c')) -- valid
-print(parser('a[^b]c')) -- valid
-print(parser('a[b-c]d')) -- valid
-print(parser('a[bc-de]f')) -- valid
-print(parser('a[bc-d]e')) -- valid
-print(parser('a[b-cd]e')) -- valid
-print(parser('a[bc-de-fg]h')) -- valid
-print(parser('a[^b-c]d')) -- valid
-print(parser('a[^bc-de]f')) -- valid
-print(parser('a[^bc-d]e')) -- valid
-print(parser('a[^b-cd]e')) -- valid
-print(parser('a[^bc-de-fg]h')) -- valid
-print(parser('a[-]b')) -- valid
-print(parser('a[b-]c')) -- valid
-print(parser('a[-b]c')) -- valid
-print(parser('a[a-b-]c')) -- valid
-print(parser('a[-a-b]c')) -- valid
-print(parser('a[-bc-d]e')) -- valid
-print(parser('a[b-c-d-e-f-g----]h')) -- valid
-print(parser('a[----b-c-d-e-f-g]h')) -- valid
-print(parser('a[-bc-de')) -- invalid
-print(parser('a-bc-d]e')) -- valid
-print(parser('a[%z]c')) -- invalid
-print(parser('a[^%c1]c')) -- valid
-print(parser('a[%cA-%cA]d')) -- valid
-print(parser('a[z%cA-%cAf]d')) -- valid
-print(parser('a[%cA-%cAf]d')) -- valid
-print(parser('a[z%cA-%cA]d')) -- valid
-print(parser('a[%cA-cB]d')) -- valid
-print(parser('a[cA-%c1]d')) -- valid
-print(parser('a[%c\xFF]d')) -- invalid
-print(parser('a[%e0070]b')) -- valid
-print(parser('a[2%e00701]b')) -- valid
-print(parser('a[2%eFFFF1]b')) -- invalid
-print(parser('a[%e00AA-%e00FF]b')) -- valid
-print(parser('a[%c2-%e00FF]b')) -- valid
-print(parser('a[a-%e00FF]b')) -- valid
-print(parser('a[%e0070-z]b')) -- valid
-print(parser('a[-%e00FF]b')) -- valid
-print(parser('a[%e00FF-]b')) -- valid
+print(parser('abc(d)ef')) -- valid
+print(parser('a(b(c(d(e)f)g)h)i')) -- valid
+print(parser('abc(def')) -- invalid
+print(parser('a(b(c(d(ef)g)h)i')) -- invalid
+print(parser('abcde)f')) -- invalid
+print(parser('abcd((()e)f')) -- invalid
+print(parser('abc(d)?ef')) -- valid
+print(parser('abc(d)+ef')) -- valid
+print(parser('abc(d+)+ef')) -- valid
+print(parser('abc(d+){1,5}?ef')) -- valid
+print(parser('a([)])d')) -- valid
+print(parser('(a)')) -- valid
 
 return parser

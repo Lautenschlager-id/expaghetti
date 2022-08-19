@@ -8,8 +8,8 @@ local characters = {
 
 	ESCAPE_CHARACTER = '%', -- %%
 
-	--OPEN_GROUP = '(', -- (abc)
-	--CLOSE_GROUP = ')' -- (abc)
+	OPEN_GROUP = '(', -- (abc)
+	CLOSE_GROUP = ')', -- (abc)
 	--GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
 	--GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
 	--GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)

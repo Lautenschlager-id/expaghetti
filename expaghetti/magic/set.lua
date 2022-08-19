@@ -51,7 +51,7 @@ Set.execute = function(currentCharacter, index, charactersList, charactersValueL
 
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_SET,
+			type = "set",
 
 			hasToNegateMatch = false,
 
