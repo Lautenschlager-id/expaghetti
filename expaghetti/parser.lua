@@ -129,5 +129,6 @@ print(parser('abc(d)+ef')) -- valid
 print(parser('abc(d+)+ef')) -- valid
 print(parser('abc(d+){1,5}?ef')) -- valid
 print(parser('a([)])d')) -- valid
+print(parser('(a)')) -- valid
 
 return parser
