@@ -118,17 +118,16 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('abc(d)ef')) -- valid
-print(parser('a(b(c(d(e)f)g)h)i')) -- valid
-print(parser('abc(def')) -- invalid
-print(parser('a(b(c(d(ef)g)h)i')) -- invalid
-print(parser('abcde)f')) -- invalid
-print(parser('abcd((()e)f')) -- invalid
-print(parser('abc(d)?ef')) -- valid
-print(parser('abc(d)+ef')) -- valid
-print(parser('abc(d+)+ef')) -- valid
-print(parser('abc(d+){1,5}?ef')) -- valid
-print(parser('a([)])d')) -- valid
-print(parser('(a)')) -- valid
+print(parser('(?:a)')) -- valid
+print(parser('(?>a)')) -- valid
+print(parser('(?=a)')) -- valid
+print(parser('(?!a)')) -- valid
+print(parser('(?<=a)')) -- valid
+print(parser('(?<!a)')) -- valid
+print(parser('(??a)')) -- invalid
+print(parser('(?<<a)')) -- invalid
+print(parser('(?<!(?!a))')) -- valid
+print(parser('(%?<!(?!a))')) -- valid
+print(parser('(?<!%(?!a%))')) -- valid
 
 return parser
