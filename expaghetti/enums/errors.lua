@@ -22,6 +22,10 @@ local errors = {
 	unorderedCustomQuantifier = "Numbers out of order in quantifier",
 
 	nothingToRepeat = "Nothing to repeat",
+
+	unterminatedGroup = "Unterminated group",
+
+	noGroupToClose = "No group to close",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "
