@@ -32,7 +32,7 @@ Set.is = function(currentCharacter)
 	return currentCharacter == ENUM_OPEN_SET
 end
 
-Set.execute = function(currentCharacter, index, charactersList, charactersValueList, tree)
+Set.execute = function(index, charactersList, charactersValueList, tree)
 	-- skip magic opening
 	index = index + 1
 
@@ -84,7 +84,7 @@ Set.execute = function(currentCharacter, index, charactersList, charactersValueL
 	}
 
 	local watchingForRangeSeparator
-	local lastCharacter, rangeInitChar, currentCharacterValue
+	local currentCharacter, lastCharacter, rangeInitChar, currentCharacterValue
 
 	local elementIndex = index - 1
 	repeat

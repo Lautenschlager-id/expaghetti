@@ -81,11 +81,11 @@ local function parser(expr,
 			tree[tree._index] = currentCharacter
 		else
 			if Set.is(currentCharacter) then
-				index, errorMessage = Set.execute(
-					currentCharacter, index, charactersList, charactersValueList, tree)
+				index, errorMessage = Set.execute(index, charactersList, charactersValueList, tree)
 			elseif Group.isOpening(currentCharacter) then
-				index, errorMessage = Group.execute(parser, index, tree, expression, expressionLength, charactersIndex,
-					charactersList, charactersValueList, boolEscapedList)
+				index, errorMessage = Group.execute(parser, index, tree, expression,
+					expressionLength, charactersIndex, charactersList, charactersValueList,
+					boolEscapedList)
 			elseif Group.isClosing(currentCharacter) then
 				if isGroup then
 					hasGroupClosed = true
@@ -94,7 +94,7 @@ local function parser(expr,
 					errorMessage = errorsEnum.noGroupToClose
 				end
 			else
-				index = Literal.execute(currentCharacter, index, charactersList, tree)
+				index = Literal.execute(currentCharacter, index, tree)
 			end
 		end
 

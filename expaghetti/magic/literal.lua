@@ -3,7 +3,7 @@ local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
 ----------------------------------------------------------------------------------------------------
 local Literal = { }
 
-Literal.execute = function(currentCharacter, index, _, tree)
+Literal.execute = function(currentCharacter, index, tree)
 	--[[
 		{
 			type = "literal",
