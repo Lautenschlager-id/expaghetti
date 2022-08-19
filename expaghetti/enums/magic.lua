@@ -10,12 +10,12 @@ local characters = {
 
 	OPEN_GROUP = '(', -- (abc)
 	CLOSE_GROUP = ')', -- (abc)
-	--GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
-	--GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
-	--GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
-	--GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
-	--GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
-	--GROUP_ATOMIC_BEHAVIOR = '>', -- (?>abc)
+	GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
+	GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
+	GROUP_ATOMIC_BEHAVIOR = '>', -- (?>abc)
+	GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
+	GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
+	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
 	--GROUP_NAME_OPEN = '<', -- (?<name>abc)
 	--GROUP_NAME_CLOSE = '>', -- (?<name>abc)
 

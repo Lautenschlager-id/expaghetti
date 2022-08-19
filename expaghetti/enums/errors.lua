@@ -26,6 +26,8 @@ local errors = {
 	unterminatedGroup = "Unterminated group",
 
 	noGroupToClose = "No group to close",
+
+	invalidGroupBehavior = "Invalid group behavior",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "
