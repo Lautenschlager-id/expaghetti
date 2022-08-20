@@ -100,7 +100,7 @@ local function parser(expr,
 					errorMessage = errorsEnum.noGroupToClose
 				end
 			else
-				index = Literal.execute(currentCharacter, index, tree)
+				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
 		end
 
@@ -123,26 +123,19 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('(?:a)')) -- valid
-print(parser('(?>a)')) -- valid
-print(parser('(?=a)')) -- valid
-print(parser('(?!a)')) -- valid
-print(parser('(?<=a)')) -- valid
-print(parser('(?<!a)')) -- valid
-print(parser('(??a)')) -- invalid
-print(parser('(?<<a)')) -- invalid
-print(parser('(?<!(?!a))')) -- valid
-print(parser('(%?<!(?!a))')) -- valid
-print(parser('(?<!%(?!a%))')) -- valid
-print(parser('(?<oi>xau)')) -- valid
-print(parser('(?<>xau)')) -- invalid
-print(parser('(?<?>xau)')) -- invalid
-print(parser('(?<:()>xau)')) -- invalid
-print(parser('(?<abacuiahdysuifsodsfdibvndmclvdnfklmcnkmccvkdfkls>)')) -- valid
-print(parser('(?<0a>)')) -- invalid
-print(parser('(?<abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_>)')) -- valid
-print(parser('(?<a>((?<a>((?<a>((?<a>((?<a>((?<a>())))))))))))')) -- invalid
-print(parser('(?<a>((?<ab>((?<ac>((?<ad>((?<ae>((?<af>(;))))))))))))')) -- valid
-print(parser('(')) -- invalid
+print(parser('a')) -- valid
+print(parser('{a')) -- valid
+print(parser('{1,2}')) -- invalid
+print(parser('a{1,2}')) -- valid
+print(parser('a++')) -- valid
+print(parser('a+++')) -- invalid
+print(parser('a++*')) -- invalid
+print(parser('a++?')) -- invalid
+print(parser('a++*?')) -- invalid
+print(parser('a{1,2}??')) -- invalid
+print(parser('+')) -- invalid
+print(parser('%+')) -- valid
+print(parser('%+{1,2}+%+')) -- valid
+print(parser('a(?:+)')) -- invalid
 
 return parser

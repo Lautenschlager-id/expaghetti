@@ -116,20 +116,20 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 		-- quantifier = error message
 		return false, quantifier
 	elseif not quantifier then
+		-- not a quantifier
 		return index
 	end
 
 	index = Quantifier.checkIfHasMode(index, charactersList, quantifier)
 
-	-- This is not efficient, but that's the basic way of checking for cases like:
-	-- `a+++`, `a+?*`, ...
-	index, quantifier = Quantifier.checkIfAppliesToParentElement(
-		index, charactersList, parentElement)
-	if index and quantifier then
-		return false, errorsEnum.nothingToRepeat
-	end
+	return index
+end
 
-	return index, quantifier
+Quantifier.is = function(index, charactersList, parentElement)
+	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
+		index, charactersList, parentElement)
+
+	return index and quantifier
 end
 
 return Quantifier
