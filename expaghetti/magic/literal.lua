@@ -1,9 +1,18 @@
 ----------------------------------------------------------------------------------------------------
+local Quantifier = require("./magic/Quantifier")
+----------------------------------------------------------------------------------------------------
+local errorsEnum = require("./enums/errors")
+----------------------------------------------------------------------------------------------------
 local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
 ----------------------------------------------------------------------------------------------------
 local Literal = { }
 
-Literal.execute = function(currentCharacter, index, tree)
+Literal.execute = function(currentCharacter, index, tree, charactersList)
+	-- tree is a bad parameter, but if it's true then an error is thrown anyway
+	if Quantifier.is(index, charactersList, tree) then
+		return false, errorsEnum.nothingToRepeat
+	end
+
 	--[[
 		{
 			type = "literal",
