@@ -45,7 +45,8 @@ local function parser(expr,
 	-- Parameters passed for recursion on (groups)'	parsing
 	isGroup, -- Should be true or else it's going to ignore all the next parameters
 	index, expression, expressionLength,
-	charactersIndex, charactersList, charactersValueList, boolEscapedList)
+	charactersIndex, charactersList, charactersValueList, boolEscapedList,
+	metaData)
 
 	local hasGroupClosed
 	if not isGroup then
@@ -57,6 +58,11 @@ local function parser(expr,
 			-- charactersList = error message
 			return false, charactersList
 		end
+
+		-- Data shared for all sub-groups
+		metaData = {
+			groupNames = { }
+		}
 
 		index = 1
 		hasGroupClosed = true
@@ -85,7 +91,7 @@ local function parser(expr,
 			elseif Group.isOpening(currentCharacter) then
 				index, errorMessage = Group.execute(parser, index, tree, expression,
 					expressionLength, charactersIndex, charactersList, charactersValueList,
-					boolEscapedList)
+					boolEscapedList, metaData)
 			elseif Group.isClosing(currentCharacter) then
 				if isGroup then
 					hasGroupClosed = true
@@ -98,11 +104,10 @@ local function parser(expr,
 			end
 		end
 
-		if errorMessage then
-			return false, errorMessage
+		if not errorMessage then
+			index, errorMessage = Quantifier.checkForElement(index, charactersList,
+				tree[tree._index])
 		end
-
-		index, errorMessage = Quantifier.checkForElement(index, charactersList, tree[tree._index])
 
 		if errorMessage then
 			return false, errorMessage
@@ -110,7 +115,7 @@ local function parser(expr,
 	end
 
 	if isGroup and not hasGroupClosed then
-		return false, errorsEnum.unterminatedGroup
+		return false, errorsEnum.untermitedGroup
 	end
 
 	return tree, index
@@ -129,5 +134,14 @@ print(parser('(?<<a)')) -- invalid
 print(parser('(?<!(?!a))')) -- valid
 print(parser('(%?<!(?!a))')) -- valid
 print(parser('(?<!%(?!a%))')) -- valid
+print(parser('(?<oi>xau)')) -- valid
+print(parser('(?<>xau)')) -- invalid
+print(parser('(?<?>xau)')) -- invalid
+print(parser('(?<:()>xau)')) -- invalid
+print(parser('(?<abacuiahdysuifsodsfdibvndmclvdnfklmcnkmccvkdfkls>)')) -- valid
+print(parser('(?<0a>)')) -- invalid
+print(parser('(?<abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_>)')) -- valid
+print(parser('(?<a>((?<a>((?<a>((?<a>((?<a>((?<a>())))))))))))')) -- invalid
+print(parser('(?<a>((?<ab>((?<ac>((?<ad>((?<ae>((?<af>(;))))))))))))')) -- valid
 
 return parser

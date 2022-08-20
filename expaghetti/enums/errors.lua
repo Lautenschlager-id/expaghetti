@@ -28,6 +28,10 @@ local errors = {
 	noGroupToClose = "No group to close",
 
 	invalidGroupBehavior = "Invalid group behavior",
+
+	invalidGroupName = "Invalid group name",
+
+	duplicatedGroupName = "Duplicated group name <%s>",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

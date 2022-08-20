@@ -16,8 +16,8 @@ local characters = {
 	GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
 	GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
 	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
-	--GROUP_NAME_OPEN = '<', -- (?<name>abc)
-	--GROUP_NAME_CLOSE = '>', -- (?<name>abc)
+	GROUP_NAME_OPEN = '<', -- (?<name>abc)
+	GROUP_NAME_CLOSE = '>', -- (?<name>abc)
 
 	OPEN_QUANTIFIER = '{', -- {1,2}
 	CLOSE_QUANTIFIER = '}', -- {1,2}
