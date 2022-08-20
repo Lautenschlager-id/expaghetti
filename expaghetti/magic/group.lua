@@ -10,6 +10,8 @@ local ENUM_GROUP_ATOMIC_BEHAVIOR = magicEnum.GROUP_ATOMIC_BEHAVIOR
 local ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR
 local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
+local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
+local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_ELEMENT_TYPE_GROUP = require("./enums/elements").group
 ----------------------------------------------------------------------------------------------------
 local Group = { }
@@ -50,6 +52,16 @@ local getGroupBehavior = function(index, charactersList, groupElement)
 		errorMessage = errorsEnum.invalidGroupBehavior
 	end
 
+	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
+	if errorMessage and currentCharacter == ENUM_GROUP_NAME_OPEN then
+		repeat
+			index = index + 1
+			currentCharacter = charactersList[index]
+
+
+		until not
+	end
+
 	if errorMessage then
 		return false, errorMessage
 	end
@@ -74,6 +86,12 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 	--[[
 		{
 			type = "group",
+			disableCapture = false,
+			isAtomic = false,
+			isLookahead = false,
+			isLookbehind = false,
+			isNegative = false,
+			name = "",
 			tree = {
 				...
 			}
