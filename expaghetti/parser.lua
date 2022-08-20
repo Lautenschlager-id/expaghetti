@@ -115,7 +115,7 @@ local function parser(expr,
 	end
 
 	if isGroup and not hasGroupClosed then
-		return false, errorsEnum.untermitedGroup
+		return false, errorsEnum.unterminatedGroup
 	end
 
 	return tree, index
@@ -143,5 +143,6 @@ print(parser('(?<0a>)')) -- invalid
 print(parser('(?<abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_>)')) -- valid
 print(parser('(?<a>((?<a>((?<a>((?<a>((?<a>((?<a>())))))))))))')) -- invalid
 print(parser('(?<a>((?<ab>((?<ac>((?<ad>((?<ae>((?<af>(;))))))))))))')) -- valid
+print(parser('(')) -- invalid
 
 return parser
