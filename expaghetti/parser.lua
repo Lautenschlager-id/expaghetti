@@ -131,5 +131,14 @@ print(parser('()a()')) -- valid
 print(parser('(.)()a(())')) -- valid
 print(parser('(?:)')) -- valid
 print(parser('(?>)')) -- valid
+print(parser('%k1')) -- invalid
+print(parser('%k<1')) -- invalid
+print(parser('%k<1>')) -- valid
+print(parser('%k<1a>')) -- valid
+print(parser('%k<a1>')) -- valid
+print(parser('%k<ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$>')) -- valid
+print(parser('%k<12.0>')) -- invalid
+print(parser('%k<%>>')) -- invalid
+print(parser('%%k<%>>')) -- valid
 
 return parser

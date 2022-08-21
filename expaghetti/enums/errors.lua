@@ -32,6 +32,12 @@ local errors = {
 	invalidGroupName = "Invalid group name",
 
 	duplicatedGroupName = "Duplicated group name <%s>",
+
+	invalidBackreferenceSyntax = "Invalid backreference call: Missing '%s'",
+
+	unterminatedBackreference = "Unterminated backreference: Missing '%s'",
+
+	invalidBackreferenceName = "Invalid backreference name",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

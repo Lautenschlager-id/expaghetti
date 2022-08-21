@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------------------------------------
+local pcall = pcall
 local strchar = string.char
 local strformat = string.format
-local pcall = pcall
+local tblconcat = table.concat
 local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
 local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
@@ -13,6 +14,8 @@ local errorsEnum = require("./enums/errors")
 local characterClasses = require("./enums/classes")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
+local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
+local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = elementsEnum.capture_reference
 local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
@@ -20,6 +23,8 @@ local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 local Escaped = { }
 
 local specialEscaped = { }
+
+-- %cA --> ctrl char A
 specialEscaped.c = function(currentCharacter, index, expression)
 	local ctrlChar = stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
@@ -31,7 +36,7 @@ specialEscaped.c = function(currentCharacter, index, expression)
 		value = ctrlChar
 	}
 end
-
+-- %e00FF --> char(0x00FF)
 specialEscaped.e = function(currentCharacter, index, expression)
 	local hex = ''
 
@@ -56,7 +61,7 @@ specialEscaped.e = function(currentCharacter, index, expression)
 		value = hex
 	}
 end
-
+-- %1 --> reference capture N
 specialEscaped.int = function(currentCharacter, index)
 	currentCharacter = currentCharacter + 0
 
@@ -69,6 +74,39 @@ specialEscaped.int = function(currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
 		index = currentCharacter
+	}
+end
+-- %k<NN> --> reference capture NN
+specialEscaped.k = function(currentCharacter, index, expression)
+	if expression[index] ~= ENUM_GROUP_NAME_OPEN then
+		return false, strformat(errorsEnum.invalidBackreferenceSyntax, ENUM_GROUP_NAME_OPEN)
+	end
+
+	local name, nameIndex = { }, 0
+	repeat
+		index = index + 1
+		currentCharacter = expression[index]
+
+		if not currentCharacter then
+			return false, strformat(errorsEnum.unterminatedBackreference, ENUM_GROUP_NAME_CLOSE)
+		-- The first character must be letter
+		elseif (currentCharacter >= 'A' and currentCharacter <= 'z')
+			or (currentCharacter >= '0' and currentCharacter <= '9')
+			or currentCharacter == '$' then
+
+			nameIndex = nameIndex + 1
+			name[nameIndex] = currentCharacter
+		elseif nameIndex > 0 and currentCharacter == ENUM_GROUP_NAME_CLOSE then
+			name = tblconcat(name)
+			break
+		else
+			return false, errorsEnum.invalidBackreferenceName
+		end
+	until false
+
+	return index + 1, {
+		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
+		index = tonumber(name) or name
 	}
 end
 ----------------------------------------------------------------------------------------------------
