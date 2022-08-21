@@ -2,6 +2,7 @@
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
 local Anchor = require("./magic/anchor")
+local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
 local Escaped = require("./magic/escaped")
 local Group = require("./magic/group")
@@ -46,14 +47,15 @@ local getElementsList = function(expression, expressionLength)
 end
 ----------------------------------------------------------------------------------------------------
 local function parser(expr, flags,
-	-- Parameters passed for recursion on (groups)'	parsing
-	isGroup, -- Should be true or else it's going to ignore all the next parameters
+	-- At least one should be true or else it's going to ignore all the next parameters
+	isGroup, isAlternate,
+	-- Parameters passed for recursion parsing
 	index, expression, expressionLength,
 	charactersIndex, charactersList, charactersValueList, boolEscapedList,
-	metaData)
+	metaData,
+	hasGroupClosed)
 
-	local hasGroupClosed
-	if not isGroup then
+	if not (isGroup or isAlternate) then
 		flags = flags or { }
 
 		expression, expressionLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
@@ -72,7 +74,9 @@ local function parser(expr, flags,
 
 		index = 1
 		hasGroupClosed = true
-	else
+
+	-- If hasGroupClosed is not nil, then it's already inside a loop
+	elseif isGroup and hasGroupClosed == nil then
 		hasGroupClosed = false
 	end
 
@@ -95,10 +99,14 @@ local function parser(expr, flags,
 			if Set.is(currentCharacter) then
 				index, errorMessage = Set.execute(index, charactersList, charactersValueList, tree)
 			elseif Group.isOpening(currentCharacter) then
-				index, errorMessage = Group.execute(parser, index, tree, expression,
-					expressionLength, charactersIndex, charactersList, charactersValueList,
-					boolEscapedList, metaData)
+				index, errorMessage = Group.execute(
+					parser, index, tree,
+					expression, expressionLength,
+					charactersIndex, charactersList, charactersValueList, boolEscapedList,
+					metaData
+				)
 			elseif Group.isClosing(currentCharacter) then
+				-- assumes hasGroupClosed = false
 				if isGroup then
 					hasGroupClosed = true
 					break
@@ -108,7 +116,26 @@ local function parser(expr, flags,
 			elseif Anchor.is(currentCharacter) then
 				index = Anchor.execute(index, currentCharacter, tree)
 			elseif Any.is(currentCharacter) then
-				index = Any.execute(index, currentCharacter, tree)
+				index = Any.execute(index, tree)
+			elseif Alternate.is(currentCharacter) then
+				if not isAlternate then
+					-- First occurrence
+					index, errorMessage, hasGroupClosed = Alternate.execute(
+						parser, index, tree,
+						expression, expressionLength,
+						charactersIndex, charactersList, charactersValueList, boolEscapedList,
+						metaData,
+						isGroup, hasGroupClosed
+					)
+
+					if errorMessage then
+						return false, errorMessage
+					end
+
+					tree = Alternate.transform(tree)
+				end
+				-- Whenever found, stop processing the rest of the expression since it's looping
+				break
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
@@ -124,18 +151,31 @@ local function parser(expr, flags,
 		end
 	end
 
-	if isGroup and not hasGroupClosed then
+	if isGroup and not hasGroupClosed and not isAlternate then
 		return false, errorsEnum.unterminatedGroup
 	end
 
-	return tree, index
+	return tree, index, hasGroupClosed
 end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('maçã')) -- valid (not utf8)
-print(parser('maçã', {['u']=true})) -- valid (utf8)
-print(parser('[çã]+', {['u']=true})) -- valid (utf8)
-print(parser('[çã]+')) -- valid (not utf8)
+print(parser('a|b|c)')) -- invalid
+print(parser('(a|b|c)')) -- valid
+print(parser('(a|b|c|)')) -- valid
+print(parser('(|a|b|c|)')) -- valid
+print(parser('(||||)')) -- valid
+print(parser('|(||||)||')) -- valid
+print(parser('|((((|(|(((|||((||(())|))|)))||))|)|))||||||')) -- valid
+print(parser('[|((((|(|(((|||((||(())|))|)))||))|)|))||||||]')) -- valid
+print(parser('(a(b)|(c|(d|(f|g))))')) -- valid
+print(parser('|+')) -- invalid
+print(parser('e(a|b|c)f')) -- valid
+print(parser('e|(a|b|c)|f')) -- valid
+print(parser('e(a|b|c)|f')) -- valid
+print(parser('(a|(.)b|.)')) -- valid
+print(parser('(aaa%||b)')) -- valid
+print(parser('(|+||)|+')) -- invalid
+print(parser('(|||)|+')) -- invalid
 
 return parser

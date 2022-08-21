@@ -8,7 +8,7 @@ Any.is = function(currentCharacter)
 	return currentCharacter == ENUM_ANY_CHARACTER
 end
 
-Any.execute = function(index, currentCharacter, tree)
+Any.execute = function(index, tree)
 	--[[
 		{
 			type = ENUM_ELEMENT_TYPE_ANY,
