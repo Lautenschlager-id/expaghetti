@@ -112,6 +112,13 @@ specialEscaped.k = function(currentCharacter, index, expression)
 end
 -- %b --> boundary (word and no word)
 specialEscaped.b = function(currentCharacter, index)
+	--[[
+		{
+			type = ENUM_ELEMENT_TYPE_BOUNDARY,
+			value = true,
+			quantifier = false,
+		}
+	]]
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
 		value = true,
