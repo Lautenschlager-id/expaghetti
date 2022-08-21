@@ -17,14 +17,12 @@ Alternate.transform = function(tree)
 			tree = {
 				...
 			},
-			quantifier = false,
 		}
 	]]
 	return {
 		[1] = {
 			type = ENUM_ELEMENT_TYPE_ALTERNATE,
 			tree = tree,
-			quantifier = false,
 		},
 		_index = 1
 	}

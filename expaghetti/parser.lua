@@ -175,5 +175,8 @@ print(parser('e(a|b|c)f')) -- valid
 print(parser('e|(a|b|c)|f')) -- valid
 print(parser('e(a|b|c)|f')) -- valid
 print(parser('(a|(.)b|.)')) -- valid
+print(parser('(aaa%||b)')) -- valid
+print(parser('(|+||)|+')) -- invalid
+print(parser('(|||)|+')) -- invalid
 
 return parser
