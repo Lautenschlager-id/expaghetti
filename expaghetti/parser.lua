@@ -1,11 +1,12 @@
 ----------------------------------------------------------------------------------------------------
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
+local Anchor = require("./magic/anchor")
 local Escaped = require("./magic/escaped")
-local Literal = require("./magic/literal")
-local Set = require("./magic/set")
 local Group = require("./magic/group")
+local Literal = require("./magic/literal")
 local Quantifier = require("./magic/Quantifier")
+local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
@@ -99,14 +100,21 @@ local function parser(expr,
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
+			elseif Anchor.is(currentCharacter) then
+				index = Anchor.execute(index, currentCharacter, tree)
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
 		end
 
 		if not errorMessage then
-			index, errorMessage = Quantifier.checkForElement(index, charactersList,
-				tree[tree._index])
+			local parentElement = tree[tree._index]
+
+			-- if the object has quantifier = false then it cannot be repeated
+			if parentElement.quantifier == nil then
+				index, errorMessage = Quantifier.checkForElement(index, charactersList,
+					parentElement)
+			end
 		end
 
 		if errorMessage then
@@ -125,5 +133,9 @@ local print = require("./helpers/pretty-print")
 print(parser(''))
 print(parser('a%bacate%B')) -- valid
 print(parser('a%%bacate%%B')) -- valid
+print(parser('^abacate$')) -- valid
+print(parser('^aba^ca$te$')) -- valid
+print(parser('^aba%^ca$te%$')) -- valid
+print(parser('^+')) -- invalid
 
 return parser
