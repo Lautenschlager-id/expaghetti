@@ -110,7 +110,7 @@ end
 
 Quantifier.checkForElement = function(index, charactersList, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
-	local shouldHaveQuantifier = parentElement.quantifier == nil
+	local shouldntHaveQuantifier = parentElement.quantifier == false
 
 	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
 		index, charactersList, parentElement)
@@ -121,7 +121,7 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 	elseif not quantifier then
 		-- not a quantifier
 		return index
-	elseif not shouldHaveQuantifier then
+	elseif shouldntHaveQuantifier then
 		-- has a quantifier but shouldn't
 		return false, errorsEnum.nothingToRepeat
 	end
