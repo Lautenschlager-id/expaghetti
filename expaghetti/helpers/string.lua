@@ -1,7 +1,13 @@
 ----------------------------------------------------------------------------------------------------
 local strsub = string.sub
 ----------------------------------------------------------------------------------------------------
-local splitStringByEachChar = function(str)
+local utf8 = require("./helpers/utf8")
+----------------------------------------------------------------------------------------------------
+local splitStringByEachChar = function(str, encodeUTF8)
+	if encodeUTF8 then
+		return utf8.transform(str)
+	end
+
 	local splitString = { }
 	local stringLength = #str
 

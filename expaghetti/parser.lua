@@ -11,6 +11,8 @@ local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
+local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
+----------------------------------------------------------------------------------------------------
 local getElementsList = function(expression, expressionLength)
 	local charactersIndex, charactersList, charactersValueList, boolEscapedList = 0, { }, { }, { }
 
@@ -43,7 +45,7 @@ local getElementsList = function(expression, expressionLength)
 	return charactersIndex, charactersList, charactersValueList, boolEscapedList
 end
 ----------------------------------------------------------------------------------------------------
-local function parser(expr,
+local function parser(expr, flags,
 	-- Parameters passed for recursion on (groups)'	parsing
 	isGroup, -- Should be true or else it's going to ignore all the next parameters
 	index, expression, expressionLength,
@@ -52,7 +54,9 @@ local function parser(expr,
 
 	local hasGroupClosed
 	if not isGroup then
-		expression, expressionLength = splitStringByEachChar(expr)
+		flags = flags or { }
+
+		expression, expressionLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
 		charactersIndex, charactersList, charactersValueList, boolEscapedList =
 			getElementsList(expression, expressionLength)
 
@@ -129,11 +133,9 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('(.)%1.+')) -- valid
-print(parser('(.)%..+')) -- invalid
-print(parser('...')) -- valid
-print(parser('.%..')) -- valid
-print(parser('.++.*.-')) -- valid
-print(parser('[.].')) -- valid
+print(parser('maçã')) -- valid (not utf8)
+print(parser('maçã', {['u']=true})) -- valid (utf8)
+print(parser('[çã]+', {['u']=true})) -- valid (utf8)
+print(parser('[çã]+')) -- valid (not utf8)
 
 return parser
