@@ -77,7 +77,6 @@ local function parser(expr, flags,
 
 	-- If hasGroupClosed is not nil, then it's already inside a loop
 	elseif isGroup and hasGroupClosed == nil then
-		print(1)
 		hasGroupClosed = false
 	end
 
