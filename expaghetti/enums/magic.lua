@@ -2,7 +2,7 @@ local characters = {
 	ANCHOR_START = '^', -- ^a
 	ANCHOR_END = '$', -- a$
 
-	--ALTERNATE_SEPARATOR = '|', -- a|b
+	ALTERNATE_SEPARATOR = '|', -- a|b
 
 	ANY_CHARACTER = '.', -- .
 

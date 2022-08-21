@@ -2,6 +2,7 @@
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
 local Anchor = require("./magic/anchor")
+local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
 local Escaped = require("./magic/escaped")
 local Group = require("./magic/group")
@@ -10,6 +11,8 @@ local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
+----------------------------------------------------------------------------------------------------
+local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local getElementsList = function(expression, expressionLength)
 	local charactersIndex, charactersList, charactersValueList, boolEscapedList = 0, { }, { }, { }
@@ -43,16 +46,18 @@ local getElementsList = function(expression, expressionLength)
 	return charactersIndex, charactersList, charactersValueList, boolEscapedList
 end
 ----------------------------------------------------------------------------------------------------
-local function parser(expr,
-	-- Parameters passed for recursion on (groups)'	parsing
-	isGroup, -- Should be true or else it's going to ignore all the next parameters
+local function parser(expr, flags,
+	-- At least one should be true or else it's going to ignore all the next parameters
+	isGroup, isAlternate,
+	-- Parameters passed for recursion parsing
 	index, expression, expressionLength,
 	charactersIndex, charactersList, charactersValueList, boolEscapedList,
-	metaData)
+	metaData, hasGroupClosed)
 
-	local hasGroupClosed
-	if not isGroup then
-		expression, expressionLength = splitStringByEachChar(expr)
+	if not (isGroup or isAlternate) then
+		flags = flags or { }
+
+		expression, expressionLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
 		charactersIndex, charactersList, charactersValueList, boolEscapedList =
 			getElementsList(expression, expressionLength)
 
@@ -68,7 +73,8 @@ local function parser(expr,
 
 		index = 1
 		hasGroupClosed = true
-	else
+	elseif isGroup and hasGroupClosed == nil then
+		-- Either checking group or alternate, never both in the same execution
 		hasGroupClosed = false
 	end
 
@@ -81,6 +87,7 @@ local function parser(expr,
 
 	while index <= charactersIndex do
 		currentCharacter = charactersList[index]
+		print('index is now ', index , currentCharacter)
 
 		if boolEscapedList[index] then
 			index = index + 1
@@ -91,10 +98,12 @@ local function parser(expr,
 			if Set.is(currentCharacter) then
 				index, errorMessage = Set.execute(index, charactersList, charactersValueList, tree)
 			elseif Group.isOpening(currentCharacter) then
+				print('\tgrouping at ', index)
 				index, errorMessage = Group.execute(parser, index, tree, expression,
 					expressionLength, charactersIndex, charactersList, charactersValueList,
 					boolEscapedList, metaData)
 			elseif Group.isClosing(currentCharacter) then
+				print('close group ', isGroup, hasGroupClosed)
 				if isGroup then
 					hasGroupClosed = true
 					break
@@ -104,7 +113,23 @@ local function parser(expr,
 			elseif Anchor.is(currentCharacter) then
 				index = Anchor.execute(index, currentCharacter, tree)
 			elseif Any.is(currentCharacter) then
-				index = Any.execute(index, currentCharacter, tree)
+				index = Any.execute(index, tree)
+			elseif Alternate.is(currentCharacter) then
+				print('\tfound |')
+				if not isAlternate then
+					-- First occurrence
+					print('\talternating at', index)
+					index, errorMessage, hasGroupClosed = Alternate.execute(
+						parser, index, tree, expression,
+						expressionLength, charactersIndex, charactersList, charactersValueList,
+						boolEscapedList, metaData, isGroup, hasGroupClosed)
+					print('error message is ', errorMessage)
+					if errorMessage then
+						return false, errorMessage
+					end
+					tree = Alternate.transform(tree)
+				end
+				break
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
@@ -120,20 +145,28 @@ local function parser(expr,
 		end
 	end
 
-	if isGroup and not hasGroupClosed then
+	if isGroup and not hasGroupClosed and not isAlternate then
 		return false, errorsEnum.unterminatedGroup
 	end
 
-	return tree, index
+	print('isAlternate', isAlternate, 'isGroup', isGroup)
+	return tree, index, hasGroupClosed
 end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('(.)%1.+')) -- valid
-print(parser('(.)%..+')) -- invalid
-print(parser('...')) -- valid
-print(parser('.%..')) -- valid
-print(parser('.++.*.-')) -- valid
-print(parser('[.].')) -- valid
+print(parser('a|b|c)')) -- invalid
+print(parser('(a|b|c)')) -- valid
+print(parser('(a|b|c|)')) -- valid
+print(parser('(|a|b|c|)')) -- valid
+print(parser('(||||)')) -- valid
+print(parser('|(||||)||')) -- valid
+print(parser('|((((|(|(((|||((||(())|))|)))||))|)|))||||||')) -- valid
+print(parser('[|((((|(|(((|||((||(())|))|)))||))|)|))||||||]')) -- valid
+print(parser('(a(b)|(c|(d|(f|g))))')) -- valid
+print(parser('|+')) -- invalid
+print(parser('e(a|b|c)f')) -- valid
+print(parser('e|(a|b|c)|f')) -- valid
+print(parser('e(a|b|c)|f')) -- valid
 
 return parser
