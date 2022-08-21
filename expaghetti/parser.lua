@@ -134,5 +134,6 @@ print(parser('(.)%..+')) -- invalid
 print(parser('...')) -- valid
 print(parser('.%..')) -- valid
 print(parser('.++.*.-')) -- valid
+print(parser('[.].')) -- valid
 
 return parser
