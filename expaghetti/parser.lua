@@ -2,6 +2,7 @@
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
 local Anchor = require("./magic/anchor")
+local Any = require("./magic/any")
 local Escaped = require("./magic/escaped")
 local Group = require("./magic/group")
 local Literal = require("./magic/literal")
@@ -102,6 +103,8 @@ local function parser(expr,
 				end
 			elseif Anchor.is(currentCharacter) then
 				index = Anchor.execute(index, currentCharacter, tree)
+			elseif Any.is(currentCharacter) then
+				index = Any.execute(index, currentCharacter, tree)
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
@@ -126,15 +129,11 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a%bacate%B')) -- valid
-print(parser('a%%bacate%%B')) -- valid
-print(parser('a%b+a')) -- invalid
-print(parser('a%B+a')) -- invalid
-print(parser('^abacate$')) -- valid
-print(parser('^aba^ca$te$')) -- valid
-print(parser('^aba%^ca$te%$')) -- valid
-print(parser('^+')) -- invalid
-print(parser('$*+')) -- invalid
-print(parser('${1,2}')) -- invalid
+print(parser('(.)%1.+')) -- valid
+print(parser('(.)%..+')) -- invalid
+print(parser('...')) -- valid
+print(parser('.%..')) -- valid
+print(parser('.++.*.-')) -- valid
+print(parser('[.].')) -- valid
 
 return parser
