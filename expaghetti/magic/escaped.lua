@@ -8,16 +8,19 @@ local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
+local elementsEnum = require("./enums/elements")
 local errorsEnum = require("./enums/errors")
 local characterClasses = require("./enums/classes")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
-local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
+local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = elementsEnum.capture_reference
 local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 ----------------------------------------------------------------------------------------------------
 local Escaped = { }
 
-Escaped.c = function(currentCharacter, index, expression)
+local specialEscaped = { }
+specialEscaped.c = function(currentCharacter, index, expression)
 	local ctrlChar = stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
 		return false, errorsEnum.invalidParamCtrlChar
@@ -29,7 +32,7 @@ Escaped.c = function(currentCharacter, index, expression)
 	}
 end
 
-Escaped.e = function(currentCharacter, index, expression)
+specialEscaped.e = function(currentCharacter, index, expression)
 	local hex = ''
 
 	-- Must be exactly 4 characters long
@@ -51,6 +54,21 @@ Escaped.e = function(currentCharacter, index, expression)
 	return index + 4, {
 		type = ENUM_ELEMENT_TYPE_LITERAL,
 		value = hex
+	}
+end
+
+specialEscaped.int = function(currentCharacter, index)
+	currentCharacter = currentCharacter + 0
+
+	--[[
+		{
+			type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
+			index = 1
+		}
+	]]
+	return index, {
+		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
+		index = currentCharacter
 	}
 end
 ----------------------------------------------------------------------------------------------------
@@ -77,8 +95,10 @@ Escaped.execute = function(index, expression)
 			type = ENUM_ELEMENT_TYPE_LITERAL,
 			value = currentCharacter
 		}
-	elseif Escaped[currentCharacter] then
-		return Escaped[currentCharacter](expression[index], index, expression)
+	elseif specialEscaped[currentCharacter] then
+		return specialEscaped[currentCharacter](expression[index], index, expression)
+	elseif currentCharacter >= '1' and currentCharacter <= '9' then
+		return specialEscaped.int(currentCharacter, index)
 	end
 
 	return false, strformat(errorsEnum.invalidEscape, currentCharacter)

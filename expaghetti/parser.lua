@@ -123,19 +123,9 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a')) -- valid
-print(parser('{a')) -- valid
-print(parser('{1,2}')) -- invalid
-print(parser('a{1,2}')) -- valid
-print(parser('a++')) -- valid
-print(parser('a+++')) -- invalid
-print(parser('a++*')) -- invalid
-print(parser('a++?')) -- invalid
-print(parser('a++*?')) -- invalid
-print(parser('a{1,2}??')) -- invalid
-print(parser('+')) -- invalid
-print(parser('%+')) -- valid
-print(parser('%+{1,2}+%+')) -- valid
-print(parser('a(?:+)')) -- invalid
+print(parser('a%1b')) -- valid
+print(parser('a%%1b')) -- valid
+print(parser('a%9b')) -- valid
+print(parser('a%80b')) -- valid
 
 return parser
