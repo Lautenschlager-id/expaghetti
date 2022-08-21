@@ -33,9 +33,11 @@ local errors = {
 
 	duplicatedGroupName = "Duplicated group name <%s>",
 
-	invalidBackreferenceSyntax = "Invalid backreference call: Missing '%s'",
+	invalidBackreferenceSyntax =
+		"Invalid backreference call: Missing '" .. magic.GROUP_NAME_OPEN .. "'",
 
-	unterminatedBackreference = "Unterminated backreference: Missing '%s'",
+	unterminatedBackreference =
+		"Unterminated backreference: Missing '" .. magic.GROUP_NAME_CLOSE .. "'",
 
 	invalidBackreferenceName = "Invalid backreference name",
 }

@@ -79,7 +79,7 @@ end
 -- %k<NN> --> reference capture NN
 specialEscaped.k = function(currentCharacter, index, expression)
 	if expression[index] ~= ENUM_GROUP_NAME_OPEN then
-		return false, strformat(errorsEnum.invalidBackreferenceSyntax, ENUM_GROUP_NAME_OPEN)
+		return false, errorsEnum.invalidBackreferenceSyntax
 	end
 
 	local name, nameIndex = { }, 0
@@ -88,7 +88,7 @@ specialEscaped.k = function(currentCharacter, index, expression)
 		currentCharacter = expression[index]
 
 		if not currentCharacter then
-			return false, strformat(errorsEnum.unterminatedBackreference, ENUM_GROUP_NAME_CLOSE)
+			return false, errorsEnum.unterminatedBackreference
 		-- The first character must be letter
 		elseif (currentCharacter >= 'A' and currentCharacter <= 'z')
 			or (currentCharacter >= '0' and currentCharacter <= '9')
