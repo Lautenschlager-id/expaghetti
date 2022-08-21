@@ -127,5 +127,9 @@ print(parser('a%1b')) -- valid
 print(parser('a%%1b')) -- valid
 print(parser('a%9b')) -- valid
 print(parser('a%80b')) -- valid
+print(parser('()a()')) -- valid
+print(parser('(.)()a(())')) -- valid
+print(parser('(?:)')) -- valid
+print(parser('(?>)')) -- valid
 
 return parser

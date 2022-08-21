@@ -3,6 +3,7 @@ local strformat = string.format
 local tblconcat = table.concat
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
+local elementsEnum = require("./enums/elements")
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
 local ENUM_OPEN_GROUP = magicEnum.OPEN_GROUP
@@ -15,7 +16,8 @@ local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEA
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
 local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
-local ENUM_ELEMENT_TYPE_GROUP = require("./enums/elements").group
+local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
+local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = elementsEnum.position_capture
 ----------------------------------------------------------------------------------------------------
 local Group = { }
 
@@ -78,10 +80,10 @@ local getGroupBehavior = function(index, charactersList, groupElement, parserMet
 				name[nameIndex] = currentCharacter
 			elseif nameIndex > 0 and currentCharacter == ENUM_GROUP_NAME_CLOSE then
 				name = tblconcat(name)
-				if parserMetaData[name] then
+				if parserMetaData.groupNames[name] then
 					errorMessage = strformat(errorsEnum.duplicatedGroupName, name)
 				else
-					parserMetaData[name] = true
+					parserMetaData.groupNames[name] = true
 					groupElement.name = name
 					errorMessage = nil
 				end
@@ -97,6 +99,7 @@ local getGroupBehavior = function(index, charactersList, groupElement, parserMet
 		return false, errorMessage
 	end
 
+	groupElement.hasBehavior = true
 	return index + 1
 end
 ----------------------------------------------------------------------------------------------------
@@ -138,17 +141,32 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 		return false, errorMessage
 	end
 
-	local groupTree, index = parser(nil,
-		true, index, expression,
-		expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
-		parserMetaData)
+	-- A group with any value
+	if expression[index] ~= ENUM_CLOSE_GROUP then
+		local groupTree
+		groupTree, index = parser(nil,
+			true, index, expression,
+			expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
+			parserMetaData)
 
-	if not groupTree then
-		-- index = error message
-		return false, index
+		if not groupTree then
+			-- index = error message
+			return false, index
+		end
+
+		value.tree = groupTree
+	else
+		if not value.hasBehavior then
+			--[[
+				{
+					type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+				}
+			]]
+			value = {
+				type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+			}
+		end
 	end
-
-	value.tree = groupTree
 
 	tree._index = tree._index + 1
 	tree[tree._index] = value
