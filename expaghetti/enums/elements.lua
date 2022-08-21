@@ -1,5 +1,6 @@
 return {
 	anchor = "anchor",
+	any = "any",
 	boundary = "boundary",
 	capture_reference = "capture_reference",
 	group = "group",

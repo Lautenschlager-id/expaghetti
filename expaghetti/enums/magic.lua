@@ -4,7 +4,7 @@ local characters = {
 
 	--ALTERNATE_SEPARATOR = '|', -- a|b
 
-	--ANY_CHARACTER = '.', -- .
+	ANY_CHARACTER = '.', -- .
 
 	ESCAPE_CHARACTER = '%', -- %%
 
