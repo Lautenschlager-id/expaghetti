@@ -108,13 +108,8 @@ local function parser(expr,
 		end
 
 		if not errorMessage then
-			local parentElement = tree[tree._index]
-
-			-- if the object has quantifier = false then it cannot be repeated
-			if parentElement.quantifier == nil then
-				index, errorMessage = Quantifier.checkForElement(index, charactersList,
-					parentElement)
-			end
+			index, errorMessage = Quantifier.checkForElement(index, charactersList,
+				tree[tree._index])
 		end
 
 		if errorMessage then
@@ -133,9 +128,13 @@ local print = require("./helpers/pretty-print")
 print(parser(''))
 print(parser('a%bacate%B')) -- valid
 print(parser('a%%bacate%%B')) -- valid
+print(parser('a%b+a')) -- invalid
+print(parser('a%B+a')) -- invalid
 print(parser('^abacate$')) -- valid
 print(parser('^aba^ca$te$')) -- valid
 print(parser('^aba%^ca$te%$')) -- valid
 print(parser('^+')) -- invalid
+print(parser('$*+')) -- invalid
+print(parser('${1,2}')) -- invalid
 
 return parser

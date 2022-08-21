@@ -109,6 +109,9 @@ Quantifier.checkIfHasMode = function(index, charactersList, quantifier)
 end
 
 Quantifier.checkForElement = function(index, charactersList, parentElement)
+	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
+	local shouldHaveQuantifier = parentElement.quantifier == nil
+
 	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
 		index, charactersList, parentElement)
 
@@ -118,6 +121,9 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 	elseif not quantifier then
 		-- not a quantifier
 		return index
+	elseif not shouldHaveQuantifier then
+		-- has a quantifier but shouldn't
+		return false, errorsEnum.nothingToRepeat
 	end
 
 	index = Quantifier.checkIfHasMode(index, charactersList, quantifier)

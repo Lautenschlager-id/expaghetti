@@ -112,16 +112,18 @@ specialEscaped.k = function(currentCharacter, index, expression)
 end
 -- %b --> boundary (word and no word)
 specialEscaped.b = function(currentCharacter, index)
-	return index + 1, {
+	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		value = true
+		value = true,
+		quantifier = false,
 	}
 end
 -- %B --> boundary ((word and word) or (no word and no word))
 specialEscaped.B = function(currentCharacter, index)
-	return index + 1, {
+	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		value = false
+		value = false,
+		quantifier = false,
 	}
 end
 ----------------------------------------------------------------------------------------------------
