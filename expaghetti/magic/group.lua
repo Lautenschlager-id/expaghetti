@@ -144,7 +144,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 	-- A group with any value
 	if expression[index] ~= ENUM_CLOSE_GROUP then
 		local groupTree
-		groupTree, index = parser(nil,
+		groupTree, index = parser(nil, nil,
 			true, index, expression,
 			expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
 			parserMetaData)
