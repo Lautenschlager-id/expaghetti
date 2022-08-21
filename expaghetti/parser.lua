@@ -52,7 +52,8 @@ local function parser(expr, flags,
 	-- Parameters passed for recursion parsing
 	index, expression, expressionLength,
 	charactersIndex, charactersList, charactersValueList, boolEscapedList,
-	metaData, hasGroupClosed)
+	metaData,
+	hasGroupClosed)
 
 	if not (isGroup or isAlternate) then
 		flags = flags or { }
@@ -73,8 +74,10 @@ local function parser(expr, flags,
 
 		index = 1
 		hasGroupClosed = true
+
+	-- If hasGroupClosed is not nil, then it's already inside a loop
 	elseif isGroup and hasGroupClosed == nil then
-		-- Either checking group or alternate, never both in the same execution
+		print(1)
 		hasGroupClosed = false
 	end
 
@@ -87,7 +90,6 @@ local function parser(expr, flags,
 
 	while index <= charactersIndex do
 		currentCharacter = charactersList[index]
-		print('index is now ', index , currentCharacter)
 
 		if boolEscapedList[index] then
 			index = index + 1
@@ -98,12 +100,14 @@ local function parser(expr, flags,
 			if Set.is(currentCharacter) then
 				index, errorMessage = Set.execute(index, charactersList, charactersValueList, tree)
 			elseif Group.isOpening(currentCharacter) then
-				print('\tgrouping at ', index)
-				index, errorMessage = Group.execute(parser, index, tree, expression,
-					expressionLength, charactersIndex, charactersList, charactersValueList,
-					boolEscapedList, metaData)
+				index, errorMessage = Group.execute(
+					parser, index, tree,
+					expression, expressionLength,
+					charactersIndex, charactersList, charactersValueList, boolEscapedList,
+					metaData
+				)
 			elseif Group.isClosing(currentCharacter) then
-				print('close group ', isGroup, hasGroupClosed)
+				-- assumes hasGroupClosed = false
 				if isGroup then
 					hasGroupClosed = true
 					break
@@ -115,20 +119,23 @@ local function parser(expr, flags,
 			elseif Any.is(currentCharacter) then
 				index = Any.execute(index, tree)
 			elseif Alternate.is(currentCharacter) then
-				print('\tfound |')
 				if not isAlternate then
 					-- First occurrence
-					print('\talternating at', index)
 					index, errorMessage, hasGroupClosed = Alternate.execute(
-						parser, index, tree, expression,
-						expressionLength, charactersIndex, charactersList, charactersValueList,
-						boolEscapedList, metaData, isGroup, hasGroupClosed)
-					print('error message is ', errorMessage)
+						parser, index, tree,
+						expression, expressionLength,
+						charactersIndex, charactersList, charactersValueList, boolEscapedList,
+						metaData,
+						isGroup, hasGroupClosed
+					)
+
 					if errorMessage then
 						return false, errorMessage
 					end
+
 					tree = Alternate.transform(tree)
 				end
+				-- Whenever found, stop processing the rest of the expression since it's looping
 				break
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
@@ -149,7 +156,6 @@ local function parser(expr, flags,
 		return false, errorsEnum.unterminatedGroup
 	end
 
-	print('isAlternate', isAlternate, 'isGroup', isGroup)
 	return tree, index, hasGroupClosed
 end
 ----------------------------------------------------------------------------------------------------
@@ -168,5 +174,6 @@ print(parser('|+')) -- invalid
 print(parser('e(a|b|c)f')) -- valid
 print(parser('e|(a|b|c)|f')) -- valid
 print(parser('e(a|b|c)|f')) -- valid
+print(parser('(a|(.)b|.)')) -- valid
 
 return parser

@@ -38,21 +38,18 @@ Alternate.execute = function(parser, index, tree, expression, expressionLength, 
 
 	local alternativeTree
 	repeat
-		print('\t\trepeat starting in ', index+1, charactersList[index + 1], ' with isGroup = ', isGroup, 'and hasGroupClosed = ', hasGroupClosed)
 		alternativeTree, index, hasGroupClosed = parser(nil, nil,
 			isGroup	, true, index + 1, expression,
 			expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
 			parserMetaData, hasGroupClosed)
 
 		if not alternativeTree then
-			print('\t\t\tfailure ', index)
 			-- index = error message
 			return false, index
 		end
 
 		totalAlternates = totalAlternates + 1
 		tree[totalAlternates] = alternativeTree
-		print('isGroup and hasGroupClosed', isGroup and hasGroupClosed)
 	until index > charactersIndex or (isGroup and hasGroupClosed)
 
 	for elementIndex = totalAlternates + 1, tree._index do
