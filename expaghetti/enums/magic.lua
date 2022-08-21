@@ -1,6 +1,6 @@
 local characters = {
-	--ANCHOR_START = '^', -- ^a
-	--ANCHOR_END = '$', -- a$
+	ANCHOR_START = '^', -- ^a
+	ANCHOR_END = '$', -- a$
 
 	--ALTERNATE_SEPARATOR = '|', -- a|b
 

@@ -18,6 +18,7 @@ local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = elementsEnum.capture_reference
+local ENUM_ELEMENT_TYPE_BOUNDARY = elementsEnum.boundary
 local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 ----------------------------------------------------------------------------------------------------
 local Escaped = { }
@@ -107,6 +108,29 @@ specialEscaped.k = function(currentCharacter, index, expression)
 	return index + 1, {
 		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
 		index = tonumber(name) or name
+	}
+end
+-- %b --> boundary (word and no word)
+specialEscaped.b = function(currentCharacter, index)
+	--[[
+		{
+			type = ENUM_ELEMENT_TYPE_BOUNDARY,
+			value = true,
+			quantifier = false,
+		}
+	]]
+	return index, {
+		type = ENUM_ELEMENT_TYPE_BOUNDARY,
+		value = true,
+		quantifier = false,
+	}
+end
+-- %B --> boundary ((word and word) or (no word and no word))
+specialEscaped.B = function(currentCharacter, index)
+	return index, {
+		type = ENUM_ELEMENT_TYPE_BOUNDARY,
+		value = false,
+		quantifier = false,
 	}
 end
 ----------------------------------------------------------------------------------------------------

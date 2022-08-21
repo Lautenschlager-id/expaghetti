@@ -1,11 +1,12 @@
 ----------------------------------------------------------------------------------------------------
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
+local Anchor = require("./magic/anchor")
 local Escaped = require("./magic/escaped")
-local Literal = require("./magic/literal")
-local Set = require("./magic/set")
 local Group = require("./magic/group")
+local Literal = require("./magic/literal")
 local Quantifier = require("./magic/Quantifier")
+local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
@@ -99,6 +100,8 @@ local function parser(expr,
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
+			elseif Anchor.is(currentCharacter) then
+				index = Anchor.execute(index, currentCharacter, tree)
 			else
 				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
 			end
@@ -123,22 +126,15 @@ end
 ----------------------------------------------------------------------------------------------------
 local print = require("./helpers/pretty-print")
 print(parser(''))
-print(parser('a%1b')) -- valid
-print(parser('a%%1b')) -- valid
-print(parser('a%9b')) -- valid
-print(parser('a%80b')) -- valid
-print(parser('()a()')) -- valid
-print(parser('(.)()a(())')) -- valid
-print(parser('(?:)')) -- valid
-print(parser('(?>)')) -- valid
-print(parser('%k1')) -- invalid
-print(parser('%k<1')) -- invalid
-print(parser('%k<1>')) -- valid
-print(parser('%k<1a>')) -- valid
-print(parser('%k<a1>')) -- valid
-print(parser('%k<ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_$>')) -- valid
-print(parser('%k<12.0>')) -- invalid
-print(parser('%k<%>>')) -- invalid
-print(parser('%%k<%>>')) -- valid
+print(parser('a%bacate%B')) -- valid
+print(parser('a%%bacate%%B')) -- valid
+print(parser('a%b+a')) -- invalid
+print(parser('a%B+a')) -- invalid
+print(parser('^abacate$')) -- valid
+print(parser('^aba^ca$te$')) -- valid
+print(parser('^aba%^ca$te%$')) -- valid
+print(parser('^+')) -- invalid
+print(parser('$*+')) -- invalid
+print(parser('${1,2}')) -- invalid
 
 return parser
