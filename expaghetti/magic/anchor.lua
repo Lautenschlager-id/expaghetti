@@ -1,12 +1,9 @@
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
-local elementsEnum = require("./enums/elements")
-local errorsEnum = require("./enums/errors")
-local characterClasses = require("./enums/classes")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ANCHOR_START = magicEnum.ANCHOR_START
 local ENUM_ANCHOR_END = magicEnum.ANCHOR_END
-local ENUM_ELEMENT_TYPE_ANCHOR = elementsEnum.anchor
+local ENUM_ELEMENT_TYPE_ANCHOR = require("./enums/elements").anchor
 ----------------------------------------------------------------------------------------------------
 local Anchor = { }
 
