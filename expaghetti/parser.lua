@@ -157,25 +157,5 @@ local function parser(expr, flags,
 
 	return tree, index, hasGroupClosed
 end
-----------------------------------------------------------------------------------------------------
-local print = require("./helpers/pretty-print")
-print(parser(''))
-print(parser('a|b|c)')) -- invalid
-print(parser('(a|b|c)')) -- valid
-print(parser('(a|b|c|)')) -- valid
-print(parser('(|a|b|c|)')) -- valid
-print(parser('(||||)')) -- valid
-print(parser('|(||||)||')) -- valid
-print(parser('|((((|(|(((|||((||(())|))|)))||))|)|))||||||')) -- valid
-print(parser('[|((((|(|(((|||((||(())|))|)))||))|)|))||||||]')) -- valid
-print(parser('(a(b)|(c|(d|(f|g))))')) -- valid
-print(parser('|+')) -- invalid
-print(parser('e(a|b|c)f')) -- valid
-print(parser('e|(a|b|c)|f')) -- valid
-print(parser('e(a|b|c)|f')) -- valid
-print(parser('(a|(.)b|.)')) -- valid
-print(parser('(aaa%||b)')) -- valid
-print(parser('(|+||)|+')) -- invalid
-print(parser('(|||)|+')) -- invalid
 
 return parser
