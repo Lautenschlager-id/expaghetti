@@ -1,3 +1,7 @@
+package.path = package.path
+	.. ";./enums/?.lua"
+	.. ";./helpers/?.lua"
+	.. ";./magic/?.lua"
 ----------------------------------------------------------------------------------------------------
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 ----------------------------------------------------------------------------------------------------
