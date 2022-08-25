@@ -338,4 +338,20 @@ return {
 			}
 		}
 	},
+	{
+		regex = "[",
+		errorMessage = "Invalid regular expression: Missing ']' to close set"
+	},
+	{
+		regex = "[^",
+		errorMessage = "Invalid regular expression: Missing ']' to close set"
+	},
+	{
+		regex = "[%]",
+		errorMessage = "Invalid regular expression: Missing ']' to close set"
+	},
+	{
+		regex = "[b-a]",
+		errorMessage = "Invalid regular expression: Range out of order in set"
+	},
 }
