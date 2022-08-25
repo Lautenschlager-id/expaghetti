@@ -27,4 +27,56 @@ return {
 			}
 		}
 	},
+	{
+		regex = "[a-b-c-d]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					'a', 'b',
+					'c', 'd'
+				},
+				classIndex = 0,
+				classes = { },
+				['-'] = true
+			}
+		}
+	},
+	{
+		regex = "[-a-b-c-d-]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					'a', 'b',
+					'c', 'd'
+				},
+				classIndex = 0,
+				classes = { },
+				['-'] = true
+			}
+		}
+	},
+	{
+		regex = "[%cA-%cb]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 2,
+				ranges = {
+					'\1', '\2'
+				},
+				classIndex = 0,
+				classes = { }
+			}
+		}
+	},
 }
