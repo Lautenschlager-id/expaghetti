@@ -16,7 +16,8 @@ local cases = {
 	--"escaped",
 	--"character_class",
 	--"special_escaped",
-	"any",
+	--"any",
+	"set"
 }
 
 for case = 1, #cases do
