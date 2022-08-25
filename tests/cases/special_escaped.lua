@@ -5,11 +5,11 @@ return {
 			_index = 2,
 			{
 				type = "literal",
-				value = "\1"
+				value = '\1'
 			},
 			{
 				type = "literal",
-				value = "\2"
+				value = '\2'
 			}
 		}
 	},
@@ -19,11 +19,11 @@ return {
 			_index = 2,
 			{
 				type = "literal",
-				value = "\26"
+				value = '\26'
 			},
 			{
 				type = "literal",
-				value = "\26"
+				value = '\26'
 			},
 		}
 	},
@@ -33,15 +33,15 @@ return {
 			_index = 3,
 			{
 				type = "literal",
-				value = "`"
+				value = '`'
 			},
 			{
 				type = "literal",
-				value = ">"
+				value = '>'
 			},
 			{
 				type = "literal",
-				value = "q"
+				value = 'q'
 			}
 		}
 	},
@@ -59,7 +59,7 @@ return {
 			_index = 1,
 			{
 				type = "literal",
-				value = "\255"
+				value = '\255'
 			}
 		}
 	},

@@ -87,7 +87,7 @@ return {
 				type = "literal",
 				value = '-'
 			}
-		},
+		}
 	},
 	{
 		regex = "%a%b%c%!%@%#%$%%",

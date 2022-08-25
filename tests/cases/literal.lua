@@ -75,6 +75,6 @@ return {
 				type = "literal",
 				value = ':'
 			}
-		},
+		}
 	},
 }
