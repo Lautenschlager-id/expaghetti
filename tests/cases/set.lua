@@ -233,4 +233,109 @@ return {
 			}
 		}
 	},
+	{
+		regex = "[^^$|.%%()?:>=!<{},+*[%]a%-b]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['^'] = true,
+				['$'] = true,
+				['|'] = true,
+				['.'] = true,
+				['%'] = true,
+				['('] = true,
+				[')'] = true,
+				['?'] = true,
+				[':'] = true,
+				['>'] = true,
+				['='] = true,
+				['!'] = true,
+				['<'] = true,
+				['{'] = true,
+				['}'] = true,
+				[','] = true,
+				['+'] = true,
+				['*'] = true,
+				['['] = true,
+				[']'] = true,
+				['a'] = true,
+				['-'] = true,
+				['b'] = true
+			}
+		}
+	},
+	{
+		regex = "[%^^$|.%%()?:>=!<{},+*[%]a%-b]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['^'] = true,
+				['$'] = true,
+				['|'] = true,
+				['.'] = true,
+				['%'] = true,
+				['('] = true,
+				[')'] = true,
+				['?'] = true,
+				[':'] = true,
+				['>'] = true,
+				['='] = true,
+				['!'] = true,
+				['<'] = true,
+				['{'] = true,
+				['}'] = true,
+				[','] = true,
+				['+'] = true,
+				['*'] = true,
+				['['] = true,
+				[']'] = true,
+				['a'] = true,
+				['-'] = true,
+				['b'] = true
+			}
+		}
+	},
+	{
+		regex = "%c %[[%^%%w[-%]]%]",
+		parsed = {
+			_index = 4,
+			{
+				type = "literal",
+				value = '`'
+			},
+			{
+				type = "literal",
+				value = '['
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 2,
+				ranges = {
+					'[', ']'
+				},
+				classIndex = 0,
+				classes = { },
+				['^'] = true,
+				['%'] = true,
+				['w'] = true
+			},
+			{
+				type = "literal",
+				value = ']'
+			}
+		}
+	},
 }
