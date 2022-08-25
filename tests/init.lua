@@ -12,11 +12,16 @@ local parser = require("../expaghetti/parser")
 local compareTables = require("./assertion").compareTables
 ----------------------------------------------------------------------------------------------------
 local cases = {
-	literal = require("./cases/literal")
+	"literal",
+	"escaped",
+	"character_class"
 }
 
-for caseName, caseData in next, cases do
-	for caseIndex, caseObj in next, caseData do
+for case = 1, #cases do
+	case = cases[case]
+
+	print(strformat("\n\n############### Testing cases of %q ###############", case))
+	for caseIndex, caseObj in next, require("./cases/" .. case) do
 		print(strformat("Checking generated tree for the regex %q", caseObj.regex))
 
 		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex)
