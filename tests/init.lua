@@ -15,7 +15,8 @@ local cases = {
 	--"literal",
 	--"escaped",
 	--"character_class",
-	"special_escaped",
+	--"special_escaped",
+	"any",
 }
 
 for case = 1, #cases do
@@ -26,6 +27,7 @@ for case = 1, #cases do
 		print(strformat("Checking generated tree for the regex %q", caseObj.regex))
 
 		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex)
+
 		if not tree then
 			if caseObj.errorMessage then
 				if errorMessage ~= caseObj.errorMessage then
