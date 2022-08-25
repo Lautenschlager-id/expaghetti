@@ -27,7 +27,7 @@ local specialEscaped = { }
 
 -- %cA --> ctrl char A
 specialEscaped.c = function(currentCharacter, index, expression)
-	local ctrlChar = stringCharToCtrlChar(currentCharacter)
+	local ctrlChar = currentCharacter and stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
 		return false, errorsEnum.invalidParamCtrlChar
 	end
