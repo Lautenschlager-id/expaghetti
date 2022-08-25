@@ -1,11 +1,11 @@
 return {
-	[1] = {
+	{
 		regex = '',
 		parsed = {
 			_index = 0
 		}
 	},
-	[1] = {
+	{
 		regex = 'a',
 		parsed = {
 			_index = 1,
@@ -15,7 +15,7 @@ return {
 			}
 		}
 	},
-	[3] = {
+	{
 		regex = "aBcD_!@#&}{~>:",
 		parsed = {
 			_index = 14,
@@ -75,6 +75,6 @@ return {
 				type = "literal",
 				value = ':'
 			}
-		}
-	}
+		},
+	},
 }
