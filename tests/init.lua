@@ -19,7 +19,8 @@ local cases = {
 	--"any",
 	--"set",
 	--"delimiter",
-	"group"
+	--"group",
+	"quantifier"
 }
 
 for case = 1, #cases do
