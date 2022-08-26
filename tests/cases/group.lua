@@ -93,4 +93,28 @@ return {
 			}
 		}
 	},
+	{
+		regex = "a()b()c",
+		parsed = {
+			_index = 5,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "position_capture"
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "position_capture"
+			},
+			{
+				type = "literal",
+				value = 'c'
+			}
+		}
+	},
 }
