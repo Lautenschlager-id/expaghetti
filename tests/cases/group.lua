@@ -459,6 +459,166 @@ return {
 		}
 	},
 	{
+		regex = "(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)%k<12>",
+		parsed = {
+			_index = 13,
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "capture_reference",
+				index = 12
+			}
+		}
+	},
+	{
+		regex = "(?<abc>(?<def>(?<ghi>%k<abc>)))%k<ghi>%k<def>",
+		parsed = {
+			_index = 3,
+			{
+				type = "group",
+				hasBehavior = true,
+				name = "abc",
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						name = "def",
+						tree = {
+							_index = 1,
+							{
+								type = "group",
+								hasBehavior = true,
+								name = "ghi",
+								tree = {
+									_index = 1,
+									{
+										type = "capture_reference",
+										index = "abc"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "capture_reference",
+				index = "ghi"
+			},
+			{
+				type = "capture_reference",
+				index = "def"
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
