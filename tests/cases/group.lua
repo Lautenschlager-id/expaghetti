@@ -309,11 +309,30 @@ return {
 		}
 	},
 	{
+		regex = "(?:)",
+		parsed = {
+			_index = 1,
+			{
+				type = "group",
+				hasBehavior = true,
+				disableCapture = true,
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
 	{
 		regex = "a)",
 		errorMessage = "Invalid regular expression: No group to close"
+	},
+	{
+		regex = "(??)",
+		errorMessage = "Invalid regular expression: Invalid group behavior"
+	},
+	{
+		regex = "(?<b)",
+		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 }
