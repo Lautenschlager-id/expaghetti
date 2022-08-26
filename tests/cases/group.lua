@@ -213,6 +213,102 @@ return {
 		}
 	},
 	{
+		regex = ".(?!(?=.)).",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				isLookahead = true,
+				isNegative = true,
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						isLookahead = true,
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".(?<!(?=.)).",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				isLookbehind = true,
+				isNegative = true,
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						isLookahead = true,
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".(?<!(?<=.)).",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				isLookbehind = true,
+				isNegative = true,
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						isLookbehind = true,
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
