@@ -320,6 +320,78 @@ return {
 		}
 	},
 	{
+		regex = ".((?<named>.))",
+		parsed = {
+			_index = 2,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						name = "named",
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	{
+		regex = ".((?<n4m3d_>.))",
+		parsed = {
+			_index = 2,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						hasBehavior = true,
+						name = "n4m3d_",
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	{
+		regex = ".(?<_007>.)",
+		parsed = {
+			_index = 2,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				name = "_007",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
@@ -333,6 +405,34 @@ return {
 	},
 	{
 		regex = "(?<b)",
+		errorMessage = "Invalid regular expression: Invalid group name"
+	},
+	{
+		regex = "(?<>)",
+		errorMessage = "Invalid regular expression: Invalid group name"
+	},
+	{
+		regex = "(?<007>)",
+		errorMessage = "Invalid regular expression: Invalid group name"
+	},
+	{
+		regex = "(?<_ 007>)",
+		errorMessage = "Invalid regular expression: Invalid group name"
+	},
+	{
+		regex = "(?<abc>)(?<abc>)",
+		errorMessage = "Invalid regular expression: Duplicated group name <abc>"
+	},
+	{
+		regex = "(?<o%w>)",
+		errorMessage = "Invalid regular expression: Invalid group name"
+	},
+	{
+		regex = "(?%w)",
+		errorMessage = "Invalid regular expression: Invalid group behavior"
+	},
+	{
+		regex = "(?<%>>)",
 		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 }
