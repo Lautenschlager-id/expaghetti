@@ -117,4 +117,12 @@ return {
 			}
 		}
 	},
+	{
+		regex = "a(",
+		errorMessage = "Invalid regular expression: Unterminated group"
+	},
+	{
+		regex = "a)",
+		errorMessage = "Invalid regular expression: No group to close"
+	},
 }
