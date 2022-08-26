@@ -119,4 +119,85 @@ return {
 			}
 		}
 	},
+	{
+		regex = "a%bbc",
+		parsed = {
+			_index = 4,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "boundary",
+				shouldBeBetweenWord = false,
+				quantifier = false
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = 'c'
+			},
+		}
+	},
+	{
+		regex = "a%Bbc",
+		parsed = {
+			_index = 4,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "boundary",
+				shouldBeBetweenWord = true,
+				quantifier = false
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = 'c'
+			}
+		}
+	},
+	{
+		regex = "a%%bb%B%%c",
+		parsed = {
+			_index = 7,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = '%'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "boundary",
+				shouldBeBetweenWord = true,
+				quantifier = false
+			},
+			{
+				type = "literal",
+				value = '%'
+			},
+			{
+				type = "literal",
+				value = 'c'
+			}
+		}
+	},
 }

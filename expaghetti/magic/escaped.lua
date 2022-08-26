@@ -115,13 +115,13 @@ specialEscaped.b = function(currentCharacter, index)
 	--[[
 		{
 			type = ENUM_ELEMENT_TYPE_BOUNDARY,
-			value = true,
+			shouldBeBetweenWord = false,
 			quantifier = false,
 		}
 	]]
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		value = true,
+		shouldBeBetweenWord = false,
 		quantifier = false,
 	}
 end
@@ -129,7 +129,7 @@ end
 specialEscaped.B = function(currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		value = false,
+		shouldBeBetweenWord = true,
 		quantifier = false,
 	}
 end
