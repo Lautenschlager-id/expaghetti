@@ -662,4 +662,24 @@ return {
 		regex = "(?<%>>)",
 		errorMessage = "Invalid regular expression: Invalid group name"
 	},
+	{
+		regex = "%k",
+		errorMessage = "Invalid regular expression: Invalid backreference call: Missing '<'"
+	},
+	{
+		regex = "%k<",
+		errorMessage = "Invalid regular expression: Unterminated backreference: Missing '>'"
+	},
+	{
+		regex = "%k<>",
+		errorMessage = "Invalid regular expression: Invalid backreference name"
+	},
+	{
+		regex = "%k<$.>",
+		errorMessage = "Invalid regular expression: Invalid backreference name"
+	},
+	{
+		regex = "%k<oi%>",
+		errorMessage = "Invalid regular expression: Invalid backreference name"
+	},
 }
