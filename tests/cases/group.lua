@@ -118,6 +118,101 @@ return {
 		}
 	},
 	{
+		regex = "a(%?:b)",
+		parsed = {
+			_index = 2,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 3,
+					{
+						type = "literal",
+						value = '?'
+					},
+					{
+						type = "literal",
+						value = ':'
+					},
+					{
+						type = "literal",
+						value = 'b'
+					},
+				}
+			}
+		}
+	},
+	{
+		regex = "a(?:(~))b",
+		parsed = {
+			_index = 3,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				disableCapture = true,
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						tree = {
+							_index = 1,
+							{
+								type = "literal",
+								value = '~'
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "literal",
+				value = 'b'
+			}
+		}
+	},
+	{
+		regex = ".(?>..(.)).",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				isAtomic = true,
+				tree = {
+					_index = 3,
+					{
+						type = "any"
+					},
+					{
+						type = "any"
+					},
+					{
+						type = "group",
+						tree = {
+							_index = 1,
+							{
+								type = "any"
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
