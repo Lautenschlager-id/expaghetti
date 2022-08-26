@@ -392,6 +392,73 @@ return {
 		}
 	},
 	{
+		regex = "(.)(.)%1%2%3",
+		parsed = {
+			_index = 5,
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "capture_reference",
+				index = 1
+			},
+			{
+				type = "capture_reference",
+				index = 2
+			},
+			{
+				type = "capture_reference",
+				index = 3
+			}
+		}
+	},
+	{
+		regex = "(.)%%1%30",
+		parsed = {
+			_index = 5,
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "literal",
+				value = '%'
+			},
+			{
+				type = "literal",
+				value = '1'
+			},
+			{
+				type = "capture_reference",
+				index = 3
+			},
+			{
+				type = "literal",
+				value = '0'
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
