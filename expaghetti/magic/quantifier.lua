@@ -1,6 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
+local tblDeepCopy = require("./helpers/table").tblDeepCopy
+----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
 local quantifiersEnum = require("./enums/quantifiers")
@@ -77,16 +79,14 @@ local validateCustomQuantifier = function(index, charactersList)
 	}
 end
 ----------------------------------------------------------------------------------------------------
-Quantifier.checkIfAppliesToParentElement = function(index, charactersList, parentElement)
+Quantifier.checkIfAppliesToParentElement = function(index, charactersList)
 	local currentCharacter = charactersList[index]
 
 	if quantifiersEnum[currentCharacter] then
-		parentElement.quantifier = quantifiersEnum[currentCharacter]
-		return index + 1, parentElement.quantifier
+		return index + 1, quantifiersEnum[currentCharacter]
 	elseif currentCharacter == ENUM_OPEN_QUANTIFIER then
 		local newIndex, customQuantifier = validateCustomQuantifier(index, charactersList)
 		if newIndex then
-			parentElement.quantifier = customQuantifier
 			return newIndex, customQuantifier
 		elseif customQuantifier then
 			-- customQuantifier = error message
@@ -101,19 +101,19 @@ Quantifier.checkIfHasMode = function(index, charactersList, quantifier)
 	local quantifierMode = quantifierModesEnum[charactersList[index]]
 
 	if quantifierMode then
+		quantifier = tblDeepCopy(quantifier)
 		quantifier.mode = quantifierMode
-		return index + 1
+		index = index + 1
 	end
 
-	return index
+	return index, quantifier
 end
 
 Quantifier.checkForElement = function(index, charactersList, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
 	local shouldntHaveQuantifier = parentElement.quantifier == false
 
-	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
-		index, charactersList, parentElement)
+	local index, quantifier = Quantifier.checkIfAppliesToParentElement(index, charactersList)
 
 	if not index then
 		-- quantifier = error message
@@ -126,7 +126,8 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index = Quantifier.checkIfHasMode(index, charactersList, quantifier)
+	index, quantifier = Quantifier.checkIfHasMode(index, charactersList, quantifier)
+	parentElement.quantifier = quantifier
 
 	return index
 end
