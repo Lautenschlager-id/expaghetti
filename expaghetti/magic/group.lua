@@ -155,17 +155,15 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 		end
 
 		value.tree = groupTree
-	else
-		if not value.hasBehavior then
-			--[[
-				{
-					type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
-				}
-			]]
-			value = {
+	elseif not value.hasBehavior then
+		--[[
+			{
 				type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
 			}
-		end
+		]]
+		value = {
+			type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+		}
 	end
 
 	tree._index = tree._index + 1

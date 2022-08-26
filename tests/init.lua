@@ -18,7 +18,8 @@ local cases = {
 	--"special_escaped",
 	--"any",
 	--"set",
-	"delimiters"
+	--"delimiter",
+	"group"
 }
 
 for case = 1, #cases do
