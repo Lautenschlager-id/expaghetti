@@ -18,10 +18,12 @@ local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
 local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = elementsEnum.position_capture
+local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 ----------------------------------------------------------------------------------------------------
 local Group = { }
 
-local getGroupBehavior = function(index, charactersList, groupElement, parserMetaData)
+local getGroupBehavior = function(index, charactersList, charactersValueList, groupElement,
+	parserMetaData)
 	local currentCharacter = charactersList[index]
 
 	if currentCharacter ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
@@ -62,19 +64,22 @@ local getGroupBehavior = function(index, charactersList, groupElement, parserMet
 
 	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
 	if errorMessage and currentCharacter == ENUM_GROUP_NAME_OPEN then
+		local currentCharacterValue
 		local name, nameIndex = { }, 0
 		local firstCharacter = index + 1
 		repeat
 			index = index + 1
 			currentCharacter = charactersList[index]
+			currentCharacterValue = charactersValueList[index]
 
-			if not currentCharacter then
+			if not currentCharacterValue then
+				errorMessage = errorsEnum.invalidGroupName
 				break
 			-- The first character must be letter
-			elseif (currentCharacter >= 'A' and currentCharacter <= 'z')
-				or currentCharacter == '$'
+			elseif (currentCharacterValue >= 'A' and currentCharacterValue <= 'z')
+				or currentCharacterValue == '$'
 				or (index > firstCharacter
-					and (currentCharacter >= '0' and currentCharacter <= '9')) then
+					and (currentCharacterValue >= '0' and currentCharacterValue <= '9')) then
 
 				nameIndex = nameIndex + 1
 				name[nameIndex] = currentCharacter
@@ -136,7 +141,8 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 	}
 
 	local errorMessage
-	index, errorMessage = getGroupBehavior(index, charactersList, value, parserMetaData)
+	index, errorMessage = getGroupBehavior(index, charactersList, charactersValueList,
+		value, parserMetaData)
 	if not index then
 		return false, errorMessage
 	end

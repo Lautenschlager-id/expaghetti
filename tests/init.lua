@@ -48,6 +48,12 @@ for case = 1, #cases do
 				))
 			end
 		else
+			--print("###################################", caseObj.regex)
+			--print(require("../expaghetti/helpers/pretty-print")(tree, true))
+			--print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+			--print(require("../expaghetti/helpers/pretty-print")(caseObj.parsed, true))
+			--print("###################################")
+
 			if caseObj.errorMessage then
 				print("\tF", "\t", "Error message expected, got valid tree.")
 			else
