@@ -29,4 +29,8 @@ Literal.execute = function(currentCharacter, index, tree, charactersList)
 	return index + 1
 end
 
+Literal.match = function(currentElement, currentCharacter)
+	return currentElement.value == currentCharacter
+end
+
 return Literal
