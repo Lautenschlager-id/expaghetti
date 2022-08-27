@@ -29,21 +29,18 @@ local function matcher(expr, str, flags)
 		treeIndex = treeIndex + 1
 		currentElement = tree[treeIndex]
 
-		repeat
-			stringIndex = stringIndex + 1
-			currentCharacter = splitStr[stringIndex]
+		stringIndex = stringIndex + 1
+		currentCharacter = splitStr[stringIndex]
 
-			if not currentCharacter then
-				return
-			else
-				hasMatched = Literal.match(currentElement, currentCharacter)
-			end
+		if not currentCharacter then
+			return
+		else
+			hasMatched = Literal.match(currentElement, currentCharacter)
+		end
 
-			if not hasMatched then
-				treeIndex = 0
-				break
-			end
-		until hasMatched
+		if not hasMatched then
+			treeIndex = 0
+		end
 	end
 
 	return true
