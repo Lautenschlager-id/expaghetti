@@ -14,7 +14,7 @@ Alternate.transform = function(tree)
 	--[[
 		{
 			type = ENUM_ELEMENT_TYPE_ALTERNATE,
-			tree = {
+			trees = {
 				...
 			},
 		}
@@ -22,7 +22,7 @@ Alternate.transform = function(tree)
 	return {
 		[1] = {
 			type = ENUM_ELEMENT_TYPE_ALTERNATE,
-			tree = tree,
+			trees = tree,
 		},
 		_index = 1
 	}

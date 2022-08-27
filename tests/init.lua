@@ -12,15 +12,16 @@ local parser = require("../expaghetti/parser")
 local compareTables = require("./assertion").compareTables
 ----------------------------------------------------------------------------------------------------
 local cases = {
-	"literal",
-	"escaped",
-	"character_class",
-	"special_escaped",
-	"any",
-	"set",
-	"delimiter",
-	"group",
-	"quantifier"
+	--"literal",
+	--"escaped",
+	--"character_class",
+	--"special_escaped",
+	--"any",
+	--"set",
+	--"delimiter",
+	--"group",
+	--"quantifier",
+	"alternate"
 }
 
 local success, error = 0, 0
