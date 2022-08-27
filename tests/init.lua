@@ -12,16 +12,16 @@ local parser = require("../expaghetti/parser")
 local compareTables = require("./assertion").compareTables
 ----------------------------------------------------------------------------------------------------
 local cases = {
-	--"literal",
-	--"escaped",
-	--"character_class",
-	--"special_escaped",
-	--"any",
-	--"set",
-	--"delimiter",
-	--"group",
-	--"quantifier",
-	--"alternate",
+	"literal",
+	"escaped",
+	"character_class",
+	"special_escaped",
+	"any",
+	"set",
+	"delimiter",
+	"group",
+	"quantifier",
+	"alternate",
 	"flag"
 }
 
@@ -55,12 +55,6 @@ for case = 1, #cases do
 				error = error + 1
 			end
 		else
-			print("###################################", caseObj.regex)
-			print(require("../expaghetti/helpers/pretty-print")(tree, true))
-			print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-			print(require("../expaghetti/helpers/pretty-print")(caseObj.parsed, true))
-			print("###################################")
-
 			if caseObj.errorMessage then
 				print("\tF", "\t", "Error message expected, got valid tree.")
 				error = error + 1
