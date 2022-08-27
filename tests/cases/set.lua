@@ -204,6 +204,9 @@ return {
 							'Z'
 						},
 
+						classIndex = 0,
+						classes = { },
+
 						['_'] = true
 					},
 					{
@@ -218,7 +221,10 @@ return {
 
 							'A',
 							'Z'
-						}
+						},
+
+						classIndex = 0,
+						classes = { }
 					},
 					{
 						type = "set",
@@ -229,7 +235,10 @@ return {
 						ranges = {
 							'A',
 							'Z'
-						}
+						},
+
+						classIndex = 0,
+						classes = { }
 					}
 				},
 				['.'] = true,
@@ -267,6 +276,9 @@ return {
 							'Z'
 						},
 
+						classIndex = 0,
+						classes = { },
+
 						['_'] = true
 					},
 					{
@@ -281,7 +293,10 @@ return {
 
 							'A',
 							'Z'
-						}
+						},
+
+						classIndex = 0,
+						classes = { }
 					},
 					{
 						type = "set",
@@ -292,7 +307,10 @@ return {
 						ranges = {
 							'A',
 							'Z'
-						}
+						},
+
+						classIndex = 0,
+						classes = { }
 					}
 				},
 				['^'] = true,
@@ -322,7 +340,10 @@ return {
 						ranges = {
 							'A',
 							'Z'
-						}
+						},
+
+						classIndex = 0,
+						classes = { }
 					}
 				},
 				['Z'] = true,

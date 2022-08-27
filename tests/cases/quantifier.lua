@@ -1561,6 +1561,9 @@ return {
 					'0', '9'
 				},
 
+				classIndex = 0,
+				classes = { },
+
 				quantifier = {
 					type = "quantifier",
 					min = 1,
@@ -1583,6 +1586,9 @@ return {
 				ranges = {
 					'0', '9'
 				},
+
+				classIndex = 0,
+				classes = { },
 
 				quantifier = {
 					type = "quantifier",

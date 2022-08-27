@@ -15,7 +15,10 @@ return {
 
 					'A',
 					'Z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -32,7 +35,10 @@ return {
 				ranges = {
 					'0',
 					'9'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -55,7 +61,10 @@ return {
 
 					'A',
 					'F'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			},
 			{
 				type = "set",
@@ -72,7 +81,10 @@ return {
 
 					'A',
 					'F'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -89,7 +101,10 @@ return {
 				ranges = {
 					'a',
 					'z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -115,7 +130,10 @@ return {
 
 					'{',
 					'~'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -130,6 +148,9 @@ return {
 
 				rangeIndex = 0,
 				ranges = { },
+
+				classIndex = 0,
+				classes = { },
 
 				['\f'] = true,
 				['\n'] = true,
@@ -152,7 +173,10 @@ return {
 				ranges = {
 					'A',
 					'Z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -177,6 +201,9 @@ return {
 					'Z'
 				},
 
+				classIndex = 0,
+				classes = { },
+
 				['_'] = true
 			}
 		}
@@ -197,7 +224,10 @@ return {
 
 					'A',
 					'Z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -214,7 +244,10 @@ return {
 				ranges = {
 					'0',
 					'9'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -237,7 +270,10 @@ return {
 
 					'A',
 					'F'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			},
 			{
 				type = "set",
@@ -254,7 +290,10 @@ return {
 
 					'A',
 					'F'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -271,7 +310,10 @@ return {
 				ranges = {
 					'a',
 					'z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -297,7 +339,10 @@ return {
 
 					'{',
 					'~'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -312,6 +357,9 @@ return {
 
 				rangeIndex = 0,
 				ranges = { },
+
+				classIndex = 0,
+				classes = { },
 
 				['\f'] = true,
 				['\n'] = true,
@@ -334,7 +382,10 @@ return {
 				ranges = {
 					'A',
 					'Z'
-				}
+				},
+
+				classIndex = 0,
+				classes = { }
 			}
 		}
 	},
@@ -358,6 +409,9 @@ return {
 					'A',
 					'Z'
 				},
+
+				classIndex = 0,
+				classes = { },
 
 				['_'] = true
 			}
