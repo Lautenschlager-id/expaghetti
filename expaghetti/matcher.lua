@@ -13,16 +13,25 @@ local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local function matcher(expr, str, flags)
-	flags = flags or { }
+local function matcher(expr, str, flags,
+	-- For recursive purposes only
+	stringIndex,
+	tree, treeLength, splitStr, strLength)
 
-	local tree = parser(expr, flags)
-	local treeLength = tree._index
+	if not tree then
+		flags = flags or { }
 
-	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+		tree = parser(expr, flags)
+		treeLength = tree._index
 
-	local treeIndex, stringIndex = 0, 0
-	local restartStringIndexFrom = 0
+		splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+
+		stringIndex = 0
+	end
+
+	local treeIndex = 0
+	local initialStringIndex = stringIndex
+
 	local currentElement, currentCharacter
 	local hasMatched
 
@@ -44,13 +53,15 @@ local function matcher(expr, str, flags)
 		end
 
 		if not hasMatched then
-			treeIndex = 0
-			stringIndex = restartStringIndexFrom
-			restartStringIndexFrom = restartStringIndexFrom + 1
+			return matcher(
+				nil, --[[debug:]]str, flags,
+				initialStringIndex + 1,
+				tree, treeLength, splitStr, strLength
+			)
 		end
 	end
 
-	return true, --[[debug:]]str, restartStringIndexFrom, stringIndex
+	return true, --[[debug:]]str, initialStringIndex + 1, stringIndex
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -58,6 +69,7 @@ end
 local p = require("./helpers/pretty-print")
 _G.see = function(t, s, i, e) print(s and ("%q"):format(s:sub(i, e)), p(t, true)) end
 
+see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
 see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
 see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
 see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
