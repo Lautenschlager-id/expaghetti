@@ -1548,6 +1548,51 @@ return {
 		}
 	},
 	{
+		regex = "%d++",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+
+				hasToNegateMatch = false,
+
+				rangeIndex = 2,
+				ranges = {
+					'0', '9'
+				},
+
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil,
+					mode = "possessive"
+				}
+			}
+		}
+	},
+	{
+		regex = "%d+",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+
+				hasToNegateMatch = false,
+
+				rangeIndex = 2,
+				ranges = {
+					'0', '9'
+				},
+
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			}
+		}
+	},
+	{
 		regex = "a{2,1}",
 		errorMessage = "Invalid regular expression: Numbers out of order in quantifier"
 	},
@@ -1573,6 +1618,22 @@ return {
 	},
 	{
 		regex = "()+",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = "^+.",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = ".$+",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = "%b+.",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = ".%B+",
 		errorMessage = "Invalid regular expression: Nothing to repeat"
 	},
 }

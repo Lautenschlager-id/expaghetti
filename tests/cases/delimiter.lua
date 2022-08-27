@@ -200,12 +200,4 @@ return {
 			}
 		}
 	},
-	{
-		regex = "^+.",
-		errorMessage = "Invalid regular expression: Nothing to repeat"
-	},
-	{
-		regex = ".$+",
-		errorMessage = "Invalid regular expression: Nothing to repeat"
-	},
 }

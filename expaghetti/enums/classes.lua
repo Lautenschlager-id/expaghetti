@@ -128,7 +128,6 @@ local w = {
 
 	['_'] = true
 }
-local x = h
 
 -- %X
 
@@ -257,7 +256,6 @@ local W = {
 
 	['_'] = true
 }
-local X = H
 
 return {
 	a = a,
@@ -268,7 +266,7 @@ return {
 	s = s,
 	u = u,
 	w = w,
-	x = x,
+	x = h,
 
 	A = A,
 	D = D,
@@ -278,5 +276,5 @@ return {
 	S = S,
 	U = U,
 	W = W,
-	X = X,
+	X = H,
 }
