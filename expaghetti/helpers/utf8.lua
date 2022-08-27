@@ -59,7 +59,7 @@ utf8.transform = function(str)
 		until true
 	end
 
-	return new, index
+	return new, index - 1
 end
 
 return utf8

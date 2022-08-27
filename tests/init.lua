@@ -12,16 +12,17 @@ local parser = require("../expaghetti/parser")
 local compareTables = require("./assertion").compareTables
 ----------------------------------------------------------------------------------------------------
 local cases = {
-	--"literal",
-	--"escaped",
-	--"character_class",
-	--"special_escaped",
-	--"any",
-	--"set",
-	--"delimiter",
-	--"group",
-	--"quantifier",
-	"alternate"
+	"literal",
+	"escaped",
+	"character_class",
+	"special_escaped",
+	"any",
+	"set",
+	"delimiter",
+	"group",
+	"quantifier",
+	"alternate",
+	"flag"
 }
 
 local success, error = 0, 0
@@ -32,7 +33,7 @@ for case = 1, #cases do
 	for caseIndex, caseObj in next, require("./cases/" .. case) do
 		print(strformat("Checking generated tree for the regex %q", caseObj.regex))
 
-		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex)
+		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex, caseObj.flags)
 
 		if not tree then
 			if caseObj.errorMessage then
@@ -54,12 +55,6 @@ for case = 1, #cases do
 				error = error + 1
 			end
 		else
-			--print("###################################", caseObj.regex)
-			--print(require("../expaghetti/helpers/pretty-print")(tree, true))
-			--print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-			--print(require("../expaghetti/helpers/pretty-print")(caseObj.parsed, true))
-			--print("###################################")
-
 			if caseObj.errorMessage then
 				print("\tF", "\t", "Error message expected, got valid tree.")
 				error = error + 1
