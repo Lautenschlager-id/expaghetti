@@ -20,6 +20,8 @@ local p = require("./helpers/pretty-print")
 local see = function(t) print(p(t, true)) end
 
 see(matcher("abc", "not abacate"))
+see(matcher("abc", "abacatãozão", { ['u'] = true }))
+see(matcher("abc", "abacatãozão", { ['u'] = false }))
 
 ----------------------------------------------------------------------------------------------------
 
