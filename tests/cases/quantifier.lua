@@ -753,4 +753,75 @@ return {
 			}
 		}
 	},
+	{
+		regex = "a%+++b",
+		parsed = {
+			_index = 3,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = '+',
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil,
+					mode = "possessive"
+				}
+			},
+			{
+				type = "literal",
+				value = 'b'
+			}
+		}
+	},
+	{
+		regex = "a%**%*b",
+		parsed = {
+			_index = 4,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = '*',
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = nil
+				}
+			},
+			{
+				type = "literal",
+				value = '*'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			}
+		}
+	},
+	{
+		regex = "%cC{4,}+%cC",
+		parsed = {
+			_index = 2,
+			{
+				type = "literal",
+				value = '\3',
+				quantifier = {
+					type = "quantifier",
+					min = 4,
+					max = nil,
+					mode = "possessive"
+				}
+			},
+			{
+				type = "literal",
+				value = '\3'
+			}
+		}
+	},
 }
