@@ -46,6 +46,103 @@ return {
 		}
 	},
 	{
+		regex = "[]a]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				[']'] = true,
+				['a'] = true
+			}
+		}
+	},
+	{
+		regex = "[]]a]",
+		parsed = {
+			_index = 3,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				[']'] = true
+			},
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = ']'
+			}
+		}
+	},
+	{
+		regex = "[^]a]",
+		parsed = {
+			_index = 1,
+			{
+				type = "set",
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				[']'] = true,
+				['a'] = true
+			}
+		}
+	},
+	{
+		regex = "[^]]a]",
+		parsed = {
+			_index = 3,
+			{
+				type = "set",
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				[']'] = true
+			},
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = ']'
+			}
+		}
+	},
+	{
+		regex = "[^a]]",
+		parsed = {
+			_index = 2,
+			{
+				type = "set",
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['a'] = true
+			},
+			{
+				type = "literal",
+				value = ']'
+			}
+		}
+	},
+	{
 		regex = "[-a-b-c-d-]",
 		parsed = {
 			_index = 1,

@@ -11,6 +11,9 @@ local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
 local Set = { }
 
 local findMagicClosingIndex = function(index, charactersList)
+	local firstCharacter = index
+	local positionDiff = 0
+
 	local currentCharacter
 	repeat
 		currentCharacter = charactersList[index]
@@ -18,7 +21,9 @@ local findMagicClosingIndex = function(index, charactersList)
 		-- expression ended but magic was never closed
 		if not currentCharacter then
 			return false, errorsEnum.unclosedSet
-		elseif currentCharacter == ENUM_CLOSE_SET then
+		elseif index == firstCharacter and currentCharacter == ENUM_NEGATE_SET then
+			positionDiff = 1
+		elseif currentCharacter == ENUM_CLOSE_SET and (index - firstCharacter) > positionDiff then
 			return index
 		end
 
