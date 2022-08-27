@@ -78,8 +78,8 @@ local validateCustomQuantifier = function(index, charactersList)
 		mode = nil,
 	}
 end
-----------------------------------------------------------------------------------------------------
-Quantifier.checkIfAppliesToParentElement = function(index, charactersList)
+
+local checkIfAppliesToParentElement = function(index, charactersList)
 	local currentCharacter = charactersList[index]
 
 	if quantifiersEnum[currentCharacter] then
@@ -97,7 +97,7 @@ Quantifier.checkIfAppliesToParentElement = function(index, charactersList)
 	return index, false
 end
 
-Quantifier.checkIfHasMode = function(index, charactersList, quantifier)
+local checkIfHasMode = function(index, charactersList, quantifier)
 	local quantifierMode = quantifierModesEnum[charactersList[index]]
 
 	if quantifierMode then
@@ -108,12 +108,23 @@ Quantifier.checkIfHasMode = function(index, charactersList, quantifier)
 
 	return index, quantifier
 end
+----------------------------------------------------------------------------------------------------
+Quantifier.is = function(index, charactersList, parentElement)
+	local index, quantifier = checkIfAppliesToParentElement(index, charactersList)
+
+	return index and quantifier
+end
+
+Quantifier.isElement = function(currentElement)
+	return currentElement.quantifier
+		and currentElement.quantifier.type == ENUM_ELEMENT_TYPE_QUANTIFIER
+end
 
 Quantifier.checkForElement = function(index, charactersList, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
 	local shouldntHaveQuantifier = parentElement.quantifier == false
 
-	local index, quantifier = Quantifier.checkIfAppliesToParentElement(index, charactersList)
+	local index, quantifier = checkIfAppliesToParentElement(index, charactersList)
 
 	if not index then
 		-- quantifier = error message
@@ -126,17 +137,10 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index, quantifier = Quantifier.checkIfHasMode(index, charactersList, quantifier)
+	index, quantifier = checkIfHasMode(index, charactersList, quantifier)
 	parentElement.quantifier = quantifier
 
 	return index
-end
-
-Quantifier.is = function(index, charactersList, parentElement)
-	local index, quantifier = Quantifier.checkIfAppliesToParentElement(
-		index, charactersList, parentElement)
-
-	return index and quantifier
 end
 
 return Quantifier

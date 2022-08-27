@@ -13,7 +13,7 @@ end
 Alternate.transform = function(tree)
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_ALTERNATE,
+			type = "alternate",
 			trees = {
 				...
 			},

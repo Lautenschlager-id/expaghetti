@@ -14,7 +14,7 @@ end
 Anchor.execute = function(index, currentCharacter, tree)
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_ANCHOR,
+			type = "anchor",
 			isBeginning = true,
 			quantifier = false,
 		}
