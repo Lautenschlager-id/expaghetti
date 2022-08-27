@@ -322,4 +322,38 @@ return {
 			}
 		}
 	},
+	{
+		regex = '|%+',
+		parsed = {
+			_index = 1,
+			{
+				type = "alternate",
+				trees = {
+					_index = 2,
+					{
+						_index = 0
+					},
+					{
+						_index = 1,
+						{
+							type = "literal",
+							value = '+'
+						}
+					}
+				}
+			}
+		}
+	},
+	{
+		regex = '|(|',
+		errorMessage = "Invalid regular expression: Unterminated group"
+	},
+	{
+		regex = '|+',
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = '|++',
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
 }
