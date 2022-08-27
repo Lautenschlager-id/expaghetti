@@ -824,4 +824,60 @@ return {
 			}
 		}
 	},
+	{
+		regex = "..*?.??.{4}.+%+.++",
+		parsed = {
+			_index = 7,
+			{
+				type = "any"
+			},
+			{
+				type = "any",
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = nil,
+					mode = "lazy"
+				}
+			},
+			{
+				type = "any",
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = 1,
+					mode = "lazy"
+				}
+			},
+			{
+				type = "any",
+				quantifier = {
+					type = "quantifier",
+					min = 4,
+					max = 4
+				}
+			},
+			{
+				type = "any",
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			},
+			{
+				type = "literal",
+				value = '+'
+			},
+			{
+				type = "any",
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil,
+					mode = "possessive"
+				}
+			},
+		}
+	},
 }
