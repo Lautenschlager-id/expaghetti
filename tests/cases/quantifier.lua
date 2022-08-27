@@ -1242,4 +1242,170 @@ return {
 			}
 		}
 	},
+	{
+		regex = ".(.)+.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".(.)*.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = nil
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".(.)?.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = 1
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = "(.)??(.)+(.)",
+		parsed = {
+			_index = 3,
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = 1,
+					mode = "lazy"
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			}
+		}
+	},
+	{
+		regex = "(.){3,5}(.){1}+(.)",
+		parsed = {
+			_index = 3,
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = 3,
+					max = 5
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				},
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = 1,
+					mode = "possessive"
+				}
+			},
+			{
+				type = "group",
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			}
+		}
+	},
 }
