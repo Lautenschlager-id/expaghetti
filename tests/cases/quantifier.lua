@@ -1486,5 +1486,89 @@ return {
 				}
 			}
 		}
-	}
+	},
+	{
+		regex = "a{}",
+		parsed = {
+			_index = 3,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "a{123,,4}",
+		parsed = {
+			_index = 9,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '1'
+			},
+			{
+				type = "literal",
+				value = '2'
+			},
+			{
+				type = "literal",
+				value = '3'
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = '4'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "a{2,1}",
+		errorMessage = "Invalid regular expression: Numbers out of order in quantifier"
+	},
+	{
+		regex = "a{12,2}",
+		errorMessage = "Invalid regular expression: Numbers out of order in quantifier"
+	},
+	{
+		regex = "a+++",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = "*",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = "??",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
+	{
+		regex = "{1,2}",
+		errorMessage = "Invalid regular expression: Nothing to repeat"
+	},
 }
