@@ -102,14 +102,16 @@ return {
 				value = 'a'
 			},
 			{
-				type = "position_capture"
+				type = "position_capture",
+				quantifier = false
 			},
 			{
 				type = "literal",
 				value = 'b'
 			},
 			{
-				type = "position_capture"
+				type = "position_capture",
+				quantifier = false
 			},
 			{
 				type = "literal",
