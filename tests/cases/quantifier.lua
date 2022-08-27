@@ -880,4 +880,200 @@ return {
 			},
 		}
 	},
+	{
+		regex = "ab{4.0}",
+		parsed = {
+			_index = 7,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '4'
+			},
+			{
+				type = "any"
+			},
+			{
+				type = "literal",
+				value = '0'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "ab{,0}",
+		parsed = {
+			_index = 6,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = '0'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "ab{2,b}",
+		parsed = {
+			_index = 7,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '2'
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "ab{2b}",
+		parsed = {
+			_index = 6,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '2'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "ab{4%,0}",
+		parsed = {
+			_index = 7,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = '4'
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = '0'
+			},
+			{
+				type = "literal",
+				value = '}'
+			}
+		}
+	},
+	{
+		regex = "ab{,0}+",
+		parsed = {
+			_index = 6,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "literal",
+				value = 'b'
+			},
+			{
+				type = "literal",
+				value = '{'
+			},
+			{
+				type = "literal",
+				value = ','
+			},
+			{
+				type = "literal",
+				value = '0'
+			},
+			{
+				type = "literal",
+				value = '}',
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			}
+		}
+	}
 }
