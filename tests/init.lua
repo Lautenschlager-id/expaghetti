@@ -23,6 +23,7 @@ local cases = {
 	"quantifier"
 }
 
+local success, error = 0, 0
 for case = 1, #cases do
 	case = cases[case]
 
@@ -39,14 +40,17 @@ for case = 1, #cases do
 						"Expected error message\n\t\t\t\t\t%q,\n\t\t\t\tbut got\n\t\t\t\t\t%q",
 						caseObj.errorMessage, tostring(errorMessage)
 					))
+					error = error + 1
 				else
 					print("\t.", "\t", true)
+					success = success + 1
 				end
 			else
 				print("\tF", "\t", strformat(
 					"Failure to parse regex %q:\n\t\t\t\t\t%s",
 					caseObj.regex, errorMessage
 				))
+				error = error + 1
 			end
 		else
 			--print("###################################", caseObj.regex)
@@ -57,14 +61,21 @@ for case = 1, #cases do
 
 			if caseObj.errorMessage then
 				print("\tF", "\t", "Error message expected, got valid tree.")
+				error = error + 1
 			else
 				local hasCompared, errorMessage = pcall(compareTables, caseObj.parsed, tree)
 				if hasCompared then
 					print("\t.", "\t", true)
+					success = success + 1
 				else
 					print("\tF", "\t", errorMessage)
+					error = error + 1
 				end
 			end
 		end
 	end
 end
+
+print("\n\n------------------------------------")
+print(strformat("Success : %03d\nError : %03d", success, error))
+print("------------------------------------")
