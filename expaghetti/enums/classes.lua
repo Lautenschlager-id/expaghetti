@@ -16,7 +16,10 @@ local a = {
 
 		'A',
 		'Z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [0-9]
 local d = {
@@ -28,7 +31,10 @@ local d = {
 	ranges = {
 		'0',
 		'9'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [0-9a-fA-F]
 local h = {
@@ -46,7 +52,10 @@ local h = {
 
 		'A',
 		'F'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [a-z]
 local l = {
@@ -58,7 +67,10 @@ local l = {
 	ranges = {
 		'a',
 		'z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [!-/:-@[-`{-~]
 local p = {
@@ -79,7 +91,10 @@ local p = {
 
 		'{',
 		'~'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [\f\n\r\t ]
 local s = {
@@ -89,6 +104,9 @@ local s = {
 
 	rangeIndex = 0,
 	ranges = { },
+
+	classIndex = 0,
+	classes = { },
 
 	['\f'] = true,
 	['\n'] = true,
@@ -106,7 +124,10 @@ local u = {
 	ranges = {
 		'A',
 		'Z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [0-9a-zA-Z_]
 local w = {
@@ -126,6 +147,9 @@ local w = {
 		'Z'
 	},
 
+	classIndex = 0,
+	classes = { },
+
 	['_'] = true
 }
 
@@ -144,7 +168,10 @@ local A = {
 
 		'A',
 		'Z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^0-9]
 local D = {
@@ -156,7 +183,10 @@ local D = {
 	ranges = {
 		'0',
 		'9'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^0-9a-fA-F]
 local H = {
@@ -174,7 +204,10 @@ local H = {
 
 		'A',
 		'F'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^a-z]
 local L = {
@@ -186,7 +219,10 @@ local L = {
 	ranges = {
 		'a',
 		'z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^!-/:-@[-`{-~]
 local P = {
@@ -207,7 +243,10 @@ local P = {
 
 		'{',
 		'~'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^\f\n\r\t ]
 local S = {
@@ -217,6 +256,9 @@ local S = {
 
 	rangeIndex = 0,
 	ranges = { },
+
+	classIndex = 0,
+	classes = { },
 
 	['\f'] = true,
 	['\n'] = true,
@@ -234,7 +276,10 @@ local U = {
 	ranges = {
 		'A',
 		'Z'
-	}
+	},
+
+	classIndex = 0,
+	classes = { }
 }
 -- [^0-9a-zA-Z_]
 local W = {
@@ -253,6 +298,9 @@ local W = {
 		'A',
 		'Z'
 	},
+
+	classIndex = 0,
+	classes = { },
 
 	['_'] = true
 }
