@@ -1075,5 +1075,171 @@ return {
 				}
 			}
 		}
-	}
+	},
+	{
+		regex = ".[.]+.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".[.]*.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = nil
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = ".[.]?.",
+		parsed = {
+			_index = 3,
+			{
+				type = "any"
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = 1
+				}
+			},
+			{
+				type = "any"
+			}
+		}
+	},
+	{
+		regex = "[.]??[.]+[.]",
+		parsed = {
+			_index = 3,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = nil,
+					max = 1,
+					mode = "lazy"
+				}
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = nil
+				}
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true
+			}
+		}
+	},
+	{
+		regex = "[.]{3,5}[.]{1}+[.]",
+		parsed = {
+			_index = 3,
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = 3,
+					max = 5
+				}
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true,
+				quantifier = {
+					type = "quantifier",
+					min = 1,
+					max = 1,
+					mode = "possessive"
+				}
+			},
+			{
+				type = "set",
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = { },
+				classIndex = 0,
+				classes = { },
+				['.'] = true
+			}
+		}
+	},
 }
