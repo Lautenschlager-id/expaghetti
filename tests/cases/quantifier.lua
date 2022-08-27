@@ -1408,4 +1408,83 @@ return {
 			}
 		}
 	},
+	{
+		regex = "(?:(.+({0,0}+?(.)+){1,5}))",
+		parsed = {
+			_index = 1,
+			{
+				type = "group",
+				hasBehavior = true,
+				disableCapture = true,
+				tree = {
+					_index = 1,
+					{
+						type = "group",
+						tree = {
+							_index = 2,
+							{
+								type = "any",
+								quantifier = {
+									type = "quantifier",
+									min = 1,
+									max = nil
+								}
+							},
+							{
+								type = "group",
+								tree = {
+									_index = 6,
+									{
+										type = "literal",
+										value = '{'
+									},
+									{
+										type = "literal",
+										value = '0'
+									},
+									{
+										type = "literal",
+										value = ','
+									},
+									{
+										type = "literal",
+										value = '0'
+									},
+									{
+										type = "literal",
+										value = '}',
+										quantifier = {
+											type = "quantifier",
+											min = 1,
+											max = nil,
+											mode = "lazy"
+										}
+									},
+									{
+										type = "group",
+										tree = {
+											_index = 1,
+											{
+												type = "any"
+											}
+										},
+										quantifier = {
+											type = "quantifier",
+											min = 1,
+											max = nil
+										}
+									}
+								},
+								quantifier = {
+									type = "quantifier",
+									min = 1,
+									max = 5
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

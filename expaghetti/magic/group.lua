@@ -164,11 +164,13 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 	elseif not value.hasBehavior then
 		--[[
 			{
-				type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+				type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE,
+				quantifier = false
 			}
 		]]
 		value = {
-			type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+			type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE,
+			quantifier = false,
 		}
 	end
 
