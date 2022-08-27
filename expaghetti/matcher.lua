@@ -5,7 +5,7 @@ local parser = require("./parser")
 ----------------------------------------------------------------------------------------------------
 --local Anchor = require("./magic/anchor")
 --local Alternate = require("./magic/alternate")
---local Any = require("./magic/any")
+local Any = require("./magic/any")
 --local Group = require("./magic/group")
 local Literal = require("./magic/literal")
 --local Quantifier = require("./magic/Quantifier")
@@ -35,6 +35,8 @@ local function matcher(expr, str, flags)
 
 		if not currentCharacter then
 			return
+		elseif Any.isElement(currentElement) then
+			hasMatched = Any.match(currentElement, currentCharacter)
 		elseif Set.isElement(currentElement) then
 			hasMatched = Set.match(currentElement, currentCharacter)
 		else
@@ -56,13 +58,15 @@ end
 local p = require("./helpers/pretty-print")
 _G.see = function(t, s, i, e) print(s and ("%q"):format(s:sub(i, e)), p(t, true)) end
 
-see(matcher("%cCo ", "abacateiro d\3o abc!"))
-see(matcher("abc!", "abcateiro d\3o abc!"))
-see(matcher("[ei]", "abacateiro d\3o abc!"))
-see(matcher("[ro] d", "abacateiro d\3o abc!"))
-see(matcher("[^ro] [da]", "abacateiro d\3u abc!"))
-see(matcher("[i-t][i-t][i-t][^i-t][^i-t]", "abacateiro d\3u abc!"))
-see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery"))
+see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
+see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
+see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
+see(matcher("[ro] d", "abacateiro d\3o abc!")) -- valid (o d)
+see(matcher("[^ro] [da]", "abacateiro d\3u abc!")) -- valid (u a)
+see(matcher("[i-t][i-t][i-t][^i-t][^i-t]", "abacateiro d\3u abc!")) -- valid (iro d)
+see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
+see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
+see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
 
 ----------------------------------------------------------------------------------------------------
 

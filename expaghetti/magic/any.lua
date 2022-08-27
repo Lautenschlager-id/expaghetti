@@ -8,6 +8,10 @@ Any.is = function(currentCharacter)
 	return currentCharacter == ENUM_ANY_CHARACTER
 end
 
+Any.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_ANY
+end
+
 Any.execute = function(index, tree)
 	--[[
 		{
@@ -20,6 +24,10 @@ Any.execute = function(index, tree)
 	}
 
 	return index + 1
+end
+
+Any.match = function(currentElement, currentCharacter)
+	return true
 end
 
 return Any
