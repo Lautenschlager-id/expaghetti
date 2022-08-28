@@ -29,25 +29,12 @@ local elementMatches = function(currentElement, currentCharacter)
 	return hasMatched
 end
 
-local function matcher(expr, str, flags,
-	stringIndex,
-	-- For recursive purposes only
-	tree, treeLength, treeIndex,
-	splitStr, strLength)
+local function _matcher(
+	flags, tree, treeLength, treeIndex,
+	splitStr, strLength,
+	stringIndex, initialStringIndex)
 
-	if not tree then
-		flags = flags or { }
-
-		tree = parser(expr, flags)
-		treeLength = tree._index
-
-		splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
-
-		treeIndex = 0
-		stringIndex = 0
-	end
-
-	local initialStringIndex = stringIndex
+	pdebug(string.format("GOT INDEX %d AND TREE INDEX %d AND STRING %q", stringIndex, treeIndex, table.concat(splitStr, '', stringIndex + 1)))
 
 	local currentElement, currentCharacter
 	local hasMatched
@@ -58,9 +45,7 @@ local function matcher(expr, str, flags,
 
 		stringIndex = stringIndex + 1
 		currentCharacter = splitStr[stringIndex]
-
-		--print('\t\t\t\tcurrentElement', currentElement.value, currentCharacter)
-
+		pdebug('\t\tcurrentCharacter', currentCharacter)
 		if not currentCharacter then
 			return
 		else
@@ -90,53 +75,74 @@ local function matcher(expr, str, flags,
 					newStringIndex = newStringIndex + 1
 					newCurrentCharacter = splitStr[newStringIndex]
 				until false
+				pdebug('\tmaxOccurrencesFound', maxOccurrencesFound)
 
-				--print('maxOccurrencesFound', maxOccurrencesFound, min <= maxOccurrencesFound)
+				if maxOccurrencesFound < min then
+					return
+				end
 
 				-- greedy
-				if min <= maxOccurrencesFound then
-					if not quantifier.mode then
-						for occurence = maxOccurrencesFound, min, -1 do
-							if occurence == 0 then
-								hasMatched = true
-								stringIndex = stringIndex - 1
-								break
-							end
+				if not quantifier.mode then
+					pdebug('\tLooping from ', maxOccurrencesFound, ' to ', min, ' and from index ', stringIndex)
+					for occurence = maxOccurrencesFound, min, -1 do
+						local matched, debugStr = _matcher(
+							flags, tree, treeLength, treeIndex,
+							splitStr, strLength,
+							stringIndex + occurence - 1, initialStringIndex
+						)
 
-							if matcher(
-								nil, nil, flags,
-								stringIndex + occurence - 1,
-								tree, treeLength, treeIndex,
-								splitStr, strLength
-							) then
-								hasMatched = true
-								stringIndex = stringIndex + occurence - 1
-								break
-							end
+						if matched then
+							return matched, debugStr
 						end
 					end
+					pdebug("########################################")
+					return
 				end
 			end
 		end
 
 		if not hasMatched then
-			return matcher(
-				nil, --[[debug:]]str, flags,
-				initialStringIndex + 1,
-				tree, treeLength, 0,
-				splitStr, strLength
-			)
+			return
 		end
 	end
 
+	pdebug('Finished', initialStringIndex, stringIndex)
 	return true,
 		--[[debug:]]splitStr and table.concat(splitStr, '', initialStringIndex + 1, stringIndex)
+end
+
+local matcher = function(expr, str, flags, stringIndex)
+	flags = flags or { }
+
+	local tree = parser(expr, flags)
+	local treeLength = tree._index
+
+	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+
+	stringIndex = stringIndex or 0
+
+	while stringIndex < strLength do
+		pdebug('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+		local matched, debugStr = _matcher(
+			flags, tree, treeLength, 0,
+			splitStr, strLength,
+			stringIndex, stringIndex
+		)
+
+		if matched then
+			return matched, debugStr
+		end
+
+		stringIndex = stringIndex + 1
+	end
 end
 
 ----------------------------------------------------------------------------------------------------
 -- Debugging
 local p = require("./helpers/pretty-print")
 _G.see = function(t, s) print(s and ("%q"):format(s), p(t, true)) end
+local printdebug = false
+_G.pdebug = function(...) if printdebug then print(...) end end
 
 --see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
 --see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
@@ -159,7 +165,13 @@ see(matcher("o*", "mooon")) -- valid
 see(matcher("o?", "mooon")) -- valid
 see(matcher("o{3,}", "moooon")) -- valid
 see(matcher("o{3,}", "moon")) -- invalid
-
+see(matcher("o+.o+", "mooon")) -- valid
+see(matcher("[aeiou]+", "mooon")) -- valid
+see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
+see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
+see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
+see(matcher("a.?c", "aabaaac")) -- valid (aac)
+see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
