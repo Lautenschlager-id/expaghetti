@@ -129,16 +129,18 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 --see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
 --see(matcher(".*", "aba!_@Q22?")) -- valid
 --see(matcher(".+;", "aba!_@Q22?")) -- invalid
---see(matcher("%d+%??", "aba!_@Q22?")) -- valid
-see(matcher("<.+>", "<html> <body>hi?</body> </html>"))
-see(matcher("<.+?>", "<html> <body>hi?</body> </html>"))
-see(matcher("o+?", "mooon")) -- valid
-see(matcher(".o*.", "mooon")) -- valid
-see(matcher(".o?.", "mooon")) -- valid
-see(matcher(".o*?.", "mooon")) -- valid
-see(matcher(".o??.", "mooon")) -- valid
-see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid
-see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid
+--see(matcher("%d+%??", "aba!_@Q22?")) -- valid (22?)
+see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
+see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
+see(matcher("o+?", "mooon")) -- valid (o)
+see(matcher(".o*.", "mooon")) -- valid (mooon)
+see(matcher(".o?.", "mooon")) -- valid (moo)
+see(matcher(".o*?.", "mooon")) -- valid (mo)
+see(matcher(".o??.", "mooon")) -- valid (mo)
+see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
+see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
+see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
+see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
