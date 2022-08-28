@@ -25,7 +25,7 @@ local singleElementMatcher = function(currentElement, currentCharacter)
 	end
 end
 
-local function _matcher(
+local function treeMatcher(
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
@@ -52,7 +52,7 @@ local function _matcher(
 				end
 			else
 				return Quantifier.loopOver(
-					currentElement, currentCharacter, singleElementMatcher, _matcher,
+					currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 					flags, tree, treeLength, treeIndex,
 					splitStr, strLength,
 					stringIndex, initialStringIndex
@@ -78,7 +78,7 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	while stringIndex < strLength do
 		pdebug('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-		local matched, debugStr = _matcher(
+		local matched, debugStr = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex
