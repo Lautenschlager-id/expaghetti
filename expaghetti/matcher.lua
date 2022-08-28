@@ -98,48 +98,48 @@ _G.see = function(t, s) print(s and ("%q"):format(s), p(t, true)) end
 local printdebug = false
 _G.pdebug = function(...) if printdebug then print(...) end end
 
---see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
---see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
---see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
---see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
---see(matcher("[ro] d", "abacateiro d\3o abc!")) -- valid (o d)
---see(matcher("[^ro] [da]", "abacateiro d\3u abc!")) -- valid (u a)
---see(matcher("[i-t][i-t][i-t][^i-t][^i-t]", "abacateiro d\3u abc!")) -- valid (iro d)
---see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
---see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
---see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
---see(matcher("mo*n", "mn")) -- valid
---see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
---see(matcher("mo*n", "mon")) -- valid
---see(matcher("mo*oo?o*n", "mon")) -- valid
---see(matcher("mo*oo?o*n", "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooon")) -- valid
---see(matcher("mo{,2}on", "mooon")) -- valid
---see(matcher("o+", "mooon")) -- valid
---see(matcher("o*", "mooon")) -- valid
---see(matcher("o?", "mooon")) -- valid
---see(matcher("o{3,}", "moooon")) -- valid
---see(matcher("o{3,}", "moon")) -- invalid
---see(matcher("o+.o+", "mooon")) -- valid
---see(matcher("[aeiou]+", "mooon")) -- valid
---see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
---see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
---see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
---see(matcher("a.?c", "aabaaac")) -- valid (aac)
---see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
---see(matcher(".*", "aba!_@Q22?")) -- valid
---see(matcher(".+;", "aba!_@Q22?")) -- invalid
---see(matcher("%d+%??", "aba!_@Q22?")) -- valid (22?)
---see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
---see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
---see(matcher("o+?", "mooon")) -- valid (o)
---see(matcher(".o*.", "mooon")) -- valid (mooon)
---see(matcher(".o?.", "mooon")) -- valid (moo)
---see(matcher(".o*?.", "mooon")) -- valid (mo)
---see(matcher(".o??.", "mooon")) -- valid (mo)
---see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
---see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
---see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
---see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
+see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
+see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
+see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
+see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
+see(matcher("[ro] d", "abacateiro d\3o abc!")) -- valid (o d)
+see(matcher("[^ro] [da]", "abacateiro d\3u abc!")) -- valid (u a)
+see(matcher("[i-t][i-t][i-t][^i-t][^i-t]", "abacateiro d\3u abc!")) -- valid (iro d)
+see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
+see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
+see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
+see(matcher("mo*n", "mn")) -- valid
+see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
+see(matcher("mo*n", "mon")) -- valid
+see(matcher("mo*oo?o*n", "mon")) -- valid
+see(matcher("mo*oo?o*n", "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooon")) -- valid
+see(matcher("mo{,2}on", "mooon")) -- valid
+see(matcher("o+", "mooon")) -- valid
+see(matcher("o*", "mooon")) -- valid
+see(matcher("o?", "mooon")) -- valid
+see(matcher("o{3,}", "moooon")) -- valid
+see(matcher("o{3,}", "moon")) -- invalid
+see(matcher("o+.o+", "mooon")) -- valid
+see(matcher("[aeiou]+", "mooon")) -- valid
+see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
+see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
+see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
+see(matcher("a.?c", "aabaaac")) -- valid (aac)
+see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
+see(matcher(".*", "aba!_@Q22?")) -- valid
+see(matcher(".+;", "aba!_@Q22?")) -- invalid
+see(matcher("%d+%??", "aba!_@Q22?")) -- valid (22?)
+see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
+see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
+see(matcher("o+?", "mooon")) -- valid (o)
+see(matcher(".o*.", "mooon")) -- valid (mooon)
+see(matcher(".o?.", "mooon")) -- valid (moo)
+see(matcher(".o*?.", "mooon")) -- valid (mo)
+see(matcher(".o??.", "mooon")) -- valid (mo)
+see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
+see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
+see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
+see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
 see(matcher("a+amo", "te aaaaaaamoo")) -- valid (aaaaaaamo)
 see(matcher("a++amo", "te aaaaaaamoo")) -- invalid
 see(matcher("a++mo++", "te aaaaaaamoo")) -- valid (aaaaaaamoo)
