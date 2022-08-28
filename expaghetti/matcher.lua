@@ -109,28 +109,36 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 --see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
 --see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
 --see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
-see(matcher("mo*n", "mn")) -- valid
-see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
-see(matcher("mo*n", "mon")) -- valid
-see(matcher("mo*oo?o*n", "mon")) -- valid
-see(matcher("mo*oo?o*n", "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooon")) -- valid
-see(matcher("mo{,2}on", "mooon")) -- valid
-see(matcher("o+", "mooon")) -- valid
-see(matcher("o*", "mooon")) -- valid
-see(matcher("o?", "mooon")) -- valid
-see(matcher("o{3,}", "moooon")) -- valid
-see(matcher("o{3,}", "moon")) -- invalid
-see(matcher("o+.o+", "mooon")) -- valid
-see(matcher("[aeiou]+", "mooon")) -- valid
-see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
-see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
-see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
-see(matcher("a.?c", "aabaaac")) -- valid (aac)
-see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
-see(matcher(".*", "aba!_@Q22?")) -- valid
-see(matcher(".+;", "aba!_@Q22?")) -- invalid
-see(matcher("%d+%??", "aba!_@Q22?")) -- valid
-
+--see(matcher("mo*n", "mn")) -- valid
+--see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
+--see(matcher("mo*n", "mon")) -- valid
+--see(matcher("mo*oo?o*n", "mon")) -- valid
+--see(matcher("mo*oo?o*n", "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooon")) -- valid
+--see(matcher("mo{,2}on", "mooon")) -- valid
+--see(matcher("o+", "mooon")) -- valid
+--see(matcher("o*", "mooon")) -- valid
+--see(matcher("o?", "mooon")) -- valid
+--see(matcher("o{3,}", "moooon")) -- valid
+--see(matcher("o{3,}", "moon")) -- invalid
+--see(matcher("o+.o+", "mooon")) -- valid
+--see(matcher("[aeiou]+", "mooon")) -- valid
+--see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
+--see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
+--see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
+--see(matcher("a.?c", "aabaaac")) -- valid (aac)
+--see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
+--see(matcher(".*", "aba!_@Q22?")) -- valid
+--see(matcher(".+;", "aba!_@Q22?")) -- invalid
+--see(matcher("%d+%??", "aba!_@Q22?")) -- valid
+see(matcher("<.+>", "<html> <body>hi?</body> </html>"))
+see(matcher("<.+?>", "<html> <body>hi?</body> </html>"))
+see(matcher("o+?", "mooon")) -- valid
+see(matcher(".o*.", "mooon")) -- valid
+see(matcher(".o?.", "mooon")) -- valid
+see(matcher(".o*?.", "mooon")) -- valid
+see(matcher(".o??.", "mooon")) -- valid
+see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid
+see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid
 ----------------------------------------------------------------------------------------------------
 
 return matcher
