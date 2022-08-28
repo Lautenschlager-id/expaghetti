@@ -11,21 +11,21 @@ return {
 	[ENUM_ONE_OR_MORE_QUANTIFIER] = {
 		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
 		min = 1,
-		max = nil,
-		mode = nil,
+		max = 0,
+		mode = nil
 	},
 
 	[ENUM_ZERO_OR_MORE_QUANTIFIER] = {
 		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
-		min = nil,
-		max = nil,
-		mode = nil,
+		min = 0,
+		max = 0,
+		mode = nil
 	},
 
 	[ENUM_ZERO_OR_ONE_QUANTIFIER] = {
 		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
-		min = nil,
+		min = 0,
 		max = 1,
-		mode = nil,
+		mode = nil
 	},
 }

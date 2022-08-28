@@ -13,20 +13,16 @@ local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local elementMatches = function(currentElement, currentCharacter)
-	local hasMatched
-
+local singleElementMatcher = function(currentElement, currentCharacter)
 	if not currentCharacter then
 		return
 	elseif Any.isElement(currentElement) then
-		hasMatched = Any.match(currentElement, currentCharacter)
+		return Any.match(currentElement, currentCharacter)
 	elseif Set.isElement(currentElement) then
-		hasMatched = Set.match(currentElement, currentCharacter)
+		return Set.match(currentElement, currentCharacter)
 	else
-		hasMatched = Literal.match(currentElement, currentCharacter)
+		return Literal.match(currentElement, currentCharacter)
 	end
-
-	return hasMatched
 end
 
 local function _matcher(
@@ -37,7 +33,6 @@ local function _matcher(
 	pdebug(string.format("GOT INDEX %d AND TREE INDEX %d AND STRING %q", stringIndex, treeIndex, table.concat(splitStr, '', stringIndex + 1)))
 
 	local currentElement, currentCharacter
-	local hasMatched
 
 	while treeIndex < treeLength do
 		treeIndex = treeIndex + 1
@@ -52,57 +47,17 @@ local function _matcher(
 			local hasQuantifier = Quantifier.isElement(currentElement)
 
 			if not hasQuantifier then
-				hasMatched = elementMatches(currentElement, currentCharacter)
+				if not singleElementMatcher(currentElement, currentCharacter) then
+					return
+				end
 			else
-				local quantifier = currentElement.quantifier
-
-				local min, max = quantifier.min or 0, quantifier.max or 0
-				local maxOccurrencesFound = 0
-
-				-- get maximum iterations
-				local newCurrentCharacter = currentCharacter
-				local newStringIndex = stringIndex
-				repeat
-					if not elementMatches(currentElement, newCurrentCharacter) then
-						break
-					end
-
-					maxOccurrencesFound = maxOccurrencesFound + 1
-					if maxOccurrencesFound == max then
-						break
-					end
-
-					newStringIndex = newStringIndex + 1
-					newCurrentCharacter = splitStr[newStringIndex]
-				until false
-				pdebug('\tmaxOccurrencesFound', maxOccurrencesFound)
-
-				if maxOccurrencesFound < min then
-					return
-				end
-
-				-- greedy
-				if not quantifier.mode then
-					pdebug('\tLooping from ', maxOccurrencesFound, ' to ', min, ' and from index ', stringIndex)
-					for occurence = maxOccurrencesFound, min, -1 do
-						local matched, debugStr = _matcher(
-							flags, tree, treeLength, treeIndex,
-							splitStr, strLength,
-							stringIndex + occurence - 1, initialStringIndex
-						)
-
-						if matched then
-							return matched, debugStr
-						end
-					end
-					pdebug("########################################")
-					return
-				end
+				return Quantifier.loopOver(
+					currentElement, currentCharacter, singleElementMatcher, _matcher,
+					flags, tree, treeLength, treeIndex,
+					splitStr, strLength,
+					stringIndex, initialStringIndex
+				)
 			end
-		end
-
-		if not hasMatched then
-			return
 		end
 	end
 
@@ -172,6 +127,10 @@ see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
 see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
 see(matcher("a.?c", "aabaaac")) -- valid (aac)
 see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
+see(matcher(".*", "aba!_@Q22?")) -- valid
+see(matcher(".+;", "aba!_@Q22?")) -- invalid
+see(matcher("%d+%??", "aba!_@Q22?")) -- valid
+
 ----------------------------------------------------------------------------------------------------
 
 return matcher

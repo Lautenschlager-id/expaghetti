@@ -15,6 +15,8 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
+local quantifierMatchMode = { }
+
 local validateCustomQuantifier = function(index, charactersList)
 	local currentCharacter
 
@@ -73,8 +75,8 @@ local validateCustomQuantifier = function(index, charactersList)
 	]]
 	return index, {
 		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
-		min = parameters[1],
-		max = parameters[2],
+		min = parameters[1] or 0,
+		max = parameters[2] or 0,
 		mode = nil,
 	}
 end
@@ -107,6 +109,50 @@ local checkIfHasMode = function(index, charactersList, quantifier)
 	end
 
 	return index, quantifier
+end
+
+local getMaximumOccurrencesOfElement = function(quantifier, currentElement, singleElementMatcher,
+	currentCharacter, stringIndex, splitStr)
+
+	local maximumOccurrences = quantifier.max
+
+	local totalOccurrences = 0
+	repeat
+		if not singleElementMatcher(currentElement, currentCharacter) then
+			break
+		end
+
+		totalOccurrences = totalOccurrences + 1
+		if totalOccurrences == maximumOccurrences then
+			break
+		end
+
+		stringIndex = stringIndex + 1
+		currentCharacter = splitStr[stringIndex]
+	until false
+
+	return totalOccurrences
+end
+
+quantifierMatchMode.greedy = function(treeMatcher, minimumOccurrences, maximumOccurrencesOfElement,
+	flags, tree, treeLength, treeIndex,
+	splitStr, strLength,
+	stringIndex, initialStringIndex)
+
+	pdebug('\tLooping from ', maximumOccurrencesOfElement, ' to ', minimumOccurrences,
+		' and from index ', stringIndex)
+	local hasMatched
+	for occurence = maximumOccurrencesOfElement, minimumOccurrences, -1 do
+		hasMatched, debugStr = treeMatcher(
+			flags, tree, treeLength, treeIndex,
+			splitStr, strLength,
+			stringIndex + occurence - 1, initialStringIndex
+		)
+		if hasMatched then
+			return hasMatched, debugStr
+		end
+	end
+	pdebug("########################################")
 end
 ----------------------------------------------------------------------------------------------------
 Quantifier.is = function(index, charactersList, parentElement)
@@ -141,6 +187,32 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 	parentElement.quantifier = quantifier
 
 	return index
+end
+
+Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMatcher, treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex
+	)
+
+	local quantifier = currentElement.quantifier
+
+	local maximumOccurrencesOfElement = getMaximumOccurrencesOfElement(
+		quantifier, currentElement, singleElementMatcher, currentCharacter, stringIndex, splitStr)
+
+	pdebug('\tmaximumOccurrencesOfElement', maximumOccurrencesOfElement)
+
+	local minimumOccurrences = quantifier.min
+	if maximumOccurrencesOfElement < minimumOccurrences then
+		return
+	end
+
+	return quantifierMatchMode.greedy(
+		treeMatcher, minimumOccurrences, maximumOccurrencesOfElement,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex
+	)
 end
 
 return Quantifier
