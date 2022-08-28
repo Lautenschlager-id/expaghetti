@@ -116,6 +116,10 @@ Group.isClosing = function(currentCharacter)
 	return currentCharacter == ENUM_CLOSE_GROUP
 end
 
+Group.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_GROUP
+end
+
 Group.execute = function(parser, index, tree, expression, expressionLength, charactersIndex,
 	charactersList, charactersValueList, boolEscapedList, parserMetaData)
 
@@ -137,7 +141,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 		}
 	]]
 	local value = {
-		type = ENUM_ELEMENT_TYPE_GROUP
+		type = ENUM_ELEMENT_TYPE_GROUP,
 	}
 
 	local errorMessage
@@ -178,6 +182,19 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 	tree[tree._index] = value
 
 	return index + 1
+end
+
+Group.match = function(currentElement, treeMatcher,
+	flags,
+	splitStr, strLength,
+	stringIndex)
+
+	local tree = currentElement.tree
+	return treeMatcher(
+		flags, tree, tree._index, 0,
+		splitStr, strLength,
+		stringIndex, stringIndex
+	)
 end
 
 return Group
