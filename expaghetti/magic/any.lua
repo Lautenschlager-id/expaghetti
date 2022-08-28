@@ -15,7 +15,7 @@ end
 Any.execute = function(index, tree)
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_ANY,
+			type = "any",
 		}
 	]]
 	tree._index = tree._index + 1

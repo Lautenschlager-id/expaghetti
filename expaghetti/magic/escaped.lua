@@ -68,7 +68,7 @@ specialEscaped.int = function(currentCharacter, index)
 
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
+			type = "capture_reference",
 			index = 1
 		}
 	]]
@@ -114,7 +114,7 @@ end
 specialEscaped.b = function(currentCharacter, index)
 	--[[
 		{
-			type = ENUM_ELEMENT_TYPE_BOUNDARY,
+			type = "boundary",
 			shouldBeBetweenWord = false,
 			quantifier = false,
 		}

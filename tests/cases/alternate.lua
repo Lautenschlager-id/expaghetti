@@ -93,7 +93,7 @@ return {
 												quantifier = {
 													type = "quantifier",
 													min = 1,
-													max = nil
+													max = 0
 												}
 											}
 										}
@@ -205,7 +205,7 @@ return {
 												quantifier = {
 													type = "quantifier",
 													min = 1,
-													max = nil
+													max = 0
 												}
 											}
 										}
@@ -269,7 +269,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			},

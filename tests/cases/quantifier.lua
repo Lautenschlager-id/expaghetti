@@ -13,7 +13,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			}
 		}
@@ -31,8 +31,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil
+					min = 0,
+					max = 0
 				}
 			}
 		}
@@ -50,7 +50,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1
 				}
 			}
@@ -66,7 +66,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -74,8 +74,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil
+					min = 0,
+					max = 0
 				}
 			},
 			{
@@ -83,7 +83,7 @@ return {
 				value = 'c',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1
 				}
 			}
@@ -103,7 +103,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "lazy"
 				}
 			}
@@ -122,8 +122,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil,
+					min = 0,
+					max = 0,
 					mode = "lazy"
 				}
 			}
@@ -142,7 +142,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "lazy"
 				}
@@ -159,7 +159,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "lazy"
 				}
 			},
@@ -168,8 +168,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil,
+					min = 0,
+					max = 0,
 					mode = "lazy"
 				}
 			},
@@ -178,7 +178,7 @@ return {
 				value = 'c',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "lazy"
 				}
@@ -199,7 +199,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			}
@@ -218,8 +218,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil,
+					min = 0,
+					max = 0,
 					mode = "possessive"
 				}
 			}
@@ -238,7 +238,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "possessive"
 				}
@@ -255,7 +255,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			},
@@ -264,8 +264,8 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil,
+					min = 0,
+					max = 0,
 					mode = "possessive"
 				}
 			},
@@ -274,7 +274,7 @@ return {
 				value = 'c',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "possessive"
 				}
@@ -333,7 +333,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 5,
-					max = nil
+					max = 0
 				}
 			}
 		}
@@ -352,7 +352,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 404,
-					max = nil
+					max = 0
 				}
 			}
 		}
@@ -370,7 +370,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 4
 				}
 			}
@@ -389,7 +389,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 404
 				}
 			}
@@ -487,7 +487,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 5,
-					max = nil,
+					max = 0,
 					mode = "lazy"
 				}
 			}
@@ -507,7 +507,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 404,
-					max = nil,
+					max = 0,
 					mode = "lazy"
 				}
 			}
@@ -526,7 +526,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 4,
 					mode = "lazy"
 				}
@@ -546,7 +546,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 404,
 					mode = "lazy"
 				}
@@ -647,7 +647,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 5,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			}
@@ -667,7 +667,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 404,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			}
@@ -686,7 +686,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 4,
 					mode = "possessive"
 				}
@@ -706,7 +706,7 @@ return {
 				value = 'b',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 404,
 					mode = "possessive"
 				}
@@ -767,7 +767,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			},
@@ -790,8 +790,8 @@ return {
 				value = '*',
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil
+					min = 0,
+					max = 0
 				}
 			},
 			{
@@ -814,7 +814,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 4,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			},
@@ -835,8 +835,8 @@ return {
 				type = "any",
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil,
+					min = 0,
+					max = 0,
 					mode = "lazy"
 				}
 			},
@@ -844,7 +844,7 @@ return {
 				type = "any",
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "lazy"
 				}
@@ -862,7 +862,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -874,7 +874,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			},
@@ -1071,7 +1071,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			}
 		}
@@ -1094,7 +1094,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -1119,8 +1119,8 @@ return {
 				['.'] = true,
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil
+					min = 0,
+					max = 0
 				}
 			},
 			{
@@ -1145,7 +1145,7 @@ return {
 				['.'] = true,
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1
 				}
 			},
@@ -1168,7 +1168,7 @@ return {
 				['.'] = true,
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "lazy"
 				}
@@ -1184,7 +1184,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -1260,7 +1260,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -1285,8 +1285,8 @@ return {
 				},
 				quantifier = {
 					type = "quantifier",
-					min = nil,
-					max = nil
+					min = 0,
+					max = 0
 				}
 			},
 			{
@@ -1311,7 +1311,7 @@ return {
 				},
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1
 				}
 			},
@@ -1334,7 +1334,7 @@ return {
 				},
 				quantifier = {
 					type = "quantifier",
-					min = nil,
+					min = 0,
 					max = 1,
 					mode = "lazy"
 				}
@@ -1350,7 +1350,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			},
 			{
@@ -1427,7 +1427,7 @@ return {
 								quantifier = {
 									type = "quantifier",
 									min = 1,
-									max = nil
+									max = 0
 								}
 							},
 							{
@@ -1456,7 +1456,7 @@ return {
 										quantifier = {
 											type = "quantifier",
 											min = 1,
-											max = nil,
+											max = 0,
 											mode = "lazy"
 										}
 									},
@@ -1471,7 +1471,7 @@ return {
 										quantifier = {
 											type = "quantifier",
 											min = 1,
-											max = nil
+											max = 0
 										}
 									}
 								},
@@ -1567,7 +1567,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil,
+					max = 0,
 					mode = "possessive"
 				}
 			}
@@ -1593,7 +1593,7 @@ return {
 				quantifier = {
 					type = "quantifier",
 					min = 1,
-					max = nil
+					max = 0
 				}
 			}
 		}
