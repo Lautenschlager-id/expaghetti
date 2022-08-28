@@ -30,8 +30,6 @@ local function treeMatcher(
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	pdebug(string.format("GOT INDEX %d AND TREE INDEX %d AND STRING %q", stringIndex, treeIndex, table.concat(splitStr, '', stringIndex + 1)))
-
 	local currentElement, currentCharacter
 
 	while treeIndex < treeLength do
@@ -40,7 +38,7 @@ local function treeMatcher(
 
 		stringIndex = stringIndex + 1
 		currentCharacter = splitStr[stringIndex]
-		pdebug('\t\tcurrentCharacter', currentCharacter)
+
 		if not currentCharacter then
 			return
 		else
@@ -61,7 +59,6 @@ local function treeMatcher(
 		end
 	end
 
-	pdebug('Finished', initialStringIndex, stringIndex)
 	return true,
 		--[[debug:]]splitStr and table.concat(splitStr, '', initialStringIndex + 1, stringIndex)
 end
@@ -69,7 +66,10 @@ end
 local matcher = function(expr, str, flags, stringIndex)
 	flags = flags or { }
 
-	local tree = parser(expr, flags)
+	local tree, errorMessage = parser(expr, flags)
+	if not tree then
+		return false, errorMessage
+	end
 	local treeLength = tree._index
 
 	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
@@ -77,7 +77,6 @@ local matcher = function(expr, str, flags, stringIndex)
 	stringIndex = stringIndex or 0
 
 	while stringIndex < strLength do
-		pdebug('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 		local matched, debugStr = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
@@ -130,17 +129,22 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 --see(matcher(".*", "aba!_@Q22?")) -- valid
 --see(matcher(".+;", "aba!_@Q22?")) -- invalid
 --see(matcher("%d+%??", "aba!_@Q22?")) -- valid (22?)
-see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
-see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
-see(matcher("o+?", "mooon")) -- valid (o)
-see(matcher(".o*.", "mooon")) -- valid (mooon)
-see(matcher(".o?.", "mooon")) -- valid (moo)
-see(matcher(".o*?.", "mooon")) -- valid (mo)
-see(matcher(".o??.", "mooon")) -- valid (mo)
-see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
-see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
-see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
-see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
+--see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
+--see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
+--see(matcher("o+?", "mooon")) -- valid (o)
+--see(matcher(".o*.", "mooon")) -- valid (mooon)
+--see(matcher(".o?.", "mooon")) -- valid (moo)
+--see(matcher(".o*?.", "mooon")) -- valid (mo)
+--see(matcher(".o??.", "mooon")) -- valid (mo)
+--see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
+--see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
+--see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
+--see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
+see(matcher("a+amo", "te aaaaaaamoo")) -- valid (aaaaaaamo)
+see(matcher("a++amo", "te aaaaaaamoo")) -- invalid
+see(matcher("a++mo++", "te aaaaaaamoo")) -- valid (aaaaaaamoo)
+see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
+see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
