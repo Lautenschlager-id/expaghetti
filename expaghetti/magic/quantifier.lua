@@ -12,6 +12,7 @@ local ENUM_OPEN_QUANTIFIER = magicEnum.OPEN_QUANTIFIER
 local ENUM_CLOSE_QUANTIFIER = magicEnum.CLOSE_QUANTIFIER
 local ENUM_QUANTIFIER_SEPARATOR_CHARACTER = magicEnum.QUANTIFIER_SEPARATOR_CHARACTER
 local ENUM_LAZY_QUANTIFIER = magicEnum.LAZY_QUANTIFIER
+local ENUM_POSSESSIVE_QUANTIFIER = magicEnum.POSSESSIVE_QUANTIFIER
 local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
@@ -142,9 +143,7 @@ quantifierMatchMode.default = function(
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	pdebug('\tLooping from ', maximumOccurrencesOfElement, ' to ', minimumOccurrences,
-		' and from index ', stringIndex)
-	local hasMatched
+	local hasMatched, debugStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
 		hasMatched, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
@@ -155,7 +154,6 @@ quantifierMatchMode.default = function(
 			return hasMatched, debugStr
 		end
 	end
-	pdebug("########################################")
 end
 
 quantifierMatchMode.greedy = function(minimumOccurrences, maximumOccurrencesOfElement, ...)
@@ -166,6 +164,21 @@ quantifierMatchMode[quantifierModesEnum[ENUM_LAZY_QUANTIFIER]] = function(minimu
 	maximumOccurrencesOfElement, ...)
 
 	return quantifierMatchMode.default(minimumOccurrences, maximumOccurrencesOfElement, 1, ...)
+end
+
+quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
+	minimumOccurrences, maximumOccurrencesOfElement,
+	treeMatcher,
+	flags, tree, treeLength, treeIndex,
+	splitStr, strLength,
+	stringIndex, initialStringIndex)
+
+	-- Equals to default(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1, ...)
+	return treeMatcher(
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex + maximumOccurrencesOfElement - 1, initialStringIndex
+	)
 end
 ----------------------------------------------------------------------------------------------------
 Quantifier.is = function(index, charactersList, parentElement)
@@ -212,8 +225,6 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 
 	local maximumOccurrencesOfElement = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher, currentCharacter, stringIndex, splitStr)
-
-	pdebug('\tmaximumOccurrencesOfElement', maximumOccurrencesOfElement)
 
 	local minimumOccurrences = quantifier.min
 	if maximumOccurrencesOfElement < minimumOccurrences then
