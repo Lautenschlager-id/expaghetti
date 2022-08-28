@@ -114,13 +114,24 @@ local checkIfHasMode = function(index, charactersList, quantifier)
 end
 
 local getMaximumOccurrencesOfElement = function(quantifier, currentElement, singleElementMatcher,
-	currentCharacter, stringIndex, splitStr)
+	currentCharacter, treeMatcher,
+	flags,
+	splitStr, strLength,
+	stringIndex)
 
 	local maximumOccurrences = quantifier.max
-
 	local totalOccurrences = 0
+
+	local hasMatched
 	repeat
-		if not singleElementMatcher(currentElement, currentCharacter) then
+		local hasMatched = singleElementMatcher(
+			currentElement, currentCharacter, treeMatcher,
+			flags,
+			splitStr, strLength,
+			stringIndex
+		)
+
+		if not hasMatched then
 			break
 		end
 
@@ -224,7 +235,12 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 	local quantifier = currentElement.quantifier
 
 	local maximumOccurrencesOfElement = getMaximumOccurrencesOfElement(
-		quantifier, currentElement, singleElementMatcher, currentCharacter, stringIndex, splitStr)
+		quantifier, currentElement, singleElementMatcher,
+		currentCharacter, treeMatcher,
+		flags,
+		splitStr, strLength,
+		stringIndex
+	)
 
 	local minimumOccurrences = quantifier.min
 	if maximumOccurrencesOfElement < minimumOccurrences then

@@ -162,7 +162,7 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 
-see(matcher("a(b)acate", "abacate"))
+see(matcher("a(ba)?cate", "acate"))
 ----------------------------------------------------------------------------------------------------
 
 return matcher
