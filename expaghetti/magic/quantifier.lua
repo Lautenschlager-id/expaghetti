@@ -122,59 +122,71 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 	local maximumOccurrences = quantifier.max
 	local totalOccurrences = 0
 
-	local hasMatched
+	local hasMatched, iniStr, endStr, debugStr
 	repeat
-		local hasMatched = singleElementMatcher(
+		print('init quantifier singleElementMatcher')
+		hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
 			flags,
 			splitStr, strLength,
 			stringIndex
 		)
+		print('end quantifier singleElementMatcher')
 
 		if not hasMatched then
+			print('broke for character ', currentCharacter)
 			break
 		end
+		print('\tmatched for characters ', table.concat(splitStr, '', iniStr, endStr))
 
 		totalOccurrences = totalOccurrences + 1
 		if totalOccurrences == maximumOccurrences then
 			break
 		end
+		print('\ttotalOccurrences is', totalOccurrences)
 
-		stringIndex = stringIndex + 1
+		stringIndex = (endStr or stringIndex) + 1
 		currentCharacter = splitStr[stringIndex]
 	until false
 
 	return totalOccurrences
 end
 
-quantifierMatchMode.default = function(
+local matchBacktrackElement = function(
 	minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection,
 	treeMatcher,
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	local hasMatched, debugStr
+	local hasMatched, iniStr, endStr, debugStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		hasMatched, debugStr = treeMatcher(
+		print("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
+		hasMatched, iniStr, endStr, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			stringIndex + occurrence - 1, initialStringIndex
 		)
+		print('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
+			'\n\t: hasMatched: ', hasMatched,
+			'\n\t: str considered: ', table.concat(splitStr, '', stringIndex + occurrence),
+			'\n\t: debugStr: ', table.concat(splitStr, '', iniStr, endStr)
+		)
+
 		if hasMatched then
-			return hasMatched, debugStr
+			return hasMatched, iniStr, endStr, debugStr
 		end
 	end
 end
 
 quantifierMatchMode.greedy = function(minimumOccurrences, maximumOccurrencesOfElement, ...)
-	return quantifierMatchMode.default(maximumOccurrencesOfElement, minimumOccurrences, -1, ...)
+	return matchBacktrackElement(maximumOccurrencesOfElement, minimumOccurrences, -1, ...)
 end
 
 quantifierMatchMode[quantifierModesEnum[ENUM_LAZY_QUANTIFIER]] = function(minimumOccurrences,
 	maximumOccurrencesOfElement, ...)
 
-	return quantifierMatchMode.default(minimumOccurrences, maximumOccurrencesOfElement, 1, ...)
+	return matchBacktrackElement(minimumOccurrences, maximumOccurrencesOfElement, 1, ...)
 end
 
 quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
@@ -184,7 +196,7 @@ quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	-- Equals to default(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1, ...)
+	-- Equals to matchBacktrackElement(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1,)
 	return treeMatcher(
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
@@ -241,6 +253,11 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		splitStr, strLength,
 		stringIndex
 	)
+
+	if currentElement.type == 'group' then
+		pdebug('\t\t\t\tmaximum occurrences of group : ', maximumOccurrencesOfElement)
+		--see(currentElement)
+	end
 
 	local minimumOccurrences = quantifier.min
 	if maximumOccurrencesOfElement < minimumOccurrences then

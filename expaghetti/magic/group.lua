@@ -190,11 +190,20 @@ Group.match = function(currentElement, treeMatcher,
 	stringIndex)
 
 	local tree = currentElement.tree
-	return treeMatcher(
+
+	local hasMatched, iniStr, endStr, debugStr = treeMatcher(
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex
 	)
+
+	if hasMatched then
+		print('@@group matched ',
+			table.concat(splitStr, '', iniStr, endStr),
+			'and string goes from ', stringIndex, ' to ', endStr)
+	end
+
+	return hasMatched, iniStr, endStr, debugStr
 end
 
 return Group

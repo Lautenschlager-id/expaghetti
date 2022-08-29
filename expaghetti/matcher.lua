@@ -31,9 +31,9 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 			splitStr, strLength,
 			stringIndex - 1
 		)
-	else
-		return Literal.match(currentElement, currentCharacter)
 	end
+
+	return Literal.match(currentElement, currentCharacter)
 end
 
 local function treeMatcher(
@@ -50,33 +50,33 @@ local function treeMatcher(
 		stringIndex = stringIndex + 1
 		currentCharacter = splitStr[stringIndex]
 
-		if not currentCharacter then
-			return
-		else
-			local hasQuantifier = Quantifier.isElement(currentElement)
+		local hasQuantifier = Quantifier.isElement(currentElement)
 
-			if not hasQuantifier then
-				if not singleElementMatcher(
-					currentElement, currentCharacter, treeMatcher,
-					flags,
-					splitStr, strLength,
-					stringIndex
-				) then
-					return
-				end
-			else
-				return Quantifier.loopOver(
-					currentElement, currentCharacter, singleElementMatcher, treeMatcher,
-					flags, tree, treeLength, treeIndex,
-					splitStr, strLength,
-					stringIndex, initialStringIndex
-				)
+		if not hasQuantifier then
+			--pdebug('\t singleElementMatcher', currentElement.type, currentCharacter)
+			local hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
+				currentElement, currentCharacter, treeMatcher,
+				flags,
+				splitStr, strLength,
+				stringIndex
+			)
+
+			if not hasMatched then
+				return
+			elseif endStr then
+				stringIndex = endSt
 			end
+		else
+			return Quantifier.loopOver(
+				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
+				flags, tree, treeLength, treeIndex,
+				splitStr, strLength,
+				stringIndex, initialStringIndex
+			)
 		end
 	end
 
-	return true,
-		--[[debug:]]splitStr and table.concat(splitStr, '', initialStringIndex + 1, stringIndex)
+	return true, initialStringIndex + 1, stringIndex, --[[debug:]]splitStr
 end
 
 local matcher = function(expr, str, flags, stringIndex)
@@ -92,15 +92,16 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	stringIndex = stringIndex or 0
 
+	local hasMatched, iniStr, endStr, debugStr
 	while stringIndex < strLength do
-		local matched, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr, debugStr = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex
 		)
 
-		if matched then
-			return matched, debugStr
+		if hasMatched then
+			return hasMatched, iniStr, endStr, debugStr
 		end
 
 		stringIndex = stringIndex + 1
@@ -110,8 +111,8 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Debugging
 local p = require("./helpers/pretty-print")
-_G.see = function(t, s) print(s and ("%q"):format(s), p(t, true)) end
-local printdebug = false
+_G.see = function(t, i, e, tmpS) print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true)) end
+local printdebug = true
 _G.pdebug = function(...) if printdebug then print(...) end end
 
 -- see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
@@ -161,8 +162,16 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a++mo++", "te aaaaaaamoo")) -- valid (aaaaaaamoo)
 -- see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
+-- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
-see(matcher("a(ba)?cate", "acate"))
+--see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+--see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+--see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+
+--see(matcher("a(ba(c(a)(t)?e))e?", "abacate"))
+--see(matcher("a(b?c?)a)+", "abacate"))-------
+--see(matcher("a([bc]a)+", "abacate"))-------
+see(matcher("([bc]a)+", "abacate"))-------
 ----------------------------------------------------------------------------------------------------
 
 return matcher
