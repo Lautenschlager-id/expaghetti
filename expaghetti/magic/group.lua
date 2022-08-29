@@ -200,7 +200,7 @@ Group.match = function(currentElement, treeMatcher,
 	if hasMatched then
 		print('@@group matched ',
 			table.concat(splitStr, '', iniStr, endStr),
-			'and string goes from ', stringIndex, ' to ', endStr)
+			'and string goes from ', iniStr, ' to ', endStr)
 	end
 
 	return hasMatched, iniStr, endStr, debugStr

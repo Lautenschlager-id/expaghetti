@@ -120,7 +120,9 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 	stringIndex)
 
 	local maximumOccurrences = quantifier.max
+
 	local totalOccurrences = 0
+	local endStringPositions = { }
 
 	local hasMatched, iniStr, endStr, debugStr
 	repeat
@@ -137,9 +139,15 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 			print('broke for character ', currentCharacter)
 			break
 		end
+
+		iniStr = iniStr or stringIndex
+		endStr = endStr or stringIndex
+
 		print('\tmatched for characters ', table.concat(splitStr, '', iniStr, endStr))
 
 		totalOccurrences = totalOccurrences + 1
+		endStringPositions[totalOccurrences] = endStr
+
 		if totalOccurrences == maximumOccurrences then
 			break
 		end
@@ -149,27 +157,34 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		currentCharacter = splitStr[stringIndex]
 	until false
 
-	return totalOccurrences
+	return totalOccurrences, endStringPositions
 end
 
 local matchBacktrackElement = function(
-	minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection,
+	minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
 	treeMatcher,
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	local hasMatched, iniStr, endStr, debugStr
+	local hasMatched, iniStr, endStr, debugStr, debugIni
+
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
 		print("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
+
+		debugIni = endStringPositions[occurrence] or (stringIndex - 1)
+		print('@@@@@@@@@@@@@@@@@@@@@@@@@@ stringIndex vs debugIni', stringIndex + occurrence - 1 ,
+			debugIni)
+
 		hasMatched, iniStr, endStr, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			stringIndex + occurrence - 1, initialStringIndex
+			debugIni, --stringIndex + occurrence - 1,
+			initialStringIndex
 		)
 		print('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
 			'\n\t: hasMatched: ', hasMatched,
-			'\n\t: str considered: ', table.concat(splitStr, '', stringIndex + occurrence),
+			'\n\t: str considered: ', table.concat(splitStr, '', debugIni),--stringIndex + occurrence),
 			'\n\t: debugStr: ', table.concat(splitStr, '', iniStr, endStr)
 		)
 
@@ -179,29 +194,25 @@ local matchBacktrackElement = function(
 	end
 end
 
-quantifierMatchMode.greedy = function(minimumOccurrences, maximumOccurrencesOfElement, ...)
-	return matchBacktrackElement(maximumOccurrencesOfElement, minimumOccurrences, -1, ...)
+quantifierMatchMode.greedy = function(minimumOccurrences, maximumOccurrencesOfElement,
+	endStringPositions, ...)
+
+	return matchBacktrackElement(maximumOccurrencesOfElement, minimumOccurrences, -1,
+		endStringPositions, ...)
 end
 
 quantifierMatchMode[quantifierModesEnum[ENUM_LAZY_QUANTIFIER]] = function(minimumOccurrences,
-	maximumOccurrencesOfElement, ...)
+	maximumOccurrencesOfElement, endStringPositions, ...)
 
-	return matchBacktrackElement(minimumOccurrences, maximumOccurrencesOfElement, 1, ...)
+	return matchBacktrackElement(minimumOccurrences, maximumOccurrencesOfElement, 1,
+		endStringPositions, ...)
 end
 
 quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
-	minimumOccurrences, maximumOccurrencesOfElement,
-	treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex)
+	minimumOccurrences, maximumOccurrencesOfElement, endStringPositions, ...)
 
-	-- Equals to matchBacktrackElement(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1,)
-	return treeMatcher(
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex + maximumOccurrencesOfElement - 1, initialStringIndex
-	)
+	return matchBacktrackElement(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1,
+		endStringPositions, ...)
 end
 ----------------------------------------------------------------------------------------------------
 Quantifier.is = function(index, charactersList, parentElement)
@@ -246,7 +257,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 
 	local quantifier = currentElement.quantifier
 
-	local maximumOccurrencesOfElement = getMaximumOccurrencesOfElement(
+	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
 		flags,
@@ -266,7 +277,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 
 	local mode = quantifier.mode or "greedy"
 	return quantifierMatchMode[mode](
-		minimumOccurrences, maximumOccurrencesOfElement,
+		minimumOccurrences, maximumOccurrencesOfElement, endStringPositions,
 		treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,

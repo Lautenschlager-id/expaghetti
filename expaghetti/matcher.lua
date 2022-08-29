@@ -64,7 +64,7 @@ local function treeMatcher(
 			if not hasMatched then
 				return
 			elseif endStr then
-				stringIndex = endSt
+				stringIndex = endStr
 			end
 		else
 			return Quantifier.loopOver(
@@ -164,14 +164,19 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
+--see(matcher("a(b)acate", "abacate")) -- valid (acate)
 --see(matcher("a(ba)?cate", "acate")) -- valid (acate)
 --see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
 --see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
 
---see(matcher("a(ba(c(a)(t)?e))e?", "abacate"))
---see(matcher("a(b?c?)a)+", "abacate"))-------
---see(matcher("a([bc]a)+", "abacate"))-------
-see(matcher("([bc]a)+", "abacate"))-------
+--see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
+--see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+--see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+--see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+--see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+--see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+--see(matcher("(b?c?a?)+", "abacate"))-------
 ----------------------------------------------------------------------------------------------------
 
 return matcher
