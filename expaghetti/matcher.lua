@@ -79,6 +79,7 @@ local function treeMatcher(
 	if stringIndex == initialStringIndex then
 		return
 	end
+
 	return true, initialStringIndex + 1, stringIndex, --[[debug:]]splitStr
 end
 
@@ -115,7 +116,7 @@ end
 -- Debugging
 local p = require("./helpers/pretty-print")
 _G.see = function(t, i, e, tmpS) print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true)) end
-local printdebug = true
+local printdebug = false
 _G.pdebug = function(...) if printdebug then print(...) end end
 
 -- see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
@@ -166,29 +167,21 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
-
---see(matcher("a(b)acate", "abacate")) -- valid (acate)
---see(matcher("a(ba)?cate", "acate")) -- valid (acate)
---see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
---see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
-
---see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
---see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
---see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
---see(matcher("([bc]a)+", "abacate")) -- valid (baca)
---see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
---see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
---see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
-
--- IT'S NOT GLITCHY, IT JUST WILL LOOP FOREVER BECAUSE IT CAN ALWAYS BE ''
---see(matcher("(b?c?a?){100}", "abacate"))-------
---[[
-	if stringIndex == initialStringIndex then
-		return
-	end
-]]
-see(matcher("(b?c?a?)+", "abacate"))-------
-
+see(matcher("a(b)acate", "abacate")) -- valid (abacate)
+see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
+see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
+see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
+see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
+see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

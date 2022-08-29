@@ -198,7 +198,7 @@ Group.match = function(currentElement, treeMatcher,
 	)
 
 	if hasMatched then
-		print('@@group matched ',
+		pdebug('@@group matched ',
 			table.concat(splitStr, '', iniStr, endStr),
 			'and string goes from ', iniStr, ' to ', endStr)
 	end

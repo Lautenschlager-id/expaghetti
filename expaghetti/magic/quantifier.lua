@@ -126,24 +126,24 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 
 	local hasMatched, iniStr, endStr, debugStr
 	repeat
-		print('init quantifier singleElementMatcher')
+		pdebug('init quantifier singleElementMatcher')
 		hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
 			flags,
 			splitStr, strLength,
 			stringIndex
 		)
-		print('end quantifier singleElementMatcher')
+		pdebug('end quantifier singleElementMatcher')
 
 		if not hasMatched then
-			print('broke for character ', currentCharacter)
+			pdebug('broke for character ', currentCharacter)
 			break
 		end
 
 		iniStr = iniStr or stringIndex
 		endStr = endStr or stringIndex
 
-		print('\tmatched for characters ', table.concat(splitStr, '', iniStr, endStr))
+		pdebug('\tmatched for characters ', table.concat(splitStr, '', iniStr, endStr))
 
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
@@ -151,7 +151,7 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		if totalOccurrences == maximumOccurrences then
 			break
 		end
-		print('\ttotalOccurrences is', totalOccurrences)
+		pdebug('\ttotalOccurrences is', totalOccurrences)
 
 		stringIndex = (endStr or stringIndex) + 1
 		currentCharacter = splitStr[stringIndex]
@@ -169,13 +169,11 @@ local matchBacktrackElement = function(
 
 	local hasMatched, iniStr, endStr, debugStr, debugIni
 
-	local loop = 0
-
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		print("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
+		pdebug("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
 
 		debugIni = endStringPositions[occurrence] or (stringIndex - 1)
-		print('@@@@@@@@@@@@@@@@@@@@@@@@@@ stringIndex vs debugIni', stringIndex + occurrence - 1 ,
+		pdebug('@@@@@@@@@@@@@@@@@@@@@@@@@@ stringIndex vs debugIni', stringIndex + occurrence - 1 ,
 			debugIni)
 
 		hasMatched, iniStr, endStr, debugStr = treeMatcher(
@@ -184,13 +182,12 @@ local matchBacktrackElement = function(
 			debugIni, --stringIndex + occurrence - 1,
 			initialStringIndex
 		)
-		print('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
+		pdebug('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
 			'\n\t: hasMatched: ', hasMatched,
 			'\n\t: str considered: ', table.concat(splitStr, '', debugIni+1),--stringIndex + occurrence),
 			'\n\t: debugStr: ', table.concat(splitStr, '', iniStr, endStr)
 		)
 
-		if loop == 1 then return end
 		if hasMatched then
 			return hasMatched, iniStr, endStr, debugStr
 		end
