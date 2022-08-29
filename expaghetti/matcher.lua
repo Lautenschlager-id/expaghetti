@@ -76,6 +76,9 @@ local function treeMatcher(
 		end
 	end
 
+	if stringIndex == initialStringIndex then
+		return
+	end
 	return true, initialStringIndex + 1, stringIndex, --[[debug:]]splitStr
 end
 
@@ -175,8 +178,17 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 --see(matcher("([bc]a)+", "abacate")) -- valid (baca)
 --see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
 --see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
-see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
---see(matcher("(b?c?a?)+", "abacate"))-------
+--see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+
+-- IT'S NOT GLITCHY, IT JUST WILL LOOP FOREVER BECAUSE IT CAN ALWAYS BE ''
+--see(matcher("(b?c?a?){100}", "abacate"))-------
+--[[
+	if stringIndex == initialStringIndex then
+		return
+	end
+]]
+see(matcher("(b?c?a?)+", "abacate"))-------
+
 ----------------------------------------------------------------------------------------------------
 
 return matcher

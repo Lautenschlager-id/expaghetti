@@ -169,6 +169,8 @@ local matchBacktrackElement = function(
 
 	local hasMatched, iniStr, endStr, debugStr, debugIni
 
+	local loop = 0
+
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
 		print("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
 
@@ -184,10 +186,11 @@ local matchBacktrackElement = function(
 		)
 		print('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
 			'\n\t: hasMatched: ', hasMatched,
-			'\n\t: str considered: ', table.concat(splitStr, '', debugIni),--stringIndex + occurrence),
+			'\n\t: str considered: ', table.concat(splitStr, '', debugIni+1),--stringIndex + occurrence),
 			'\n\t: debugStr: ', table.concat(splitStr, '', iniStr, endStr)
 		)
 
+		if loop == 1 then return end
 		if hasMatched then
 			return hasMatched, iniStr, endStr, debugStr
 		end
@@ -265,10 +268,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		stringIndex
 	)
 
-	if currentElement.type == 'group' then
-		pdebug('\t\t\t\tmaximum occurrences of group : ', maximumOccurrencesOfElement)
-		--see(currentElement)
-	end
+	pdebug('\t\t\t\tmaximum occurrences  : ', maximumOccurrencesOfElement)
 
 	local minimumOccurrences = quantifier.min
 	if maximumOccurrencesOfElement < minimumOccurrences then
