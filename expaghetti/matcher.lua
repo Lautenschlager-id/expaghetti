@@ -131,10 +131,19 @@ _G.see = function(t, i, e, m, tmpS)
 	if not m then return end
 	print('\t\t---------Captures---------')
 	for x = 1, #m.groupCapturesInitStringPositions do
-		print('\tcapture', x, ' ('.. (m.groupCapturesInitStringPositions[x] or 0) .. ','
-			.. (m.groupCapturesEndStringPositions[x] or 0) ..') =',
-			string.format("%q", table.concat(tmpS, '',
-				m.groupCapturesInitStringPositions[x], m.groupCapturesEndStringPositions[x])))
+		local pi, pe = m.groupCapturesInitStringPositions[x] or 0,
+			m.groupCapturesEndStringPositions[x] or 0
+		print(string.format("\tcapture\t%d\t(%d,%d) = \t%q", x, pi, pe,
+			table.concat(tmpS, '', pi, pe)))
+	end
+	print('\t\t---------NamedCaptures---------')
+	for k, v in next, m.groupCapturesInitStringPositions do
+		if not tonumber(k) then
+			local pi, pe = m.groupCapturesInitStringPositions[k] or 0,
+				m.groupCapturesEndStringPositions[k] or 0
+			print(string.format("\tcapture\t%q\t(%d,%d) = \t%q", k, pi, pe,
+				table.concat(tmpS, '', pi, pe)))
+		end
 	end
 	print('\t\t---------Position Captures---------')
 	for x = 1, #m.positionCaptures do
@@ -150,6 +159,7 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
 -- see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
 -- see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
+
 -- see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
 -- see(matcher("[ro] d", "abacateiro d\3o abc!")) -- valid (o d)
 -- see(matcher("[^ro] [da]", "abacateiro d\3u abc!")) -- valid (u a)
@@ -157,6 +167,7 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
 -- see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
 -- see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
+
 -- see(matcher("m(o*)n", "mn")) -- valid
 -- see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
 -- see(matcher("mo*n", "mon")) -- valid
@@ -196,30 +207,33 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
---see(matcher("a(b)acate", "abacate")) -- valid (abacate)
---see(matcher("a(ba)?cate", "acate")) -- valid (acate)
---see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
---see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
---see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
---see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
---see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
---see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
---see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
---see(matcher("([bc]a)+", "abacate")) -- valid (baca)
---see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
---see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
---see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
---see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
---see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
---see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
---see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
---see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
---see(matcher("(a??)", "abacate")) -- valid ('')
+-- see(matcher("a(b)acate", "abacate")) -- valid (abacate)
+-- see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+-- see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
+-- see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+-- see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+-- see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
+-- see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
+-- see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+-- see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+-- see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+-- see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+-- see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+-- see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+-- see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
+-- see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
+-- see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
+-- see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
+-- see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
+-- see(matcher("(a??)", "abacate")) -- valid ('')
 
-see(matcher("a()[bt]e", "abacate")) -- valid 6
-see(matcher("()", "abacate")) -- valid 1
-see(matcher("()(a()b(()a)()c()a()t()e())()().?", "abacate")) -- valid
-see(matcher("(b?c?a?())+", "abacate")) -- valid (abaca)
+-- see(matcher("a()[bt]e", "abacate")) -- valid 6
+-- see(matcher("()", "abacate")) -- valid 1
+-- see(matcher("()(a()b(()a)()c()a()t()e())()().?", "abacate")) -- valid
+-- see(matcher("(b?c?a?())+", "abacate")) -- valid (abaca) (6)
+
+--see(matcher("(?<oi>.)", "banana")) -- valid (b)
+--see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

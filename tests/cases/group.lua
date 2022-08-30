@@ -447,7 +447,6 @@ return {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
 						name = "named",
 						tree = {
@@ -475,7 +474,6 @@ return {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
 						name = "n4m3d_",
 						tree = {
@@ -498,7 +496,6 @@ return {
 			},
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
 				name = "_007",
 				tree = {
@@ -716,21 +713,18 @@ return {
 			_index = 3,
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
 				name = "abc",
 				tree = {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
 						name = "def",
 						tree = {
 							_index = 1,
 							{
 								type = "group",
-								index = 3,
 								hasBehavior = true,
 								name = "ghi",
 								tree = {
