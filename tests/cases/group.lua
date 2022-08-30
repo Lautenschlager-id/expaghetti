@@ -5,6 +5,7 @@ return {
 			_index = 1,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -25,6 +26,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -49,6 +51,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 2,
 					{
@@ -57,10 +60,12 @@ return {
 					},
 					{
 						type = "group",
+						index = 2,
 						tree = {
 							_index = 2,
 							{
 								type = "group",
+								index = 3,
 								tree = {
 									_index = 2,
 									{
@@ -69,6 +74,7 @@ return {
 									},
 									{
 										type = "group",
+										index = 4,
 										tree = {
 											_index = 1,
 											{
@@ -129,6 +135,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 3,
 					{
@@ -163,6 +170,7 @@ return {
 					_index = 1,
 					{
 						type = "group",
+						index = 1,
 						tree = {
 							_index = 1,
 							{
@@ -188,6 +196,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				isAtomic = true,
 				tree = {
@@ -200,6 +209,7 @@ return {
 					},
 					{
 						type = "group",
+						index = 2,
 						tree = {
 							_index = 1,
 							{
@@ -223,6 +233,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				isLookahead = true,
 				isNegative = true,
@@ -230,6 +241,7 @@ return {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						isLookahead = true,
 						tree = {
@@ -255,6 +267,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
@@ -262,6 +275,7 @@ return {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						isLookahead = true,
 						tree = {
@@ -287,6 +301,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
@@ -294,6 +309,7 @@ return {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						isLookbehind = true,
 						tree = {
@@ -317,7 +333,101 @@ return {
 			{
 				type = "group",
 				hasBehavior = true,
+				disableCapture = true
+			}
+		}
+	},
+	{
+		regex = "(.)(?:.)(.)",
+		parsed = {
+			_index = 3,
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				hasBehavior = true,
 				disableCapture = true,
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				index = 2,
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			}
+		}
+	},
+	{
+		regex = "(.)(?:.(.(.)))(.)",
+		parsed = {
+			_index = 3,
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
+			},
+			{
+				type = "group",
+				hasBehavior = true,
+				disableCapture = true,
+				tree = {
+					_index = 2,
+					{
+						type = "any"
+					},
+					{
+						type = "group",
+						index = 2,
+						tree = {
+							_index = 2,
+							{
+								type = "any"
+							},
+							{
+								type = "group",
+								index = 3,
+								tree = {
+									_index = 1,
+									{
+										type = "any"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			{
+				type = "group",
+				index = 4,
+				tree = {
+					_index = 1,
+					{
+						type = "any"
+					}
+				}
 			}
 		}
 	},
@@ -330,10 +440,12 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						name = "named",
 						tree = {
@@ -356,10 +468,12 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						name = "n4m3d_",
 						tree = {
@@ -382,6 +496,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				name = "_007",
 				tree = {
@@ -399,6 +514,7 @@ return {
 			_index = 5,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -408,6 +524,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 2,
 				tree = {
 					_index = 1,
 					{
@@ -435,6 +552,7 @@ return {
 			_index = 5,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -466,6 +584,7 @@ return {
 			_index = 13,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -475,6 +594,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 2,
 				tree = {
 					_index = 1,
 					{
@@ -484,6 +604,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 3,
 				tree = {
 					_index = 1,
 					{
@@ -493,6 +614,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 4,
 				tree = {
 					_index = 1,
 					{
@@ -502,6 +624,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 5,
 				tree = {
 					_index = 1,
 					{
@@ -511,6 +634,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 6,
 				tree = {
 					_index = 1,
 					{
@@ -520,6 +644,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 7,
 				tree = {
 					_index = 1,
 					{
@@ -529,6 +654,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 8,
 				tree = {
 					_index = 1,
 					{
@@ -538,6 +664,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 9,
 				tree = {
 					_index = 1,
 					{
@@ -547,6 +674,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 10,
 				tree = {
 					_index = 1,
 					{
@@ -556,6 +684,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 11,
 				tree = {
 					_index = 1,
 					{
@@ -565,6 +694,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 12,
 				tree = {
 					_index = 1,
 					{
@@ -584,18 +714,21 @@ return {
 			_index = 3,
 			{
 				type = "group",
+				index = 1,
 				hasBehavior = true,
 				name = "abc",
 				tree = {
 					_index = 1,
 					{
 						type = "group",
+						index = 2,
 						hasBehavior = true,
 						name = "def",
 						tree = {
 							_index = 1,
 							{
 								type = "group",
+								index = 3,
 								hasBehavior = true,
 								name = "ghi",
 								tree = {

@@ -135,6 +135,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 			isLookbehind = false,
 			isNegative = false,
 			name = "",
+			index = 1,
 			tree = {
 				...
 			}
@@ -153,6 +154,11 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 
 	-- A group with any value
 	if expression[index] ~= ENUM_CLOSE_GROUP then
+		if not value.disableCapture then
+			parserMetaData.groupIndex = parserMetaData.groupIndex + 1
+			value.index = parserMetaData.groupIndex
+		end
+
 		local groupTree
 		groupTree, index = parser(nil, nil,
 			true, false, index, expression,
@@ -187,17 +193,34 @@ end
 Group.match = function(currentElement, treeMatcher,
 	flags,
 	splitStr, strLength,
-	stringIndex)
+	stringIndex,
+	matcherMetaData)
 
 	local tree = currentElement.tree
 
-	local hasMatched, iniStr, endStr, debugStr = treeMatcher(
+	local hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
-		stringIndex, stringIndex
+		stringIndex, stringIndex,
+		matcherMetaData
 	)
 
-	return hasMatched, iniStr, endStr, debugStr
+	local groupIndex = currentElement.index
+	if groupIndex then
+		local groupCapturesInitStringPositions, groupCapturesEndStringPositions =
+			matcherMetaData.groupCapturesInitStringPositions,
+			matcherMetaData.groupCapturesEndStringPositions
+
+		if hasMatched and iniStr <= endStr then
+			groupCapturesInitStringPositions[groupIndex] = iniStr
+			groupCapturesEndStringPositions[groupIndex] = endStr
+		elseif not groupCapturesInitStringPositions[groupIndex] then
+			groupCapturesInitStringPositions[groupIndex] = 2
+			groupCapturesEndStringPositions[groupIndex] = 1
+		end
+	end
+
+	return hasMatched, iniStr, endStr, matcherMetaData, debugStr
 end
 
 return Group

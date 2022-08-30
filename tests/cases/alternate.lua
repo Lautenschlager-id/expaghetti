@@ -73,6 +73,7 @@ return {
 						},
 						{
 							type = "group",
+							index = 1,
 							tree = {
 								_index = 1,
 								{
@@ -125,6 +126,7 @@ return {
 						},
 						{
 							type = "group",
+							index = 1,
 							tree = {
 								_index = 1,
 								{
@@ -135,6 +137,7 @@ return {
 											_index = 1,
 											{
 												type = "group",
+												index = 2,
 												tree = {
 													_index = 1,
 													{
@@ -172,6 +175,7 @@ return {
 																},
 																{
 																	type = "group",
+																	index = 3,
 																	tree = {
 																		_index = 1,
 																		{
@@ -301,6 +305,53 @@ return {
 			{
 				type = "literal",
 				value = 'd'
+			}
+		}
+	},
+	{
+		regex = '((a)|(b))',
+		parsed = {
+			_index = 1,
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					_index = 1,
+					{
+						type = "alternate",
+						trees = {
+							_index = 2,
+							{
+								_index = 1,
+								{
+									type = "group",
+									index = 2,
+									tree = {
+										_index = 1,
+										{
+											type = "literal",
+											value = 'a'
+										}
+									}
+								}
+							},
+							{
+								_index = 1,
+								{
+									type = "group",
+									index = 3,
+									tree = {
+										_index = 1,
+										{
+											type = "literal",
+											value = 'b'
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	},

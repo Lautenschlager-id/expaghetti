@@ -117,7 +117,8 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 	currentCharacter, treeMatcher,
 	flags,
 	splitStr, strLength,
-	stringIndex)
+	stringIndex,
+	matcherMetaData)
 
 	local maximumOccurrences = quantifier.max
 
@@ -130,7 +131,8 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 			currentElement, currentCharacter, treeMatcher,
 			flags,
 			splitStr, strLength,
-			stringIndex
+			stringIndex,
+			matcherMetaData
 		)
 
 		if not hasMatched then
@@ -142,7 +144,7 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
 
-		if totalOccurrences == maximumOccurrences then
+		if totalOccurrences == maximumOccurrences or (iniStr and iniStr > endStr) then
 			break
 		end
 
@@ -158,19 +160,21 @@ local matchBacktrackElement = function(
 	treeMatcher,
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
-	stringIndex, initialStringIndex)
+	stringIndex, initialStringIndex,
+	matcherMetaData)
 
-	local hasMatched, iniStr, endStr, debugStr
+	local hasMatched, iniStr, endStr, _, debugStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		hasMatched, iniStr, endStr, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			endStringPositions[occurrence] or (stringIndex - 1),
-			initialStringIndex
+			initialStringIndex,
+			matcherMetaData
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
 		end
 	end
 end
@@ -233,7 +237,8 @@ end
 Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex, initialStringIndex
+		stringIndex, initialStringIndex,
+		matcherMetaData
 	)
 
 	local quantifier = currentElement.quantifier
@@ -243,7 +248,8 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		currentCharacter, treeMatcher,
 		flags,
 		splitStr, strLength,
-		stringIndex
+		stringIndex,
+		matcherMetaData
 	)
 
 	local minimumOccurrences = quantifier.min
@@ -257,7 +263,8 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex, initialStringIndex
+		stringIndex, initialStringIndex,
+		matcherMetaData
 	)
 end
 

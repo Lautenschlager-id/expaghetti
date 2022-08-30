@@ -73,7 +73,8 @@ local function parser(expr, flags,
 
 		-- Data shared for all sub-groups
 		metaData = {
-			groupNames = { }
+			groupNames = { },
+			groupIndex = 0,
 		}
 
 		index = 1
