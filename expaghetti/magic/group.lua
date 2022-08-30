@@ -205,12 +205,9 @@ Group.match = function(currentElement, treeMatcher,
 		metaData
 	)
 
-	if hasMatched then
-		local index = metaData.groupCaptureIndex + 1
-
-		metaData.groupCaptureIndex = index
-		metaData.groupCapturesInitStringPositions[index] = iniStr
-		metaData.groupCapturesEndStringPositions[index] = endStr
+	if hasMatched and currentElement.index then
+		metaData.groupCapturesInitStringPositions[currentElement.index] = iniStr
+		metaData.groupCapturesEndStringPositions[currentElement.index] = endStr
 	end
 
 	return hasMatched, iniStr, endStr, metaData, debugStr

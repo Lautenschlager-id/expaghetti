@@ -144,7 +144,7 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
 
-		if totalOccurrences == maximumOccurrences or (iniStr > endStr) then
+		if totalOccurrences == maximumOccurrences or (iniStr and iniStr > endStr) then
 			break
 		end
 
