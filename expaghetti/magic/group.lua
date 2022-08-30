@@ -198,16 +198,26 @@ Group.match = function(currentElement, treeMatcher,
 
 	local tree = currentElement.tree
 
-	local hasMatched, iniStr, endStr, metaData, debugStr = treeMatcher(
+	local hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
 		metaData
 	)
 
-	if hasMatched and currentElement.index then
-		metaData.groupCapturesInitStringPositions[currentElement.index] = iniStr
-		metaData.groupCapturesEndStringPositions[currentElement.index] = endStr
+	local groupIndex = currentElement.index
+	if groupIndex then
+		local groupCapturesInitStringPositions, groupCapturesEndStringPositions =
+			metaData.groupCapturesInitStringPositions, metaData.groupCapturesEndStringPositions
+
+		if hasMatched and iniStr <= endStr then
+			print("register index ", currentElement.index, iniStr, endStr, hasMatched)
+			groupCapturesInitStringPositions[groupIndex] = iniStr
+			groupCapturesEndStringPositions[groupIndex] = endStr
+		elseif not groupCapturesInitStringPositions[groupIndex] then
+			groupCapturesInitStringPositions[groupIndex] = 2
+			groupCapturesEndStringPositions[groupIndex] = 1
+		end
 	end
 
 	return hasMatched, iniStr, endStr, metaData, debugStr
