@@ -75,6 +75,7 @@ local function parser(expr, flags,
 		metaData = {
 			groupNames = { },
 			groupIndex = 0,
+			positionCaptureIndex = 0,
 		}
 
 		index = 1
