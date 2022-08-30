@@ -187,17 +187,27 @@ end
 Group.match = function(currentElement, treeMatcher,
 	flags,
 	splitStr, strLength,
-	stringIndex)
+	stringIndex,
+	metaData)
 
 	local tree = currentElement.tree
 
-	local hasMatched, iniStr, endStr, debugStr = treeMatcher(
+	local hasMatched, iniStr, endStr, metaData, debugStr = treeMatcher(
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
-		stringIndex, stringIndex
+		stringIndex, stringIndex,
+		metaData
 	)
 
-	return hasMatched, iniStr, endStr, debugStr
+	if hasMatched then
+		local index = metaData.groupCaptureIndex + 1
+
+		metaData.groupCaptureIndex = index
+		metaData.groupCapturesInitStringPositions[index] = iniStr
+		metaData.groupCapturesEndStringPositions[index] = endStr
+	end
+
+	return hasMatched, iniStr, endStr, metaData, debugStr
 end
 
 return Group

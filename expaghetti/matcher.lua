@@ -16,7 +16,8 @@ local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 local singleElementMatcher = function(currentElement, currentCharacter, treeMatcher,
 	flags,
 	splitStr, strLength,
-	stringIndex)
+	stringIndex,
+	metaData)
 
 	if not currentCharacter then
 		return
@@ -29,7 +30,8 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 			currentElement, treeMatcher,
 			flags,
 			splitStr, strLength,
-			stringIndex - 1
+			stringIndex - 1,
+			metaData
 		)
 	end
 
@@ -39,7 +41,16 @@ end
 local function treeMatcher(
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
-	stringIndex, initialStringIndex)
+	stringIndex, initialStringIndex,
+	metaData)
+
+	if not metaData then
+		metaData = {
+			groupCaptureIndex = 0,
+			groupCapturesInitStringPositions = { },
+			groupCapturesEndStringPositions = { },
+		}
+	end
 
 	local currentElement, currentCharacter
 
@@ -53,11 +64,12 @@ local function treeMatcher(
 		local hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			local hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
+			local hasMatched, iniStr, endStr = singleElementMatcher(
 				currentElement, currentCharacter, treeMatcher,
 				flags,
 				splitStr, strLength,
-				stringIndex
+				stringIndex,
+				metaData
 			)
 
 			if not hasMatched then
@@ -70,16 +82,13 @@ local function treeMatcher(
 				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 				flags, tree, treeLength, treeIndex,
 				splitStr, strLength,
-				stringIndex, initialStringIndex
+				stringIndex, initialStringIndex,
+				metaData
 			)
 		end
 	end
 
-	if stringIndex == initialStringIndex then
-		return
-	end
-
-	return true, initialStringIndex + 1, stringIndex, --[[debug:]]splitStr
+	return true, initialStringIndex + 1, stringIndex, metaData, --[[debug:]]splitStr
 end
 
 local matcher = function(expr, str, flags, stringIndex)
@@ -95,16 +104,16 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	stringIndex = stringIndex or 0
 
-	local hasMatched, iniStr, endStr, debugStr
+	local hasMatched, iniStr, endStr, metaData, debugStr
 	while stringIndex < strLength do
-		hasMatched, iniStr, endStr, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr, metaData, debugStr = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, debugStr
+			return hasMatched, iniStr, endStr, metaData, debugStr
 		end
 
 		stringIndex = stringIndex + 1
@@ -114,7 +123,14 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Debugging
 local p = require("./helpers/pretty-print")
-_G.see = function(t, i, e, tmpS) print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true)) end
+_G.see = function(t, i, e, m, tmpS)
+	print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true))
+
+	for x = 1, m.groupCaptureIndex do
+		print('\tcapture', x, '=', string.format("%q", table.concat(tmpS, '',
+			m.groupCapturesInitStringPositions[x], m.groupCapturesEndStringPositions[x])))
+	end
+end
 local printdebug = false
 _G.pdebug = function(...) if printdebug then print(...) end end
 
@@ -128,7 +144,7 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
 -- see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
 -- see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
--- see(matcher("mo*n", "mn")) -- valid
+-- see(matcher("m(o*)n", "mn")) -- valid
 -- see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
 -- see(matcher("mo*n", "mon")) -- valid
 -- see(matcher("mo*oo?o*n", "mon")) -- valid
@@ -166,21 +182,22 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
-see(matcher("a(b)acate", "abacate")) -- valid (abacate)
-see(matcher("a(ba)?cate", "acate")) -- valid (acate)
-see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
-see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+
+--see(matcher("a(b)acate", "abacate")) -- valid (abacate)
+--see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+--see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+--see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
 see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
-see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
-see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
-see(matcher("([bc]a)+", "abacate")) -- valid (baca)
-see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
-see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
-see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
-see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
-see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
-see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
-see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
+-- see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+-- see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+-- see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+-- see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+-- see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+-- see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+-- see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
+-- see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
+-- see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
+-- see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
