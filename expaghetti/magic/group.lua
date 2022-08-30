@@ -194,7 +194,7 @@ Group.match = function(currentElement, treeMatcher,
 	flags,
 	splitStr, strLength,
 	stringIndex,
-	metaData)
+	matcherMetaData)
 
 	local tree = currentElement.tree
 
@@ -202,16 +202,16 @@ Group.match = function(currentElement, treeMatcher,
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
-		metaData
+		matcherMetaData
 	)
 
 	local groupIndex = currentElement.index
 	if groupIndex then
 		local groupCapturesInitStringPositions, groupCapturesEndStringPositions =
-			metaData.groupCapturesInitStringPositions, metaData.groupCapturesEndStringPositions
+			matcherMetaData.groupCapturesInitStringPositions,
+			matcherMetaData.groupCapturesEndStringPositions
 
 		if hasMatched and iniStr <= endStr then
-			print("register index ", currentElement.index, iniStr, endStr, hasMatched)
 			groupCapturesInitStringPositions[groupIndex] = iniStr
 			groupCapturesEndStringPositions[groupIndex] = endStr
 		elseif not groupCapturesInitStringPositions[groupIndex] then
@@ -220,7 +220,7 @@ Group.match = function(currentElement, treeMatcher,
 		end
 	end
 
-	return hasMatched, iniStr, endStr, metaData, debugStr
+	return hasMatched, iniStr, endStr, matcherMetaData, debugStr
 end
 
 return Group

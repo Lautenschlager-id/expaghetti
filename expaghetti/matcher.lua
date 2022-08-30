@@ -17,7 +17,7 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 	flags,
 	splitStr, strLength,
 	stringIndex,
-	metaData)
+	matcherMetaData)
 
 	if not currentCharacter then
 		return
@@ -31,7 +31,7 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 			flags,
 			splitStr, strLength,
 			stringIndex - 1,
-			metaData
+			matcherMetaData
 		)
 	end
 
@@ -103,16 +103,16 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	stringIndex = stringIndex or 0
 
-	local hasMatched, iniStr, endStr, metaData, debugStr
+	local hasMatched, iniStr, endStr, matcherMetaData, debugStr
 	while stringIndex < strLength do
-		hasMatched, iniStr, endStr, metaData, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr, matcherMetaData, debugStr = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, metaData, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
 		end
 
 		stringIndex = stringIndex + 1
@@ -124,7 +124,6 @@ end
 local p = require("./helpers/pretty-print")
 _G.see = function(t, i, e, m, tmpS)
 	print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true))
-	print(p(m))
 	for x = 1, #m.groupCapturesInitStringPositions do
 		if m.groupCapturesInitStringPositions[x] then
 			print('\tcapture', x, ' ('.. (m.groupCapturesInitStringPositions[x] or 0) .. ','
@@ -187,23 +186,24 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
 
---see(matcher("a(b)acate", "abacate")) -- valid (abacate)
---see(matcher("a(ba)?cate", "acate")) -- valid (acate)
---see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
-see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate) -- invalid (meta disappears)
---see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
---see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
---see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
---see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
---see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
---see(matcher("([bc]a)+", "abacate")) -- valid (baca)
---see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
---see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
---see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
---see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
---see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
---see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
---see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
+see(matcher("a(b)acate", "abacate")) -- valid (abacate)
+see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
+see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
+see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
+see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
+see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
+see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
+see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
+see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

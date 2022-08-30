@@ -118,7 +118,7 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 	flags,
 	splitStr, strLength,
 	stringIndex,
-	metaData)
+	matcherMetaData)
 
 	local maximumOccurrences = quantifier.max
 
@@ -132,7 +132,7 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 			flags,
 			splitStr, strLength,
 			stringIndex,
-			metaData
+			matcherMetaData
 		)
 
 		if not hasMatched then
@@ -161,20 +161,20 @@ local matchBacktrackElement = function(
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex, initialStringIndex,
-	metaData)
+	matcherMetaData)
 
-	local hasMatched, iniStr, endStr, debugStr
+	local hasMatched, iniStr, endStr, _, debugStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		hasMatched, iniStr, endStr, metaData, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			endStringPositions[occurrence] or (stringIndex - 1),
 			initialStringIndex,
-			metaData
+			matcherMetaData
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, metaData, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
 		end
 	end
 end
@@ -238,7 +238,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
 		stringIndex, initialStringIndex,
-		metaData
+		matcherMetaData
 	)
 
 	local quantifier = currentElement.quantifier
@@ -249,7 +249,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		flags,
 		splitStr, strLength,
 		stringIndex,
-		metaData
+		matcherMetaData
 	)
 
 	local minimumOccurrences = quantifier.min
@@ -264,7 +264,7 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
 		stringIndex, initialStringIndex,
-		metaData
+		matcherMetaData
 	)
 end
 
