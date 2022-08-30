@@ -1251,6 +1251,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -1277,6 +1278,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -1303,6 +1305,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -1326,6 +1329,7 @@ return {
 			_index = 3,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -1341,6 +1345,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 2,
 				tree = {
 					_index = 1,
 					{
@@ -1355,6 +1360,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 3,
 				tree = {
 					_index = 1,
 					{
@@ -1370,6 +1376,7 @@ return {
 			_index = 3,
 			{
 				type = "group",
+				index = 1,
 				tree = {
 					_index = 1,
 					{
@@ -1384,6 +1391,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 2,
 				tree = {
 					_index = 1,
 					{
@@ -1399,6 +1407,7 @@ return {
 			},
 			{
 				type = "group",
+				index = 3,
 				tree = {
 					_index = 1,
 					{
@@ -1420,6 +1429,7 @@ return {
 					_index = 1,
 					{
 						type = "group",
+						index = 1,
 						tree = {
 							_index = 2,
 							{
@@ -1432,6 +1442,7 @@ return {
 							},
 							{
 								type = "group",
+								index = 2,
 								tree = {
 									_index = 6,
 									{
@@ -1462,6 +1473,7 @@ return {
 									},
 									{
 										type = "group",
+										index = 3,
 										tree = {
 											_index = 1,
 											{

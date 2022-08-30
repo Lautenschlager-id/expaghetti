@@ -135,6 +135,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 			isLookbehind = false,
 			isNegative = false,
 			name = "",
+			index = 1,
 			tree = {
 				...
 			}
@@ -153,6 +154,11 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 
 	-- A group with any value
 	if expression[index] ~= ENUM_CLOSE_GROUP then
+		if not value.disableCapture then
+			parserMetaData.groupIndex = parserMetaData.groupIndex + 1
+			value.index = parserMetaData.groupIndex
+		end
+
 		local groupTree
 		groupTree, index = parser(nil, nil,
 			true, false, index, expression,
