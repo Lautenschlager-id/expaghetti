@@ -185,7 +185,6 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
-
 see(matcher("a(b)acate", "abacate")) -- valid (abacate)
 see(matcher("a(ba)?cate", "acate")) -- valid (acate)
 see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
@@ -204,6 +203,7 @@ see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
 see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
 see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
 see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
+see(matcher("(a??)", "abacate")) -- valid ('')
 ----------------------------------------------------------------------------------------------------
 
 return matcher

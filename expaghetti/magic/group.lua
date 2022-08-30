@@ -2,6 +2,8 @@
 local strformat = string.format
 local tblconcat = table.concat
 ----------------------------------------------------------------------------------------------------
+local PositionCapture = require("./magic/position_capture")
+----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local elementsEnum = require("./enums/elements")
 local errorsEnum = require("./enums/errors")
@@ -17,7 +19,6 @@ local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
 local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
-local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = elementsEnum.position_capture
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 ----------------------------------------------------------------------------------------------------
 local Group = { }
@@ -172,16 +173,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 
 		value.tree = groupTree
 	elseif not value.hasBehavior then
-		--[[
-			{
-				type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE,
-				quantifier = false
-			}
-		]]
-		value = {
-			type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE,
-			quantifier = false,
-		}
+		return PositionCapture.parse(index, tree)
 	end
 
 	tree._index = tree._index + 1
