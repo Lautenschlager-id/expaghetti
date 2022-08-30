@@ -124,26 +124,20 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 	local totalOccurrences = 0
 	local endStringPositions = { }
 
-	local hasMatched, iniStr, endStr, debugStr
+	local hasMatched, iniStr, endStr
 	repeat
-		pdebug('init quantifier singleElementMatcher')
-		hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
+		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
 			flags,
 			splitStr, strLength,
 			stringIndex
 		)
-		pdebug('end quantifier singleElementMatcher')
 
 		if not hasMatched then
-			pdebug('broke for character ', currentCharacter)
 			break
 		end
 
-		iniStr = iniStr or stringIndex
 		endStr = endStr or stringIndex
-
-		pdebug('\tmatched for characters ', table.concat(splitStr, '', iniStr, endStr))
 
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
@@ -151,9 +145,8 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		if totalOccurrences == maximumOccurrences then
 			break
 		end
-		pdebug('\ttotalOccurrences is', totalOccurrences)
 
-		stringIndex = (endStr or stringIndex) + 1
+		stringIndex = endStr + 1
 		currentCharacter = splitStr[stringIndex]
 	until false
 
@@ -167,25 +160,13 @@ local matchBacktrackElement = function(
 	splitStr, strLength,
 	stringIndex, initialStringIndex)
 
-	local hasMatched, iniStr, endStr, debugStr, debugIni
-
+	local hasMatched, iniStr, endStr, debugStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		pdebug("#begin attempt", minimumOccurrences - maximumOccurrencesOfElement)
-
-		debugIni = endStringPositions[occurrence] or (stringIndex - 1)
-		pdebug('@@@@@@@@@@@@@@@@@@@@@@@@@@ stringIndex vs debugIni', stringIndex + occurrence - 1 ,
-			debugIni)
-
 		hasMatched, iniStr, endStr, debugStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			debugIni, --stringIndex + occurrence - 1,
+			endStringPositions[occurrence] or (stringIndex - 1),
 			initialStringIndex
-		)
-		pdebug('@attempt ', minimumOccurrences - maximumOccurrencesOfElement,
-			'\n\t: hasMatched: ', hasMatched,
-			'\n\t: str considered: ', table.concat(splitStr, '', debugIni+1),--stringIndex + occurrence),
-			'\n\t: debugStr: ', table.concat(splitStr, '', iniStr, endStr)
 		)
 
 		if hasMatched then
@@ -264,8 +245,6 @@ Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMa
 		splitStr, strLength,
 		stringIndex
 	)
-
-	pdebug('\t\t\t\tmaximum occurrences  : ', maximumOccurrencesOfElement)
 
 	local minimumOccurrences = quantifier.min
 	if maximumOccurrencesOfElement < minimumOccurrences then

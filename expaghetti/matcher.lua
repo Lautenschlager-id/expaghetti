@@ -53,7 +53,6 @@ local function treeMatcher(
 		local hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			--pdebug('\t singleElementMatcher', currentElement.type, currentCharacter)
 			local hasMatched, iniStr, endStr, debugStr = singleElementMatcher(
 				currentElement, currentCharacter, treeMatcher,
 				flags,

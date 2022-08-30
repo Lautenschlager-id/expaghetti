@@ -197,12 +197,6 @@ Group.match = function(currentElement, treeMatcher,
 		stringIndex, stringIndex
 	)
 
-	if hasMatched then
-		pdebug('@@group matched ',
-			table.concat(splitStr, '', iniStr, endStr),
-			'and string goes from ', iniStr, ' to ', endStr)
-	end
-
 	return hasMatched, iniStr, endStr, debugStr
 end
 
