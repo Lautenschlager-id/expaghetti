@@ -6,6 +6,7 @@ local parser = require("./parser")
 --local Anchor = require("./magic/anchor")
 --local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
+local CaptureReference = require("./magic/capture_reference")
 local Group = require("./magic/group")
 local Literal = require("./magic/literal")
 local PositionCapture = require("./magic/position_capture")
@@ -36,6 +37,8 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 			stringIndex - 1,
 			matcherMetaData
 		)
+	elseif CaptureReference.isElement(currentElement) then
+		return CaptureReference.match(currentElement, stringIndex, matcherMetaData)
 	end
 
 	return Literal.match(currentElement, currentCharacter)
@@ -234,6 +237,8 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 
 --see(matcher("(?<oi>.)", "banana")) -- valid (b)
 --see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
+
+see(matcher("(.)%1", "bb")) -- valid (bb)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
