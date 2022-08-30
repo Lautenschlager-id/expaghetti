@@ -38,7 +38,8 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 			matcherMetaData
 		)
 	elseif CaptureReference.isElement(currentElement) then
-		return CaptureReference.match(currentElement, stringIndex, matcherMetaData)
+		return CaptureReference.match(currentElement, stringIndex - 1, splitStr, strLength,
+			matcherMetaData)
 	end
 
 	return Literal.match(currentElement, currentCharacter)
@@ -131,30 +132,32 @@ end
 local p = require("./helpers/pretty-print")
 _G.see = function(t, i, e, m, tmpS)
 	print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true))
-	if not m then return end
-	print('\t\t---------Captures---------')
-	for x = 1, #m.groupCapturesInitStringPositions do
-		local pi, pe = m.groupCapturesInitStringPositions[x] or 0,
-			m.groupCapturesEndStringPositions[x] or 0
-		print(string.format("\tcapture\t%d\t(%d,%d) = \t%q", x, pi, pe,
-			table.concat(tmpS, '', pi, pe)))
-	end
-	print('\t\t---------NamedCaptures---------')
-	for k, v in next, m.groupCapturesInitStringPositions do
-		if not tonumber(k) then
-			local pi, pe = m.groupCapturesInitStringPositions[k] or 0,
-				m.groupCapturesEndStringPositions[k] or 0
-			print(string.format("\tcapture\t%q\t(%d,%d) = \t%q", k, pi, pe,
+	if m then
+		print('\t\t---------Captures---------')
+		for x = 1, #m.groupCapturesInitStringPositions do
+			local pi, pe = m.groupCapturesInitStringPositions[x] or 0,
+				m.groupCapturesEndStringPositions[x] or 0
+			print(string.format("\tcapture\t%d\t(%d,%d) = \t%q", x, pi, pe,
 				table.concat(tmpS, '', pi, pe)))
 		end
+		print('\t\t---------NamedCaptures---------')
+		for k, v in next, m.groupCapturesInitStringPositions do
+			if not tonumber(k) then
+				local pi, pe = m.groupCapturesInitStringPositions[k] or 0,
+					m.groupCapturesEndStringPositions[k] or 0
+				print(string.format("\tcapture\t%q\t(%d,%d) = \t%q", k, pi, pe,
+					table.concat(tmpS, '', pi, pe)))
+			end
+		end
+		print('\t\t---------Position Captures---------')
+		for x = 1, #m.positionCaptures do
+			local p = m.positionCaptures[x]
+			print('\tposcap', x, '=', string.format('(%s(%d)%s)', table.concat(tmpS, '',
+				math.max(1, p - 5), p - 1), p,
+				table.concat(tmpS, '', p, math.min(#tmpS, p + 5))))
+		end
 	end
-	print('\t\t---------Position Captures---------')
-	for x = 1, #m.positionCaptures do
-		local p = m.positionCaptures[x]
-		print('\tposcap', x, '=', string.format('(%s(%d)%s)', table.concat(tmpS, '',
-			math.max(1, p - 5), p - 1), p,
-			table.concat(tmpS, '', p, math.min(#tmpS, p + 5))))
-	end
+	print('\n')
 end
 local printdebug = false
 _G.pdebug = function(...) if printdebug then print(...) end end
@@ -239,6 +242,14 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 --see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
 
 see(matcher("(.)%1", "bb")) -- valid (bb)
+see(matcher("ba(na)%2+", "banana")) -- invalid
+see(matcher("ba()%1+", "banana")) -- invalid
+see(matcher("ba()%1+", "banana")) -- invalid
+see(matcher("(?<oi>.)%k<oi>", "bbaannaanna")) -- valid (bb)
+see(matcher("()(((.).)(?<tree>.))()%k<3>%2%k<tree>()%1()", "fjsaiodfjdaosfabcaabcabcocdsfjoidsfjiofj")) -- valid (abcaabcabc)
+see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacate")) -- valid (abaca)
+see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacatea")) -- valid (abacatea)
+see(matcher("(?<hi>a?b?c?)++.+%k<hi>", "abacate")) -- valid (t)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

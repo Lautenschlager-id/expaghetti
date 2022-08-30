@@ -15,6 +15,10 @@ CaptureReference.isIntToken = function(currentCharacter)
 	return currentCharacter >= '1' and currentCharacter <= '9'
 end
 
+CaptureReference.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE
+end
+
 -- %1 --> reference capture N
 CaptureReference.parseInt = function(currentCharacter, index)
 	currentCharacter = currentCharacter + 0
@@ -63,6 +67,30 @@ CaptureReference.parseString = function(currentCharacter, index, expression)
 		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
 		index = tonumber(name) or name
 	}
+end
+
+CaptureReference.match = function(currentElement, stringIndex, splitStr, strLength, matcherMetaData)
+	local initStringPosition, endStringPosition =
+		matcherMetaData.groupCapturesInitStringPositions[currentElement.index],
+		matcherMetaData.groupCapturesEndStringPositions[currentElement.index]
+
+	if not initStringPosition then
+		return false
+	elseif stringIndex + (endStringPosition - initStringPosition + 1) > strLength then
+		return false
+	end
+
+	local currentCharacter
+	for backreferencePosition = initStringPosition, endStringPosition do
+		stringIndex = stringIndex + 1
+		currentCharacter = splitStr[stringIndex]
+
+		if currentCharacter ~= splitStr[backreferencePosition] then
+			return false
+		end
+	end
+
+	return true, nil, stringIndex
 end
 
 return CaptureReference
