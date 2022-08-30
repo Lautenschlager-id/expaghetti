@@ -155,7 +155,10 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 
 	-- A group with any value
 	if expression[index] ~= ENUM_CLOSE_GROUP then
-		if not value.disableCapture then
+		if not (
+			value.disableCapture
+			or value.name
+		) then
 			parserMetaData.groupIndex = parserMetaData.groupIndex + 1
 			value.index = parserMetaData.groupIndex
 		end
@@ -197,7 +200,7 @@ Group.match = function(currentElement, treeMatcher,
 		matcherMetaData
 	)
 
-	local groupIndex = currentElement.index
+	local groupIndex = currentElement.index or currentElement.name
 	if groupIndex then
 		local groupCapturesInitStringPositions, groupCapturesEndStringPositions =
 			matcherMetaData.groupCapturesInitStringPositions,
