@@ -8,6 +8,7 @@ local parser = require("./parser")
 local Any = require("./magic/any")
 local Group = require("./magic/group")
 local Literal = require("./magic/literal")
+local PositionCapture = require("./magic/position_capture")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
@@ -19,7 +20,9 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 	stringIndex,
 	matcherMetaData)
 
-	if not currentCharacter then
+	if PositionCapture.isElement(currentElement) then
+		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
+	elseif not currentCharacter then
 		return
 	elseif Any.isElement(currentElement) then
 		return Any.match(currentElement, currentCharacter)
@@ -48,6 +51,7 @@ local function treeMatcher(
 		metaData = {
 			groupCapturesInitStringPositions = { },
 			groupCapturesEndStringPositions = { },
+			positionCaptures = { },
 		}
 	end
 
@@ -124,13 +128,20 @@ end
 local p = require("./helpers/pretty-print")
 _G.see = function(t, i, e, m, tmpS)
 	print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true))
+	if not m then return end
+	print('\t\t---------Captures---------')
 	for x = 1, #m.groupCapturesInitStringPositions do
-		if m.groupCapturesInitStringPositions[x] then
-			print('\tcapture', x, ' ('.. (m.groupCapturesInitStringPositions[x] or 0) .. ','
-				.. (m.groupCapturesEndStringPositions[x] or 0) ..') =',
-				string.format("%q", table.concat(tmpS, '',
-					m.groupCapturesInitStringPositions[x], m.groupCapturesEndStringPositions[x])))
-		end
+		print('\tcapture', x, ' ('.. (m.groupCapturesInitStringPositions[x] or 0) .. ','
+			.. (m.groupCapturesEndStringPositions[x] or 0) ..') =',
+			string.format("%q", table.concat(tmpS, '',
+				m.groupCapturesInitStringPositions[x], m.groupCapturesEndStringPositions[x])))
+	end
+	print('\t\t---------Position Captures---------')
+	for x = 1, #m.positionCaptures do
+		local p = m.positionCaptures[x]
+		print('\tposcap', x, '=', string.format('(%s(%d)%s)', table.concat(tmpS, '',
+			math.max(1, p - 5), p - 1), p,
+			table.concat(tmpS, '', p, math.min(#tmpS, p + 5))))
 	end
 end
 local printdebug = false
@@ -185,25 +196,30 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
 -- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
 
-see(matcher("a(b)acate", "abacate")) -- valid (abacate)
-see(matcher("a(ba)?cate", "acate")) -- valid (acate)
-see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
-see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
-see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
-see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
-see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
-see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
-see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
-see(matcher("([bc]a)+", "abacate")) -- valid (baca)
-see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
-see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
-see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
-see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
-see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
-see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
-see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
-see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
-see(matcher("(a??)", "abacate")) -- valid ('')
+--see(matcher("a(b)acate", "abacate")) -- valid (abacate)
+--see(matcher("a(ba)?cate", "acate")) -- valid (acate)
+--see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
+--see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
+--see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
+--see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
+--see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
+--see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
+--see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
+--see(matcher("([bc]a)+", "abacate")) -- valid (baca)
+--see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
+--see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
+--see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
+--see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
+--see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
+--see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
+--see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
+--see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
+--see(matcher("(a??)", "abacate")) -- valid ('')
+
+see(matcher("a()[bt]e", "abacate")) -- valid 6
+see(matcher("()", "abacate")) -- valid 1
+see(matcher("()(a()b(()a)()c()a()t()e())()().?", "abacate")) -- valid
+see(matcher("(b?c?a?())+", "abacate")) -- valid (abaca)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

@@ -173,7 +173,7 @@ Group.execute = function(parser, index, tree, expression, expressionLength, char
 
 		value.tree = groupTree
 	elseif not value.hasBehavior then
-		return PositionCapture.parse(index, tree)
+		return PositionCapture.parse(index, tree, parserMetaData)
 	end
 
 	tree._index = tree._index + 1
