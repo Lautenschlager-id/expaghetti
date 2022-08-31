@@ -235,16 +235,16 @@ return {
 			},
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
+				disableCapture = true,
 				isLookahead = true,
 				isNegative = true,
 				tree = {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
+						disableCapture = true,
 						isLookahead = true,
 						tree = {
 							_index = 1,
@@ -269,16 +269,16 @@ return {
 			},
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
+				disableCapture = true,
 				isLookbehind = true,
 				isNegative = true,
 				tree = {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
+						disableCapture = true,
 						isLookahead = true,
 						tree = {
 							_index = 1,
@@ -303,16 +303,16 @@ return {
 			},
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
+				disableCapture = true,
 				isLookbehind = true,
 				isNegative = true,
 				tree = {
 					_index = 1,
 					{
 						type = "group",
-						index = 2,
 						hasBehavior = true,
+						disableCapture = true,
 						isLookbehind = true,
 						tree = {
 							_index = 1,
