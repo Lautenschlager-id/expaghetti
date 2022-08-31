@@ -47,10 +47,6 @@ Set.parse = function(index, charactersList, charactersValueList, tree)
 	if not endIndex then
 		-- charactersList = error message
 		return false, errorMessage
-
-	-- Empty set
-	elseif index == endIndex then
-		return false, errorsEnum.emptySet
 	end
 
 	-- Set boundary [index, endIndex)

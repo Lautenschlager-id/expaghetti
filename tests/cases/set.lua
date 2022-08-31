@@ -465,6 +465,14 @@ return {
 		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		regex = "[]",
+		errorMessage = "Invalid regular expression: Missing ']' to close set"
+	},
+	{
+		regex = "[^]",
+		errorMessage = "Invalid regular expression: Missing ']' to close set"
+	},
+	{
 		regex = "[%]",
 		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
