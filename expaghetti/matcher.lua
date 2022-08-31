@@ -4,7 +4,7 @@ local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local parser = require("./parser")
 ----------------------------------------------------------------------------------------------------
 --local Anchor = require("./magic/anchor")
---local Alternate = require("./magic/alternate")
+local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
 local CaptureReference = require("./magic/capture_reference")
 local Group = require("./magic/group")
@@ -31,6 +31,14 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 		return Set.match(currentElement, currentCharacter)
 	elseif Group.isElement(currentElement) then
 		return Group.match(
+			currentElement, treeMatcher,
+			flags,
+			splitStr, strLength,
+			stringIndex - 1,
+			matcherMetaData
+		)
+	elseif Alternate.isElement(currentElement) then
+		return Alternate.match(
 			currentElement, treeMatcher,
 			flags,
 			splitStr, strLength,
@@ -238,18 +246,29 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("()(a()b(()a)()c()a()t()e())()().?", "abacate")) -- valid
 -- see(matcher("(b?c?a?())+", "abacate")) -- valid (abaca) (6)
 
---see(matcher("(?<oi>.)", "banana")) -- valid (b)
---see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
+-- see(matcher("(?<oi>.)", "banana")) -- valid (b)
+-- see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
+-- see(matcher("(.)%1", "bb")) -- valid (bb)
+-- see(matcher("ba(na)%2+", "banana")) -- invalid
+-- see(matcher("ba()%1+", "banana")) -- invalid
+-- see(matcher("ba()%1+", "banana")) -- invalid
+-- see(matcher("(?<oi>.)%k<oi>", "bbaannaanna")) -- valid (bb)
+-- see(matcher("()(((.).)(?<tree>.))()%k<3>%2%k<tree>()%1()", "fjsaiodfjdaosfabcaabcabcocdsfjoidsfjiofj")) -- valid (abcaabcabc)
+-- see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacate")) -- valid (abaca)
+-- see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacatea")) -- valid (abacatea)
+-- see(matcher("(?<hi>a?b?c?)++.+%k<hi>", "abacate")) -- valid (t)
 
-see(matcher("(.)%1", "bb")) -- valid (bb)
-see(matcher("ba(na)%2+", "banana")) -- invalid
-see(matcher("ba()%1+", "banana")) -- invalid
-see(matcher("ba()%1+", "banana")) -- invalid
-see(matcher("(?<oi>.)%k<oi>", "bbaannaanna")) -- valid (bb)
-see(matcher("()(((.).)(?<tree>.))()%k<3>%2%k<tree>()%1()", "fjsaiodfjdaosfabcaabcabcocdsfjoidsfjiofj")) -- valid (abcaabcabc)
-see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacate")) -- valid (abaca)
-see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacatea")) -- valid (abacatea)
-see(matcher("(?<hi>a?b?c?)++.+%k<hi>", "abacate")) -- valid (t)
+see(matcher("a|b", "a")) -- valid (a)
+see(matcher("a|b", "b")) -- valid (b)
+see(matcher("a.+|b", "blsdjifsjpda~ç,fsdnlj")) -- valid (b)
+see(matcher("a.+|b", "lsdjifsjpdab~ç,fsdnlj")) -- valid (ab~ç,fsdnlj)
+see(matcher("(a|b)+()(?:n|a)+", "banana")) -- valid (banana)
+see(matcher("([Gg]et|[Ss]et|[Vv]alue|[Nn]ame)+", "setName")) -- valid (setName)
+see(matcher("(|a)+b", "ab")) -- valid (b)
+see(matcher("a(|)b", "ab")) -- valid (ab)
+see(matcher("a(|)+b", "ab")) -- valid (ab)
+see(matcher("a(|b)b", "ab")) -- valid (ab)
+see(matcher("a((b|c||||d(e|))|.+)|.|", "b")) -- valid (b)
 ----------------------------------------------------------------------------------------------------
 
 return matcher

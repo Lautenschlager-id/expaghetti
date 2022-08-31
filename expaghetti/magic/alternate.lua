@@ -10,12 +10,19 @@ Alternate.is = function(currentCharacter)
 	return currentCharacter == ENUM_ALTERNATE_SEPARATOR
 end
 
+Alternate.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_ALTERNATE
+end
+
 Alternate.transform = function(tree)
 	--[[
 		{
 			type = "alternate",
 			trees = {
-				...
+				_index = 1,
+				{
+					...
+				}
 			},
 		}
 	]]
@@ -56,6 +63,31 @@ Alternate.execute = function(parser, index, tree, expression, expressionLength, 
 	tree._index = totalAlternates
 
 	return index, nil, hasGroupClosed
+end
+
+Alternate.match = function(currentElement, treeMatcher,
+	flags,
+	splitStr, strLength,
+	stringIndex,
+	matcherMetaData)
+
+	local trees = currentElement.trees
+
+	local hasMatched, iniStr, endStr, _, debugStr
+	for treeIndex = 1, trees._index do
+		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
+			flags, trees[treeIndex], trees[treeIndex]._index, 0,
+			splitStr, strLength,
+			stringIndex, stringIndex,
+			matcherMetaData
+		)
+
+		if hasMatched then
+			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+		end
+	end
+
+	return false
 end
 
 return Alternate
