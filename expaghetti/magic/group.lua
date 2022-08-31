@@ -41,18 +41,22 @@ local getGroupBehavior = function(index, charactersList, charactersValueList, gr
 		groupElement.isAtomic = true
 	elseif currentCharacter == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
+		groupElement.disableCapture = true
 	elseif currentCharacter == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
 		groupElement.isNegative = true
+		groupElement.disableCapture = true
 	elseif currentCharacter == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
 		index = index + 1
 		currentCharacter = charactersList[index]
 
 		if currentCharacter == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 			groupElement.isLookbehind = true
+			groupElement.disableCapture = true
 		elseif currentCharacter == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 			groupElement.isLookbehind = true
 			groupElement.isNegative = true
+			groupElement.disableCapture = true
 		else
 			index = index - 1
 			currentCharacter = charactersList[index]
@@ -212,6 +216,16 @@ Group.match = function(currentElement, treeMatcher,
 		elseif not groupCapturesInitStringPositions[groupIndex] then
 			groupCapturesInitStringPositions[groupIndex] = 2
 			groupCapturesEndStringPositions[groupIndex] = 1
+		end
+	else
+		hasMatched = hasMatched ~= currentElement.isNegative
+		if not hasMatched then
+			return
+		end
+
+		if currentElement.isLookahead then
+			iniStr = iniStr and (iniStr - 1) or stringIndex
+			endStr = iniStr
 		end
 	end
 

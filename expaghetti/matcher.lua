@@ -258,17 +258,29 @@ _G.pdebug = function(...) if printdebug then print(...) end end
 -- see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacatea")) -- valid (abacatea)
 -- see(matcher("(?<hi>a?b?c?)++.+%k<hi>", "abacate")) -- valid (t)
 
-see(matcher("a|b", "a")) -- valid (a)
-see(matcher("a|b", "b")) -- valid (b)
-see(matcher("a.+|b", "blsdjifsjpda~ç,fsdnlj")) -- valid (b)
-see(matcher("a.+|b", "lsdjifsjpdab~ç,fsdnlj")) -- valid (ab~ç,fsdnlj)
-see(matcher("(a|b)+()(?:n|a)+", "banana")) -- valid (banana)
-see(matcher("([Gg]et|[Ss]et|[Vv]alue|[Nn]ame)+", "setName")) -- valid (setName)
-see(matcher("(|a)+b", "ab")) -- valid (b)
-see(matcher("a(|)b", "ab")) -- valid (ab)
-see(matcher("a(|)+b", "ab")) -- valid (ab)
-see(matcher("a(|b)b", "ab")) -- valid (ab)
-see(matcher("a((b|c||||d(e|))|.+)|.|", "b")) -- valid (b)
+-- see(matcher("a|b", "a")) -- valid (a)
+-- see(matcher("a|b", "b")) -- valid (b)
+-- see(matcher("a.+|b", "blsdjifsjpda~ç,fsdnlj")) -- valid (b)
+-- see(matcher("a.+|b", "lsdjifsjpdab~ç,fsdnlj")) -- valid (ab~ç,fsdnlj)
+-- see(matcher("(a|b)+()(?:n|a)+", "banana")) -- valid (banana)
+-- see(matcher("([Gg]et|[Ss]et|[Vv]alue|[Nn]ame)+", "setName")) -- valid (setName)
+-- see(matcher("(|a)+b", "ab")) -- valid (b)
+-- see(matcher("a(|)b", "ab")) -- valid (ab)
+-- see(matcher("a(|)+b", "ab")) -- valid (ab)
+-- see(matcher("a(|b)b", "ab")) -- valid (ab)
+-- see(matcher("a((b|c||||d(e|))|.+)|.|", "b")) -- valid (b)
+
+see(matcher("i(?=(ll))(..)", "illuminati")) -- valid (ill)
+see(matcher("i(?=(ll))(..)(?=.+)i", "illuminati")) -- invalid
+see(matcher("i(?!(ll))(..)(?!u)", "illuminati")) -- valid (ina)
+see(matcher("i(?!l)", "illuminati")) -- valid (i)
+see(matcher("i(?=i)(?!l)", "illuminati")) -- invalid
+see(matcher("i(?=(?!l))", "illuminati")) -- valid (i)
+see(matcher("i(?!(?!l))", "illuminati")) -- valid (i)
+see(matcher("i(?!(?=l))", "illuminati")) -- valid (i)
+see(matcher("ba(?=((?:n|a)+))%1", "the banana is sweet")) -- valid (banana)
+see(matcher("(?!i)u", "illuminati")) -- valid (u)
+see(matcher("(?=i)i", "illuminati")) -- valid (i)
 ----------------------------------------------------------------------------------------------------
 
 return matcher
