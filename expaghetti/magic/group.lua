@@ -113,11 +113,11 @@ local getGroupBehavior = function(index, charactersList, charactersValueList, gr
 	return index + 1
 end
 ----------------------------------------------------------------------------------------------------
-Group.isOpening = function(currentCharacter)
+Group.isOpeningToken = function(currentCharacter)
 	return currentCharacter == ENUM_OPEN_GROUP
 end
 
-Group.isClosing = function(currentCharacter)
+Group.isClosingToken = function(currentCharacter)
 	return currentCharacter == ENUM_CLOSE_GROUP
 end
 
@@ -125,7 +125,7 @@ Group.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_GROUP
 end
 
-Group.execute = function(parser, index, tree, expression, expressionLength, charactersIndex,
+Group.parse = function(parser, index, tree, expression, expressionLength, charactersIndex,
 	charactersList, charactersValueList, boolEscapedList, parserMetaData)
 
 	-- skip magic opening

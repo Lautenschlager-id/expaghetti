@@ -4,7 +4,7 @@ local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").any
 ----------------------------------------------------------------------------------------------------
 local Any = { }
 
-Any.is = function(currentCharacter)
+Any.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ANY_CHARACTER
 end
 
@@ -12,7 +12,7 @@ Any.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_ANY
 end
 
-Any.execute = function(index, tree)
+Any.parse = function(index, tree)
 	--[[
 		{
 			type = "any",

@@ -29,8 +29,8 @@ local getElementsList = function(expression, expressionLength)
 
 		charactersIndex = charactersIndex + 1
 
-		if Escaped.is(currentCharacter) then
-			index, currentCharacter = Escaped.execute(index, expression)
+		if Escaped.isToken(currentCharacter) then
+			index, currentCharacter = Escaped.parse(index, expression)
 			if not index then
 				-- currentCharacter = error message
 				return false, currentCharacter
@@ -102,16 +102,16 @@ local function parser(expr, flags,
 			tree._index = tree._index + 1
 			tree[tree._index] = currentCharacter
 		else
-			if Set.is(currentCharacter) then
-				index, errorMessage = Set.execute(index, charactersList, charactersValueList, tree)
-			elseif Group.isOpening(currentCharacter) then
-				index, errorMessage = Group.execute(
+			if Set.isToken(currentCharacter) then
+				index, errorMessage = Set.parse(index, charactersList, charactersValueList, tree)
+			elseif Group.isOpeningToken(currentCharacter) then
+				index, errorMessage = Group.parse(
 					parser, index, tree,
 					expression, expressionLength,
 					charactersIndex, charactersList, charactersValueList, boolEscapedList,
 					metaData
 				)
-			elseif Group.isClosing(currentCharacter) then
+			elseif Group.isClosingToken(currentCharacter) then
 				-- assumes hasGroupClosed = false
 				if isGroup then
 					hasGroupClosed = true
@@ -119,14 +119,14 @@ local function parser(expr, flags,
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
-			elseif Anchor.is(currentCharacter) then
-				index = Anchor.execute(index, currentCharacter, tree)
-			elseif Any.is(currentCharacter) then
-				index = Any.execute(index, tree)
-			elseif Alternate.is(currentCharacter) then
+			elseif Anchor.isToken(currentCharacter) then
+				index = Anchor.parse(index, currentCharacter, tree)
+			elseif Any.isToken(currentCharacter) then
+				index = Any.parse(index, tree)
+			elseif Alternate.isToken(currentCharacter) then
 				if not isAlternate then
 					-- First occurrence
-					index, errorMessage, hasGroupClosed = Alternate.execute(
+					index, errorMessage, hasGroupClosed = Alternate.parse(
 						parser, index, tree,
 						expression, expressionLength,
 						charactersIndex, charactersList, charactersValueList, boolEscapedList,
@@ -138,17 +138,17 @@ local function parser(expr, flags,
 						return false, errorMessage
 					end
 
-					tree = Alternate.transform(tree)
+					tree = Alternate.transformIntoParsedTrees(tree)
 				end
 				-- Whenever found, stop processing the rest of the expression since it's looping
 				break
 			else
-				index, errorMessage = Literal.execute(currentCharacter, index, tree, charactersList)
+				index, errorMessage = Literal.parse(currentCharacter, index, tree, charactersList)
 			end
 		end
 
 		if not errorMessage then
-			index, errorMessage = Quantifier.checkForElement(index, charactersList,
+			index, errorMessage = Quantifier.lookForElementOperation(index, charactersList,
 				tree[tree._index])
 		end
 

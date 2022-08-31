@@ -89,11 +89,11 @@ specialEscaped.B = function(currentCharacter, index)
 	}
 end
 ----------------------------------------------------------------------------------------------------
-Escaped.is = function(currentCharacter)
+Escaped.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ESCAPE_CHARACTER
 end
 
-Escaped.execute = function(index, expression)
+Escaped.parse = function(index, expression)
 	-- Skip escape
 	index = index + 1
 

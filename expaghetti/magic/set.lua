@@ -31,7 +31,7 @@ local findMagicClosingIndex = function(index, charactersList)
 	until false
 end
 ----------------------------------------------------------------------------------------------------
-Set.is = function(currentCharacter)
+Set.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_OPEN_SET
 end
 
@@ -39,7 +39,7 @@ Set.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_SET
 end
 
-Set.execute = function(index, charactersList, charactersValueList, tree)
+Set.parse = function(index, charactersList, charactersValueList, tree)
 	-- skip magic opening
 	index = index + 1
 

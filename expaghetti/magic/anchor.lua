@@ -7,11 +7,11 @@ local ENUM_ELEMENT_TYPE_ANCHOR = require("./enums/elements").anchor
 ----------------------------------------------------------------------------------------------------
 local Anchor = { }
 
-Anchor.is = function(currentCharacter)
+Anchor.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ANCHOR_START or currentCharacter == ENUM_ANCHOR_END
 end
 
-Anchor.execute = function(index, currentCharacter, tree)
+Anchor.parse = function(index, currentCharacter, tree)
 	--[[
 		{
 			type = "anchor",

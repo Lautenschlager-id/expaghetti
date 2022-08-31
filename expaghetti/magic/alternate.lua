@@ -6,7 +6,7 @@ local ENUM_ELEMENT_TYPE_ALTERNATE = require("./enums/elements").alternate
 ----------------------------------------------------------------------------------------------------
 local Alternate = { }
 
-Alternate.is = function(currentCharacter)
+Alternate.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ALTERNATE_SEPARATOR
 end
 
@@ -14,7 +14,7 @@ Alternate.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_ALTERNATE
 end
 
-Alternate.transform = function(tree)
+Alternate.transformIntoParsedTrees = function(tree)
 	--[[
 		{
 			type = "alternate",
@@ -35,7 +35,7 @@ Alternate.transform = function(tree)
 	}
 end
 
-Alternate.execute = function(parser, index, tree, expression, expressionLength, charactersIndex,
+Alternate.parse = function(parser, index, tree, expression, expressionLength, charactersIndex,
 	charactersList, charactersValueList, boolEscapedList, parserMetaData, isGroup, hasGroupClosed)
 
 	local totalAlternates = 1

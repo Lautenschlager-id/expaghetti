@@ -19,7 +19,7 @@ local Quantifier = { }
 
 local quantifierMatchMode = { }
 
-local validateCustomQuantifier = function(index, charactersList)
+local lookForCustomQuantifier = function(index, charactersList)
 	local currentCharacter
 
 	local parameters, currentParameter = {
@@ -83,13 +83,13 @@ local validateCustomQuantifier = function(index, charactersList)
 	}
 end
 
-local checkIfAppliesToParentElement = function(index, charactersList)
+local checkIfAppliesToParentTreeElement = function(index, charactersList)
 	local currentCharacter = charactersList[index]
 
 	if quantifiersEnum[currentCharacter] then
 		return index + 1, quantifiersEnum[currentCharacter]
 	elseif currentCharacter == ENUM_OPEN_QUANTIFIER then
-		local newIndex, customQuantifier = validateCustomQuantifier(index, charactersList)
+		local newIndex, customQuantifier = lookForCustomQuantifier(index, charactersList)
 		if newIndex then
 			return newIndex, customQuantifier
 		elseif customQuantifier then
@@ -101,7 +101,7 @@ local checkIfAppliesToParentElement = function(index, charactersList)
 	return index, false
 end
 
-local checkIfHasMode = function(index, charactersList, quantifier)
+local lookForModeToken = function(index, charactersList, quantifier)
 	local quantifierMode = quantifierModesEnum[charactersList[index]]
 
 	if quantifierMode then
@@ -200,8 +200,8 @@ quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
 		endStringPositions, ...)
 end
 ----------------------------------------------------------------------------------------------------
-Quantifier.is = function(index, charactersList, parentElement)
-	local index, quantifier = checkIfAppliesToParentElement(index, charactersList)
+Quantifier.isToken = function(index, charactersList, parentElement)
+	local index, quantifier = checkIfAppliesToParentTreeElement(index, charactersList)
 
 	return index and quantifier
 end
@@ -211,11 +211,11 @@ Quantifier.isElement = function(currentElement)
 		and currentElement.quantifier.type == ENUM_ELEMENT_TYPE_QUANTIFIER
 end
 
-Quantifier.checkForElement = function(index, charactersList, parentElement)
+Quantifier.lookForElementOperation = function(index, charactersList, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
 	local shouldntHaveQuantifier = parentElement.quantifier == false
 
-	local index, quantifier = checkIfAppliesToParentElement(index, charactersList)
+	local index, quantifier = checkIfAppliesToParentTreeElement(index, charactersList)
 
 	if not index then
 		-- quantifier = error message
@@ -228,13 +228,14 @@ Quantifier.checkForElement = function(index, charactersList, parentElement)
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index, quantifier = checkIfHasMode(index, charactersList, quantifier)
+	index, quantifier = lookForModeToken(index, charactersList, quantifier)
 	parentElement.quantifier = quantifier
 
 	return index
 end
 
-Quantifier.loopOver = function(currentElement, currentCharacter, singleElementMatcher, treeMatcher,
+Quantifier.operateOver = function(
+		currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
 		stringIndex, initialStringIndex,

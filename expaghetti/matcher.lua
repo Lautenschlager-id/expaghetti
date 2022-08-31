@@ -93,7 +93,7 @@ local function treeMatcher(
 				stringIndex = endStr
 			end
 		else
-			return Quantifier.loopOver(
+			return Quantifier.operateOver(
 				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 				flags, tree, treeLength, treeIndex,
 				splitStr, strLength,
