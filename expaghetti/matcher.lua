@@ -177,7 +177,6 @@ local matcher = function(expr, str, flags, stringIndex)
 			return hasMatched, iniStr, endStr, matcherMetaData, splitStr
 		end
 
-		break -- debug
 		stringIndex = stringIndex + 1
 	end
 end
@@ -257,7 +256,7 @@ end
 --m("%d+(.)", "1235")
 --m("(x+()x)()x", "xxxxxxxxxxxx")
 
---m("(.{1,}(.+))()(..)()(.{1,}.)", "abcdef")
+--m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef")
 --m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?")
 
 --m("a(b)acate", "abacate") -- valid (abacate)
@@ -273,15 +272,16 @@ end
 --m("([bct]a?)+?", "abacate") -- valid (ba)
 --m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
 --m("(a??)", "abacate") -- valid ('')
+--m(".?((a+()(((b+)))()))().?", "aaacbab") -- valid (bab)
+--m("(x+x+)+()y", "xxxxxxxxxxy")
+--m("(b?c?a)+te", "abacate") -- valid (abacate)
+--m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate)
+--m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa)
+--m("(a)+()b", "aaacaab")
+--m("(b?c?t?a?)+", "abacate") -- valid (abacat)
+--m("(b?c?a?)+", "abacate") -- valid (abaca)
 
---*m("(x+x+)+y", "xxxxxxxxxxy") -- "()+SOMETHING" breaks
---*m("(b?c?a)+te", "abacate") -- valid (abacate)  -- "()+SOMETHING" breaks
---*m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate) -- "()?SOMETHING" breaks
---*m("(b?c?t?a?)+", "abacate") -- valid (abacat) -- INF LOOP
---*m("(b?c?a?)+", "abacate") -- valid (abaca) -- INF LOOP
---*m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa) -- "()*SOMETHING" breaks
 --*m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
 
-m("(a)+b", "aaab")
 
 return matcher

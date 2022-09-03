@@ -199,7 +199,7 @@ Group.match = function(
 
 	local groupTree = currentElement.tree
 
-	if not matcherMetaData.outerTreeReference[groupTree] then
+	if not matcherMetaData.outerTreeReference[groupTree] and tree then
 		matcherMetaData.outerTreeReference[groupTree] = {
 			tree = tree,
 			treeLength = treeLength,
