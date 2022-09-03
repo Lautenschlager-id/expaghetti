@@ -16,7 +16,7 @@ local Set = require("./magic/set")
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local singleElementMatcher = function(currentElement, currentCharacter, treeMatcher,
-	flags,
+	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex,
 	matcherMetaData)
@@ -32,7 +32,7 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 	elseif Group.isElement(currentElement) then
 		return Group.match(
 			currentElement, treeMatcher,
-			flags,
+			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			stringIndex - 1,
 			matcherMetaData
@@ -57,13 +57,20 @@ local function treeMatcher(
 	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex, initialStringIndex,
-	metaData)
+	metaData,
+	outerTree, outerTreeLength, outerTreeIndex)
+
+	pdebug("Starting tree %s with outer tree being %s", tree, outerTree,
+		string.sub(p(tree), 1, 80),
+		"\t\t\t\t",
+		outerTree and string.sub(p(outerTree), 1, 80))
 
 	if not metaData then
 		metaData = {
 			groupCapturesInitStringPositions = { },
 			groupCapturesEndStringPositions = { },
 			positionCaptures = { },
+			outerTreeReference = { }
 		}
 	end
 
@@ -81,7 +88,7 @@ local function treeMatcher(
 		if not hasQuantifier then
 			local hasMatched, iniStr, endStr = singleElementMatcher(
 				currentElement, currentCharacter, treeMatcher,
-				flags,
+				flags, tree, treeLength, treeIndex,
 				splitStr, strLength,
 				stringIndex,
 				metaData
@@ -121,6 +128,7 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	local hasMatched, iniStr, endStr, matcherMetaData
 	while stringIndex < strLength do
+		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		hasMatched, iniStr, endStr, matcherMetaData = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
@@ -137,7 +145,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 -- Debugging
-local printdebug = false
+local printdebug = true
 _G.p = require("./helpers/pretty-print")
 _G.m = function(expr, str, flags)
 	local hasMatched, iniStr, endStr, matcherMetaData, splitStr = matcher(expr, str, flags)
@@ -183,10 +191,31 @@ _G.m = function(expr, str, flags)
 
 	print('\n')
 end
-_G.pdebug = function(...) if printdebug then print(...) end end
+_G.pdebug = function(str, ...)
+	if printdebug then
+		if type(str) == "table" then
+			return print(str, ...)
+		end
+
+		local args = { ... }
+		local _, countFormats = string.gsub(str, '%%', '')
+
+		print(
+			string.format(
+				str,
+				table.unpack(args, 1, countFormats)
+			),
+			"\t\t\t\t",
+			table.unpack(args, countFormats + 1, select('#', ...))
+		)
+	end
+end
 ----------------------------------------------------------------------------------------------------
 
-m("%d+(.)", "1235")
-m("(x+x)()x", "xxxxxxxxxxxx")
+m("a(b)c(d)(e)f", "abcdef")
+m("a(b)c((d)(e(f))g)", "abcdefg")
+
+--m("%d+(.)", "1235")
+--m("(x+x)()x", "xxxxxxxxxxxx")
 
 return matcher

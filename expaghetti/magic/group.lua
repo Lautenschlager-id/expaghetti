@@ -190,18 +190,18 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 end
 
 Group.match = function(currentElement, treeMatcher,
-	flags,
+	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
 	stringIndex,
 	matcherMetaData)
 
-	local tree = currentElement.tree
-
+	local groupTree = currentElement.tree
 	local hasMatched, iniStr, endStr = treeMatcher(
-		flags, tree, tree._index, 0,
+		flags, groupTree, groupTree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
-		matcherMetaData
+		matcherMetaData,
+		tree, treeLength, treeIndex
 	)
 
 	local groupIndex = currentElement.index or currentElement.name
