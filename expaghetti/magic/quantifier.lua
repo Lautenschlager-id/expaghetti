@@ -127,7 +127,7 @@ local getMaximumOccurrencesOfElement = function(
 	local totalOccurrences = 0
 	local endStringPositions = { }
 
-	local hasMatched, iniStr, endStr
+	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
 	repeat
 		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
@@ -146,9 +146,15 @@ local getMaximumOccurrencesOfElement = function(
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
 
-		if totalOccurrences == maximumOccurrences or (iniStr and iniStr > endStr) then
+		if totalOccurrences == maximumOccurrences
+			-- Empty match
+			or (iniStr and iniStr > endStr)
+			-- Loop match
+			or (lastIniStr == iniStr and lastEndStr == endStr)
+		then
 			break
 		end
+		lastIniStr, lastEndStr = iniStr, endStr
 
 		stringIndex = endStr + 1
 		currentCharacter = splitStr[stringIndex]
@@ -259,7 +265,7 @@ Quantifier.operateOver = function(
 
 	local minimumOccurrences = quantifier.min
 	pdebug("@ Maximum occurrences is %d [%d-%d]", maximumOccurrencesOfElement, minimumOccurrences,
-		quantifier.max, p(quantifier))
+		quantifier.max, p(currentElement))
 	if maximumOccurrencesOfElement < minimumOccurrences then
 		return
 	end

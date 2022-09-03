@@ -250,38 +250,54 @@ _G.pdebug = function(str, ...)
 end
 ----------------------------------------------------------------------------------------------------
 
---m("()a()(b)()c()(d)()(e)()f()", "abcdef")
---m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
+-- m("()a()(b)()c()(d)()(e)()f()", "abcdef")
+-- m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
 
---m("%d+(.)", "1235")
---m("(x+()x)()x", "xxxxxxxxxxxx")
+-- m("%d+(.)", "1235")
+-- m("(x+()x)()x", "xxxxxxxxxxxx")
 
---m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef")
---m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?")
+-- m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef")
+-- m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?")
 
---m("a(b)acate", "abacate") -- valid (abacate)
---m("a(ba)?cate", "acate") -- valid (acate)
---m("a()(ba)?()cat(.)", "acate") -- valid (acate)
---m("a()(b.?a)().?()cate", "abacate") -- valid (abacate)
---m("a(b?c?a)te", "abacate") -- valid (acate)
---m("a?((b?c?)a)+", "abacate") -- valid (abaca)
---m("a([bc]a)+", "abacate") -- valid (acaba)
---m("([bc]a)+", "abacate") -- valid (baca)
---m("a([bct]a?)+", "abacate") -- valid (abacat)
---m("([bct]a?)+", "abacate") -- valid (bacat)
---m("([bct]a?)+?", "abacate") -- valid (ba)
---m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
---m("(a??)", "abacate") -- valid ('')
---m(".?((a+()(((b+)))()))().?", "aaacbab") -- valid (bab)
---m("(x+x+)+()y", "xxxxxxxxxxy")
---m("(b?c?a)+te", "abacate") -- valid (abacate)
---m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate)
---m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa)
---m("(a)+()b", "aaacaab")
---m("(b?c?t?a?)+", "abacate") -- valid (abacat)
---m("(b?c?a?)+", "abacate") -- valid (abaca)
+-- m("a(b)acate", "abacate") -- valid (abacate)
+-- m("a(ba)?cate", "acate") -- valid (acate)
+-- m("a()(ba)?()cat(.)", "acate") -- valid (acate)
+-- m("a()(b.?a)().?()cate", "abacate") -- valid (abacate)
+-- m("a(b?c?a)te", "abacate") -- valid (acate)
+-- m("a?((b?c?)a)+", "abacate") -- valid (abaca)
+-- m("a([bc]a)+", "abacate") -- valid (acaba)
+-- m("([bc]a)+", "abacate") -- valid (baca)
+-- m("a([bct]a?)+", "abacate") -- valid (abacat)
+-- m("([bct]a?)+", "abacate") -- valid (bacat)
+-- m("([bct]a?)+?", "abacate") -- valid (ba)
+-- m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
+-- m("(a??)", "abacate") -- valid ('')
+-- m(".?((a+()(((b+)))()))().?", "aaacbab") -- valid (bab)
+-- m("(x+x+)+()y", "xxxxxxxxxxy")
+-- m("(b?c?a)+te", "abacate") -- valid (abacate)
+-- m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate)
+-- m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa)
+-- m("(a)+()b", "aaacaab")
+-- m("(b?c?t?a?)+", "abacate") -- valid (abacat)
+-- m("(b?c?a?)+", "abacate") -- valid (abaca)
 
---*m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
+--m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
+--m("(b?)+", '.............................')
+
+--m("(a)+x", "aaax")
+--m("([ac])+x", "aacx")
+--m("([^N]*N)+", "abNNxyzN")
+--m("([^N]*N)+", "abNNxyz")
+--m("(([a-z]+):)?([a-z]+)", "smil")
+--m("(x?)?", "x")
+--m("((a)c)?(ab)", "ab")
+--m("([^/]*/)*sub1/", "d:msgs/tdir/sub1/trial/away.cpp")
+--m("([abc])*d", "abbbcd")
+--m("([abc])*bcd", "abcd")
+--m("\"(?:\\\"|[^\"])*?\"", "\"\"\"")
+
+m("(.+)?B", "AB") -- is B but should be AB
+--m("([ab]*?)(?=(b))c", "abc") -- captures returning ini=0
 
 
 return matcher
