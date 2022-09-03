@@ -197,7 +197,7 @@ Group.match = function(currentElement, treeMatcher,
 
 	local tree = currentElement.tree
 
-	local hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
+	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, tree, tree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
@@ -229,7 +229,7 @@ Group.match = function(currentElement, treeMatcher,
 		end
 	end
 
-	return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+	return hasMatched, iniStr, endStr, matcherMetaData
 end
 
 return Group

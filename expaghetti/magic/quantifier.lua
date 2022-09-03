@@ -163,9 +163,9 @@ local matchBacktrackElement = function(
 	stringIndex, initialStringIndex,
 	matcherMetaData)
 
-	local hasMatched, iniStr, endStr, _, debugStr
+	local hasMatched, iniStr, endStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			endStringPositions[occurrence] or (stringIndex - 1),
@@ -174,7 +174,7 @@ local matchBacktrackElement = function(
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData
 		end
 	end
 end
