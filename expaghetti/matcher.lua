@@ -19,7 +19,7 @@ local singleElementMatcher = function(
 		currentElement, currentCharacter, treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex,
+		stringIndex, initialStringIndex,
 		matcherMetaData
 	)
 
@@ -36,7 +36,7 @@ local singleElementMatcher = function(
 			currentElement, treeMatcher,
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			stringIndex - 1,
+			stringIndex - 1, initialStringIndex,
 			matcherMetaData
 		)
 	elseif Alternate.isElement(currentElement) then
@@ -71,8 +71,8 @@ local function treeMatcher(
 		}
 	end
 
-	local outerTree = metaData.outerTreeReference[tree]
-
+	local outerTreeReference = metaData.outerTreeReference[tree]
+	local outerTree = outerTreeReference and outerTreeReference.tree
 	pdebug("Starting tree %s with outer tree being %s", tree, outerTree,
 		string.sub(p(tree), 1, 80),
 		"\t\t\t\t",
@@ -90,15 +90,18 @@ local function treeMatcher(
 		local hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			local hasMatched, iniStr, endStr = singleElementMatcher(
+			local hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
 				currentElement, currentCharacter, treeMatcher,
 				flags, tree, treeLength, treeIndex,
 				splitStr, strLength,
-				stringIndex,
+				stringIndex, initialStringIndex,
 				metaData
 			)
 
-			if not hasMatched then
+			-- Groups continue the execution of the previous tree in another stack
+			if shouldEndThisExecution then
+				return hasMatched, iniStr, endStr, metaData
+			elseif not hasMatched then
 				return
 			elseif endStr then
 				stringIndex = endStr
@@ -112,6 +115,16 @@ local function treeMatcher(
 				metaData
 			)
 		end
+	end
+
+	if outerTreeReference then
+		return treeMatcher(
+			flags,
+			outerTreeReference.tree, outerTreeReference.treeLength, outerTreeReference.treeIndex,
+			splitStr, strLength,
+			stringIndex, outerTreeReference.initialStringIndex,
+			metaData
+		)
 	end
 
 	return true, initialStringIndex + 1, stringIndex, metaData
@@ -168,7 +181,7 @@ _G.m = function(expr, str, flags)
 		for posIndex = 1, #groupCapturesInitStringPositions do
 			iniStr, endStr = groupCapturesInitStringPositions[posIndex] or 0,
 				groupCapturesEndStringPositions[posIndex] or 0
-			print(string.format("\t\t[%d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
+			print(string.format("\t\t[%02d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
 				table.concat(splitStr, '', iniStr, endStr)))
 		end
 
@@ -187,9 +200,9 @@ _G.m = function(expr, str, flags)
 		print("\t---------Position Captures---------")
 		for posIndex = 1, #positionCaptures do
 			iniStr = positionCaptures[posIndex]
-			print(string.format("\t\t[%d]\t=(%s(%d)%s)", posIndex,
-				table.concat(splitStr, '', math.max(1, iniStr - 5), iniStr - 1), iniStr,
-				table.concat(splitStr, '', iniStr, math.min(#splitStr, iniStr + 5))))
+			print(string.format("\t\t[%02d]\t=\t\"%s(%d)%s\"", posIndex,
+				table.concat(splitStr, '', 1, iniStr - 1), iniStr,
+				table.concat(splitStr, '', iniStr)))
 		end
 	end
 
@@ -216,8 +229,8 @@ _G.pdebug = function(str, ...)
 end
 ----------------------------------------------------------------------------------------------------
 
-m("a(b)c(d)(e)f", "abcdef")
-m("a(b)c((d)(e(f))g)", "abcdefg")
+m("()a()(b)()c()(d)()(e)()f()", "abcdef")
+m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
 
 --m("%d+(.)", "1235")
 --m("(x+x)()x", "xxxxxxxxxxxx")

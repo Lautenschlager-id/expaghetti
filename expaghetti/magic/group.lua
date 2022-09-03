@@ -193,7 +193,7 @@ Group.match = function(
 		currentElement, treeMatcher,
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex,
+		stringIndex, initialStringIndex,
 		matcherMetaData
 	)
 
@@ -201,7 +201,12 @@ Group.match = function(
 	if matcherMetaData.outerTreeReference[groupTree] then
 		error('debug: already exists')
 	end
-	matcherMetaData.outerTreeReference[groupTree] = tree
+	matcherMetaData.outerTreeReference[groupTree] = {
+		tree = tree,
+		treeLength = treeLength,
+		treeIndex = treeIndex,
+		initialStringIndex = initialStringIndex
+	}
 
 	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, groupTree, groupTree._index, 0,
@@ -235,7 +240,7 @@ Group.match = function(
 		end
 	end
 
-	return hasMatched, iniStr, endStr, matcherMetaData
+	return hasMatched, iniStr, endStr, matcherMetaData, true
 end
 
 return Group
