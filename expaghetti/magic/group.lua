@@ -189,19 +189,25 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 	return index + 1
 end
 
-Group.match = function(currentElement, treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+Group.match = function(
+		currentElement, treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex,
+		matcherMetaData
+	)
 
 	local groupTree = currentElement.tree
+	if matcherMetaData.outerTreeReference[groupTree] then
+		error('debug: already exists')
+	end
+	matcherMetaData.outerTreeReference[groupTree] = tree
+
 	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, groupTree, groupTree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
-		matcherMetaData,
-		tree, treeLength, treeIndex
+		matcherMetaData
 	)
 
 	local groupIndex = currentElement.index or currentElement.name

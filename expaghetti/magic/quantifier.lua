@@ -113,12 +113,14 @@ local lookForModeToken = function(index, charactersList, quantifier)
 	return index, quantifier
 end
 
-local getMaximumOccurrencesOfElement = function(quantifier, currentElement, singleElementMatcher,
-	currentCharacter, treeMatcher,
-	flags,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+local getMaximumOccurrencesOfElement = function(
+		quantifier, currentElement, singleElementMatcher,
+		currentCharacter, treeMatcher,
+		flags,
+		splitStr, strLength,
+		stringIndex,
+		matcherMetaData
+	)
 
 	local maximumOccurrences = quantifier.max
 
@@ -156,12 +158,13 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 end
 
 local matchBacktrackElement = function(
-	minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
-	treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex,
-	matcherMetaData)
+		minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
+		treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		matcherMetaData
+	)
 
 	local hasMatched, iniStr, endStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do

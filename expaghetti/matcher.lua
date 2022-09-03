@@ -15,11 +15,13 @@ local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local singleElementMatcher = function(currentElement, currentCharacter, treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+local singleElementMatcher = function(
+		currentElement, currentCharacter, treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex,
+		matcherMetaData
+	)
 
 	if PositionCapture.isElement(currentElement) then
 		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
@@ -54,16 +56,11 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 end
 
 local function treeMatcher(
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex,
-	metaData,
-	outerTree, outerTreeLength, outerTreeIndex)
-
-	pdebug("Starting tree %s with outer tree being %s", tree, outerTree,
-		string.sub(p(tree), 1, 80),
-		"\t\t\t\t",
-		outerTree and string.sub(p(outerTree), 1, 80))
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		metaData
+	)
 
 	if not metaData then
 		metaData = {
@@ -73,6 +70,13 @@ local function treeMatcher(
 			outerTreeReference = { }
 		}
 	end
+
+	local outerTree = metaData.outerTreeReference[tree]
+
+	pdebug("Starting tree %s with outer tree being %s", tree, outerTree,
+		string.sub(p(tree), 1, 80),
+		"\t\t\t\t",
+		outerTree and string.sub(p(outerTree), 1, 80))
 
 	local currentElement, currentCharacter
 
