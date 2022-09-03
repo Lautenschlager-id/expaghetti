@@ -198,15 +198,15 @@ Group.match = function(
 	)
 
 	local groupTree = currentElement.tree
-	if matcherMetaData.outerTreeReference[groupTree] then
-		error('debug: already exists')
+
+	if not matcherMetaData.outerTreeReference[groupTree] then
+		matcherMetaData.outerTreeReference[groupTree] = {
+			tree = tree,
+			treeLength = treeLength,
+			treeIndex = treeIndex,
+			initialStringIndex = initialStringIndex
+		}
 	end
-	matcherMetaData.outerTreeReference[groupTree] = {
-		tree = tree,
-		treeLength = treeLength,
-		treeIndex = treeIndex,
-		initialStringIndex = initialStringIndex
-	}
 
 	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, groupTree, groupTree._index, 0,

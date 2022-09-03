@@ -116,9 +116,9 @@ end
 local getMaximumOccurrencesOfElement = function(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
-		flags,
+		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex,
+		stringIndex, initialStringIndex,
 		matcherMetaData
 	)
 
@@ -131,9 +131,9 @@ local getMaximumOccurrencesOfElement = function(
 	repeat
 		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
-			flags,
+			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			stringIndex,
+			stringIndex, initialStringIndex,
 			matcherMetaData
 		)
 
@@ -250,9 +250,9 @@ Quantifier.operateOver = function(
 	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
-		flags,
+		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
-		stringIndex,
+		stringIndex, initialStringIndex,
 		matcherMetaData
 	)
 

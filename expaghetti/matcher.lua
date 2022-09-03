@@ -229,10 +229,36 @@ _G.pdebug = function(str, ...)
 end
 ----------------------------------------------------------------------------------------------------
 
-m("()a()(b)()c()(d)()(e)()f()", "abcdef")
-m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
+--m("()a()(b)()c()(d)()(e)()f()", "abcdef")
+--m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
 
 --m("%d+(.)", "1235")
---m("(x+x)()x", "xxxxxxxxxxxx")
+--m("(x+()x)()x", "xxxxxxxxxxxx")
+
+--m("(.{1,}(.+))()(..)()(.{1,}.)", "abcdef")
+--m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?")
+
+--m("a(b)acate", "abacate") -- valid (abacate)
+--m("a(ba)?cate", "acate") -- valid (acate)
+--m("a()(ba)?()cat(.)", "acate") -- valid (acate)
+--m("a()(b.?a)().?()cate", "abacate") -- valid (abacate)
+--m("a(b?c?a)te", "abacate") -- valid (acate)
+--m("a?((b?c?)a)+", "abacate") -- valid (abaca)
+--m("a([bc]a)+", "abacate") -- valid (acaba)
+--m("([bc]a)+", "abacate") -- valid (baca)
+--m("a([bct]a?)+", "abacate") -- valid (abacat)
+--m("([bct]a?)+", "abacate") -- valid (bacat)
+--m("([bct]a?)+?", "abacate") -- valid (ba)
+--m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
+--m("(a??)", "abacate") -- valid ('')
+
+--*m("(x+x+)+y", "xxxxxxxxxxy") -- "()+SOMETHING" breaks
+--*m("(b?c?a)+te", "abacate") -- valid (abacate)  -- "()+SOMETHING" breaks
+--*m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate) -- "()?SOMETHING" breaks
+--*m("(b?c?t?a?)+", "abacate") -- valid (abacat) -- INF LOOP
+--*m("(b?c?a?)+", "abacate") -- valid (abaca) -- INF LOOP
+--*m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa) -- "()*SOMETHING" breaks
+--*m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
+
 
 return matcher
