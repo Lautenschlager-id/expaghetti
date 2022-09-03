@@ -55,12 +55,16 @@ local singleElementMatcher = function(
 	return Literal.match(currentElement, currentCharacter)
 end
 
+local debugCurrentStackFrame
 local function treeMatcher(
 		flags, tree, treeLength, treeIndex,
 		splitStr, strLength,
 		stringIndex, initialStringIndex,
 		metaData
 	)
+
+	debugCurrentStackFrame = debugCurrentStackFrame + 1
+	local debugCurrentStackFrameStr = "[Stack "..debugCurrentStackFrame.."]: "
 
 	if not metaData then
 		metaData = {
@@ -73,12 +77,17 @@ local function treeMatcher(
 
 	local outerTreeReference = metaData.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
-	pdebug("Starting tree %s with outer tree being %s", tree, outerTree,
+	pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
+		debugCurrentStackFrameStr,
+		tree, treeIndex + 1,
+		outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
 		string.sub(p(tree), 1, 80),
 		"\t\t\t\t",
 		outerTree and string.sub(p(outerTree), 1, 80))
 
 	local currentElement, currentCharacter
+	local hasQuantifier
+	local hasMatched, iniStr, endStr, _, shouldEndThisExecution
 
 	while treeIndex < treeLength do
 		treeIndex = treeIndex + 1
@@ -87,16 +96,24 @@ local function treeMatcher(
 		stringIndex = stringIndex + 1
 		currentCharacter = splitStr[stringIndex]
 
-		local hasQuantifier = Quantifier.isElement(currentElement)
+		hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			local hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
+			pdebug("\t%sValidating stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
+				stringIndex,
+				currentElement.value, currentElement.type, currentCharacter)
+
+			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
 				currentElement, currentCharacter, treeMatcher,
 				flags, tree, treeLength, treeIndex,
 				splitStr, strLength,
 				stringIndex, initialStringIndex,
 				metaData
 			)
+
+			pdebug("\t%s%salited stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
+				(hasMatched and 'V' or "Not v"),
+				stringIndex, currentElement.value, currentElement.type, currentCharacter)
 
 			-- Groups continue the execution of the previous tree in another stack
 			if shouldEndThisExecution then
@@ -107,6 +124,8 @@ local function treeMatcher(
 				stringIndex = endStr
 			end
 		else
+			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
+				stringIndex)
 			return Quantifier.operateOver(
 				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 				flags, tree, treeLength, treeIndex,
@@ -118,6 +137,7 @@ local function treeMatcher(
 	end
 
 	if outerTreeReference then
+		pdebug("&%sTree Matching outerTreeReference:", debugCurrentStackFrameStr)
 		return treeMatcher(
 			flags,
 			outerTreeReference.tree, outerTreeReference.treeLength, outerTreeReference.treeIndex,
@@ -145,6 +165,7 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	local hasMatched, iniStr, endStr, matcherMetaData
 	while stringIndex < strLength do
+		debugCurrentStackFrame = 0
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		hasMatched, iniStr, endStr, matcherMetaData = treeMatcher(
 			flags, tree, treeLength, 0,
@@ -156,6 +177,7 @@ local matcher = function(expr, str, flags, stringIndex)
 			return hasMatched, iniStr, endStr, matcherMetaData, splitStr
 		end
 
+		break -- debug
 		stringIndex = stringIndex + 1
 	end
 end
@@ -260,5 +282,6 @@ end
 --*m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa) -- "()*SOMETHING" breaks
 --*m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
 
+m("(a)+b", "aaab")
 
 return matcher

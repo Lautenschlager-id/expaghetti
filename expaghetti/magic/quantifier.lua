@@ -247,6 +247,7 @@ Quantifier.operateOver = function(
 
 	local quantifier = currentElement.quantifier
 
+	pdebug("@ Getting maximum occurrences for", p(quantifier))
 	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
@@ -257,6 +258,8 @@ Quantifier.operateOver = function(
 	)
 
 	local minimumOccurrences = quantifier.min
+	pdebug("@ Maximum occurrences is %d [%d-%d]", maximumOccurrencesOfElement, minimumOccurrences,
+		quantifier.max, p(quantifier))
 	if maximumOccurrencesOfElement < minimumOccurrences then
 		return
 	end
