@@ -809,6 +809,56 @@ return {
 		}
 	},
 	{
+		regex = "a(b(?#this is a random message that can never affect the pattern))c",
+		parsed = {
+			_index = 3,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					_index = 1,
+					{
+						type = "literal",
+						value = 'b'
+					}
+				}
+			},
+			{
+				type = "literal",
+				value = 'c'
+			}
+		}
+	},
+	{
+		regex = "a(?#hi)(b(?#hi))(?#hi)c(?#hi)",
+		parsed = {
+			_index = 3,
+			{
+				type = "literal",
+				value = 'a'
+			},
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					_index = 1,
+					{
+						type = "literal",
+						value = 'b'
+					}
+				}
+			},
+			{
+				type = "literal",
+				value = 'c'
+			}
+		}
+	},
+	{
 		regex = "a(",
 		errorMessage = "Invalid regular expression: Unterminated group"
 	},
