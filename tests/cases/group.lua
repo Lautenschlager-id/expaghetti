@@ -128,6 +128,65 @@ return {
 		}
 	},
 	{
+		regex = "%a()",
+		parsed = {
+			_index = 2,
+			{
+				type = "set",
+
+				hasToNegateMatch = false,
+
+				rangeIndex = 4,
+				ranges = {
+					'a',
+					'z',
+
+					'A',
+					'Z'
+				},
+
+				classIndex = 0,
+				classes = { }
+			},
+			{
+				type = "position_capture",
+				index = 1,
+				quantifier = false
+			}
+		}
+	},
+	{
+		regex = "%a.()",
+		parsed = {
+			_index = 3,
+			{
+				type = "set",
+
+				hasToNegateMatch = false,
+
+				rangeIndex = 4,
+				ranges = {
+					'a',
+					'z',
+
+					'A',
+					'Z'
+				},
+
+				classIndex = 0,
+				classes = { }
+			},
+			{
+				type = "any"
+			},
+			{
+				type = "position_capture",
+				index = 1,
+				quantifier = false
+			}
+		}
+	},
+	{
 		regex = "a(%?:b)",
 		parsed = {
 			_index = 2,

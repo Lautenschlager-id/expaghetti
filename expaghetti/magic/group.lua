@@ -158,7 +158,7 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 	end
 
 	-- A group with any value
-	if expression[index] ~= ENUM_CLOSE_GROUP then
+	if charactersList[index] ~= ENUM_CLOSE_GROUP then
 		if not (
 			value.disableCapture
 			or value.name
