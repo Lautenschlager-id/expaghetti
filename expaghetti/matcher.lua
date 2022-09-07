@@ -299,21 +299,6 @@ end
 -- m("\"(?:\\\"|[^\"])*?\"", "\"\"\"") -- valid (\"\")
 -- m("(a+b+)+(a+b+)+a", 'abbbbbbbcaaaaaaaaaaaaabaaaaba') -- valid (aaaaaaaaaaaaabaaaaba)
 
--- If ()+ knows about the whole pattern when getting the maximum occurrences,
--- then it will get to the end in (stuff) and (stuff)+ will try to match something that has already
--- been matched. For example:
--- (x+)x for "xxx" matches xx(2)x(3),
--- and (x+)+x for "xxx" matches xx(2)x(3) as (x+)x, and then (x+)+'s loop at the stringIndex 3 tries
--- to match the next element, nil(4)
-
--- If ()+ does not know about the whole pattern when getting the maximum occurrences,
--- then it will only consider what's inside the group and won't match what's next. For example:
--- (x+)x for "xxx" matches xx(2)x(3)
--- and (x+)x for "xxx" matches xxx(3) as (x+), and then nil(4) as an attempt to match the last 'x'
-
---m("(.+.+)+.", 'xxxxxxx')
-
---m("(.+)?B", "AB") -- is B but should be AB
 --m("([ab]*?)(?=(b))c", "abc") -- captures returning ini=0
 
 return matcher
