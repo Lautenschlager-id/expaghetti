@@ -73,9 +73,9 @@ Alternate.match = function(currentElement, treeMatcher,
 
 	local trees = currentElement.trees
 
-	local hasMatched, iniStr, endStr, _, debugStr
+	local hasMatched, iniStr, endStr
 	for treeIndex = 1, trees._index do
-		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
+		hasMatched, iniStr, endStr = treeMatcher(
 			flags, trees[treeIndex], trees[treeIndex]._index, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex,
@@ -83,7 +83,7 @@ Alternate.match = function(currentElement, treeMatcher,
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData
 		end
 	end
 

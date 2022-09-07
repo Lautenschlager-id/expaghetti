@@ -113,25 +113,27 @@ local lookForModeToken = function(index, charactersList, quantifier)
 	return index, quantifier
 end
 
-local getMaximumOccurrencesOfElement = function(quantifier, currentElement, singleElementMatcher,
-	currentCharacter, treeMatcher,
-	flags,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+local getMaximumOccurrencesOfElement = function(
+		quantifier, currentElement, singleElementMatcher,
+		currentCharacter, treeMatcher,
+		flags,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		matcherMetaData
+	)
 
 	local maximumOccurrences = quantifier.max
 
 	local totalOccurrences = 0
 	local endStringPositions = { }
 
-	local hasMatched, iniStr, endStr
+	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
 	repeat
 		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, currentCharacter, treeMatcher,
-			flags,
+			flags, nil, nil, nil,
 			splitStr, strLength,
-			stringIndex,
+			stringIndex, initialStringIndex,
 			matcherMetaData
 		)
 
@@ -144,9 +146,15 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 		totalOccurrences = totalOccurrences + 1
 		endStringPositions[totalOccurrences] = endStr
 
-		if totalOccurrences == maximumOccurrences or (iniStr and iniStr > endStr) then
+		if totalOccurrences == maximumOccurrences
+			-- Empty match
+			or (iniStr and iniStr > endStr)
+			-- Loop match
+			or (lastIniStr == iniStr and lastEndStr == endStr)
+		then
 			break
 		end
+		lastIniStr, lastEndStr = iniStr, endStr
 
 		stringIndex = endStr + 1
 		currentCharacter = splitStr[stringIndex]
@@ -156,16 +164,20 @@ local getMaximumOccurrencesOfElement = function(quantifier, currentElement, sing
 end
 
 local matchBacktrackElement = function(
-	minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
-	treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex,
-	matcherMetaData)
+		minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
+		treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		matcherMetaData
+	)
 
-	local hasMatched, iniStr, endStr, _, debugStr
+	local hasMatched, iniStr, endStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
+		pdebug("@ Backtracking [%d-%d] at stringIndex %d", minimumOccurrences,
+			maximumOccurrencesOfElement, endStringPositions[occurrence] or (stringIndex - 1),
+			p(tree))
+		hasMatched, iniStr, endStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
 			endStringPositions[occurrence] or (stringIndex - 1),
@@ -174,7 +186,10 @@ local matchBacktrackElement = function(
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+			pdebug("\t/!\\ Backtrack successful")
+			return hasMatched, iniStr, endStr, matcherMetaData
+		else
+			pdebug("\t/!\\ Backtrack failed")
 		end
 	end
 end
@@ -244,16 +259,19 @@ Quantifier.operateOver = function(
 
 	local quantifier = currentElement.quantifier
 
+	pdebug("@ Getting maximum occurrences for", p(currentElement))
 	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
 		flags,
 		splitStr, strLength,
-		stringIndex,
+		stringIndex, initialStringIndex,
 		matcherMetaData
 	)
 
 	local minimumOccurrences = quantifier.min
+	pdebug("@ Maximum occurrences is %d [%d-%d]", maximumOccurrencesOfElement, minimumOccurrences,
+		quantifier.max, p(currentElement))
 	if maximumOccurrencesOfElement < minimumOccurrences then
 		return
 	end

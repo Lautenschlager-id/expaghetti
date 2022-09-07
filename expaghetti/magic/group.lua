@@ -189,16 +189,27 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 	return index + 1
 end
 
-Group.match = function(currentElement, treeMatcher,
-	flags,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+Group.match = function(
+		currentElement, treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		matcherMetaData
+	)
 
-	local tree = currentElement.tree
+	local groupTree = currentElement.tree
 
-	local hasMatched, iniStr, endStr, _, debugStr = treeMatcher(
-		flags, tree, tree._index, 0,
+	if not matcherMetaData.outerTreeReference[groupTree] and tree then
+		matcherMetaData.outerTreeReference[groupTree] = {
+			tree = tree,
+			treeLength = treeLength,
+			treeIndex = treeIndex,
+			initialStringIndex = initialStringIndex
+		}
+	end
+
+	local hasMatched, iniStr, endStr = treeMatcher(
+		flags, groupTree, groupTree._index, 0,
 		splitStr, strLength,
 		stringIndex, stringIndex,
 		matcherMetaData
@@ -229,7 +240,7 @@ Group.match = function(currentElement, treeMatcher,
 		end
 	end
 
-	return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+	return hasMatched, iniStr, endStr, matcherMetaData, true
 end
 
 return Group

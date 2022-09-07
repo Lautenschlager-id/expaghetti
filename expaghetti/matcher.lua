@@ -15,11 +15,13 @@ local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local singleElementMatcher = function(currentElement, currentCharacter, treeMatcher,
-	flags,
-	splitStr, strLength,
-	stringIndex,
-	matcherMetaData)
+local singleElementMatcher = function(
+		currentElement, currentCharacter, treeMatcher,
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		matcherMetaData
+	)
 
 	if PositionCapture.isElement(currentElement) then
 		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
@@ -32,9 +34,9 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 	elseif Group.isElement(currentElement) then
 		return Group.match(
 			currentElement, treeMatcher,
-			flags,
+			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			stringIndex - 1,
+			stringIndex - 1, initialStringIndex,
 			matcherMetaData
 		)
 	elseif Alternate.isElement(currentElement) then
@@ -53,21 +55,39 @@ local singleElementMatcher = function(currentElement, currentCharacter, treeMatc
 	return Literal.match(currentElement, currentCharacter)
 end
 
+local debugCurrentStackFrame
 local function treeMatcher(
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex,
-	metaData)
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		metaData
+	)
+
+	debugCurrentStackFrame = debugCurrentStackFrame + 1
+	local debugCurrentStackFrameStr = "[Stack "..debugCurrentStackFrame.."]: "
 
 	if not metaData then
 		metaData = {
 			groupCapturesInitStringPositions = { },
 			groupCapturesEndStringPositions = { },
 			positionCaptures = { },
+			outerTreeReference = { }
 		}
 	end
 
+	local outerTreeReference = metaData.outerTreeReference[tree]
+	local outerTree = outerTreeReference and outerTreeReference.tree
+	pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
+		debugCurrentStackFrameStr,
+		tree, treeIndex + 1,
+		outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
+		string.sub(p(tree), 1, 200),
+		"\t\t\t\t",
+		outerTree and string.sub(p(outerTree), 1, 80))
+
 	local currentElement, currentCharacter
+	local hasQuantifier
+	local hasMatched, iniStr, endStr, _, shouldEndThisExecution
 
 	while treeIndex < treeLength do
 		treeIndex = treeIndex + 1
@@ -76,23 +96,36 @@ local function treeMatcher(
 		stringIndex = stringIndex + 1
 		currentCharacter = splitStr[stringIndex]
 
-		local hasQuantifier = Quantifier.isElement(currentElement)
+		hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			local hasMatched, iniStr, endStr = singleElementMatcher(
-				currentElement, currentCharacter, treeMatcher,
-				flags,
-				splitStr, strLength,
+			pdebug("\t%sValidating stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
 				stringIndex,
+				currentElement.value, currentElement.type, currentCharacter)
+
+			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
+				currentElement, currentCharacter, treeMatcher,
+				flags, tree, treeLength, treeIndex,
+				splitStr, strLength,
+				stringIndex, initialStringIndex,
 				metaData
 			)
 
-			if not hasMatched then
+			pdebug("\t%s%salidated stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
+				(hasMatched and 'V' or "Not v"),
+				stringIndex, currentElement.value, currentElement.type, currentCharacter)
+
+			-- Groups continue the execution of the previous tree in another stack
+			if shouldEndThisExecution then
+				return hasMatched, iniStr, endStr, metaData
+			elseif not hasMatched then
 				return
 			elseif endStr then
 				stringIndex = endStr
 			end
 		else
+			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
+				stringIndex)
 			return Quantifier.operateOver(
 				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
 				flags, tree, treeLength, treeIndex,
@@ -103,7 +136,18 @@ local function treeMatcher(
 		end
 	end
 
-	return true, initialStringIndex + 1, stringIndex, metaData, --[[debug:]]splitStr
+	if outerTreeReference then
+		pdebug("&%sTree Matching outerTreeReference:", debugCurrentStackFrameStr)
+		return treeMatcher(
+			flags,
+			outerTreeReference.tree, outerTreeReference.treeLength, outerTreeReference.treeIndex,
+			splitStr, strLength,
+			stringIndex, outerTreeReference.initialStringIndex,
+			metaData
+		)
+	end
+
+	return true, initialStringIndex + 1, stringIndex, metaData
 end
 
 local matcher = function(expr, str, flags, stringIndex)
@@ -119,16 +163,18 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	stringIndex = stringIndex or 0
 
-	local hasMatched, iniStr, endStr, matcherMetaData, debugStr
+	local hasMatched, iniStr, endStr, matcherMetaData
 	while stringIndex < strLength do
-		hasMatched, iniStr, endStr, matcherMetaData, debugStr = treeMatcher(
+		debugCurrentStackFrame = 0
+		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
+		hasMatched, iniStr, endStr, matcherMetaData = treeMatcher(
 			flags, tree, treeLength, 0,
 			splitStr, strLength,
 			stringIndex, stringIndex
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, debugStr
+			return hasMatched, iniStr, endStr, matcherMetaData, splitStr
 		end
 
 		stringIndex = stringIndex + 1
@@ -137,150 +183,122 @@ end
 
 ----------------------------------------------------------------------------------------------------
 -- Debugging
-local p = require("./helpers/pretty-print")
-_G.see = function(t, i, e, m, tmpS)
-	print(i, e, tmpS and ("%q"):format(table.concat(tmpS, '', i, e)), p(t, true))
-	if m then
-		print('\t\t---------Captures---------')
-		for x = 1, #m.groupCapturesInitStringPositions do
-			local pi, pe = m.groupCapturesInitStringPositions[x] or 0,
-				m.groupCapturesEndStringPositions[x] or 0
-			print(string.format("\tcapture\t%d\t(%d,%d) = \t%q", x, pi, pe,
-				table.concat(tmpS, '', pi, pe)))
+local printdebug = not true
+_G.p = require("./helpers/pretty-print")
+_G.m = function(expr, str, flags)
+	local hasMatched, iniStr, endStr, matcherMetaData, splitStr = matcher(expr, str, flags)
+
+	if not hasMatched then
+		return print(string.format("match(%q, %q) = %q", expr, str, iniStr))
+	end
+
+	print(string.format("match(%q, %q) = %q", expr, str, table.concat(splitStr, '', iniStr, endStr)))
+
+	local groupCapturesInitStringPositions = matcherMetaData.groupCapturesInitStringPositions
+	if #groupCapturesInitStringPositions > 0 then
+		local groupCapturesEndStringPositions = matcherMetaData.groupCapturesEndStringPositions
+
+		print("\t---------Captures---------")
+		for posIndex = 1, #groupCapturesInitStringPositions do
+			iniStr, endStr = groupCapturesInitStringPositions[posIndex] or 0,
+				groupCapturesEndStringPositions[posIndex] or 0
+			print(string.format("\t\t[%02d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
+				table.concat(splitStr, '', iniStr, endStr)))
 		end
-		print('\t\t---------NamedCaptures---------')
-		for k, v in next, m.groupCapturesInitStringPositions do
-			if not tonumber(k) then
-				local pi, pe = m.groupCapturesInitStringPositions[k] or 0,
-					m.groupCapturesEndStringPositions[k] or 0
-				print(string.format("\tcapture\t%q\t(%d,%d) = \t%q", k, pi, pe,
-					table.concat(tmpS, '', pi, pe)))
+
+		print("\t---------Named Captures---------")
+		for key, value in next, groupCapturesInitStringPositions do
+			if not tonumber(key) then
+				iniStr, endStr = v or 0, groupCapturesEndStringPositions[key] or 0
+				print(string.format("\t\t[%q]\t=\t(%d, %d)\t=\t%q", key, iniStr, endStr,
+					table.concat(splitStr, '', iniStr, endStr)))
 			end
 		end
-		print('\t\t---------Position Captures---------')
-		for x = 1, #m.positionCaptures do
-			local p = m.positionCaptures[x]
-			print('\tposcap', x, '=', string.format('(%s(%d)%s)', table.concat(tmpS, '',
-				math.max(1, p - 5), p - 1), p,
-				table.concat(tmpS, '', p, math.min(#tmpS, p + 5))))
+	end
+
+	local positionCaptures = matcherMetaData.positionCaptures
+	if #positionCaptures > 0 then
+		print("\t---------Position Captures---------")
+		for posIndex = 1, #positionCaptures do
+			iniStr = positionCaptures[posIndex]
+			print(string.format("\t\t[%02d]\t=\t\"%s(%d)%s\"", posIndex,
+				table.concat(splitStr, '', 1, iniStr - 1), iniStr,
+				table.concat(splitStr, '', iniStr)))
 		end
 	end
+
 	print('\n')
 end
-local printdebug = false
-_G.pdebug = function(...) if printdebug then print(...) end end
+_G.pdebug = function(str, ...)
+	if printdebug then
+		if type(str) == "table" then
+			return print(str, ...)
+		end
 
--- see(matcher("aba", "abacateiro d\3o abc!")) -- valid(aba)
--- see(matcher("%cCo ", "abacateiro d\3o abc!")) -- valid(\3o )
--- see(matcher("abc!", "abcateiro d\3o abc!")) -- valid(abc!)
+		local args = { ... }
+		local _, countFormats = string.gsub(str, '%%', '')
 
--- see(matcher("[ei]", "abacateiro d\3o abc!")) -- valid (e)
--- see(matcher("[ro] d", "abacateiro d\3o abc!")) -- valid (o d)
--- see(matcher("[^ro] [da]", "abacateiro d\3u abc!")) -- valid (u a)
--- see(matcher("[i-t][i-t][i-t][^i-t][^i-t]", "abacateiro d\3u abc!")) -- valid (iro d)
--- see(matcher("%d%d%d%d [%lz][%lz][%uz][%L][^]%U]", "i just won R$ 1000 onTHE lottery")) -- valid (1000 onTHE)
--- see(matcher("[ac][ac].e", "abacateiro d\3o abc!")) -- valid (cate)
--- see(matcher("....................", "abacateiro d\3o abc!")) -- invalid
-
--- see(matcher("m(o*)n", "mn")) -- valid
--- see(matcher("mo?o?o?o?o?o?o?o?o?o?o?o?o?o?o?n", "mn")) -- valid
--- see(matcher("mo*n", "mon")) -- valid
--- see(matcher("mo*oo?o*n", "mon")) -- valid
--- see(matcher("mo*oo?o*n", "mooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooon")) -- valid
--- see(matcher("mo{,2}on", "mooon")) -- valid
--- see(matcher("o+", "mooon")) -- valid
--- see(matcher("o*", "mooon")) -- valid
--- see(matcher("o?", "mooon")) -- valid
--- see(matcher("o{3,}", "moooon")) -- valid
--- see(matcher("o{3,}", "moon")) -- invalid
--- see(matcher("o+.o+", "mooon")) -- valid
--- see(matcher("[aeiou]+", "mooon")) -- valid
--- see(matcher("[%D]+[aeiou]+[%l]*", "mooon")) -- valid
--- see(matcher(".a+b+c+", ";aaaaabbbbbaaaaaaabbbbbbc")) -- valid (baaaaaaabbbbbbc)
--- see(matcher("a+.b+.a+", "aabaaac")) -- valid (aabaaa)
--- see(matcher("a.?c", "aabaaac")) -- valid (aac)
--- see(matcher("[%l%d_%p]*.", "aba!_@Q22?")) -- valid (aba!_@Q)
--- see(matcher(".*", "aba!_@Q22?")) -- valid
--- see(matcher(".+;", "aba!_@Q22?")) -- invalid
--- see(matcher("%d+%??", "aba!_@Q22?")) -- valid (22?)
--- see(matcher("<.+>", "<html> <body>hi?</body> </html>")) -- valid
--- see(matcher("<.+?>", "<html> <body>hi?</body> </html>")) -- valid (<html>)
--- see(matcher("o+?", "mooon")) -- valid (o)
--- see(matcher(".o*.", "mooon")) -- valid (mooon)
--- see(matcher(".o?.", "mooon")) -- valid (moo)
--- see(matcher(".o*?.", "mooon")) -- valid (mo)
--- see(matcher(".o??.", "mooon")) -- valid (mo)
--- see(matcher("%w{3,5}", "bonjoour mon amour")) -- valid (bonjo)
--- see(matcher("%w{3,5}?", "bonjoour mon amour")) -- valid (bon)
--- see(matcher("a[sc]?[abco]", "cacao tabasco tobacco")) -- valid (aca)
--- see(matcher("a[sc]??[abco]", "cacao tabasco tobacco")) -- valid (ac)
--- see(matcher("a+amo", "te aaaaaaamoo")) -- valid (aaaaaaamo)
--- see(matcher("a++amo", "te aaaaaaamoo")) -- invalid
--- see(matcher("a++mo++", "te aaaaaaamoo")) -- valid (aaaaaaamoo)
--- see(matcher("a{1,5}+m++o++", "te aaaaaaamoo")) -- valid (aaaaamoo)
--- see(matcher("a?+mo", "te aaaaaaamoo")) -- valid (amo)
--- see(matcher("aa?a?a?a?a?a?a?a?a?a?", "a"))
-
--- see(matcher("a(b)acate", "abacate")) -- valid (abacate)
--- see(matcher("a(ba)?cate", "acate")) -- valid (acate)
--- see(matcher("a(ba)?cat(.)", "acate")) -- valid (acate)
--- see(matcher("a(b.?a).?cate", "abacate")) -- valid (abacate)
--- see(matcher("a(b?c?a)te", "abacate")) -- valid (acate)
--- see(matcher("(b?c?a)+te", "abacate")) -- valid (acate)
--- see(matcher("a(ba(c(a)(t)?e))e?", "abacate")) -- valid (abacate)
--- see(matcher("a((b?c?)a)+", "abacate")) -- valid (abaca)
--- see(matcher("a([bc]a)+", "abacate")) -- valid (acaba)
--- see(matcher("([bc]a)+", "abacate")) -- valid (baca)
--- see(matcher("a([bct]a?)+", "abacate")) -- valid (abacat)
--- see(matcher("([bct]a?)+", "abacate")) -- valid (bacat)
--- see(matcher("([bct]a?)+?", "abacate")) -- valid (ba)
--- see(matcher("(b?c?a?)+", "abacate")) -- valid (abaca)
--- see(matcher("(b?c?t?a?)+", "abacate")) -- valid (abacat)
--- see(matcher("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi")) -- valid (abcdefacdefacefacdececdecef)
--- see(matcher("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.')) -- valid (.)
--- see(matcher("(?:b?c?t?(a?))+", "abacate")) -- valid (abacat)
--- see(matcher("(a??)", "abacate")) -- valid ('')
-
--- see(matcher("a()[bt]e", "abacate")) -- valid 6
--- see(matcher("()", "abacate")) -- valid 1
--- see(matcher("()(a()b(()a)()c()a()t()e())()().?", "abacate")) -- valid
--- see(matcher("(b?c?a?())+", "abacate")) -- valid (abaca) (6)
-
--- see(matcher("(?<oi>.)", "banana")) -- valid (b)
--- see(matcher("(.)(?<oi>().)(.)", "banana")) -- valid (ban)
--- see(matcher("(.)%1", "bb")) -- valid (bb)
--- see(matcher("ba(na)%2+", "banana")) -- invalid
--- see(matcher("ba()%1+", "banana")) -- invalid
--- see(matcher("ba()%1+", "banana")) -- invalid
--- see(matcher("(?<oi>.)%k<oi>", "bbaannaanna")) -- valid (bb)
--- see(matcher("()(((.).)(?<tree>.))()%k<3>%2%k<tree>()%1()", "fjsaiodfjdaosfabcaabcabcocdsfjoidsfjiofj")) -- valid (abcaabcabc)
--- see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacate")) -- valid (abaca)
--- see(matcher("(?<hi>a?b?c?)+.+?%k<hi>", "abacatea")) -- valid (abacatea)
--- see(matcher("(?<hi>a?b?c?)++.+%k<hi>", "abacate")) -- valid (t)
-
--- see(matcher("a|b", "a")) -- valid (a)
--- see(matcher("a|b", "b")) -- valid (b)
--- see(matcher("a.+|b", "blsdjifsjpda~ç,fsdnlj")) -- valid (b)
--- see(matcher("a.+|b", "lsdjifsjpdab~ç,fsdnlj")) -- valid (ab~ç,fsdnlj)
--- see(matcher("(a|b)+()(?:n|a)+", "banana")) -- valid (banana)
--- see(matcher("([Gg]et|[Ss]et|[Vv]alue|[Nn]ame)+", "setName")) -- valid (setName)
--- see(matcher("(|a)+b", "ab")) -- valid (b)
--- see(matcher("a(|)b", "ab")) -- valid (ab)
--- see(matcher("a(|)+b", "ab")) -- valid (ab)
--- see(matcher("a(|b)b", "ab")) -- valid (ab)
--- see(matcher("a((b|c||||d(e|))|.+)|.|", "b")) -- valid (b)
-
-see(matcher("i(?=(ll))(..)", "illuminati")) -- valid (ill)
-see(matcher("i(?=(ll))(..)(?=.+)i", "illuminati")) -- invalid
-see(matcher("i(?!(ll))(..)(?!u)", "illuminati")) -- valid (ina)
-see(matcher("i(?!l)", "illuminati")) -- valid (i)
-see(matcher("i(?=i)(?!l)", "illuminati")) -- invalid
-see(matcher("i(?=(?!l))", "illuminati")) -- valid (i)
-see(matcher("i(?!(?!l))", "illuminati")) -- valid (i)
-see(matcher("i(?!(?=l))", "illuminati")) -- valid (i)
-see(matcher("ba(?=((?:n|a)+))%1", "the banana is sweet")) -- valid (banana)
-see(matcher("(?!i)u", "illuminati")) -- valid (u)
-see(matcher("(?=i)i", "illuminati")) -- valid (i)
+		print(
+			string.format(
+				str,
+				table.unpack(args, 1, countFormats)
+			),
+			"\t\t\t\t",
+			table.unpack(args, countFormats + 1, select('#', ...))
+		)
+	end
+end
 ----------------------------------------------------------------------------------------------------
+
+-- m("()a()(b)()c()(d)()(e)()f()", "abcdef") -- valid (abcdefg)
+-- m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg") -- valid (abcdefg)
+
+-- m("%d+(.)", "1235") -- valid (1235)
+-- m("(x+()x)()x", "xxxxxxxxxxxx") -- valid (xxxxxxxxxxxx)
+
+-- m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef") -- valid (abcdef)
+-- m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?") -- valid (abaccccccate)
+
+-- m("a(b)acate", "abacate") -- valid (abacate)
+-- m("a(ba)?cate", "acate") -- valid (acate)
+-- m("a()(ba)?()cat(.)", "acate") -- valid (acate)
+-- m("a()(b.?a)().?()cate", "abacate") -- valid (abacate)
+-- m("a(b?c?a)te", "abacate") -- valid (acate)
+-- m("a?((b?c?)a)+", "abacate") -- valid (abaca)
+-- m("a([bc]a)+", "abacate") -- valid (acaba)
+-- m("([bc]a)+", "abacate") -- valid (baca)
+-- m("a([bct]a?)+", "abacate") -- valid (abacat)
+-- m("([bct]a?)+", "abacate") -- valid (bacat)
+-- m("([bct]a?)+?", "abacate") -- valid (ba)
+-- m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
+-- m("(a??)", "abacate") -- valid ('')
+-- m(".?((a+()(((b+)))()))().?", "aaacbab") -- valid (bab)
+-- m("(x+x+)+()y", "xxxxxxxxxxy") -- valid (xxxxxxxxxxy)
+-- m("(a+|b+)c", "aaaaaaaadbbbbbbbbbbc") -- valid (bbbbbbbbbbc)
+-- m("([ab]+)c", "aaaaaaaadbbbbbbbbbbc") -- valid (bbbbbbbbbbc)
+-- m("(b?c?a)+te", "abacate") -- valid (abacate)
+-- m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate)
+-- m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa)
+-- m("(a)+()b", "aaacaab") -- valid (aab)
+-- m("(b?c?t?a?)+", "abacate") -- valid (abacat)
+-- m("(b?c?a?)+", "abacate") -- valid (abaca)
+
+-- m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat)
+-- m("(b?)+", '.............................') -- valid ("")
+
+-- m("(a)+x", "aaax") -- valid (aaax)
+-- m("([ac])+x", "aacx") -- valid (aacx)
+-- m("([^N]*N)+", "abNNxyzN") -- valid (abNNxyzN)
+-- m("([^N]*N)+", "abNNxyz") -- valid (abNN)
+-- m("(([a-z]+):)?([a-z]+)", "smil") -- valid (smil)
+-- m("(x?)?", "x") -- valid (x)
+-- m("((a)c)?(ab)", "ab") -- valid (ab)
+-- m("([^/]*/)*sub1/", "d:msgs/tdir/sub1/trial/away.cpp") -- valid (d:msgs/tdir/sub1/)
+-- m("([abc])*d", "abbbcd") -- valid (abbbcd)
+-- m("([abc])*bcd", "abcd") -- valid (abcd)
+-- m("\"(?:\\\"|[^\"])*?\"", "\"\"\"") -- valid (\"\")
+-- m("(a+b+)+(a+b+)+a", 'abbbbbbbcaaaaaaaaaaaaabaaaaba') -- valid (aaaaaaaaaaaaabaaaaba)
+
+--m("([ab]*?)(?=(b))c", "abc") -- captures returning ini=0
 
 return matcher
