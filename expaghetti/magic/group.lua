@@ -18,6 +18,7 @@ local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEA
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
 local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
+local ENUM_GROUP_COMMENT_BEHAVIOR = magicEnum.GROUP_COMMENT_BEHAVIOR
 local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 ----------------------------------------------------------------------------------------------------
@@ -63,6 +64,9 @@ local getGroupBehavior = function(index, charactersList, charactersValueList, gr
 
 			errorMessage = errorsEnum.invalidGroupBehavior
 		end
+	elseif currentCharacter == ENUM_GROUP_COMMENT_BEHAVIOR then
+		groupElement.disableCapture = true
+		groupElement._skipFromTree = true
 	else
 		errorMessage = errorsEnum.invalidGroupBehavior
 	end
@@ -183,8 +187,10 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 		return PositionCapture.parse(index, tree, parserMetaData)
 	end
 
-	tree._index = tree._index + 1
-	tree[tree._index] = value
+	if not value._skipFromTree then
+		tree._index = tree._index + 1
+		tree[tree._index] = value
+	end
 
 	return index + 1
 end

@@ -18,6 +18,7 @@ local characters = {
 	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
 	GROUP_NAME_OPEN = '<', -- (?<name>abc)
 	GROUP_NAME_CLOSE = '>', -- (?<name>abc)
+	GROUP_COMMENT_BEHAVIOR = '#', -- (?# any message )
 
 	OPEN_QUANTIFIER = '{', -- {1,2}
 	CLOSE_QUANTIFIER = '}', -- {1,2}
