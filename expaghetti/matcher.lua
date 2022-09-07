@@ -81,7 +81,7 @@ local function treeMatcher(
 		debugCurrentStackFrameStr,
 		tree, treeIndex + 1,
 		outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
-		string.sub(p(tree), 1, 80),
+		string.sub(p(tree), 1, 200),
 		"\t\t\t\t",
 		outerTree and string.sub(p(outerTree), 1, 80))
 
@@ -111,7 +111,7 @@ local function treeMatcher(
 				metaData
 			)
 
-			pdebug("\t%s%salited stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
+			pdebug("\t%s%salidated stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
 				(hasMatched and 'V' or "Not v"),
 				stringIndex, currentElement.value, currentElement.type, currentCharacter)
 
@@ -183,7 +183,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 -- Debugging
-local printdebug = true
+local printdebug = not true
 _G.p = require("./helpers/pretty-print")
 _G.m = function(expr, str, flags)
 	local hasMatched, iniStr, endStr, matcherMetaData, splitStr = matcher(expr, str, flags)
@@ -250,14 +250,14 @@ _G.pdebug = function(str, ...)
 end
 ----------------------------------------------------------------------------------------------------
 
--- m("()a()(b)()c()(d)()(e)()f()", "abcdef")
--- m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg")
+-- m("()a()(b)()c()(d)()(e)()f()", "abcdef") -- valid (abcdefg)
+-- m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg") -- valid (abcdefg)
 
--- m("%d+(.)", "1235")
--- m("(x+()x)()x", "xxxxxxxxxxxx")
+-- m("%d+(.)", "1235") -- valid (1235)
+-- m("(x+()x)()x", "xxxxxxxxxxxx") -- valid (xxxxxxxxxxxx)
 
--- m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef")
--- m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?")
+-- m("(.{0,}(.+))()(...)()(.{1,}.)", "abcdef") -- valid (abcdef)
+-- m("aba(c+)ate", "abacccccccccccaty ou abaccccccate?") -- valid (abaccccccate)
 
 -- m("a(b)acate", "abacate") -- valid (abacate)
 -- m("a(ba)?cate", "acate") -- valid (acate)
@@ -273,34 +273,47 @@ end
 -- m("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", '.') -- valid (.)
 -- m("(a??)", "abacate") -- valid ('')
 -- m(".?((a+()(((b+)))()))().?", "aaacbab") -- valid (bab)
--- m("(x+x+)+()y", "xxxxxxxxxxy")
--- m("(x+x+)+()y", "xxxxxxxxxxy")
--- m("(a+|b+)c", "aaaaaaaadbbbbbbbbbbc")
--- m("([ab]+)c", "aaaaaaaadbbbbbbbbbbc")
+-- m("(x+x+)+()y", "xxxxxxxxxxy") -- valid (xxxxxxxxxxy)
+-- m("(a+|b+)c", "aaaaaaaadbbbbbbbbbbc") -- valid (bbbbbbbbbbc)
+-- m("([ab]+)c", "aaaaaaaadbbbbbbbbbbc") -- valid (bbbbbbbbbbc)
 -- m("(b?c?a)+te", "abacate") -- valid (abacate)
 -- m("a(ba(c(a)(t)?e))e?", "abacate") -- valid (abacate)
 -- m("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi") -- valid (abcdefacdefacefacdececdecefa)
--- m("(a)+()b", "aaacaab")
+-- m("(a)+()b", "aaacaab") -- valid (aab)
 -- m("(b?c?t?a?)+", "abacate") -- valid (abacat)
 -- m("(b?c?a?)+", "abacate") -- valid (abaca)
 
---m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat) -- INF LOOP
---m("(b?)+", '.............................')
+-- m("(?:b?c?t?(a?))+", "abacate") -- valid (abacat)
+-- m("(b?)+", '.............................') -- valid ("")
 
---m("(a)+x", "aaax")
---m("([ac])+x", "aacx")
---m("([^N]*N)+", "abNNxyzN")
---m("([^N]*N)+", "abNNxyz")
---m("(([a-z]+):)?([a-z]+)", "smil")
---m("(x?)?", "x")
---m("((a)c)?(ab)", "ab")
---m("([^/]*/)*sub1/", "d:msgs/tdir/sub1/trial/away.cpp")
---m("([abc])*d", "abbbcd")
---m("([abc])*bcd", "abcd")
---m("\"(?:\\\"|[^\"])*?\"", "\"\"\"")
+-- m("(a)+x", "aaax") -- valid (aaax)
+-- m("([ac])+x", "aacx") -- valid (aacx)
+-- m("([^N]*N)+", "abNNxyzN") -- valid (abNNxyzN)
+-- m("([^N]*N)+", "abNNxyz") -- valid (abNN)
+-- m("(([a-z]+):)?([a-z]+)", "smil") -- valid (smil)
+-- m("(x?)?", "x") -- valid (x)
+-- m("((a)c)?(ab)", "ab") -- valid (ab)
+-- m("([^/]*/)*sub1/", "d:msgs/tdir/sub1/trial/away.cpp") -- valid (d:msgs/tdir/sub1/)
+-- m("([abc])*d", "abbbcd") -- valid (abbbcd)
+-- m("([abc])*bcd", "abcd") -- valid (abcd)
+-- m("\"(?:\\\"|[^\"])*?\"", "\"\"\"") -- valid (\"\")
+-- m("(a+b+)+(a+b+)+a", 'abbbbbbbcaaaaaaaaaaaaabaaaaba') -- valid (aaaaaaaaaaaaabaaaaba)
 
-m("(.+)?B", "AB") -- is B but should be AB
+-- If ()+ knows about the whole pattern when getting the maximum occurrences,
+-- then it will get to the end in (stuff) and (stuff)+ will try to match something that has already
+-- been matched. For example:
+-- (x+)x for "xxx" matches xx(2)x(3),
+-- and (x+)+x for "xxx" matches xx(2)x(3) as (x+)x, and then (x+)+'s loop at the stringIndex 3 tries
+-- to match the next element, nil(4)
+
+-- If ()+ does not know about the whole pattern when getting the maximum occurrences,
+-- then it will only consider what's inside the group and won't match what's next. For example:
+-- (x+)x for "xxx" matches xx(2)x(3)
+-- and (x+)x for "xxx" matches xxx(3) as (x+), and then nil(4) as an attempt to match the last 'x'
+
+--m("(.+.+)+.", 'xxxxxxx')
+
+--m("(.+)?B", "AB") -- is B but should be AB
 --m("([ab]*?)(?=(b))c", "abc") -- captures returning ini=0
-
 
 return matcher

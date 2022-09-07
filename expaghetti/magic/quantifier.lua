@@ -174,6 +174,9 @@ local matchBacktrackElement = function(
 
 	local hasMatched, iniStr, endStr
 	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
+		pdebug("@ Backtracking [%d-%d] at stringIndex %d", minimumOccurrences,
+			maximumOccurrencesOfElement, endStringPositions[occurrence] or (stringIndex - 1),
+			p(tree))
 		hasMatched, iniStr, endStr = treeMatcher(
 			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
@@ -183,7 +186,10 @@ local matchBacktrackElement = function(
 		)
 
 		if hasMatched then
+			pdebug("\t/!\\ Backtrack successful")
 			return hasMatched, iniStr, endStr, matcherMetaData
+		else
+			pdebug("\t/!\\ Backtrack failed")
 		end
 	end
 end
@@ -253,7 +259,7 @@ Quantifier.operateOver = function(
 
 	local quantifier = currentElement.quantifier
 
-	pdebug("@ Getting maximum occurrences for", p(quantifier))
+	pdebug("@ Getting maximum occurrences for", p(currentElement))
 	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
 		quantifier, currentElement, singleElementMatcher,
 		currentCharacter, treeMatcher,
