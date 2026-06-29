@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
+local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local ENUM_OPEN_SET = magicEnum.OPEN_SET
 local ENUM_CLOSE_SET = magicEnum.CLOSE_SET
@@ -39,63 +40,31 @@ Set.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_SET
 end
 
-Set.parse = function(index, charactersList, charactersValueList, tree)
+Set.parse = function(state, tree)
 	-- skip magic opening
-	index = index + 1
+	state.index = state.index + 1
 
-	local endIndex, errorMessage = findMagicClosingIndex(index, charactersList)
+	local endIndex, errorMessage = findMagicClosingIndex(state.index, state.charactersList)
 	if not endIndex then
-		-- charactersList = error message
+		-- state.charactersList = error message
 		return false, errorMessage
 	end
 
 	-- Set boundary [index, endIndex)
 	endIndex = endIndex - 1
 
-	--[[
-		{
-			type = "set",
-
-			hasToNegateMatch = false,
-
-			rangeIndex = 0,
-			ranges = {
-				[min1] = '',
-				[max1] = '',
-				...
-			},
-
-			classIndex = 0,
-			classes = { },
-
-			quantifier = nil,
-
-			[literal1] = true,
-			...
-		}
-	]]
-	local set = {
-		type = ENUM_ELEMENT_TYPE_SET,
-
-		hasToNegateMatch = false,
-
-		rangeIndex = 0,
-		ranges = { },
-
-		classIndex = 0,
-		classes = { },
-	}
+	local set = AST.Set()
 
 	local watchingForRangeSeparator
 	local currentCharacter, lastCharacter, rangeInitChar, currentCharacterValue
 
-	local elementIndex = index - 1
+	local elementIndex = state.index - 1
 	repeat
 		elementIndex = elementIndex + 1
-		currentCharacter = charactersList[elementIndex]
+		currentCharacter = state.charactersList[elementIndex]
 
 		-- first character of the set
-		if elementIndex == index and currentCharacter == ENUM_NEGATE_SET then
+		if elementIndex == state.index and currentCharacter == ENUM_NEGATE_SET then
 			set.hasToNegateMatch = true
 		elseif currentCharacter.type == ENUM_ELEMENT_TYPE_SET then
 			set.classIndex = set.classIndex + 1
@@ -103,15 +72,15 @@ Set.parse = function(index, charactersList, charactersValueList, tree)
 		else
 			local nextCharacter, rangeEndChar
 			if endIndex > elementIndex then
-				nextCharacter = charactersList[elementIndex + 1]
-				rangeEndChar = charactersValueList[elementIndex + 1]
+				nextCharacter = state.charactersList[elementIndex + 1]
+				rangeEndChar = state.charactersValueList[elementIndex + 1]
 			end
-			currentCharacterValue = charactersValueList[elementIndex]
+			currentCharacterValue = state.charactersValueList[elementIndex]
 
 			-- assumes that currentCharacter == ENUM_SET_RANGE_SEPARATOR
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false
-				rangeInitChar = charactersValueList[elementIndex - 1]
+				rangeInitChar = state.charactersValueList[elementIndex - 1]
 
 				-- both the last and next characters must be literals
 				if rangeEndChar and rangeInitChar then

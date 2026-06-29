@@ -2,6 +2,7 @@
 local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
+local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
@@ -65,22 +66,7 @@ local lookForCustomQuantifier = function(index, charactersList)
 		return false
 	end
 
-	--[[
-		parentElement = {
-			quantifier = {
-				type = "quantifier",
-				min = 1,
-				max = 1,
-				mode = "lazy"
-			}
-		}
-	]]
-	return index, {
-		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
-		min = parameters[1] or 0,
-		max = parameters[2] or 0,
-		mode = nil,
-	}
+	return index, AST.Quantifier(parameters[1], parameters[2])
 end
 
 local checkIfAppliesToParentTreeElement = function(index, charactersList)
@@ -215,8 +201,8 @@ quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
 		endStringPositions, ...)
 end
 ----------------------------------------------------------------------------------------------------
-Quantifier.isToken = function(index, charactersList, parentElement)
-	local index, quantifier = checkIfAppliesToParentTreeElement(index, charactersList)
+Quantifier.isToken = function(state, parentElement)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.charactersList)
 
 	return index and quantifier
 end
@@ -226,11 +212,11 @@ Quantifier.isElement = function(currentElement)
 		and currentElement.quantifier.type == ENUM_ELEMENT_TYPE_QUANTIFIER
 end
 
-Quantifier.lookForElementOperation = function(index, charactersList, parentElement)
+Quantifier.lookForElementOperation = function(state, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
 	local shouldntHaveQuantifier = parentElement.quantifier == false
 
-	local index, quantifier = checkIfAppliesToParentTreeElement(index, charactersList)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.charactersList)
 
 	if not index then
 		-- quantifier = error message
@@ -243,7 +229,7 @@ Quantifier.lookForElementOperation = function(index, charactersList, parentEleme
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index, quantifier = lookForModeToken(index, charactersList, quantifier)
+	index, quantifier = lookForModeToken(index, state.charactersList, quantifier)
 	parentElement.quantifier = quantifier
 
 	return index

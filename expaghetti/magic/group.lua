@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 local strformat = string.format
 local tblconcat = table.concat
+local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local PositionCapture = require("./magic/position_capture")
 ----------------------------------------------------------------------------------------------------
@@ -129,62 +130,40 @@ Group.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_GROUP
 end
 
-Group.parse = function(parser, index, tree, expression, expressionLength, charactersIndex,
-	charactersList, charactersValueList, boolEscapedList, parserMetaData)
+Group.parse = function(state, tree)
 
 	-- skip magic opening
-	index = index + 1
+	state.index = state.index + 1
 
-	--[[
-		{
-			type = "group",
-			disableCapture = false,
-			isAtomic = false,
-			isLookahead = false,
-			isLookbehind = false,
-			isNegative = false,
-			name = "",
-			index = 1,
-			tree = {
-				...
-			}
-		}
-	]]
-	local value = {
-		type = ENUM_ELEMENT_TYPE_GROUP,
-	}
+	local value = AST.Group()
 
 	local errorMessage
-	index, errorMessage = getGroupBehavior(index, charactersList, charactersValueList,
-		value, parserMetaData)
-	if not index then
+	state.index, errorMessage = getGroupBehavior(state.index, state.charactersList, state.charactersValueList,
+		value, state.metaData)
+	if not state.index then
 		return false, errorMessage
 	end
 
 	-- A group with any value
-	if charactersList[index] ~= ENUM_CLOSE_GROUP then
+	if state.charactersList[state.index] ~= ENUM_CLOSE_GROUP then
 		if not (
 			value.disableCapture
 			or value.name
 		) then
-			parserMetaData.groupIndex = parserMetaData.groupIndex + 1
-			value.index = parserMetaData.groupIndex
+			state.metaData.groupIndex = state.metaData.groupIndex + 1
+			value.index = state.metaData.groupIndex
 		end
 
-		local groupTree
-		groupTree, index = parser(nil, nil,
-			true, false, index, expression,
-			expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
-			parserMetaData)
+		local groupTree, groupErrorMessage = state:parseSubTree(true, false)
 
 		if not groupTree then
 			-- index = error message
-			return false, index
+			return false, groupErrorMessage
 		end
 
 		value.tree = groupTree
 	elseif not value.hasBehavior then
-		return PositionCapture.parse(index, tree, parserMetaData)
+		return PositionCapture.parse(state.index, tree, state.metaData)
 	end
 
 	if not value._skipFromTree then
@@ -192,7 +171,7 @@ Group.parse = function(parser, index, tree, expression, expressionLength, charac
 		tree[tree._index] = value
 	end
 
-	return index + 1
+	return state.index + 1
 end
 
 Group.match = function(

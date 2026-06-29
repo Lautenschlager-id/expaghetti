@@ -1,5 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
+local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ALTERNATE_SEPARATOR = require("./enums/magic").ALTERNATE_SEPARATOR
 local ENUM_ELEMENT_TYPE_ALTERNATE = require("./enums/elements").alternate
@@ -15,28 +16,13 @@ Alternate.isElement = function(currentElement)
 end
 
 Alternate.transformIntoParsedTrees = function(tree)
-	--[[
-		{
-			type = "alternate",
-			trees = {
-				_index = 1,
-				{
-					...
-				}
-			},
-		}
-	]]
 	return {
-		[1] = {
-			type = ENUM_ELEMENT_TYPE_ALTERNATE,
-			trees = tree,
-		},
+		[1] = AST.Alternate(tree),
 		_index = 1
 	}
 end
 
-Alternate.parse = function(parser, index, tree, expression, expressionLength, charactersIndex,
-	charactersList, charactersValueList, boolEscapedList, parserMetaData, isGroup, hasGroupClosed)
+Alternate.parse = function(state, tree)
 
 	local totalAlternates = 1
 	local firstAlternative = { _index = tree._index }
@@ -45,28 +31,26 @@ Alternate.parse = function(parser, index, tree, expression, expressionLength, ch
 	end
 	tree[1] = firstAlternative
 
-	local alternativeTree
+	local alternativeTree, altErrorMessage
 	repeat
-		alternativeTree, index, hasGroupClosed = parser(nil, nil,
-			isGroup	, true, index + 1, expression,
-			expressionLength, charactersIndex, charactersList, charactersValueList, boolEscapedList,
-			parserMetaData, hasGroupClosed)
+		state.index = state.index + 1
+		alternativeTree, altErrorMessage = state:parseSubTree(state.isGroup, true, state.hasGroupClosed)
 
 		if not alternativeTree then
 			-- index = error message
-			return false, index
+			return false, altErrorMessage
 		end
 
 		totalAlternates = totalAlternates + 1
 		tree[totalAlternates] = alternativeTree
-	until index > charactersIndex or (isGroup and hasGroupClosed)
+	until state.index > state.charactersIndex or (state.isGroup and state.hasGroupClosed)
 
 	for elementIndex = totalAlternates + 1, tree._index do
 		tree[elementIndex] = nil
 	end
 	tree._index = totalAlternates
 
-	return index, nil, hasGroupClosed
+	return state.index, nil, state.hasGroupClosed
 end
 
 Alternate.match = function(currentElement, treeMatcher,

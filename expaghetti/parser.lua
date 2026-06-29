@@ -18,44 +18,82 @@ local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local getElementsList = function(expression, expressionLength)
-	local charactersIndex, charactersList, charactersValueList, boolEscapedList = 0, { }, { }, { }
+local ParserState = require("./parser_state")
+local Tokenizer = require("./tokenizer")
 
-	local index = 1
+local function parserCore(state)
+	local tree = {
+		_index = 0
+	}
 
+	local errorMessage
 	local currentCharacter
-	while index <= expressionLength do
-		currentCharacter = expression[index]
 
-		charactersIndex = charactersIndex + 1
+	while state.index <= state.charactersIndex do
+		currentCharacter = state.charactersList[state.index]
 
-		if Escaped.isToken(currentCharacter) then
-			index, currentCharacter = Escaped.parse(index, expression)
-			if not index then
-				-- currentCharacter = error message
-				return false, currentCharacter
-			end
-			boolEscapedList[charactersIndex] = true
+		if state.boolEscapedList[state.index] then
+			state.index = state.index + 1
 
-			charactersValueList[charactersIndex] = currentCharacter.value
+			tree._index = tree._index + 1
+			tree[tree._index] = currentCharacter
 		else
-			index = index + 1
+			if Set.isToken(currentCharacter) then
+				state.index, errorMessage = Set.parse(state, tree)
+			elseif Group.isOpeningToken(currentCharacter) then
+				state.index, errorMessage = Group.parse(state, tree)
+			elseif Group.isClosingToken(currentCharacter) then
+				-- assumes hasGroupClosed = false
+				if state.isGroup then
+					state.hasGroupClosed = true
+					break
+				else
+					errorMessage = errorsEnum.noGroupToClose
+				end
+			elseif Anchor.isToken(currentCharacter) then
+				state.index = Anchor.parse(state, currentCharacter, tree)
+			elseif Any.isToken(currentCharacter) then
+				state.index = Any.parse(state, tree)
+			elseif Alternate.isToken(currentCharacter) then
+				if not state.isAlternate then
+					-- First occurrence
+					state.index, errorMessage, state.hasGroupClosed = Alternate.parse(state, tree)
 
-			charactersValueList[charactersIndex] = currentCharacter
+					if errorMessage then
+						return false, errorMessage
+					end
+
+					tree = Alternate.transformIntoParsedTrees(tree)
+				end
+				-- Whenever found, stop processing the rest of the expression since it's looping
+				break
+			else
+				state.index, errorMessage = Literal.parse(state, currentCharacter, tree)
+			end
 		end
 
-		charactersList[charactersIndex] = currentCharacter
+		if not errorMessage then
+			state.index, errorMessage = Quantifier.lookForElementOperation(state, tree[tree._index])
+		end
+
+		if errorMessage then
+			return false, errorMessage
+		end
 	end
 
-	return charactersIndex, charactersList, charactersValueList, boolEscapedList
+	if state.isGroup and not state.hasGroupClosed and not state.isAlternate then
+		return false, errorsEnum.unterminatedGroup
+	end
+
+	return tree
 end
-----------------------------------------------------------------------------------------------------
-local function parser(expr, flags,
+
+function parser(expr, flags,
 	-- At least one should be true or else it's going to ignore all the next parameters
 	isGroup, isAlternate,
 	-- Parameters passed for recursion parsing
 	index, expression, expressionLength,
-	charactersIndex, charactersList, charactersValueList, boolEscapedList,
+	tokens,
 	metaData,
 	hasGroupClosed)
 
@@ -63,12 +101,11 @@ local function parser(expr, flags,
 		flags = flags or { }
 
 		expression, expressionLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
-		charactersIndex, charactersList, charactersValueList, boolEscapedList =
-			getElementsList(expression, expressionLength)
+		local tokensLength
+		tokensLength, tokens = Tokenizer.tokenize(expression, expressionLength)
 
-		if not charactersIndex then
-			-- charactersList = error message
-			return false, charactersList
+		if not tokensLength then
+			return false, tokens
 		end
 
 		-- Data shared for all sub-groups
@@ -86,82 +123,18 @@ local function parser(expr, flags,
 		hasGroupClosed = false
 	end
 
-	local tree = {
-		_index = 0
-	}
+	local state = ParserState.new(
+		expr, flags, isGroup, isAlternate, index, expression, expressionLength,
+		tokens,
+		metaData, hasGroupClosed
+	)
 
-	local nextIndex, errorMessage
-	local currentCharacter
-
-	while index <= charactersIndex do
-		currentCharacter = charactersList[index]
-
-		if boolEscapedList[index] then
-			index = index + 1
-
-			tree._index = tree._index + 1
-			tree[tree._index] = currentCharacter
-		else
-			if Set.isToken(currentCharacter) then
-				index, errorMessage = Set.parse(index, charactersList, charactersValueList, tree)
-			elseif Group.isOpeningToken(currentCharacter) then
-				index, errorMessage = Group.parse(
-					parser, index, tree,
-					expression, expressionLength,
-					charactersIndex, charactersList, charactersValueList, boolEscapedList,
-					metaData
-				)
-			elseif Group.isClosingToken(currentCharacter) then
-				-- assumes hasGroupClosed = false
-				if isGroup then
-					hasGroupClosed = true
-					break
-				else
-					errorMessage = errorsEnum.noGroupToClose
-				end
-			elseif Anchor.isToken(currentCharacter) then
-				index = Anchor.parse(index, currentCharacter, tree)
-			elseif Any.isToken(currentCharacter) then
-				index = Any.parse(index, tree)
-			elseif Alternate.isToken(currentCharacter) then
-				if not isAlternate then
-					-- First occurrence
-					index, errorMessage, hasGroupClosed = Alternate.parse(
-						parser, index, tree,
-						expression, expressionLength,
-						charactersIndex, charactersList, charactersValueList, boolEscapedList,
-						metaData,
-						isGroup, hasGroupClosed
-					)
-
-					if errorMessage then
-						return false, errorMessage
-					end
-
-					tree = Alternate.transformIntoParsedTrees(tree)
-				end
-				-- Whenever found, stop processing the rest of the expression since it's looping
-				break
-			else
-				index, errorMessage = Literal.parse(currentCharacter, index, tree, charactersList)
-			end
-		end
-
-		if not errorMessage then
-			index, errorMessage = Quantifier.lookForElementOperation(index, charactersList,
-				tree[tree._index])
-		end
-
-		if errorMessage then
-			return false, errorMessage
-		end
+	local tree, errorMessage = parserCore(state)
+	if not tree then
+		return false, errorMessage or tree
 	end
 
-	if isGroup and not hasGroupClosed and not isAlternate then
-		return false, errorsEnum.unterminatedGroup
-	end
-
-	return tree, index, hasGroupClosed
+	return tree, state.index, state.hasGroupClosed
 end
 
 return parser

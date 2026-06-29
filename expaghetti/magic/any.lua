@@ -1,5 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 local ENUM_ANY_CHARACTER = require("./enums/magic").ANY_CHARACTER
+local AST = require("./ast")
 local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").any
 ----------------------------------------------------------------------------------------------------
 local Any = { }
@@ -12,18 +13,11 @@ Any.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_ANY
 end
 
-Any.parse = function(index, tree)
-	--[[
-		{
-			type = "any",
-		}
-	]]
+Any.parse = function(state, tree)
 	tree._index = tree._index + 1
-	tree[tree._index] = {
-		type = ENUM_ELEMENT_TYPE_ANY,
-	}
+	tree[tree._index] = AST.Any()
 
-	return index + 1
+	return state.index + 1
 end
 
 Any.match = function(currentElement, currentCharacter)
