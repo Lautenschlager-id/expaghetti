@@ -19,7 +19,8 @@ local function compareTables(tbl1, tbl2, name, isSecondCheck)
 			assert(value == tbl2[key] and valueType == compValueType,
 				strformat(
 					"%s: Key '%s' expected to have value %q<%s>, but got %q<%s>",
-					name, key, value, valueType, tbl2[key], compValueType
+					tostring(name), tostring(key), tostring(value), tostring(valueType),
+					tostring(tbl2[key]), tostring(compValueType)
 				)
 			)
 		end
