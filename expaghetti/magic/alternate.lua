@@ -39,7 +39,11 @@ Alternate.parse = function(parser, index, tree, expression, expressionLength, ch
 	charactersList, charactersValueList, boolEscapedList, parserMetaData, isGroup, hasGroupClosed)
 
 	local totalAlternates = 1
-	tree[1] = tblDeepCopy(tree)
+	local firstAlternative = { _index = tree._index }
+	for i = 1, tree._index do
+		firstAlternative[i] = tree[i]
+	end
+	tree[1] = firstAlternative
 
 	local alternativeTree
 	repeat
@@ -66,24 +70,35 @@ Alternate.parse = function(parser, index, tree, expression, expressionLength, ch
 end
 
 Alternate.match = function(currentElement, treeMatcher,
-	flags,
+	flags, tree, treeLength, treeIndex,
 	splitStr, strLength,
-	stringIndex,
+	stringIndex, initialStringIndex,
 	matcherMetaData)
 
 	local trees = currentElement.trees
 
 	local hasMatched, iniStr, endStr
-	for treeIndex = 1, trees._index do
+	for branchIndex = 1, trees._index do
+		local branchTree = trees[branchIndex]
+
+		if not matcherMetaData.outerTreeReference[branchTree] and tree then
+			matcherMetaData.outerTreeReference[branchTree] = {
+				tree = tree,
+				treeLength = treeLength,
+				treeIndex = treeIndex,
+				initialStringIndex = initialStringIndex
+			}
+		end
+
 		hasMatched, iniStr, endStr = treeMatcher(
-			flags, trees[treeIndex], trees[treeIndex]._index, 0,
+			flags, branchTree, branchTree._index, 0,
 			splitStr, strLength,
-			stringIndex, stringIndex,
+			stringIndex, initialStringIndex,
 			matcherMetaData
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData
+			return hasMatched, iniStr, endStr, matcherMetaData, true
 		end
 	end
 

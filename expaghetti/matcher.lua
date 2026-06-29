@@ -42,9 +42,9 @@ local singleElementMatcher = function(
 	elseif Alternate.isElement(currentElement) then
 		return Alternate.match(
 			currentElement, treeMatcher,
-			flags,
+			flags, tree, treeLength, treeIndex,
 			splitStr, strLength,
-			stringIndex - 1,
+			stringIndex - 1, initialStringIndex,
 			matcherMetaData
 		)
 	elseif CaptureReference.isElement(currentElement) then
