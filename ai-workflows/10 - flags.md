@@ -10,10 +10,11 @@ Implement every flag described in the Wiki.
 - u
 - y - maybe not necessary
 
-If supported:
-
 - inline flags
 - scoped flags
+
+- `(?i)`, `(?-i)` — Inline option modifier.
+- `(?i:...)` — Scoped option modifier.
 
 ## Dependencies
 

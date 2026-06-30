@@ -11,33 +11,31 @@ This includes, but is not limited to:
 ### Capturing Groups
 
 - `(...)` — Captures the matched expression as a numbered group.
-- `()` — Empty capturing group.
+- `()` — Empty capturing group. Similar to Lua's.
 - `(?:...)` — Non-capturing group used for grouping without creating a capture.
 
 ### Named Groups
 
 - `(?<name>...)` — Named capturing group.
-- `%<name>` — Reference or invoke a named group (according to the Wiki).
+- `%k<name>` — Reference or invoke a named group (according to the Wiki).
 
 ### Backreferences
 
 - `%1`, `%2`, ... — Reference a previously captured numbered group.
-- `%<name>` — Reference a previously captured named group.
+- `%k<name>` — Reference a previously captured named group.
 
 ### Advanced Groups
 
 - `(?>...)` — Atomic group.
 - `(?|...)` — Branch reset group.
-- `(?(condition)...|...)` — Conditional group.
-- `(?R)` — Whole-pattern recursion.
-- `(?1)` — Numbered recursive group.
+- `(?R)` — Whole-pattern recursion. (?0) is exactly equals to (?R)
+- `(?1)` — Numbered recursive group. ?N where N >= 0
 - `(?&name)` — Named recursive group.
 
 ### Comments & Options
 
 - `(?# comment )` — Inline comment.
-- `(?i)` — Inline option modifier.
-- `(?i:...)` — Scoped option modifier.
+
 
 ### Capture Management
 
