@@ -59,7 +59,8 @@ local singleElementMatcher = function(
 	elseif not currentCharacter then
 		return
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
-		return true
+		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
+		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
 		return matchSet(currentElement, currentCharacter)
 	elseif Group.isElement(currentElement) then
