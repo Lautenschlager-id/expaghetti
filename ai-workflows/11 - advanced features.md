@@ -1,39 +1,40 @@
-# Workflow 10 — Advanced Engine Features
+# Workflow 11 — Advanced Features
 
-Implement any remaining advanced capabilities described in the Wiki.
+Implement every advanced regex feature described in the Wiki.
 
-These are intentionally left until the end because they typically depend on previously completed infrastructure.
+These features typically interact with captures, alternation, quantifiers, assertions, and the matching engine itself. The Wiki is the source of truth for syntax, semantics, validation rules, edge cases, and expected behavior.
 
 ## Features
 
-Examples include:
+### Atomic Groups
 
-- recursive matching
-- subroutine calls
-- balancing groups
-- branch reset groups
-- engine-specific extensions
-- advanced Unicode behavior
-- performance-oriented features
+- `(?>...)` — Atomic group.
 
-Always implement the simplest correct version first.
+### Branch Reset Groups
 
-Only optimize after correctness has been established.
+- `(?|...)` — Branch reset group.
 
-## Dependencies
+### Recursion & Subroutines
 
-Requires every previous workflow.
+Implement support for:
 
-## Testing
+- `(?R)` — Whole-pattern recursion.
+- `(?0)` — Whole-pattern recursion (alias to `(?R)`).
+- `(?1)` — Numbered recursive group (`?N` where `N >= 0`).
+- `(?&name)` — Named recursive group.
 
-Focus heavily on:
+## Integration
 
-- regression tests
-- interaction between advanced features
-- edge cases
-- malformed syntax
-- stress tests
+Ensure these features correctly interact with:
 
-## Deliverables
+- capturing groups
+- named groups
+- backreferences
+- alternation
+- quantifiers
+- assertions
+- capture numbering
+- recursion depth and validation
+- backtracking behavior
 
-Complete Wiki feature parity.
+Refer to the Wiki for the exact syntax, semantics, validation rules, edge cases, and expected behavior. The Wiki is the source of truth; this workflow defines only the implementation strategy.

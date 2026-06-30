@@ -1,4 +1,4 @@
-# Workflow 6 — Quantifiers
+# Workflow 7 — Quantifiers
 
 Implement quantifier behavior.
 

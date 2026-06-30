@@ -1,4 +1,4 @@
-# Workflow 9 — Flags
+# Workflow 10 — Flags
 
 Implement every flag described in the Wiki.
 

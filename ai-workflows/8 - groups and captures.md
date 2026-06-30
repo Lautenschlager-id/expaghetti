@@ -1,4 +1,4 @@
-# Workflow 7 — Groups & Captures
+# Workflow 8 — Groups & Captures
 
 Implement every grouping feature described in the Wiki.
 
@@ -23,14 +23,6 @@ This includes, but is not limited to:
 
 - `%1`, `%2`, ... — Reference a previously captured numbered group.
 - `%k<name>` — Reference a previously captured named group.
-
-### Advanced Groups
-
-- `(?>...)` — Atomic group.
-- `(?|...)` — Branch reset group.
-- `(?R)` — Whole-pattern recursion. (?0) is exactly equals to (?R)
-- `(?1)` — Numbered recursive group. ?N where N >= 0
-- `(?&name)` — Named recursive group.
 
 ### Comments & Options
 
