@@ -245,11 +245,62 @@ local function coreTreeMatcher(
 
 	if outerTreeReference then
 		pdebug("&%sTree Matching outerTreeReference:", debugCurrentStackFrameStr)
+		
+		local groupIndex = tree._groupIndex
+		local pushedCapture = false
+		if groupIndex then
+			local gIni = state.initialStringIndex + 1
+			local gEnd = state.stringIndex
+			local inits = state.metaData.groupCapturesInitStringPositions
+			local ends = state.metaData.groupCapturesEndStringPositions
+			if not inits[groupIndex] then
+				inits[groupIndex] = {}
+				ends[groupIndex] = {}
+			end
+			if gIni <= gEnd then
+				table.insert(inits[groupIndex], gIni)
+				table.insert(ends[groupIndex], gEnd)
+			else
+				table.insert(inits[groupIndex], 2)
+				table.insert(ends[groupIndex], 1)
+			end
+			pushedCapture = true
+		end
+
 		state.initialStringIndex = outerTreeReference.initialStringIndex
-		return coreTreeMatcher(
+
+		local hasMatched, oIni, oEnd, oMeta = coreTreeMatcher(
 			state,
 			outerTreeReference.tree, outerTreeReference.treeIndex
 		)
+
+		if not hasMatched and pushedCapture then
+			local inits = state.metaData.groupCapturesInitStringPositions[groupIndex]
+			local ends = state.metaData.groupCapturesEndStringPositions[groupIndex]
+			table.remove(inits)
+			table.remove(ends)
+		end
+
+		return hasMatched, oIni, oEnd, oMeta
+	end
+
+	local groupIndex = tree._groupIndex
+	if groupIndex then
+		local gIni = state.initialStringIndex + 1
+		local gEnd = state.stringIndex
+		local inits = state.metaData.groupCapturesInitStringPositions
+		local ends = state.metaData.groupCapturesEndStringPositions
+		if not inits[groupIndex] then
+			inits[groupIndex] = {}
+			ends[groupIndex] = {}
+		end
+		if gIni <= gEnd then
+			table.insert(inits[groupIndex], gIni)
+			table.insert(ends[groupIndex], gEnd)
+		else
+			table.insert(inits[groupIndex], 2)
+			table.insert(ends[groupIndex], 1)
+		end
 	end
 
 	return true, state.initialStringIndex + 1, state.stringIndex, state.metaData

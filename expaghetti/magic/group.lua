@@ -193,6 +193,13 @@ Group.match = function(
 		}
 	end
 
+	local groupIndex = currentElement.index or currentElement.name
+	if groupIndex then
+		groupTree._groupIndex = groupIndex
+	else
+		groupTree._groupIndex = nil
+	end
+
 	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, groupTree, groupTree._index, 0,
 		splitStr, strLength,
@@ -200,20 +207,7 @@ Group.match = function(
 		matcherMetaData
 	)
 
-	local groupIndex = currentElement.index or currentElement.name
-	if groupIndex then
-		local groupCapturesInitStringPositions, groupCapturesEndStringPositions =
-			matcherMetaData.groupCapturesInitStringPositions,
-			matcherMetaData.groupCapturesEndStringPositions
-
-		if hasMatched and iniStr <= endStr then
-			groupCapturesInitStringPositions[groupIndex] = iniStr
-			groupCapturesEndStringPositions[groupIndex] = endStr
-		elseif not groupCapturesInitStringPositions[groupIndex] then
-			groupCapturesInitStringPositions[groupIndex] = 2
-			groupCapturesEndStringPositions[groupIndex] = 1
-		end
-	else
+	if not groupIndex then
 		hasMatched = hasMatched ~= currentElement.isNegative
 		if not hasMatched then
 			return

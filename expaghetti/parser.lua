@@ -72,7 +72,7 @@ local function parserCore(state)
 			end
 		end
 
-		if not errorMessage then
+		if not errorMessage and tree[tree._index] then
 			state.index, errorMessage = Quantifier.lookForElementOperation(state, tree[tree._index])
 		end
 

@@ -70,9 +70,19 @@ CaptureReference.parseString = function(currentCharacter, index, expression)
 end
 
 CaptureReference.match = function(currentElement, stringIndex, splitStr, strLength, matcherMetaData)
-	local initStringPosition, endStringPosition =
+	local initStringPositionList, endStringPositionList =
 		matcherMetaData.groupCapturesInitStringPositions[currentElement.index],
 		matcherMetaData.groupCapturesEndStringPositions[currentElement.index]
+
+	local initStringPosition, endStringPosition
+	if type(initStringPositionList) == "table" then
+		if #initStringPositionList == 0 then return false end
+		initStringPosition = initStringPositionList[#initStringPositionList]
+		endStringPosition = endStringPositionList[#endStringPositionList]
+	else
+		initStringPosition = initStringPositionList
+		endStringPosition = endStringPositionList
+	end
 
 	if not initStringPosition then
 		return false

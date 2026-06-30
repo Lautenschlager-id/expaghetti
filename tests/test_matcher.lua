@@ -265,4 +265,104 @@ assertMatch("a|b.*c", "bxxxc",true,1, 5, "Alternation: complex right branch matc
 assertMatch("a|b.*c", "a",   true, 1, 1, "Alternation: complex right branch fails, left branch matches")
 assertMatch("a.*b|a.*c", "ac", true, 1, 2, "Alternation: full branch backtrack with quantifiers")
 
+----------------------------------------------------------------------------------------------------
+-- GROUPS & CAPTURES
+----------------------------------------------------------------------------------------------------
+
+local function assertCapture(expr, str, captureIndex, expectedStr, desc)
+	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	local ini = metaData.groupCapturesInitStringPositions[captureIndex]
+	local en  = metaData.groupCapturesEndStringPositions[captureIndex]
+	if type(ini) == "table" then
+		ini = ini[#ini]
+		en = en[#en]
+	end
+	assert(ini, string.format("Test '%s': capture %s not found", desc, tostring(captureIndex)))
+	local got = table.concat(splitStr, "", ini, en)
+	assert(got == expectedStr,
+		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
+end
+
+local function assertNoCapture(expr, str, desc)
+	local hasMatched, _, _, metaData = matcher(expr, str)
+	assert(hasMatched, string.format("Test '%s': expected match", desc))
+	local hasAny = false
+	for _ in pairs(metaData.groupCapturesInitStringPositions) do hasAny = true; break end
+	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
+end
+
+----------------------------------------------------------------------------------------------------
+print("  [25] Capturing groups (...)...")
+assertMatch("(a)",      "a",    true, 1, 1, "Group: single char")
+assertMatch("(ab)c",   "abc",   true, 1, 3, "Group: then literal")
+assertMatch("a(b)c",   "abc",   true, 1, 3, "Group: in the middle")
+assertMatch("(abc)",   "xabc",  true, 2, 4, "Group: searched string")
+assertCapture("(a)",   "a",  1, "a",  "Capture 1: single char")
+assertCapture("(ab)",  "xaby", 1, "ab", "Capture 1: two chars")
+assertCapture("a(b)c", "abc", 1, "b",  "Capture 1: middle char")
+assertCapture("(a)(b)(c)", "abc", 1, "a", "Capture 1 of 3")
+assertCapture("(a)(b)(c)", "abc", 2, "b", "Capture 2 of 3")
+assertCapture("(a)(b)(c)", "abc", 3, "c", "Capture 3 of 3")
+
+----------------------------------------------------------------------------------------------------
+print("  [26] Non-capturing groups (?:...)...")
+assertMatch("(?:ab)c",  "abc",  true, 1, 3, "Non-cap group: then literal")
+assertMatch("(?:a)+",   "aaa",  true, 1, 3, "Non-cap group: with quantifier")
+assertNoCapture("(?:ab)c", "abc", "Non-cap group: creates no capture")
+
+----------------------------------------------------------------------------------------------------
+print("  [27] Named capturing groups (?<name>...)...")
+assertMatch("(?<foo>ab)c", "abc", true, 1, 3, "Named group: then literal")
+assertCapture("(?<foo>ab)c", "abc", "foo", "ab", "Named group captures correctly")
+do
+	local hasMatched, _, _, metaData, splitStr = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
+	assert(hasMatched, "Named groups: expected match")
+	local fi = metaData.groupCapturesInitStringPositions["first"]
+	local fe = metaData.groupCapturesEndStringPositions["first"]
+	local si = metaData.groupCapturesInitStringPositions["second"]
+	local se = metaData.groupCapturesEndStringPositions["second"]
+	if type(fi) == "table" then
+		fi = fi[#fi] fe = fe[#fe]
+		si = si[#si] se = se[#se]
+	end
+	assert(table.concat(splitStr, "", fi, fe) == "hello", "Named capture 'first' should be 'hello'")
+	assert(table.concat(splitStr, "", si, se) == "world", "Named capture 'second' should be 'world'")
+end
+
+----------------------------------------------------------------------------------------------------
+print("  [28] Backreferences (%1, %k<name>)...")
+assertMatch("(a)%1",         "aa",      true, 1, 2, "Backreference %1: repeated char")
+assertMatch("(a)%1",         "ab",      nil,  nil, nil, "Backreference %1: no match on diff")
+assertMatch("(ab)%1",        "abab",    true, 1, 4, "Backreference %1: two-char repeat")
+assertMatch("([a-z]+)_%1",   "cat_cat", true, 1, 7, "Backreference: repeated word")
+assertMatch("([a-z]+)_%1",   "cat_dog", nil,  nil, nil, "Backreference: different words")
+do
+	local hasMatched, iniStr, endStr = matcher("(?<w>[a-z]+)_%k<w>", "hello_hello")
+	assert(hasMatched, "Named backreference: expected match")
+	assert(iniStr == 1 and endStr == 11, "Named backreference: expected full span")
+	hasMatched = matcher("(?<w>[a-z]+)_%k<w>", "hello_world")
+	assert(not hasMatched, "Named backreference: different words should not match")
+end
+
+----------------------------------------------------------------------------------------------------
+print("  [29] Inline comments (?#...)...")
+assertMatch("a(?#hello)b",  "ab",  true, 1, 2, "Comment: transparent")
+assertMatch("(?#skip)abc",  "abc", true, 1, 3, "Comment: leading")
+
+----------------------------------------------------------------------------------------------------
+print("  [31] Groups + Alternation (backtracking)...")
+assertMatch("(a|b)",       "b",    true, 1, 1, "Group alternation: second branch")
+assertMatch("(a|b)c",      "bc",   true, 1, 2, "Group alternation: with continuation")
+assertMatch("(ab|a)bc",    "abc",  true, 1, 3, "Group alternation: backtrack into group")
+assertCapture("(ab|a)bc",  "abc", 1, "a", "Group alternation: capture is the matched branch")
+assertMatch("(cat|dog)s",  "dogs", true, 1, 4, "Group alternation: multi-char branch")
+
+----------------------------------------------------------------------------------------------------
+print("  [32] Groups + Quantifiers...")
+assertMatch("(a)+",    "aaa",  true, 1, 3, "Group quantifier: greedy +")
+assertMatch("(ab)+",   "abab", true, 1, 4, "Group quantifier: two-char greedy +")
+assertMatch("(?:ab)+", "abab", true, 1, 4, "Non-cap group quantifier: +")
+assertCapture("(a)+", "aaa", 1, "a", "Group quantifier: capture is last iteration")
+
 print("All matcher tests passed!")
