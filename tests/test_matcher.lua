@@ -40,4 +40,18 @@ assertMatch("a.c", "abbc", nil, nil, nil, "Wildcard wrong length")
 assertMatch("%.", "a.c", true, 2, 2, "Escaped dot literal")
 assertMatch("%.", "abc", nil, nil, nil, "Escaped dot non-match")
 
+-- 5. Character Classes
+assertMatch("%d", "a1b", true, 2, 2, "Decimal character class")
+assertMatch("%w", "a_1", true, 1, 1, "Word character class")
+assertMatch("%h", "f", true, 1, 1, "Hexadecimal class (h)")
+assertMatch("%h", "g", nil, nil, nil, "Hexadecimal class non-match (h)")
+assertMatch("%x", "f", true, 1, 1, "Hexadecimal class")
+assertMatch("%x", "g", nil, nil, nil, "Hexadecimal class non-match")
+
+-- 6. Sets
+assertMatch("[a-z]", "A", nil, nil, nil, "Lowercase set non-match")
+assertMatch("[a-z]", "b", true, 1, 1, "Lowercase set match")
+assertMatch("[^a-z]", "A", true, 1, 1, "Negated lowercase set match")
+assertMatch("[%w_]", "_", true, 1, 1, "Set with character class")
+
 print("All matcher core engine tests passed!")

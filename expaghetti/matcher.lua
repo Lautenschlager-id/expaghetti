@@ -14,6 +14,37 @@ local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 local elementsEnum = require("./enums/elements")
 local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
+local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
+----------------------------------------------------------------------------------------------------
+local function matchSet(currentElement, currentCharacter)
+	local hasMatched = false
+
+	if currentElement[currentCharacter] then
+		hasMatched = true
+	else
+		local ranges = currentElement.ranges
+		for rangeIndex = 1, currentElement.rangeIndex, 2 do
+			if currentCharacter >= ranges[rangeIndex]
+				and currentCharacter <= ranges[rangeIndex + 1] then
+
+				hasMatched = true
+				break
+			end
+		end
+
+		if not hasMatched then
+			local classes = currentElement.classes
+			for classIndex = 1, currentElement.classIndex do
+				if matchSet(classes[classIndex], currentCharacter) then
+					hasMatched = true
+					break
+				end
+			end
+		end
+	end
+
+	return currentElement.hasToNegateMatch ~= hasMatched
+end
 ----------------------------------------------------------------------------------------------------
 local singleElementMatcher = function(
 		currentElement, currentCharacter, treeMatcher,
@@ -29,8 +60,8 @@ local singleElementMatcher = function(
 		return
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
 		return true
-	elseif Set.isElement(currentElement) then
-		return Set.match(currentElement, currentCharacter)
+	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
+		return matchSet(currentElement, currentCharacter)
 	elseif Group.isElement(currentElement) then
 		return Group.match(
 			currentElement, treeMatcher,

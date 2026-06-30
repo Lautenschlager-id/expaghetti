@@ -119,34 +119,4 @@ Set.parse = function(state, tree)
 	return endIndex + 2
 end
 
-Set.match = function(currentElement, currentCharacter)
-	local hasMatched = false
-
-	if currentElement[currentCharacter] then
-		hasMatched = true
-	else
-		local ranges = currentElement.ranges
-		for rangeIndex = 1, currentElement.rangeIndex, 2 do
-			if currentCharacter >= ranges[rangeIndex]
-				and currentCharacter <= ranges[rangeIndex + 1] then
-
-				hasMatched = true
-				break
-			end
-		end
-
-		if not hasMatched then
-			local classes = currentElement.classes
-			for classIndex = 1, currentElement.classIndex do
-				if Set.match(classes[classIndex], currentCharacter) then
-					hasMatched = true
-					break
-				end
-			end
-		end
-	end
-
-	return currentElement.hasToNegateMatch ~= hasMatched
-end
-
 return Set
