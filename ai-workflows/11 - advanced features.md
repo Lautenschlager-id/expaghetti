@@ -27,6 +27,8 @@ Implement support for:
 
 Ensure these features correctly interact with:
 
+- Multi-iteration capture history (table of captures per group)	Advanced/complex groups workflow
+- Nested group backtracking with capture rollback	Advanced/complex groups workflow
 - capturing groups
 - named groups
 - backreferences
