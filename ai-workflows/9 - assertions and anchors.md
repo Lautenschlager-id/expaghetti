@@ -6,12 +6,13 @@ Implement every zero-width assertion described in the Wiki.
 
 - `^` — Beginning of the input (or line, depending on flags).
 - `$` — End of the input (or line, depending on flags).
-- `%b` — Word boundary. (from Lua patterns)
-- `%B` — Non-word boundary. (from Lua patterns)
+- `%bxy` — Balanced match between characters `x` and `y`, accounting for nesting.
+- `%f[set]` — Frontier boundary: zero-width match at a transition into or out of the given character set. Generalizes `\b` to any set. `%f[%w]` ≡ `\b`.
+- `%F[set]` — Non-frontier: complement of `%f[set]`. Generalizes `\B`.
 - `(?=...)` — Positive lookahead.
 - `(?!...)` — Negative lookahead.
-- `(?<=...)` — Positive lookbehind.
-- `(?<!...)` — Negative lookbehind.
+- `(?<=...)` — Positive lookbehind (fixed-length only).
+- `(?<!...)` — Negative lookbehind (fixed-length only).
 
 Implement anchors first, then lookarounds.
 
