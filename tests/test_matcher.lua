@@ -196,4 +196,49 @@ assertMatch("[^%d_]",      "_",  nil,  nil, nil, "Negated compound: underscore e
 assertMatch("[a-zA-Z0-9_]","_",  true, 1, 1, "Compound set: full word chars via ranges")
 assertMatch("[a-zA-Z0-9_]","-", nil,  nil, nil, "Compound set: hyphen not in word chars")
 
+----------------------------------------------------------------------------------------------------
+print("  [19] Quantifiers -- greedy...")
+assertMatch("a?", "b",        true, 1, 0, "Greedy ?: empty match")
+assertMatch("a?", "a",        true, 1, 1, "Greedy ?: matches 1")
+assertMatch("a?", "aa",       true, 1, 1, "Greedy ?: matches 1 out of many")
+assertMatch("a*", "b",        true, 1, 0, "Greedy *: empty match")
+assertMatch("a*", "a",        true, 1, 1, "Greedy *: matches 1")
+assertMatch("a*", "aaa",      true, 1, 3, "Greedy *: matches all")
+assertMatch("a+", "b",        nil,  nil, nil, "Greedy +: requires 1")
+assertMatch("a+", "a",        true, 1, 1, "Greedy +: matches 1")
+assertMatch("a+", "aaa",      true, 1, 3, "Greedy +: matches all")
+assertMatch("a{2}", "a",      nil,  nil, nil, "Greedy {2}: requires 2")
+assertMatch("a{2}", "aa",     true, 1, 2, "Greedy {2}: matches 2")
+assertMatch("a{2}", "aaa",    true, 1, 2, "Greedy {2}: matches exactly 2")
+assertMatch("a{2,4}", "a",    nil,  nil, nil, "Greedy {2,4}: requires 2")
+assertMatch("a{2,4}", "aa",   true, 1, 2, "Greedy {2,4}: matches 2")
+assertMatch("a{2,4}", "aaaaa",true, 1, 4, "Greedy {2,4}: matches up to 4")
+assertMatch("a{2,}", "a",     nil,  nil, nil, "Greedy {2,}: requires 2")
+assertMatch("a{2,}", "aaaaa", true, 1, 5, "Greedy {2,}: matches all >= 2")
+
+----------------------------------------------------------------------------------------------------
+print("  [20] Quantifiers -- lazy...")
+assertMatch("a??", "a",       true, 1, 0, "Lazy ??: empty match favored")
+assertMatch("a??a", "a",      true, 1, 1, "Lazy ??: matches 1 to satisfy rest")
+assertMatch("a*?", "aaa",     true, 1, 0, "Lazy *?: empty match favored")
+assertMatch("a*?a", "aaa",    true, 1, 1, "Lazy *?: matches enough to satisfy rest")
+assertMatch("a+?", "aaa",     true, 1, 1, "Lazy +?: matches exactly 1")
+assertMatch("a+?a", "aaa",    true, 1, 2, "Lazy +?: matches enough to satisfy rest")
+assertMatch("a{2,4}?", "aaaa",true, 1, 2, "Lazy {2,4}?: matches exactly 2")
+
+----------------------------------------------------------------------------------------------------
+print("  [21] Quantifiers -- possessive...")
+assertMatch("a?+a", "a",      nil,  nil, nil, "Possessive ?+: no backtrack, fails rest")
+assertMatch("a*+a", "aaa",    nil,  nil, nil, "Possessive *+: consumes all, fails rest")
+assertMatch("a++a", "aaa",    nil,  nil, nil, "Possessive ++: consumes all, fails rest")
+
+----------------------------------------------------------------------------------------------------
+print("  [22] Quantifiers -- backtracking edge cases...")
+-- greedy backtracks to let 'c' match
+assertMatch(".*c", "abcc",    true, 1, 4, "Greedy *: backtracks to match 'c'")
+-- lazy expands to let 'c' match
+assertMatch(".*?c", "abcc",   true, 1, 3, "Lazy *?: expands to match 'c'")
+-- possessive does not backtrack
+assertMatch(".*+c", "abcc",   nil,  nil, nil, "Possessive *+: fails to backtrack for 'c'")
+
 print("All matcher tests passed!")

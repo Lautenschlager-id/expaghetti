@@ -18,8 +18,6 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
-local quantifierMatchMode = { }
-
 local lookForCustomQuantifier = function(index, charactersList)
 	local currentCharacter
 
@@ -99,107 +97,6 @@ local lookForModeToken = function(index, charactersList, quantifier)
 	return index, quantifier
 end
 
-local getMaximumOccurrencesOfElement = function(
-		quantifier, currentElement, singleElementMatcher,
-		currentCharacter, treeMatcher,
-		flags,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
-
-	local maximumOccurrences = quantifier.max
-
-	local totalOccurrences = 0
-	local endStringPositions = { }
-
-	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
-	repeat
-		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, currentCharacter, treeMatcher,
-			flags, nil, nil, nil,
-			splitStr, strLength,
-			stringIndex, initialStringIndex,
-			matcherMetaData
-		)
-
-		if not hasMatched then
-			break
-		end
-
-		endStr = endStr or stringIndex
-
-		totalOccurrences = totalOccurrences + 1
-		endStringPositions[totalOccurrences] = endStr
-
-		if totalOccurrences == maximumOccurrences
-			-- Empty match
-			or (iniStr and iniStr > endStr)
-			-- Loop match
-			or (lastIniStr == iniStr and lastEndStr == endStr)
-		then
-			break
-		end
-		lastIniStr, lastEndStr = iniStr, endStr
-
-		stringIndex = endStr + 1
-		currentCharacter = splitStr[stringIndex]
-	until false
-
-	return totalOccurrences, endStringPositions
-end
-
-local matchBacktrackElement = function(
-		minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection, endStringPositions,
-		treeMatcher,
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
-
-	local hasMatched, iniStr, endStr
-	for occurrence = minimumOccurrences, maximumOccurrencesOfElement, occurrenceDirection do
-		pdebug("@ Backtracking [%d-%d] at stringIndex %d", minimumOccurrences,
-			maximumOccurrencesOfElement, endStringPositions[occurrence] or (stringIndex - 1),
-			p(tree))
-		hasMatched, iniStr, endStr = treeMatcher(
-			flags, tree, treeLength, treeIndex,
-			splitStr, strLength,
-			endStringPositions[occurrence] or (stringIndex - 1),
-			initialStringIndex,
-			matcherMetaData
-		)
-
-		if hasMatched then
-			pdebug("\t/!\\ Backtrack successful")
-			return hasMatched, iniStr, endStr, matcherMetaData
-		else
-			pdebug("\t/!\\ Backtrack failed")
-		end
-	end
-end
-
-quantifierMatchMode.greedy = function(minimumOccurrences, maximumOccurrencesOfElement,
-	endStringPositions, ...)
-
-	return matchBacktrackElement(maximumOccurrencesOfElement, minimumOccurrences, -1,
-		endStringPositions, ...)
-end
-
-quantifierMatchMode[quantifierModesEnum[ENUM_LAZY_QUANTIFIER]] = function(minimumOccurrences,
-	maximumOccurrencesOfElement, endStringPositions, ...)
-
-	return matchBacktrackElement(minimumOccurrences, maximumOccurrencesOfElement, 1,
-		endStringPositions, ...)
-end
-
-quantifierMatchMode[quantifierModesEnum[ENUM_POSSESSIVE_QUANTIFIER]] = function(
-	minimumOccurrences, maximumOccurrencesOfElement, endStringPositions, ...)
-
-	return matchBacktrackElement(maximumOccurrencesOfElement, maximumOccurrencesOfElement, 1,
-		endStringPositions, ...)
-end
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
 	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.charactersList)
@@ -233,44 +130,6 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	parentElement.quantifier = quantifier
 
 	return index
-end
-
-Quantifier.operateOver = function(
-		currentElement, currentCharacter, singleElementMatcher, treeMatcher,
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
-
-	local quantifier = currentElement.quantifier
-
-	pdebug("@ Getting maximum occurrences for", p(currentElement))
-	local maximumOccurrencesOfElement, endStringPositions = getMaximumOccurrencesOfElement(
-		quantifier, currentElement, singleElementMatcher,
-		currentCharacter, treeMatcher,
-		flags,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
-
-	local minimumOccurrences = quantifier.min
-	pdebug("@ Maximum occurrences is %d [%d-%d]", maximumOccurrencesOfElement, minimumOccurrences,
-		quantifier.max, p(currentElement))
-	if maximumOccurrencesOfElement < minimumOccurrences then
-		return
-	end
-
-	local mode = quantifier.mode or "greedy"
-	return quantifierMatchMode[mode](
-		minimumOccurrences, maximumOccurrencesOfElement, endStringPositions,
-		treeMatcher,
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
 end
 
 return Quantifier

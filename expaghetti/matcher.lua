@@ -91,6 +91,92 @@ end
 
 local debugCurrentStackFrame
 local legacyTreeMatcher -- Forward declaration
+local coreTreeMatcher -- Forward declaration
+
+local function quantifyElement(
+	currentElement, currentCharacter, singleElementMatcher, legacyTreeMatcher,
+	state, tree, treeIndex
+)
+	local quantifier = currentElement.quantifier
+	local maximumOccurrences = quantifier.max
+
+	local totalOccurrences = 0
+	local endStringPositions = { }
+
+	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
+	local stringIndex = state.stringIndex
+	
+	repeat
+		hasMatched, iniStr, endStr = singleElementMatcher(
+			currentElement, currentCharacter, legacyTreeMatcher,
+			state.flags, nil, nil, nil,
+			state.splitStr, state.strLength,
+			stringIndex, state.initialStringIndex,
+			state.metaData
+		)
+
+		if not hasMatched then
+			break
+		end
+
+		endStr = endStr or stringIndex
+
+		totalOccurrences = totalOccurrences + 1
+		endStringPositions[totalOccurrences] = endStr
+
+		if totalOccurrences == maximumOccurrences
+			-- Empty match
+			or (iniStr and iniStr > endStr)
+			-- Loop match
+			or (lastIniStr == iniStr and lastEndStr == endStr)
+		then
+			break
+		end
+		lastIniStr, lastEndStr = iniStr, endStr
+
+		stringIndex = endStr + 1
+		currentCharacter = state.splitStr[stringIndex]
+	until false
+
+	local minimumOccurrences = quantifier.min
+	local maximumOccurrencesOfElement = totalOccurrences
+
+	if maximumOccurrencesOfElement < minimumOccurrences then
+		return
+	end
+
+	local mode = quantifier.mode or "greedy"
+	
+	local startOccurrences, endOccurrences, step
+	if mode == "greedy" then
+		startOccurrences = maximumOccurrencesOfElement
+		endOccurrences = minimumOccurrences
+		step = -1
+	elseif mode == "lazy" then
+		startOccurrences = minimumOccurrences
+		endOccurrences = maximumOccurrencesOfElement
+		step = 1
+	elseif mode == "possessive" then
+		startOccurrences = maximumOccurrencesOfElement
+		endOccurrences = maximumOccurrencesOfElement
+		step = 1
+	end
+
+	for occurrence = startOccurrences, endOccurrences, step do
+		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
+		
+		hasMatched, iniStr, endStr = legacyTreeMatcher(
+			state.flags, tree, tree._index, treeIndex,
+			state.splitStr, state.strLength,
+			targetStringIndex, state.initialStringIndex,
+			state.metaData
+		)
+
+		if hasMatched then
+			return hasMatched, iniStr, endStr, state.metaData
+		end
+	end
+end
 
 local function coreTreeMatcher(
 		state, tree, treeIndex
@@ -150,12 +236,9 @@ local function coreTreeMatcher(
 		else
 			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
 				state.stringIndex)
-			return Quantifier.operateOver(
+			return quantifyElement(
 				currentElement, currentCharacter, singleElementMatcher, legacyTreeMatcher,
-				state.flags, tree, tree._index, treeIndex,
-				state.splitStr, state.strLength,
-				state.stringIndex, state.initialStringIndex,
-				state.metaData
+				state, tree, treeIndex
 			)
 		end
 	end
