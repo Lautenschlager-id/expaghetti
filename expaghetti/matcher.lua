@@ -1,19 +1,19 @@
 ----------------------------------------------------------------------------------------------------
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
-----------------------------------------------------------------------------------------------------
 local parser = require("./parser")
+local MatchState = require("./match_state")
 ----------------------------------------------------------------------------------------------------
---local Anchor = require("./magic/anchor")
 local Alternate = require("./magic/alternate")
-local Any = require("./magic/any")
 local CaptureReference = require("./magic/capture_reference")
 local Group = require("./magic/group")
-local Literal = require("./magic/literal")
 local PositionCapture = require("./magic/position_capture")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
+local elementsEnum = require("./enums/elements")
+local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
+local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 ----------------------------------------------------------------------------------------------------
 local singleElementMatcher = function(
 		currentElement, currentCharacter, treeMatcher,
@@ -27,8 +27,8 @@ local singleElementMatcher = function(
 		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
 	elseif not currentCharacter then
 		return
-	elseif Any.isElement(currentElement) then
-		return Any.match(currentElement, currentCharacter)
+	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
+		return true
 	elseif Set.isElement(currentElement) then
 		return Set.match(currentElement, currentCharacter)
 	elseif Group.isElement(currentElement) then
@@ -50,32 +50,24 @@ local singleElementMatcher = function(
 	elseif CaptureReference.isElement(currentElement) then
 		return CaptureReference.match(currentElement, stringIndex - 1, splitStr, strLength,
 			matcherMetaData)
+	elseif currentElement.type == ENUM_ELEMENT_TYPE_LITERAL then
+		return currentElement.value == currentCharacter
 	end
 
-	return Literal.match(currentElement, currentCharacter)
+	return false
 end
 
 local debugCurrentStackFrame
-local function treeMatcher(
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		metaData
+local legacyTreeMatcher -- Forward declaration
+
+local function coreTreeMatcher(
+		state, tree, treeIndex
 	)
 
 	debugCurrentStackFrame = debugCurrentStackFrame + 1
 	local debugCurrentStackFrameStr = "[Stack "..debugCurrentStackFrame.."]: "
 
-	if not metaData then
-		metaData = {
-			groupCapturesInitStringPositions = { },
-			groupCapturesEndStringPositions = { },
-			positionCaptures = { },
-			outerTreeReference = { }
-		}
-	end
-
-	local outerTreeReference = metaData.outerTreeReference[tree]
+	local outerTreeReference = state.metaData.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
 	pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
 		debugCurrentStackFrameStr,
@@ -89,68 +81,85 @@ local function treeMatcher(
 	local hasQuantifier
 	local hasMatched, iniStr, endStr, _, shouldEndThisExecution
 
-	while treeIndex < treeLength do
+	while treeIndex < tree._index do
 		treeIndex = treeIndex + 1
 		currentElement = tree[treeIndex]
 
-		stringIndex = stringIndex + 1
-		currentCharacter = splitStr[stringIndex]
+		state.stringIndex = state.stringIndex + 1
+		currentCharacter = state.splitStr[state.stringIndex]
 
 		hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
 			pdebug("\t%sValidating stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
-				stringIndex,
+				state.stringIndex,
 				currentElement.value, currentElement.type, currentCharacter)
 
 			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
-				currentElement, currentCharacter, treeMatcher,
-				flags, tree, treeLength, treeIndex,
-				splitStr, strLength,
-				stringIndex, initialStringIndex,
-				metaData
+				currentElement, currentCharacter, legacyTreeMatcher,
+				state.flags, tree, tree._index, treeIndex,
+				state.splitStr, state.strLength,
+				state.stringIndex, state.initialStringIndex,
+				state.metaData
 			)
 
 			pdebug("\t%s%salidated stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
 				(hasMatched and 'V' or "Not v"),
-				stringIndex, currentElement.value, currentElement.type, currentCharacter)
+				state.stringIndex, currentElement.value, currentElement.type, currentCharacter)
 
 			-- Groups continue the execution of the previous tree in another stack
 			if shouldEndThisExecution then
-				return hasMatched, iniStr, endStr, metaData
+				return hasMatched, iniStr, endStr, state.metaData
 			elseif not hasMatched then
 				return
 			elseif endStr then
-				stringIndex = endStr
+				state.stringIndex = endStr
 			end
 		else
 			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
-				stringIndex)
+				state.stringIndex)
 			return Quantifier.operateOver(
-				currentElement, currentCharacter, singleElementMatcher, treeMatcher,
-				flags, tree, treeLength, treeIndex,
-				splitStr, strLength,
-				stringIndex, initialStringIndex,
-				metaData
+				currentElement, currentCharacter, singleElementMatcher, legacyTreeMatcher,
+				state.flags, tree, tree._index, treeIndex,
+				state.splitStr, state.strLength,
+				state.stringIndex, state.initialStringIndex,
+				state.metaData
 			)
 		end
 	end
 
 	if outerTreeReference then
 		pdebug("&%sTree Matching outerTreeReference:", debugCurrentStackFrameStr)
-		return treeMatcher(
-			flags,
-			outerTreeReference.tree, outerTreeReference.treeLength, outerTreeReference.treeIndex,
-			splitStr, strLength,
-			stringIndex, outerTreeReference.initialStringIndex,
-			metaData
+		state.initialStringIndex = outerTreeReference.initialStringIndex
+		return coreTreeMatcher(
+			state,
+			outerTreeReference.tree, outerTreeReference.treeIndex
 		)
 	end
 
-	return true, initialStringIndex + 1, stringIndex, metaData
+	return true, state.initialStringIndex + 1, state.stringIndex, state.metaData
+end
+
+legacyTreeMatcher = function(
+		flags, tree, treeLength, treeIndex,
+		splitStr, strLength,
+		stringIndex, initialStringIndex,
+		metaData
+	)
+	local state = MatchState.new(
+		flags, splitStr, strLength, stringIndex, initialStringIndex, metaData
+	)
+	return coreTreeMatcher(state, tree, treeIndex)
 end
 
 local matcher = function(expr, str, flags, stringIndex)
+	if type(expr) ~= "string" then
+		return false, "Expression must be a string"
+	end
+	if type(str) ~= "string" then
+		return false, "Target must be a string"
+	end
+
 	flags = flags or { }
 
 	local tree, errorMessage = parser(expr, flags)
@@ -167,10 +176,12 @@ local matcher = function(expr, str, flags, stringIndex)
 	while stringIndex < strLength do
 		debugCurrentStackFrame = 0
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
-		hasMatched, iniStr, endStr, matcherMetaData = treeMatcher(
-			flags, tree, treeLength, 0,
-			splitStr, strLength,
-			stringIndex, stringIndex
+		
+		local state = MatchState.new(
+			flags, splitStr, strLength, stringIndex, stringIndex, nil
+		)
+		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
+			state, tree, 0
 		)
 
 		if hasMatched then

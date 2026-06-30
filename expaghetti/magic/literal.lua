@@ -20,8 +20,4 @@ Literal.parse = function(state, currentCharacter, tree)
 	return state.index + 1
 end
 
-Literal.match = function(currentElement, currentCharacter)
-	return currentElement.value == currentCharacter
-end
-
 return Literal

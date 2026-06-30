@@ -20,8 +20,4 @@ Any.parse = function(state, tree)
 	return state.index + 1
 end
 
-Any.match = function(currentElement, currentCharacter)
-	return true
-end
-
 return Any
