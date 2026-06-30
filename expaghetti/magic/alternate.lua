@@ -1,5 +1,3 @@
-----------------------------------------------------------------------------------------------------
-local tblDeepCopy = require("./helpers/table").tblDeepCopy
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ALTERNATE_SEPARATOR = require("./enums/magic").ALTERNATE_SEPARATOR

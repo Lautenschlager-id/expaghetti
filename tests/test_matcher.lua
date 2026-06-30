@@ -197,7 +197,21 @@ assertMatch("[a-zA-Z0-9_]","_",  true, 1, 1, "Compound set: full word chars via 
 assertMatch("[a-zA-Z0-9_]","-", nil,  nil, nil, "Compound set: hyphen not in word chars")
 
 ----------------------------------------------------------------------------------------------------
-print("  [19] Quantifiers -- greedy...")
+-- ALTERNATION
+----------------------------------------------------------------------------------------------------
+print("  [19] Alternation | ...")
+assertMatch("a|b", "a",     true, 1, 1, "Alternation: first branch")
+assertMatch("a|b", "b",     true, 1, 1, "Alternation: second branch")
+assertMatch("a|b", "c",     nil,  nil, nil, "Alternation: no branch matches")
+assertMatch("cat|dog", "dog", true, 1, 3, "Alternation: multi-char branch")
+assertMatch("a|b|c", "c",   true, 1, 1, "Alternation: three branches")
+assertMatch("a|", "a",      true, 1, 1, "Alternation: empty right branch matches a")
+assertMatch("a|", "b",      true, 1, 0, "Alternation: empty right branch matches empty string")
+assertMatch("|a", "a",      true, 1, 0, "Alternation: empty left branch matches empty string before a")
+assertMatch("a||c", "b",    true, 1, 0, "Alternation: middle empty branch matches empty string")
+
+----------------------------------------------------------------------------------------------------
+print("  [20] Quantifiers -- greedy...")
 assertMatch("a?", "b",        true, 1, 0, "Greedy ?: empty match")
 assertMatch("a?", "a",        true, 1, 1, "Greedy ?: matches 1")
 assertMatch("a?", "aa",       true, 1, 1, "Greedy ?: matches 1 out of many")
@@ -217,7 +231,7 @@ assertMatch("a{2,}", "a",     nil,  nil, nil, "Greedy {2,}: requires 2")
 assertMatch("a{2,}", "aaaaa", true, 1, 5, "Greedy {2,}: matches all >= 2")
 
 ----------------------------------------------------------------------------------------------------
-print("  [20] Quantifiers -- lazy...")
+print("  [21] Quantifiers -- lazy...")
 assertMatch("a??", "a",       true, 1, 0, "Lazy ??: empty match favored")
 assertMatch("a??a", "a",      true, 1, 1, "Lazy ??: matches 1 to satisfy rest")
 assertMatch("a*?", "aaa",     true, 1, 0, "Lazy *?: empty match favored")
@@ -227,18 +241,28 @@ assertMatch("a+?a", "aaa",    true, 1, 2, "Lazy +?: matches enough to satisfy re
 assertMatch("a{2,4}?", "aaaa",true, 1, 2, "Lazy {2,4}?: matches exactly 2")
 
 ----------------------------------------------------------------------------------------------------
-print("  [21] Quantifiers -- possessive...")
+print("  [22] Quantifiers -- possessive...")
 assertMatch("a?+a", "a",      nil,  nil, nil, "Possessive ?+: no backtrack, fails rest")
 assertMatch("a*+a", "aaa",    nil,  nil, nil, "Possessive *+: consumes all, fails rest")
 assertMatch("a++a", "aaa",    nil,  nil, nil, "Possessive ++: consumes all, fails rest")
 
 ----------------------------------------------------------------------------------------------------
-print("  [22] Quantifiers -- backtracking edge cases...")
+print("  [23] Quantifiers -- backtracking edge cases...")
 -- greedy backtracks to let 'c' match
 assertMatch(".*c", "abcc",    true, 1, 4, "Greedy *: backtracks to match 'c'")
 -- lazy expands to let 'c' match
 assertMatch(".*?c", "abcc",   true, 1, 3, "Lazy *?: expands to match 'c'")
 -- possessive does not backtrack
 assertMatch(".*+c", "abcc",   nil,  nil, nil, "Possessive *+: fails to backtrack for 'c'")
+
+----------------------------------------------------------------------------------------------------
+print("  [24] Quantifiers -- inside alternations...")
+assertMatch("a|b+", "bb",    true, 1, 2, "Alternation: quantified right branch")
+assertMatch("a+|b", "aa",    true, 1, 2, "Alternation: quantified left branch")
+assertMatch("a.*b|c", "axxb",true, 1, 4, "Alternation: complex quantified left branch")
+assertMatch("a.*b|c", "c",   true, 1, 1, "Alternation: complex left branch fails, right branch matches")
+assertMatch("a|b.*c", "bxxxc",true,1, 5, "Alternation: complex right branch matches")
+assertMatch("a|b.*c", "a",   true, 1, 1, "Alternation: complex right branch fails, left branch matches")
+assertMatch("a.*b|a.*c", "ac", true, 1, 2, "Alternation: full branch backtrack with quantifiers")
 
 print("All matcher tests passed!")
