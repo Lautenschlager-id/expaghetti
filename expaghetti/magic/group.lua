@@ -226,7 +226,7 @@ Group.parse = function(state, tree)
 	end
 
 	if value.isLookbehind then
-		local len = getFixedLength(groupTree)
+		local len = getFixedLength(value.tree)
 		if not len then
 			return false, errorsEnum.variableLengthLookbehind
 		end
@@ -285,12 +285,13 @@ Group.match = function(
 	)
 
 	if isAssertion then
-		hasMatched = hasMatched ~= currentElement.isNegative
+		local originalHasMatched = hasMatched
 		if currentElement.isLookbehind then
-			if hasMatched and (endStr ~= stringIndex) then
-				hasMatched = false
+			if originalHasMatched and (endStr ~= stringIndex) then
+				originalHasMatched = false
 			end
 		end
+		hasMatched = originalHasMatched ~= currentElement.isNegative
 
 		if not hasMatched then
 			return false, nil, nil, matcherMetaData, false

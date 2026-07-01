@@ -332,6 +332,7 @@ return {
 				disableCapture = true,
 				isLookbehind = true,
 				isNegative = true,
+				fixedLength = 0,
 				tree = {
 					_index = 1,
 					{
@@ -366,6 +367,7 @@ return {
 				disableCapture = true,
 				isLookbehind = true,
 				isNegative = true,
+				fixedLength = 0,
 				tree = {
 					_index = 1,
 					{
