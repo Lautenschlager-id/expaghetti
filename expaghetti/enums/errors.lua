@@ -23,7 +23,9 @@ local errors = {
 
 	unterminatedGroup = "Unterminated group",
 
-	noGroupToClose = "No group to close",
+	noGroupToClose = "There is no group to close",
+
+	variableLengthLookbehind = "Lookbehinds can only be applied to fixed-length expressions",
 
 	invalidGroupBehavior = "Invalid group behavior",
 
@@ -38,6 +40,8 @@ local errors = {
 		"Unterminated backreference: Missing '" .. magicEnum.GROUP_NAME_CLOSE .. "'",
 
 	invalidBackreferenceName = "Invalid backreference name",
+
+	missingFrontierSet = "Missing set after frontier pattern",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

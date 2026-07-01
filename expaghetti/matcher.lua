@@ -4,6 +4,9 @@ local parser = require("./parser")
 local MatchState = require("./match_state")
 ----------------------------------------------------------------------------------------------------
 local Alternate = require("./magic/alternate")
+local Anchor = require("./magic/anchor")
+local Balanced = require("./magic/balanced")
+local Boundary = require("./magic/boundary")
 local CaptureReference = require("./magic/capture_reference")
 local Group = require("./magic/group")
 local PositionCapture = require("./magic/position_capture")
@@ -56,6 +59,12 @@ local singleElementMatcher = function(
 
 	if PositionCapture.isElement(currentElement) then
 		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
+	elseif Anchor.isElement(currentElement) then
+		return Anchor.match(currentElement, stringIndex - 1, splitStr, strLength, flags)
+	elseif Boundary.isElement(currentElement) then
+		return Boundary.match(currentElement, stringIndex - 1, splitStr, strLength, matchSet)
+	elseif Balanced.isElement(currentElement) then
+		return Balanced.match(currentElement, stringIndex - 1, splitStr, strLength)
 	elseif not currentCharacter then
 		return
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then

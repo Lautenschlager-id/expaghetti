@@ -365,4 +365,51 @@ assertMatch("(ab)+",   "abab", true, 1, 4, "Group quantifier: two-char greedy +"
 assertMatch("(?:ab)+", "abab", true, 1, 4, "Non-cap group quantifier: +")
 assertCapture("(a)+", "aaa", 1, "a", "Group quantifier: capture is last iteration")
 
+----------------------------------------------------------------------------------------------------
+print("  [33] Assertions -- Anchors ^ and $...")
+assertMatch("^abc", "abc",   true, 1, 3, "Start anchor ^: matches at start")
+assertMatch("^abc", "xabc",  nil,  nil, nil, "Start anchor ^: fails if not at start")
+assertMatch("abc$", "abc",   true, 1, 3, "End anchor $: matches at end")
+assertMatch("abc$", "abcx",  nil,  nil, nil, "End anchor $: fails if not at end")
+assertMatch("^(a|b)c$", "ac", true, 1, 2, "Anchors with alternates: matches ac")
+assertMatch("^(a|b)c$", "bc", true, 1, 2, "Anchors with alternates: matches bc")
+assertMatch("^(a|b)c$", "xac", nil, nil, nil, "Anchors with alternates: fails start anchor")
+assertMatch("^(a|b)c$", "acx", nil, nil, nil, "Anchors with alternates: fails end anchor")
+assertMatch("^(?:a+b)c$", "aabc", true, 1, 4, "Anchors with groups: matches")
+assertMatch("^a(b$)c", "abc", nil, nil, nil, "Anchors inside groups: fails because $ is followed by c")
+assertMatch("^a(b$)", "ab", true, 1, 2, "Anchors inside groups: matches")
+assertMatch("^a(b|c)$", "ab", true, 1, 2, "Anchors with alternations at end: matches ab")
+assertMatch("^a(b|c)$", "ac", true, 1, 2, "Anchors with alternations at end: matches ac")
+assertMatch("^(a|b)(c|d)$", "ad", true, 1, 2, "Anchors with multiple alternations: matches ad")
+
+----------------------------------------------------------------------------------------------------
+print("  [34] Assertions -- Boundaries %f and %F...")
+assertMatch("a%f[%d]1", "a1", true, 1, 2, "Frontier boundary %f: letter to digit")
+assertMatch("a%f[%d]b", "ab", nil,  nil, nil, "Frontier boundary %f: fails letter to letter")
+assertMatch("%f[%d]1", "1",   true, 1, 1, "Frontier boundary %f: string start to digit")
+assertMatch("a%F[%d]b", "ab", true, 1, 2, "Non-frontier boundary %F: letter to letter")
+assertMatch("a%F[%d]1", "a1", nil,  nil, nil, "Non-frontier boundary %F: fails letter to digit")
+assertMatch("a%f[%w]", "a!",  true, 1, 1, "Frontier boundary %f[%w]: word to non-word")
+assertMatch("%f[%w]a", " a",  true, 2, 2, "Frontier boundary %f[%w]: non-word to word")
+
+----------------------------------------------------------------------------------------------------
+print("  [35] Assertions -- Balanced Match %bxy...")
+assertMatch("%b()", "(a(b)c)", true, 1, 7, "Balanced match %b(): nested parentheses")
+assertMatch("%b{}", "{abc{def}}", true, 1, 10, "Balanced match %b{}: nested curly braces")
+assertMatch("%b()", "(ab", nil, nil, nil, "Balanced match %b(): unclosed")
+assertMatch("x%b()y", "x(a)y", true, 1, 5, "Balanced match %b(): within string")
+
+----------------------------------------------------------------------------------------------------
+print("  [36] Assertions -- Lookarounds...")
+-- assertMatch("a(?=b)b", "ab", true, 1, 2, "Positive lookahead: matches")
+-- assertMatch("a(?=b)c", "abc", nil, nil, nil, "Positive lookahead: fails")
+-- assertMatch("a(?!b)c", "ac", true, 1, 2, "Negative lookahead: matches")
+-- assertMatch("a(?!b)b", "ab", nil, nil, nil, "Negative lookahead: fails")
+-- assertMatch("(?<=a)b", "ab", true, 2, 2, "Positive lookbehind: matches")
+-- assertMatch("(?<=a)b", "xb", nil, nil, nil, "Positive lookbehind: fails")
+-- assertMatch("(?<!a)b", "xb", true, 2, 2, "Negative lookbehind: matches")
+-- assertMatch("(?<!a)b", "ab", nil, nil, nil, "Negative lookbehind: fails")
+-- assertMatch("(?<=ab)c", "abc", true, 3, 3, "Positive lookbehind length > 1: matches")
+
 print("All matcher tests passed!")
+

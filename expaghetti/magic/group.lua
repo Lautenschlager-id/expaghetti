@@ -22,8 +22,67 @@ local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
 local ENUM_GROUP_COMMENT_BEHAVIOR = magicEnum.GROUP_COMMENT_BEHAVIOR
 local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
+local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
+local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
+local ENUM_ELEMENT_TYPE_ALTERNATE = elementsEnum.alternate
+local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
 ----------------------------------------------------------------------------------------------------
 local Group = { }
+
+local function getFixedLength(tree)
+	if not tree then return 0 end
+	local totalLen = 0
+	for i = 1, (tree._index or 0) do
+		local elem = tree[i]
+		
+		-- Elements that don't consume characters
+		if elementsEnum.anchor == elem.type or elementsEnum.boundary == elem.type or elementsEnum.position_capture == elem.type then
+			-- Length 0
+		elseif elem.isLookahead or elem.isLookbehind then
+			-- Length 0
+		-- Elements that consume 1 character
+		elseif elem.type == ENUM_ELEMENT_TYPE_LITERAL or elem.type == ENUM_ELEMENT_TYPE_ANY or elem.type == ENUM_ELEMENT_TYPE_SET then
+			local q = elem.quantifier
+			if q then
+				if q.min ~= q.max then return nil end
+				totalLen = totalLen + q.min
+			else
+				totalLen = totalLen + 1
+			end
+		elseif elem.type == ENUM_ELEMENT_TYPE_GROUP then
+			local gLen = getFixedLength(elem.tree)
+			if not gLen then return nil end
+			local q = elem.quantifier
+			if q then
+				if q.min ~= q.max then return nil end
+				totalLen = totalLen + (gLen * q.min)
+			else
+				totalLen = totalLen + gLen
+			end
+		elseif elem.type == ENUM_ELEMENT_TYPE_ALTERNATE then
+			local altLen = nil
+			for _, branchTree in ipairs(elem.trees) do
+				local bLen = getFixedLength(branchTree)
+				if not bLen then return nil end
+				if altLen == nil then
+					altLen = bLen
+				elseif altLen ~= bLen then
+					return nil
+				end
+			end
+			local q = elem.quantifier
+			if q then
+				if q.min ~= q.max then return nil end
+				totalLen = totalLen + ((altLen or 0) * q.min)
+			else
+				totalLen = totalLen + (altLen or 0)
+			end
+		else
+			return nil -- Unknown element, cannot determine length safely
+		end
+	end
+	return totalLen
+end
 
 local getGroupBehavior = function(index, charactersList, charactersValueList, groupElement,
 	parserMetaData)
@@ -166,6 +225,14 @@ Group.parse = function(state, tree)
 		return PositionCapture.parse(state.index, tree, state.metaData)
 	end
 
+	if value.isLookbehind then
+		local len = getFixedLength(groupTree)
+		if not len then
+			return false, errorsEnum.variableLengthLookbehind
+		end
+		value.fixedLength = len
+	end
+
 	if not value._skipFromTree then
 		tree._index = tree._index + 1
 		tree[tree._index] = value
@@ -184,7 +251,9 @@ Group.match = function(
 
 	local groupTree = currentElement.tree
 
-	if not matcherMetaData.outerTreeReference[groupTree] and tree then
+	local isAssertion = currentElement.isLookahead or currentElement.isLookbehind
+
+	if not isAssertion and not matcherMetaData.outerTreeReference[groupTree] and tree then
 		matcherMetaData.outerTreeReference[groupTree] = {
 			tree = tree,
 			treeLength = treeLength,
@@ -200,22 +269,40 @@ Group.match = function(
 		groupTree._groupIndex = nil
 	end
 
+	local execStringIndex = stringIndex
+	if currentElement.isLookbehind then
+		execStringIndex = stringIndex - currentElement.fixedLength
+		if execStringIndex < 0 then
+			return false, nil, nil, matcherMetaData, true
+		end
+	end
+
 	local hasMatched, iniStr, endStr = treeMatcher(
 		flags, groupTree, groupTree._index, 0,
 		splitStr, strLength,
-		stringIndex, stringIndex,
+		execStringIndex, execStringIndex,
 		matcherMetaData
 	)
+
+	if isAssertion then
+		hasMatched = hasMatched ~= currentElement.isNegative
+		if currentElement.isLookbehind then
+			if hasMatched and (endStr ~= stringIndex) then
+				hasMatched = false
+			end
+		end
+
+		if not hasMatched then
+			return false, nil, nil, matcherMetaData, false
+		end
+
+		return true, nil, stringIndex, matcherMetaData, false
+	end
 
 	if not groupIndex then
 		hasMatched = hasMatched ~= currentElement.isNegative
 		if not hasMatched then
 			return
-		end
-
-		if currentElement.isLookahead then
-			iniStr = iniStr and (iniStr - 1) or stringIndex
-			endStr = iniStr
 		end
 	end
 

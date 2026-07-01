@@ -17,6 +17,7 @@ local characterClasses = require("./enums/classes")
 local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_BOUNDARY = elementsEnum.boundary
+local ENUM_ELEMENT_TYPE_BALANCED = elementsEnum.balanced
 local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 ----------------------------------------------------------------------------------------------------
 local Escaped = { }
@@ -65,26 +66,33 @@ specialEscaped.e = function(currentCharacter, index, expression)
 		value = hex
 	}
 end
--- %b --> boundary (word and no word)
-specialEscaped.b = function(currentCharacter, index)
-	--[[
-		{
-			type = "boundary",
-			shouldBeBetweenWord = false,
-			quantifier = false,
-		}
-	]]
-	return index, {
-		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		shouldBeBetweenWord = false,
+-- %bxy --> balanced match between x and y
+specialEscaped.b = function(currentCharacter, index, expression)
+	local opener = expression[index]
+	local closer = expression[index + 1]
+	if not opener or not closer then
+		return false, errorsEnum.incompleteEscape
+	end
+	return index + 2, {
+		type = ENUM_ELEMENT_TYPE_BALANCED,
+		open = opener,
+		close = closer,
 		quantifier = false,
 	}
 end
--- %B --> boundary ((word and word) or (no word and no word))
-specialEscaped.B = function(currentCharacter, index)
+-- %f --> frontier boundary
+specialEscaped.f = function(currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		shouldBeBetweenWord = true,
+		isNegated = false,
+		quantifier = false,
+	}
+end
+-- %F --> negated frontier boundary
+specialEscaped.F = function(currentCharacter, index)
+	return index, {
+		type = ENUM_ELEMENT_TYPE_BOUNDARY,
+		isNegated = true,
 		quantifier = false,
 	}
 end

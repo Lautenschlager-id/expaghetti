@@ -35,8 +35,21 @@ local function parserCore(state)
 		if state.boolEscapedList[state.index] then
 			state.index = state.index + 1
 
-			tree._index = tree._index + 1
-			tree[tree._index] = currentCharacter
+			if type(currentCharacter) == "table" and currentCharacter.type == "boundary" then
+				local nextChar = state.charactersList[state.index]
+				if not state.boolEscapedList[state.index] and Set.isToken(nextChar) then
+					state.index, errorMessage = Set.parse(state, tree)
+					if errorMessage then return false, errorMessage end
+					local parsedSet = tree[tree._index]
+					currentCharacter.set = parsedSet
+					tree[tree._index] = currentCharacter
+				else
+					errorMessage = errorsEnum.missingFrontierSet
+				end
+			else
+				tree._index = tree._index + 1
+				tree[tree._index] = currentCharacter
+			end
 		else
 			if Set.isToken(currentCharacter) then
 				state.index, errorMessage = Set.parse(state, tree)

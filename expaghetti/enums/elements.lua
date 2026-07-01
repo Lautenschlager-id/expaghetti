@@ -2,6 +2,7 @@ return {
 	anchor = "anchor",
 	alternate = "alternate",
 	any = "any",
+	balanced = "balanced",
 	boundary = "boundary",
 	capture_reference = "capture_reference",
 	group = "group",
