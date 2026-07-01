@@ -379,6 +379,11 @@ assertPositionCapture("()a()", "abc", 2, 2, "Two positions: second after 'a'")
 assertPositionCapture("(a()b)", "ab", 1, 2, "Position inside a capturing group: index is 1 (first pos capture)")
 assertPositionCapture("()abc()", "abc", 1, 1, "Position at start and end: first")
 assertPositionCapture("()abc()", "abc", 2, 4, "Position at start and end: second")
+-- () must NOT consume a numbered capture slot; %1 should reference the first string capture
+assertMatch("()(a)%1",    "aa", true, 1, 2, "Position capture: does not consume %1 slot")
+assertCapture("()(a)%1",  "aa", 1, "a",   "Position capture: %1 refers to first string capture (a)") 
+assertMatch("(a)()(b)%2", "abb", true, 1, 3, "Position capture in middle: %2 refers to (b), not ()")
+assertCapture("(a)()(b)%2", "abb", 2, "b",  "Position capture in middle: %2 is (b)")
 
 ----------------------------------------------------------------------------------------------------
 print("  [31] Groups + Alternation (backtracking)...")
