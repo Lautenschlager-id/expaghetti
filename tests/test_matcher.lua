@@ -681,6 +681,9 @@ assertMatch("(?<X>x|y)(?&X){2}", "xyy", true, 1, 3, "Recursion: quantified named
 assertMatch("(?<A>a(?&B)?)(?<B>b(?&A)?)", "ab", true, 1, 2, "Recursion: call another named group")
 assertMatch("(?<A>a(?&B)?)(?<B>b(?&A)?)", "aba", true, 1, 3, "Recursion: ping pong calls")
 
+-- Key-Value multiline format recursion
+assertMatch("^([%w]+): ([%w]+)$[\n ]*(?R)?", "name: john\nage: 10", true, 1, 18, "Recursion: key-value multiline recursion", "m")
+
 
 print("All matcher tests passed!")
 
