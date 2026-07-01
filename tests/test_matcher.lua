@@ -652,8 +652,35 @@ assertMatch("(?<P>a)(?&P)", "aa", true, 1, 2, "Recursion: backreference to named
 -- Quantified recursion
 assertMatch("(a)(?1)+", "aaa", true, 1, 3, "Recursion: quantified recursive group")
 assertMatch("(a)(?1){2}", "aaa", true, 1, 3, "Recursion: exact-count quantified recursive group")
--- Depth and complex nesting
+-- Complex nesting
 assertMatch("(((a)))(?2)", "aa", true, 1, 2, "Recursion: deep group reference")
+
+-- Recursion mixed with alternation
+assertMatch("a(?R)?b|c", "aabb", true, 1, 4, "Recursion: recursive alt matched")
+assertMatch("a(?R)?b|c", "c", true, 1, 1, "Recursion: non-recursive alt matched")
+assertMatch("a(?R)?b|c", "acb", true, 1, 3, "Recursion: recursion evaluates inner alt")
+
+-- Recursion inside lookahead
+assertMatch("^(?=(a(?1)?b))a+b+", "aabb", true, 1, 4, "Recursion: subroutine inside positive lookahead (calling inner group)")
+assertMatch("^(?=(a(?1)?b))a+b+", "aab", nil, nil, nil, "Recursion: lookahead prevents match on incomplete string")
+
+-- Lookaround inside recursion
+assertMatch("^(a(?=a|b)(?1)?b)", "aabb", true, 1, 4, "Recursion: subroutine contains lookahead")
+assertMatch("^(a(?=b)(?1)?b)", "aabb", nil, nil, nil, "Recursion: subroutine contains lookahead that fails")
+
+-- Recursion and backreferences mixed
+assertMatch("(a)(?1)%1", "aaa", true, 1, 3, "Recursion: subroutine then backreference")
+assertMatch("(a|b)(?1)%1", "aba", true, 1, 3, "Recursion: subroutine evaluates 'b', then backreference evaluates 'a'")
+
+-- Multiple quantifiers on recursion
+assertMatch("(a)(?1)*", "aaaaa", true, 1, 5, "Recursion: star quantifier on subroutine")
+assertMatch("(a|b)(?1){2,3}", "abb", true, 1, 3, "Recursion: bounded quantifier on subroutine")
+assertMatch("(?<X>x|y)(?&X){2}", "xyy", true, 1, 3, "Recursion: quantified named subroutine")
+
+-- Mutual recursion-like behavior (calling another group that calls back - not fully supported without careful regex, but let's test deep calls)
+assertMatch("(?<A>a(?&B)?)(?<B>b(?&A)?)", "ab", true, 1, 2, "Recursion: call another named group")
+assertMatch("(?<A>a(?&B)?)(?<B>b(?&A)?)", "aba", true, 1, 3, "Recursion: ping pong calls")
+
 
 print("All matcher tests passed!")
 
