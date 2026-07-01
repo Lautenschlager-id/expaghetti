@@ -44,7 +44,7 @@ local function getFixedLength(tree)
 		elseif elem.type == ENUM_ELEMENT_TYPE_LITERAL or elem.type == ENUM_ELEMENT_TYPE_ANY or elem.type == ENUM_ELEMENT_TYPE_SET then
 			local q = elem.quantifier
 			if q then
-				if q.min ~= q.max then return nil end
+				if q.min ~= q.max or q.max == 0 then return nil end
 				totalLen = totalLen + q.min
 			else
 				totalLen = totalLen + 1
@@ -54,7 +54,7 @@ local function getFixedLength(tree)
 			if not gLen then return nil end
 			local q = elem.quantifier
 			if q then
-				if q.min ~= q.max then return nil end
+				if q.min ~= q.max or q.max == 0 then return nil end
 				totalLen = totalLen + (gLen * q.min)
 			else
 				totalLen = totalLen + gLen
@@ -72,7 +72,7 @@ local function getFixedLength(tree)
 			end
 			local q = elem.quantifier
 			if q then
-				if q.min ~= q.max then return nil end
+				if q.min ~= q.max or q.max == 0 then return nil end
 				totalLen = totalLen + ((altLen or 0) * q.min)
 			else
 				totalLen = totalLen + (altLen or 0)
