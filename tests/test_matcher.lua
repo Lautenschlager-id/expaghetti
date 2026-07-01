@@ -299,6 +299,14 @@ local function assertNoCapture(expr, str, desc, flags)
 	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
 end
 
+local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc)
+	local hasMatched, _, _, metaData = matcher(expr, str)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	local pos = metaData.positionCaptures[captureIndex]
+	assert(pos ~= nil, string.format("Test '%s': position capture %d not found", desc, captureIndex))
+	assert(pos == expectedPos, string.format("Test '%s': expected position=%d but got %s", desc, expectedPos, tostring(pos)))
+end
+
 ----------------------------------------------------------------------------------------------------
 print("  [25] Capturing groups (...)...")
 assertMatch("(a)",      "a",    true, 1, 1, "Group: single char")
@@ -356,6 +364,21 @@ end
 print("  [29] Inline comments (?#...)...")
 assertMatch("a(?#hello)b",  "ab",  true, 1, 2, "Comment: transparent")
 assertMatch("(?#skip)abc",  "abc", true, 1, 3, "Comment: leading")
+
+----------------------------------------------------------------------------------------------------
+print("  [30] Position capture ()...")
+-- () captures the current string position (1-based), just like Lua's ()
+assertMatch("()",       "abc",  true, 1, 0,  "Position capture: empty match")
+assertMatch("a()",      "abc",  true, 1, 1,  "Position capture: after 'a'")
+assertMatch("ab()",     "abc",  true, 1, 2,  "Position capture: after 'ab'")
+assertPositionCapture("()",   "abc", 1, 1,  "Position 1: at start of string (1-based)")
+assertPositionCapture("a()",  "abc", 1, 2,  "Position 1: after first char")
+assertPositionCapture("ab()", "abc", 1, 3,  "Position 1: after two chars")
+assertPositionCapture("()a()", "abc", 1, 1, "Two positions: first at start")
+assertPositionCapture("()a()", "abc", 2, 2, "Two positions: second after 'a'")
+assertPositionCapture("(a()b)", "ab", 1, 2, "Position inside a capturing group: index is 1 (first pos capture)")
+assertPositionCapture("()abc()", "abc", 1, 1, "Position at start and end: first")
+assertPositionCapture("()abc()", "abc", 2, 4, "Position at start and end: second")
 
 ----------------------------------------------------------------------------------------------------
 print("  [31] Groups + Alternation (backtracking)...")
