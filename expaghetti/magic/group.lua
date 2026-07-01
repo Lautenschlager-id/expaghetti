@@ -14,6 +14,7 @@ local ENUM_CLOSE_GROUP = magicEnum.CLOSE_GROUP
 local ENUM_GROUP_BEHAVIOR_CHARACTER = magicEnum.GROUP_BEHAVIOR_CHARACTER
 local ENUM_GROUP_NON_CAPTURING_BEHAVIOR = magicEnum.GROUP_NON_CAPTURING_BEHAVIOR
 local ENUM_GROUP_ATOMIC_BEHAVIOR = magicEnum.GROUP_ATOMIC_BEHAVIOR
+local ENUM_GROUP_BRANCH_RESET_BEHAVIOR = magicEnum.GROUP_BRANCH_RESET_BEHAVIOR
 local ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR
 local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
@@ -103,6 +104,10 @@ local getGroupBehavior = function(state, groupElement)
 		groupElement.disableCapture = true
 	elseif currentCharacter == ENUM_GROUP_ATOMIC_BEHAVIOR then
 		groupElement.isAtomic = true
+		groupElement.disableCapture = true
+	elseif currentCharacter == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
+		groupElement.isBranchReset = true
+		groupElement.disableCapture = true
 	elseif currentCharacter == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
 		groupElement.disableCapture = true
@@ -264,7 +269,7 @@ Group.parse = function(state, tree)
 			end
 		end
 
-		local groupTree, groupErrorMessage = state:parseSubTree(true, false)
+		local groupTree, groupErrorMessage = state:parseSubTree(true, false, nil, value.isBranchReset)
 
 		if not groupTree then
 			-- index = error message
@@ -312,7 +317,7 @@ Group.match = function(
 
 	local isAssertion = currentElement.isLookahead or currentElement.isLookbehind
 
-	if not isAssertion and not matcherMetaData.outerTreeReference[groupTree] and tree then
+	if not isAssertion and not currentElement.isAtomic and not matcherMetaData.outerTreeReference[groupTree] and tree then
 		matcherMetaData.outerTreeReference[groupTree] = {
 			tree = tree,
 			treeLength = treeLength,
@@ -361,6 +366,13 @@ Group.match = function(
 		end
 
 		return true, nil, stringIndex, matcherMetaData, false
+	end
+
+	if currentElement.isAtomic then
+		if not hasMatched then
+			return false, nil, nil, matcherMetaData, false
+		end
+		return true, nil, endStr, matcherMetaData, false
 	end
 
 	if not groupIndex then

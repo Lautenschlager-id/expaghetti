@@ -13,6 +13,7 @@ local characters = {
 	GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
 	GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
 	GROUP_ATOMIC_BEHAVIOR = '>', -- (?>abc)
+	GROUP_BRANCH_RESET_BEHAVIOR = '|', -- (?|abc)
 	GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
 	GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
 	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)

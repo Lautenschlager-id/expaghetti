@@ -109,7 +109,8 @@ function parser(expr, flags,
 	tokens,
 	metaData,
 	hasGroupClosed,
-	inheritedFlags)
+	inheritedFlags,
+	isBranchReset)
 
 	if not (isGroup or isAlternate) then
 		flags = flags or { }
@@ -142,6 +143,7 @@ function parser(expr, flags,
 		tokens,
 		metaData, hasGroupClosed
 	)
+	state.isBranchReset = isBranchReset
 
 	local tree, errorMessage = parserCore(state)
 	if not tree then

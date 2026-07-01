@@ -36,10 +36,11 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, expression, e
 	
 	self.metaData = metaData
 	self.hasGroupClosed = hasGroupClosed
+	self.initialGroupIndex = metaData and metaData.groupIndex or 0
 	return self
 end
 
-function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed)
+function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranchReset)
 	-- To avoid circular dependency, we require parser dynamically, or inject it
 	local parser = require("./parser")
 	local tree, nextIndex, newHasGroupClosed = parser(
@@ -49,7 +50,8 @@ function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed)
 		self.tokens,
 		self.metaData,
 		hasGroupClosed,
-		self.flags
+		self.flags,
+		isBranchReset
 	)
 	if not tree then
 		return false, nextIndex

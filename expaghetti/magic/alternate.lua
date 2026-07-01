@@ -29,10 +29,25 @@ Alternate.parse = function(state, tree)
 	end
 	tree[1] = firstAlternative
 
+	local isBranchReset = state.isBranchReset
+	local initialGroupIndex = state.initialGroupIndex
+	local maxGroupIndex = state.metaData.groupIndex
+
 	local alternativeTree, altErrorMessage
 	repeat
 		state.index = state.index + 1
+		
+		if isBranchReset then
+			state.metaData.groupIndex = initialGroupIndex
+		end
+
 		alternativeTree, altErrorMessage = state:parseSubTree(state.isGroup, true, state.hasGroupClosed)
+
+		if isBranchReset then
+			if state.metaData.groupIndex > maxGroupIndex then
+				maxGroupIndex = state.metaData.groupIndex
+			end
+		end
 
 		if not alternativeTree then
 			-- index = error message
@@ -42,6 +57,10 @@ Alternate.parse = function(state, tree)
 		totalAlternates = totalAlternates + 1
 		tree[totalAlternates] = alternativeTree
 	until state.index > state.charactersIndex or (state.isGroup and state.hasGroupClosed)
+
+	if isBranchReset then
+		state.metaData.groupIndex = maxGroupIndex
+	end
 
 	for elementIndex = totalAlternates + 1, tree._index do
 		tree[elementIndex] = nil

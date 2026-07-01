@@ -3,7 +3,7 @@ local matcher = require("matcher")
 
 local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
 	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
-	if hasMatched ~= expectedHasMatched then
+	if (not hasMatched) ~= (not expectedHasMatched) then
 		error(string.format("Test '%s' failed: Expected hasMatched=%s for expr='%s', str='%s' but got %s", desc, tostring(expectedHasMatched), expr, str, tostring(hasMatched)))
 	end
 	if expectedHasMatched then
@@ -561,6 +561,40 @@ assertMatch("(?i:a(?-i:b)c)", "AbC", true, 1, 3, "Nested scopes with disables: m
 assertMatch("(?i:a(?-i:b)c)", "ABC", nil, nil, nil, "Nested scopes with disables: fails correctly")
 assertError("(?z)", "", "Invalid inline flag: parse error")
 assertMatch("(?i-m:)", "", true, 1, 0, "Empty scoped inline flag: matches empty string")
+
+print("  [45] Advanced Groups -- Atomic (?>...)...")
+assertMatch("(?>a)b", "ab", true, 1, 2, "Atomic: simple match")
+assertMatch("a(?>bc|b)c", "abcc", true, 1, 4, "Atomic: matches without backtracking into group")
+assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic: prevents backtracking into group (would match if normal)")
+assertMatch("(?>a+)a", "aa", nil, nil, nil, "Atomic: quantifier inside group prevents backtracking (a+ takes both a's)")
+assertMatch("(?>a*)a", "a", nil, nil, nil, "Atomic: zero or more")
+assertMatch("(?>a)*a", "a", true, 1, 1, "Atomic: quantified group is fine")
+assertMatch("(?>a)+", "aaa", true, 1, 3, "Atomic: quantified group takes multiple")
+assertMatch("(?>a+)+", "aaa", true, 1, 3, "Atomic: quantified atomic group")
+assertMatch("(?>a*)+", "aaa", true, 1, 3, "Atomic: quantified atomic group 2")
+
+print("  [46] Advanced Groups -- Branch Reset (?|...)...")
+assertMatch("(?|(a)|(b)(c)|(d))e(f)", "ae", nil, nil, nil, "Branch reset: f fails")
+do
+	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "bcef")
+	assert(hasMatched)
+	-- b is group 1, c is group 2. Then e is matched. f is matched as group 3 (since max group inside was 2).
+	assert(metaData.groupCapturesInitStringPositions[1][1] == 1) -- b
+	assert(metaData.groupCapturesInitStringPositions[2][1] == 2) -- c
+	assert(metaData.groupCapturesInitStringPositions[3][1] == 4) -- f
+end
+do
+	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "def")
+	assert(hasMatched)
+	-- d is group 1. f is group 3.
+	assert(metaData.groupCapturesInitStringPositions[1][1] == 1) -- d
+	assert(not metaData.groupCapturesInitStringPositions[2])     -- no group 2
+	assert(metaData.groupCapturesInitStringPositions[3][1] == 3) -- f
+end
+assertMatch("(?|(?=a)(a)|(?=b)(b))", "a", true, 1, 1, "Branch reset: with lookahead")
+assertMatch("(?|((a))|b)c", "ac", true, 1, 2, "Branch reset: nested groups")
+assertCapture("(?|((a))|b)c", "ac", 1, "a", "Branch reset: nested group 1")
+assertCapture("(?|((a))|b)c", "ac", 2, "a", "Branch reset: nested group 2")
 
 print("All matcher tests passed!")
 
