@@ -128,6 +128,8 @@ function parser(expr, flags,
 			groupNames = { },
 			groupIndex = 0,
 			positionCaptureIndex = 0,
+			groupTreesByIndex = { },
+			groupTreesByName = { },
 		}
 
 		index = 1
@@ -148,6 +150,10 @@ function parser(expr, flags,
 	local tree, errorMessage = parserCore(state)
 	if not tree then
 		return false, errorMessage or tree
+	end
+	
+	if not isGroup and not isAlternate then
+		tree._metaData = state.metaData
 	end
 
 	return tree, state.index, state.hasGroupClosed

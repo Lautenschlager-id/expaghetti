@@ -382,8 +382,17 @@ local matcher = function(expr, str, flags, stringIndex)
 		debugCurrentStackFrame = 0
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		
+		local parsedMetaData = tree._metaData
 		local state = MatchState.new(
-			flags, splitStr, strLength, stringIndex, stringIndex, nil
+			flags, splitStr, strLength, stringIndex, stringIndex, {
+				groupCapturesInitStringPositions = {},
+				groupCapturesEndStringPositions = {},
+				positionCaptures = {},
+				outerTreeReference = {},
+				rootTree = tree,
+				parsedMetaData = parsedMetaData,
+				groupNames = parsedMetaData and parsedMetaData.groupNames
+			}
 		)
 		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
 			state, tree, 0

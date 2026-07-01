@@ -136,9 +136,43 @@ local getGroupBehavior = function(state, groupElement)
 		groupElement.disableCapture = true
 		groupElement._skipFromTree = true
 	else
-		-- Check for inline flags
 		local charVal = charactersValueList[index]
-		if charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' then
+		if charVal == 'R' or charVal == '0' then
+			local nextChar = charactersList[index + 1]
+			if nextChar == ENUM_CLOSE_GROUP then
+				groupElement.isRecursion = true
+				groupElement.isRecursionRoot = true
+				index = index + 1
+			else
+				errorMessage = errorsEnum.invalidGroupBehavior
+			end
+		elseif charVal and charVal >= '1' and charVal <= '9' then
+			local numStr = ""
+			while charactersValueList[index] and charactersValueList[index] >= '0' and charactersValueList[index] <= '9' do
+				numStr = numStr .. charactersValueList[index]
+				index = index + 1
+			end
+			if charactersList[index] == ENUM_CLOSE_GROUP then
+				groupElement.isRecursion = true
+				groupElement.targetIndex = tonumber(numStr)
+			else
+				errorMessage = errorsEnum.invalidGroupBehavior
+			end
+		elseif charVal == '&' then
+			local nameStr = ""
+			index = index + 1
+			while charactersValueList[index] and charactersList[index] ~= ENUM_CLOSE_GROUP do
+				nameStr = nameStr .. charactersValueList[index]
+				index = index + 1
+			end
+			if charactersList[index] == ENUM_CLOSE_GROUP and #nameStr > 0 then
+				groupElement.isRecursion = true
+				groupElement.targetName = nameStr
+			else
+				errorMessage = errorsEnum.invalidGroupName
+			end
+		-- Check for inline flags
+		elseif charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' then
 			local enableFlags = {}
 			local disableFlags = {}
 			local currentTarget = enableFlags
@@ -256,7 +290,9 @@ Group.parse = function(state, tree)
 	end
 
 	-- A group with any value
-	if state.charactersList[state.index] ~= ENUM_CLOSE_GROUP then
+	if value.isRecursion then
+		value.tree = { _index = 0 }
+	elseif state.charactersList[state.index] ~= ENUM_CLOSE_GROUP then
 		if not (
 			value.disableCapture
 			or value.name
@@ -277,6 +313,14 @@ Group.parse = function(state, tree)
 		end
 
 		value.tree = groupTree
+		
+		-- Register groups for recursion target lookup
+		if value.index and state.metaData.groupTreesByIndex then
+			state.metaData.groupTreesByIndex[value.index] = groupTree
+		end
+		if value.name and state.metaData.groupTreesByName then
+			state.metaData.groupTreesByName[value.name] = groupTree
+		end
 	elseif not value.hasBehavior then
 		return PositionCapture.parse(state.index, tree, state.metaData)
 	else
@@ -302,6 +346,12 @@ Group.parse = function(state, tree)
 		tree[tree._index] = value
 	end
 
+	-- For recursion, getGroupBehavior already consumed the `)`, so state.index is pointing at the NEXT character.
+	-- We return state.index instead of state.index + 1
+	if value.isRecursion then
+		return state.index
+	end
+
 	return state.index + 1
 end
 
@@ -315,9 +365,27 @@ Group.match = function(
 
 	local groupTree = currentElement.tree
 
+	if currentElement.isRecursion then
+		if currentElement.isRecursionRoot then
+			groupTree = matcherMetaData.rootTree
+		elseif currentElement.targetIndex then
+			groupTree = matcherMetaData.parsedMetaData.groupTreesByIndex[currentElement.targetIndex]
+		elseif currentElement.targetName then
+			groupTree = matcherMetaData.parsedMetaData.groupTreesByName[currentElement.targetName]
+		end
+
+		if not groupTree then
+			error("Invalid recursion target")
+		end
+	end
+
 	local isAssertion = currentElement.isLookahead or currentElement.isLookbehind
 
-	if not isAssertion and not currentElement.isAtomic and not matcherMetaData.outerTreeReference[groupTree] and tree then
+	local oldOuterTreeRef = matcherMetaData.outerTreeReference[groupTree]
+	
+	if currentElement.isRecursion then
+		matcherMetaData.outerTreeReference[groupTree] = nil
+	elseif not isAssertion and not currentElement.isAtomic and tree then
 		matcherMetaData.outerTreeReference[groupTree] = {
 			tree = tree,
 			treeLength = treeLength,
@@ -326,6 +394,7 @@ Group.match = function(
 		}
 	end
 
+	local oldGroupIndex = groupTree._groupIndex
 	local groupIndex = currentElement.index or currentElement.name
 	if groupIndex then
 		groupTree._groupIndex = groupIndex
@@ -337,6 +406,8 @@ Group.match = function(
 	if currentElement.isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
+			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			groupTree._groupIndex = oldGroupIndex
 			if currentElement.isNegative then
 				return true, nil, stringIndex, matcherMetaData, false
 			else
@@ -361,6 +432,9 @@ Group.match = function(
 		end
 		hasMatched = originalHasMatched ~= currentElement.isNegative
 
+		matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+		groupTree._groupIndex = oldGroupIndex
+
 		if not hasMatched then
 			return false, nil, nil, matcherMetaData, false
 		end
@@ -368,20 +442,28 @@ Group.match = function(
 		return true, nil, stringIndex, matcherMetaData, false
 	end
 
-	if currentElement.isAtomic then
+	if currentElement.isAtomic or currentElement.isRecursion then
 		if not hasMatched then
+			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			groupTree._groupIndex = oldGroupIndex
 			return false, nil, nil, matcherMetaData, false
 		end
+		matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+		groupTree._groupIndex = oldGroupIndex
 		return true, nil, endStr, matcherMetaData, false
 	end
 
 	if not groupIndex then
 		hasMatched = hasMatched ~= currentElement.isNegative
 		if not hasMatched then
+			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			groupTree._groupIndex = oldGroupIndex
 			return
 		end
 	end
 
+	matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+	groupTree._groupIndex = oldGroupIndex
 	return hasMatched, iniStr, endStr, matcherMetaData, true
 end
 

@@ -632,6 +632,29 @@ assertCapture("(?|((a))|b)c", "ac", 2, "a", "Branch reset: inner nested group 2"
 assertMatch("(?|((a))|b)c%2", "aca", true, 1, 3, "Branch reset: backref %2 to inner nested group")
 assertMatch("(?|((a))|b)c%1", "aca", true, 1, 3, "Branch reset: backref %1 to outer nested group")
 
+print("  [47] Advanced Groups -- Recursion (?R), (?1), (?&name)...")
+-- Root recursion: matches 'a', then recursively calls the whole pattern which matches 'a', then 'b', then 'b'
+assertMatch("a(?R)?b", "aabb", true, 1, 4, "Recursion: whole pattern recursion (?R)")
+assertMatch("a(?0)?b", "aabb", true, 1, 4, "Recursion: whole pattern recursion (?0)")
+assertMatch("a(?R)?b", "ab", true, 1, 2, "Recursion: recursion is optional and skipped")
+-- Numbered recursion
+assertMatch("(a(?1)?b)", "aabb", true, 1, 4, "Recursion: numbered recursion (?1)")
+assertMatch("(a)(?1)", "aa", true, 1, 2, "Recursion: backreference to group 1 using (?1)")
+assertMatch("(a)(?1)", "ab", nil, nil, nil, "Recursion: fails if group 1 pattern doesn't match")
+assertMatch("(a|b)(?1)", "ab", true, 1, 2, "Recursion: (?1) re-evaluates the group 1 pattern, matching 'b'")
+-- The difference between backreference %1 and recursion (?1)
+assertMatch("(a|b)%1", "ab", nil, nil, nil, "Backref: %1 requires exact captured text, fails 'ab'")
+-- Forward reference
+assertMatch("(?1)(a)", "aa", true, 1, 2, "Recursion: forward reference to (?1)")
+-- Named recursion
+assertMatch("(?<P>a(?&P)?b)", "aabb", true, 1, 4, "Recursion: named recursion (?&P)")
+assertMatch("(?<P>a)(?&P)", "aa", true, 1, 2, "Recursion: backreference to named group")
+-- Quantified recursion
+assertMatch("(a)(?1)+", "aaa", true, 1, 3, "Recursion: quantified recursive group")
+assertMatch("(a)(?1){2}", "aaa", true, 1, 3, "Recursion: exact-count quantified recursive group")
+-- Depth and complex nesting
+assertMatch("(((a)))(?2)", "aa", true, 1, 2, "Recursion: deep group reference")
+
 print("All matcher tests passed!")
 
 
