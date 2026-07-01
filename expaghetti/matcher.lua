@@ -104,7 +104,7 @@ local singleElementMatcher = function(
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
 		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
 		-- With DotAll flag (s), "." matches everything including newlines
-		if flags.s then
+		if currentElement.isDotAll or (flags and flags.s) then
 			return true
 		end
 		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
@@ -378,7 +378,7 @@ local matcher = function(expr, str, flags, stringIndex)
 	stringIndex = stringIndex or 0
 
 	local hasMatched, iniStr, endStr, matcherMetaData
-	while stringIndex < strLength do
+	while stringIndex <= strLength do
 		debugCurrentStackFrame = 0
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		

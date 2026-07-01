@@ -15,7 +15,9 @@ end
 
 Any.parse = function(state, tree)
 	tree._index = tree._index + 1
-	tree[tree._index] = AST.Any()
+	local node = AST.Any()
+	if state.flags.s then node.isDotAll = true end
+	tree[tree._index] = node
 
 	return state.index + 1
 end

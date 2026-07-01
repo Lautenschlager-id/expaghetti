@@ -18,7 +18,9 @@ end
 
 Anchor.parse = function(state, currentCharacter, tree)
 	tree._index = tree._index + 1
-	tree[tree._index] = AST.Anchor(currentCharacter == ENUM_ANCHOR_START)
+	local node = AST.Anchor(currentCharacter == ENUM_ANCHOR_START)
+	if state.flags.m then node.isMultiline = true end
+	tree[tree._index] = node
 
 	return state.index + 1
 end
@@ -28,7 +30,7 @@ Anchor.match = function(currentElement, stringIndex, splitStr, strLength, flags)
 		-- ^
 		if stringIndex == 0 then
 			return true, nil, stringIndex
-		elseif flags and flags.m then
+		elseif currentElement.isMultiline or (flags and flags.m) then
 			local prevChar = splitStr[stringIndex]
 			if prevChar == '\n' or prevChar == '\r' then
 				return true, nil, stringIndex
@@ -38,7 +40,7 @@ Anchor.match = function(currentElement, stringIndex, splitStr, strLength, flags)
 		-- $
 		if stringIndex >= strLength then
 			return true, nil, stringIndex
-		elseif flags and flags.m then
+		elseif currentElement.isMultiline or (flags and flags.m) then
 			local currChar = splitStr[stringIndex + 1]
 			if currChar == '\n' or currChar == '\r' then
 				return true, nil, stringIndex

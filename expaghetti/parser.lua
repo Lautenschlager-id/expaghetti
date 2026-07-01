@@ -108,7 +108,8 @@ function parser(expr, flags,
 	index, expression, expressionLength,
 	tokens,
 	metaData,
-	hasGroupClosed)
+	hasGroupClosed,
+	inheritedFlags)
 
 	if not (isGroup or isAlternate) then
 		flags = flags or { }
@@ -137,7 +138,7 @@ function parser(expr, flags,
 	end
 
 	local state = ParserState.new(
-		expr, flags, isGroup, isAlternate, index, expression, expressionLength,
+		expr, inheritedFlags or flags, isGroup, isAlternate, index, expression, expressionLength,
 		tokens,
 		metaData, hasGroupClosed
 	)

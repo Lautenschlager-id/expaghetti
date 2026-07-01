@@ -239,6 +239,7 @@ Group.parse = function(state, tree)
 	if value.inlineFlags then
 		for k, v in pairs(value.inlineFlags.enable) do state.flags[k] = true end
 		for k, v in pairs(value.inlineFlags.disable) do state.flags[k] = nil end
+		return state.index
 	end
 	
 	local restoreFlags = nil
@@ -273,6 +274,8 @@ Group.parse = function(state, tree)
 		value.tree = groupTree
 	elseif not value.hasBehavior then
 		return PositionCapture.parse(state.index, tree, state.metaData)
+	else
+		value.tree = { _index = 0 }
 	end
 	
 	if restoreFlags then

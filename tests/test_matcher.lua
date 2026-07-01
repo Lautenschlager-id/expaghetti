@@ -1,8 +1,8 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 local matcher = require("matcher")
 
-local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc)
-	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str)
+local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
+	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
 	if hasMatched ~= expectedHasMatched then
 		error(string.format("Test '%s' failed: Expected hasMatched=%s for expr='%s', str='%s' but got %s", desc, tostring(expectedHasMatched), expr, str, tostring(hasMatched)))
 	end
@@ -276,8 +276,8 @@ assertMatch("a.*b|a.*c", "ac", true, 1, 2, "Alternation: full branch backtrack w
 -- GROUPS & CAPTURES
 ----------------------------------------------------------------------------------------------------
 
-local function assertCapture(expr, str, captureIndex, expectedStr, desc)
-	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str)
+local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
+	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local ini = metaData.groupCapturesInitStringPositions[captureIndex]
 	local en  = metaData.groupCapturesEndStringPositions[captureIndex]
@@ -291,8 +291,8 @@ local function assertCapture(expr, str, captureIndex, expectedStr, desc)
 		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
 end
 
-local function assertNoCapture(expr, str, desc)
-	local hasMatched, _, _, metaData = matcher(expr, str)
+local function assertNoCapture(expr, str, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match", desc))
 	local hasAny = false
 	for _ in pairs(metaData.groupCapturesInitStringPositions) do hasAny = true; break end
@@ -494,6 +494,45 @@ assertMatch("(?<!a)(?<!b)c", "c", true, 1, 1, "Consecutive negative lookbehinds:
 assertMatch("(?<!a)(?<!b)c", "ac", nil, nil, nil, "Consecutive negative lookbehinds: fails (first fails)")
 assertMatch("(?<!(?<=a)b)c", "c", true, 1, 1, "Nested lookbehinds (negative outer): matches")
 assertMatch("(?<!(?<=a)b)c", "abc", nil, nil, nil, "Nested lookbehinds (negative outer): fails")
+
+print("  [40] Flags -- i (Case Insensitive)...")
+assertMatch("abc", "ABC", true, 1, 3, "Global i flag: literal matches", "i")
+assertMatch("[a-c]", "B", true, 1, 1, "Global i flag: set range matches", "i")
+assertMatch("[x-z]", "B", nil, nil, nil, "Global i flag: set range fails", "i")
+assertMatch("a(?i)bc", "aBC", true, 1, 3, "Inline toggle i flag: matches")
+assertMatch("(?i)a(?-i)b", "Ab", true, 1, 2, "Inline toggle and disable i flag: matches")
+assertMatch("(?i)a(?-i)b", "AB", nil, nil, nil, "Inline toggle and disable i flag: fails on disabled part")
+assertMatch("a(?i:b)c", "aBc", true, 1, 3, "Scoped inline i flag: matches")
+assertMatch("a(?i:b)c", "aBC", nil, nil, nil, "Scoped inline i flag: fails outside scope")
+
+print("  [41] Flags -- m (Multiline)...")
+assertMatch("^b", "a\nb", true, 3, 3, "Global m flag: ^ matches after newline", "m")
+assertMatch("^b", "a\nb", nil, nil, nil, "Without m flag: ^ fails after newline")
+assertMatch("a$", "a\nb", true, 1, 1, "Global m flag: $ matches before newline", "m")
+assertMatch("a$", "a\nb", nil, nil, nil, "Without m flag: $ fails before newline")
+assertMatch("a\n(?m)^b", "a\nb", true, 1, 3, "Inline m flag: matches")
+assertMatch("(?m:^b)", "a\nb", true, 3, 3, "Scoped m flag: matches")
+
+print("  [42] Flags -- s (DotAll)...")
+assertMatch("a.b", "a\nb", true, 1, 3, "Global s flag: . matches newline", "s")
+assertMatch("a.b", "a\nb", nil, nil, nil, "Without s flag: . fails on newline")
+assertMatch("a(?s:.)b", "a\nb", true, 1, 3, "Scoped s flag: matches")
+assertMatch("(?s)a(?-s:.)b", "a\nb", nil, nil, nil, "Inline toggle s flag with scoped disable: fails on newline")
+
+print("  [43] Flags -- n (No Auto-Capture)...")
+assertMatch("(a)", "a", true, 1, 1, "Global n flag: matches", "n")
+assertNoCapture("(a)", "a", "Global n flag: standard group does not capture", "n")
+assertMatch("(?n:(a))", "a", true, 1, 1, "Scoped n flag: matches")
+assertNoCapture("(?n:(a))", "a", "Scoped n flag: standard group does not capture")
+assertMatch("(?n)(?<foo>a)", "a", true, 1, 1, "Inline n flag: matches named group")
+assertCapture("(?n)(?<foo>a)", "a", "foo", "a", "Inline n flag: named group still captures")
+
+print("  [44] Flags -- Complex Modifiers & Edge Cases...")
+assertMatch("(?im-s)", "", true, 1, 0, "Multiple toggles: parses without error")
+assertMatch("(?i:a(?-i:b)c)", "AbC", true, 1, 3, "Nested scopes with disables: matches")
+assertMatch("(?i:a(?-i:b)c)", "ABC", nil, nil, nil, "Nested scopes with disables: fails correctly")
+assertError("(?z)", "", "Invalid inline flag: parse error")
+assertMatch("(?i-m:)", "", true, 1, 0, "Empty scoped inline flag: matches empty string")
 
 print("All matcher tests passed!")
 
