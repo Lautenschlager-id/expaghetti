@@ -381,6 +381,12 @@ assertMatch("^a(b$)", "ab", true, 1, 2, "Anchors inside groups: matches")
 assertMatch("^a(b|c)$", "ab", true, 1, 2, "Anchors with alternations at end: matches ab")
 assertMatch("^a(b|c)$", "ac", true, 1, 2, "Anchors with alternations at end: matches ac")
 assertMatch("^(a|b)(c|d)$", "ad", true, 1, 2, "Anchors with multiple alternations: matches ad")
+assertMatch("(^|b)c", "c", true, 1, 1, "Start anchor inside group alternate: matches start")
+assertMatch("(^|b)c", "bc", true, 1, 2, "Start anchor inside group alternate: matches literal")
+assertMatch("(^|b)c", "xc", nil, nil, nil, "Start anchor inside group alternate: fails")
+assertMatch("a($|b)", "a", true, 1, 1, "End anchor inside group alternate: matches end")
+assertMatch("a($|b)", "ab", true, 1, 2, "End anchor inside group alternate: matches literal")
+assertMatch("a($|b)", "ax", nil, nil, nil, "End anchor inside group alternate: fails")
 
 ----------------------------------------------------------------------------------------------------
 print("  [34] Assertions -- Boundaries %f and %F...")

@@ -65,13 +65,6 @@ local singleElementMatcher = function(
 		return Boundary.match(currentElement, stringIndex - 1, splitStr, strLength, matchSet)
 	elseif Balanced.isElement(currentElement) then
 		return Balanced.match(currentElement, stringIndex - 1, splitStr, strLength)
-	elseif not currentCharacter then
-		return
-	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
-		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
-		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
-	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
-		return matchSet(currentElement, currentCharacter)
 	elseif Group.isElement(currentElement) then
 		return Group.match(
 			currentElement, treeMatcher,
@@ -91,6 +84,13 @@ local singleElementMatcher = function(
 	elseif CaptureReference.isElement(currentElement) then
 		return CaptureReference.match(currentElement, stringIndex - 1, splitStr, strLength,
 			matcherMetaData)
+	elseif not currentCharacter then
+		return
+	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
+		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
+		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
+	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
+		return matchSet(currentElement, currentCharacter)
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_LITERAL then
 		return currentElement.value == currentCharacter
 	end
