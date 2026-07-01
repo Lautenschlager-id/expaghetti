@@ -563,38 +563,74 @@ assertError("(?z)", "", "Invalid inline flag: parse error")
 assertMatch("(?i-m:)", "", true, 1, 0, "Empty scoped inline flag: matches empty string")
 
 print("  [45] Advanced Groups -- Atomic (?>...)...")
+-- Basic behavior
 assertMatch("(?>a)b", "ab", true, 1, 2, "Atomic: simple match")
-assertMatch("a(?>bc|b)c", "abcc", true, 1, 4, "Atomic: matches without backtracking into group")
-assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic: prevents backtracking into group (would match if normal)")
-assertMatch("(?>a+)a", "aa", nil, nil, nil, "Atomic: quantifier inside group prevents backtracking (a+ takes both a's)")
-assertMatch("(?>a*)a", "a", nil, nil, nil, "Atomic: zero or more")
-assertMatch("(?>a)*a", "a", true, 1, 1, "Atomic: quantified group is fine")
-assertMatch("(?>a)+", "aaa", true, 1, 3, "Atomic: quantified group takes multiple")
-assertMatch("(?>a+)+", "aaa", true, 1, 3, "Atomic: quantified atomic group")
-assertMatch("(?>a*)+", "aaa", true, 1, 3, "Atomic: quantified atomic group 2")
+assertMatch("(?>ab)", "ab", true, 1, 2, "Atomic: literal match")
+assertMatch("a(?>bc|b)c", "abcc", true, 1, 4, "Atomic: alternation commits to first match")
+assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic: prevents backtracking into alternation")
+assertMatch("(?>a+)a", "aa", nil, nil, nil, "Atomic: quantifier inside group prevents backtracking")
+assertMatch("(?>a*)a", "a", nil, nil, nil, "Atomic: zero-or-more inside, cannot backtrack")
+-- Quantifiers on the atomic group itself
+assertMatch("(?>a)*a", "a", true, 1, 1, "Atomic: outer * can backtrack on repetition count")
+assertMatch("(?>a)+", "aaa", true, 1, 3, "Atomic: outer + repeats")
+assertMatch("(?>a+)+", "aaa", true, 1, 3, "Atomic: quantifier inside and outside")
+assertMatch("(?>a*)+", "aaa", true, 1, 3, "Atomic: zero-or-more inside, plus outside")
+assertMatch("(?>a){2}", "aa", true, 1, 2, "Atomic: exact count quantifier")
+assertMatch("(?>a){2}", "a", nil, nil, nil, "Atomic: exact count quantifier fail")
+assertMatch("a(?>bc|b)c", "abcc", true, 1, 4, "Atomic: commits to bc, c after matches")
+assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic: commits to bc, no c left after")
+assertMatch("a(?:bc|b)c", "abc", true, 1, 3, "Non-atomic control: backtracks to b, c matches")
+-- Capturing inside atomic groups (atomic is non-capturing itself, but inner groups can capture)
+assertMatch("((?>a+))%1", "aaa", nil, nil, nil, "Atomic: inner capture, backref to it (group 1 = 'aa', %1 needs 'aa' but only 'a' left)")
+assertMatch("((?>a))%1", "aa", true, 1, 2, "Atomic: inner capture backref succeeds")
+assertMatch("((?>a))%1", "ab", nil, nil, nil, "Atomic: inner capture backref fails on mismatch")
+assertCapture("((?>cat|ca))t", "catt", 1, "cat", "Atomic: inner group captures committed value (cat)")
+assertMatch("((?>cat|ca))t", "cat", nil, nil, nil, "Atomic: commits to cat, no t left")
+assertMatch("((?>cat|ca))t", "catt", true, 1, 4, "Atomic: commits to cat, t follows")
+-- Nested atomic
+assertMatch("(?>.(?>b+))c", "abbc", true, 1, 4, "Atomic: nested atomic groups")
+assertMatch("(?>.(?>b+))c", "abc", true, 1, 3, "Atomic: nested atomic, single b")
 
 print("  [46] Advanced Groups -- Branch Reset (?|...)...")
+-- Basic non-match
 assertMatch("(?|(a)|(b)(c)|(d))e(f)", "ae", nil, nil, nil, "Branch reset: f fails")
+-- Capture alignment: branch with 2 groups
 do
 	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "bcef")
-	assert(hasMatched)
-	-- b is group 1, c is group 2. Then e is matched. f is matched as group 3 (since max group inside was 2).
-	assert(metaData.groupCapturesInitStringPositions[1][1] == 1) -- b
-	assert(metaData.groupCapturesInitStringPositions[2][1] == 2) -- c
-	assert(metaData.groupCapturesInitStringPositions[3][1] == 4) -- f
+	assert(hasMatched, "Branch reset: bcef should match")
+	-- b=group1, c=group2. outer f=group3 (max inside was 2)
+	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Branch reset bcef: group1 init=1")
+	assert(metaData.groupCapturesInitStringPositions[2][1] == 2, "Branch reset bcef: group2 init=2")
+	assert(metaData.groupCapturesInitStringPositions[3][1] == 4, "Branch reset bcef: group3 init=4")
 end
+-- Capture alignment: branch with 1 group (shorter branch)
 do
 	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "def")
-	assert(hasMatched)
-	-- d is group 1. f is group 3.
-	assert(metaData.groupCapturesInitStringPositions[1][1] == 1) -- d
-	assert(not metaData.groupCapturesInitStringPositions[2])     -- no group 2
-	assert(metaData.groupCapturesInitStringPositions[3][1] == 3) -- f
+	assert(hasMatched, "Branch reset: def should match")
+	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Branch reset def: group1=d")
+	assert(not metaData.groupCapturesInitStringPositions[2],     "Branch reset def: group2 is nil")
+	assert(metaData.groupCapturesInitStringPositions[3][1] == 3, "Branch reset def: group3=f")
 end
+-- Backreferences inside branch reset
+assertMatch("(?|(a)|(b))%1", "aa", true, 1, 2, "Branch reset: backref %1 to first branch")
+assertMatch("(?|(a)|(b))%1", "bb", true, 1, 2, "Branch reset: backref %1 to second branch")
+assertMatch("(?|(a)|(b))%1", "ab", nil, nil, nil, "Branch reset: backref %1 fails on mismatch")
+assertMatch("(?|(ab)|(a)(b))%1", "abab", true, 1, 4, "Branch reset: backref %1 two-char first branch")
+assertMatch("(?|(ab)|(a)(b))%1", "aba", true, 1, 3, "Branch reset: backref %1 to second branch (a)")
+-- Backreferences to outer group after branch reset
+assertMatch("(?|(a)|(b)(c))x(d)%3", "axdd", true, 1, 4, "Branch reset: outer group %3 backref")
+assertMatch("(?|(a)|(b)(c))x(d)%3", "bxdd", nil, nil, nil, "Branch reset: outer %3 fails (c+d mismatch)")
+assertCapture("(?|(a)|(b)(c))x(d)%3", "axdd", 3, "d", "Branch reset: outer group 3 captured value")
+-- With lookahead
 assertMatch("(?|(?=a)(a)|(?=b)(b))", "a", true, 1, 1, "Branch reset: with lookahead")
+assertMatch("(?|(?=a)(a)|(?=b)(b))%1", "aa", true, 1, 2, "Branch reset: lookahead branch backref")
+assertMatch("(?|(?=a)(a)|(?=b)(b))%1", "bb", true, 1, 2, "Branch reset: lookahead second branch backref")
+-- Nested groups inside branch reset
 assertMatch("(?|((a))|b)c", "ac", true, 1, 2, "Branch reset: nested groups")
-assertCapture("(?|((a))|b)c", "ac", 1, "a", "Branch reset: nested group 1")
-assertCapture("(?|((a))|b)c", "ac", 2, "a", "Branch reset: nested group 2")
+assertCapture("(?|((a))|b)c", "ac", 1, "a", "Branch reset: outer nested group 1")
+assertCapture("(?|((a))|b)c", "ac", 2, "a", "Branch reset: inner nested group 2")
+assertMatch("(?|((a))|b)c%2", "aca", true, 1, 3, "Branch reset: backref %2 to inner nested group")
+assertMatch("(?|((a))|b)c%1", "aca", true, 1, 3, "Branch reset: backref %1 to outer nested group")
 
 print("All matcher tests passed!")
 

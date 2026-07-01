@@ -1,11 +1,18 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
-local parser = require("parser")
-local expr = "(?|(a)|(b)(c)|(d))e(f)"
-local tree, err = parser(expr)
-local function findBranchReset(t)
-    if type(t) == "table" then
-        if t.isBranchReset then print("Found branch reset!") end
-        for k,v in pairs(t) do findBranchReset(v) end
+local matcher = require("matcher")
+
+local tests = {
+    {"((?>cat|ca))t", "cat"},
+    {"((?>cat|ca))t", "catt"},
+    {"((?>a+))%1", "aaa"},
+    {"((?>a))%1", "aa"},
+}
+for _, t in ipairs(tests) do
+    local h, i, e, m = matcher(t[1], t[2])
+    print(t[1], t[2], "->", h, i, e)
+    if m then
+        for k, v in pairs(m.groupCapturesInitStringPositions) do
+            print("  group", k, "ini:", v[1])
+        end
     end
 end
-findBranchReset(tree)
