@@ -423,10 +423,16 @@ assertCapture("a(?=(b))", "ab", 1, "b", "Lookahead with group: captures inside l
 assertMatch("(?=a)+a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy +")
 assertMatch("(?=a)*a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy *")
 assertMatch("(?=a)?a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy ?")
+assertMatch("a(?=b)?(b|c)", "ac", true, 1, 2, "Quantifier outside positive lookahead with ?: fallback matching")
 
 print("  [37] Assertions -- Negative Lookahead...")
 assertMatch("a(?!b)c", "ac", true, 1, 2, "Negative lookahead: matches")
 assertMatch("a(?!b)b", "ab", nil, nil, nil, "Negative lookahead: fails")
+assertMatch("a(?![0-9])", "ab", true, 1, 1, "Negative lookahead with set: matches before letter")
+assertMatch("a(?![0-9])", "a1", nil, nil, nil, "Negative lookahead with set: fails before digit")
+assertMatch("a(?!b$)", "abc", true, 1, 1, "Negative lookahead with anchor: matches when not at end")
+assertMatch("a(?!b$)", "ab", nil, nil, nil, "Negative lookahead with anchor: fails at end")
+assertMatch("(?!a)+b", "b", true, 1, 1, "Quantifier outside negative lookahead: greedy +")
 
 print("  [38] Assertions -- Positive Lookbehind...")
 assertMatch("(?<=a)b", "ab", true, 2, 2, "Positive lookbehind: matches")
@@ -448,6 +454,10 @@ assertMatch("(?<=a)+b", "ab", true, 2, 2, "Quantifier outside positive lookbehin
 print("  [39] Assertions -- Negative Lookbehind...")
 assertMatch("(?<!a)b", "xb", true, 2, 2, "Negative lookbehind: matches")
 assertMatch("(?<!a)b", "ab", nil, nil, nil, "Negative lookbehind: fails")
+assertMatch("(?<!a|b)c", "xc", true, 2, 2, "Negative lookbehind with alternate: matches branch 1")
+assertMatch("(?<!a|b)c", "ac", nil, nil, nil, "Negative lookbehind with alternate: fails branch 1")
+assertMatch("(?<!a|b)c", "bc", nil, nil, nil, "Negative lookbehind with alternate: fails branch 2")
+assertMatch("(?<!a)+b", "b", true, 1, 1, "Quantifier outside negative lookbehind: greedy +")
 
 
 print("All matcher tests passed!")

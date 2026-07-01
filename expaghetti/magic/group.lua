@@ -273,7 +273,11 @@ Group.match = function(
 	if currentElement.isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
-			return false, nil, nil, matcherMetaData, true
+			if currentElement.isNegative then
+				return true, nil, stringIndex, matcherMetaData, false
+			else
+				return false, nil, nil, matcherMetaData, false
+			end
 		end
 	end
 
