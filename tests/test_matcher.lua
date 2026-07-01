@@ -432,7 +432,14 @@ assertMatch("a(?![0-9])", "ab", true, 1, 1, "Negative lookahead with set: matche
 assertMatch("a(?![0-9])", "a1", nil, nil, nil, "Negative lookahead with set: fails before digit")
 assertMatch("a(?!b$)", "abc", true, 1, 1, "Negative lookahead with anchor: matches when not at end")
 assertMatch("a(?!b$)", "ab", nil, nil, nil, "Negative lookahead with anchor: fails at end")
+assertMatch("a(?!b)", "a", true, 1, 1, "Negative lookahead: matches at end of string")
 assertMatch("(?!a)+b", "b", true, 1, 1, "Quantifier outside negative lookahead: greedy +")
+
+print("  [37.5] Assertions -- Advanced Lookaheads...")
+assertMatch("(?=a)(?=ab)abc", "abc", true, 1, 3, "Consecutive lookaheads: matches")
+assertMatch("(?=(?=a)a)a", "a", true, 1, 1, "Nested lookaheads: matches")
+assertMatch("(?=(a))%1", "a", true, 1, 1, "Lookahead with group and backreference: matches")
+assertMatch("(?=(a))%1", "b", nil, nil, nil, "Lookahead with group and backreference: fails")
 
 print("  [38] Assertions -- Positive Lookbehind...")
 assertMatch("(?<=a)b", "ab", true, 2, 2, "Positive lookbehind: matches")
@@ -442,6 +449,8 @@ assertMatch("(?<=[a-z])1", "a1", true, 2, 2, "Lookbehind with set: matches after
 assertMatch("(?<=[a-z])1", "A1", nil, nil, nil, "Lookbehind with set: fails after uppercase")
 assertMatch("(?<=a{3})b", "aaab", true, 4, 4, "Lookbehind with fixed quantifier: matches")
 assertMatch("(?<=a{3})b", "aab", nil, nil, nil, "Lookbehind with fixed quantifier: fails (too few)")
+assertMatch("(?<=ab|cd)e", "abe", true, 3, 3, "Lookbehind with valid fixed-length alternate: matches branch 1")
+assertMatch("(?<=ab|cd)e", "cde", true, 3, 3, "Lookbehind with valid fixed-length alternate: matches branch 2")
 assertMatch("(?<=a|b)c", "ac", true, 2, 2, "Lookbehind with alternate: matches branch 1")
 assertMatch("(?<=a|b)c", "bc", true, 2, 2, "Lookbehind with alternate: matches branch 2")
 assertMatch("(?<=a|b)c", "xc", nil, nil, nil, "Lookbehind with alternate: fails")
@@ -458,6 +467,11 @@ assertMatch("(?<!a|b)c", "xc", true, 2, 2, "Negative lookbehind with alternate: 
 assertMatch("(?<!a|b)c", "ac", nil, nil, nil, "Negative lookbehind with alternate: fails branch 1")
 assertMatch("(?<!a|b)c", "bc", nil, nil, nil, "Negative lookbehind with alternate: fails branch 2")
 assertMatch("(?<!a)+b", "b", true, 1, 1, "Quantifier outside negative lookbehind: greedy +")
+
+print("  [39.5] Assertions -- Advanced Lookbehinds...")
+assertMatch("(?<=ab)(?<=b)c", "abc", true, 3, 3, "Consecutive lookbehinds: matches")
+assertMatch("(?<=ab)(?<=b)c", "xbc", nil, nil, nil, "Consecutive lookbehinds: fails (first fails)")
+assertMatch("(?<=(?<=a)b)c", "abc", true, 3, 3, "Nested lookbehinds: matches")
 
 
 print("All matcher tests passed!")
