@@ -15,7 +15,12 @@ Literal.parse = function(state, currentCharacter, tree)
 	end
 
 	tree._index = tree._index + 1
-	tree[tree._index] = AST.Literal(currentCharacter)
+	local node = AST.Literal(currentCharacter)
+	if state.flags.i and type(currentCharacter) == "string" then
+		node.isCaseInsensitive = true
+		node.lowercaseValue = string.lower(currentCharacter)
+	end
+	tree[tree._index] = node
 
 	return state.index + 1
 end

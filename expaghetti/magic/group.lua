@@ -84,8 +84,11 @@ local function getFixedLength(tree)
 	return totalLen
 end
 
-local getGroupBehavior = function(index, charactersList, charactersValueList, groupElement,
-	parserMetaData)
+local getGroupBehavior = function(state, groupElement)
+	local index = state.index
+	local charactersList = state.charactersList
+	local charactersValueList = state.charactersValueList
+	local parserMetaData = state.metaData
 	local currentCharacter = charactersList[index]
 
 	if currentCharacter ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
@@ -128,7 +131,37 @@ local getGroupBehavior = function(index, charactersList, charactersValueList, gr
 		groupElement.disableCapture = true
 		groupElement._skipFromTree = true
 	else
-		errorMessage = errorsEnum.invalidGroupBehavior
+		-- Check for inline flags
+		local charVal = charactersValueList[index]
+		if charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' then
+			local enableFlags = {}
+			local disableFlags = {}
+			local currentTarget = enableFlags
+			while charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' do
+				if charVal == '-' then
+					currentTarget = disableFlags
+				else
+					currentTarget[charVal] = true
+				end
+				index = index + 1
+				charVal = charactersValueList[index]
+			end
+			
+			local nextChar = charactersList[index]
+			if nextChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+				-- Scoped flags (?i:...)
+				groupElement.disableCapture = true
+				groupElement.scopedFlags = { enable = enableFlags, disable = disableFlags }
+			elseif nextChar == ENUM_CLOSE_GROUP then
+				-- Inline toggle (?i)
+				groupElement._skipFromTree = true
+				groupElement.inlineFlags = { enable = enableFlags, disable = disableFlags }
+			else
+				errorMessage = errorsEnum.invalidGroupBehavior
+			end
+		else
+			errorMessage = errorsEnum.invalidGroupBehavior
+		end
 	end
 
 	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
@@ -197,10 +230,23 @@ Group.parse = function(state, tree)
 	local value = AST.Group()
 
 	local errorMessage
-	state.index, errorMessage = getGroupBehavior(state.index, state.charactersList, state.charactersValueList,
-		value, state.metaData)
+	state.index, errorMessage = getGroupBehavior(state, value)
 	if not state.index then
 		return false, errorMessage
+	end
+	
+	-- Apply inline toggle flags immediately to state
+	if value.inlineFlags then
+		for k, v in pairs(value.inlineFlags.enable) do state.flags[k] = true end
+		for k, v in pairs(value.inlineFlags.disable) do state.flags[k] = nil end
+	end
+	
+	local restoreFlags = nil
+	if value.scopedFlags then
+		restoreFlags = {}
+		for k, v in pairs(state.flags) do restoreFlags[k] = v end
+		for k, v in pairs(value.scopedFlags.enable) do state.flags[k] = true end
+		for k, v in pairs(value.scopedFlags.disable) do state.flags[k] = nil end
 	end
 
 	-- A group with any value
@@ -209,8 +255,12 @@ Group.parse = function(state, tree)
 			value.disableCapture
 			or value.name
 		) then
-			state.metaData.groupIndex = state.metaData.groupIndex + 1
-			value.index = state.metaData.groupIndex
+			if not state.flags.n then
+				state.metaData.groupIndex = state.metaData.groupIndex + 1
+				value.index = state.metaData.groupIndex
+			else
+				value.disableCapture = true
+			end
 		end
 
 		local groupTree, groupErrorMessage = state:parseSubTree(true, false)
@@ -223,6 +273,12 @@ Group.parse = function(state, tree)
 		value.tree = groupTree
 	elseif not value.hasBehavior then
 		return PositionCapture.parse(state.index, tree, state.metaData)
+	end
+	
+	if restoreFlags then
+		-- Clear current flags table and restore previous state
+		for k in pairs(state.flags) do state.flags[k] = nil end
+		for k, v in pairs(restoreFlags) do state.flags[k] = v end
 	end
 
 	if value.isLookbehind then

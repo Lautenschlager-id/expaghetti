@@ -4,7 +4,16 @@ ParserState.__index = ParserState
 function ParserState.new(expr, flags, isGroup, isAlternate, index, expression, expressionLength, tokens, metaData, hasGroupClosed)
 	local self = setmetatable({}, ParserState)
 	self.expr = expr
-	self.flags = flags or {}
+	self.flags = {}
+	if type(flags) == "string" then
+		for char in flags:gmatch(".") do
+			self.flags[char] = true
+		end
+	elseif type(flags) == "table" then
+		for k, v in pairs(flags) do
+			self.flags[k] = v
+		end
+	end
 	self.isGroup = isGroup
 	self.isAlternate = isAlternate
 	self.index = index
@@ -39,7 +48,8 @@ function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed)
 		self.index, self.expression, self.expressionLength,
 		self.tokens,
 		self.metaData,
-		hasGroupClosed
+		hasGroupClosed,
+		self.flags
 	)
 	if not tree then
 		return false, nextIndex

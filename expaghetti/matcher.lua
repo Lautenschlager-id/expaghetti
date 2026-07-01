@@ -13,7 +13,6 @@ local PositionCapture = require("./magic/position_capture")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
-local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 local elementsEnum = require("./enums/elements")
 local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
@@ -22,14 +21,30 @@ local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
 local function matchSet(currentElement, currentCharacter)
 	local hasMatched = false
 
-	if currentElement[currentCharacter] then
+	if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
+		local lowerChar = string.lower(currentCharacter)
+		local upperChar = string.upper(currentCharacter)
+		if currentElement[lowerChar] or currentElement[upperChar] then
+			hasMatched = true
+		end
+	elseif currentElement[currentCharacter] then
 		hasMatched = true
-	else
+	end
+
+	if not hasMatched then
 		local ranges = currentElement.ranges
 		for rangeIndex = 1, currentElement.rangeIndex, 2 do
-			if currentCharacter >= ranges[rangeIndex]
-				and currentCharacter <= ranges[rangeIndex + 1] then
-
+			local rStart = ranges[rangeIndex]
+			local rEnd = ranges[rangeIndex + 1]
+			
+			if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
+				local lowerChar = string.lower(currentCharacter)
+				local upperChar = string.upper(currentCharacter)
+				if (lowerChar >= rStart and lowerChar <= rEnd) or (upperChar >= rStart and upperChar <= rEnd) then
+					hasMatched = true
+					break
+				end
+			elseif currentCharacter >= rStart and currentCharacter <= rEnd then
 				hasMatched = true
 				break
 			end
@@ -88,10 +103,17 @@ local singleElementMatcher = function(
 		return
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
 		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
+		-- With DotAll flag (s), "." matches everything including newlines
+		if flags.s then
+			return true
+		end
 		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
 		return matchSet(currentElement, currentCharacter)
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_LITERAL then
+		if currentElement.isCaseInsensitive then
+			return string.lower(currentCharacter) == currentElement.lowercaseValue
+		end
 		return currentElement.value == currentCharacter
 	end
 
@@ -335,7 +357,15 @@ local matcher = function(expr, str, flags, stringIndex)
 		return false, "Target must be a string"
 	end
 
-	flags = flags or { }
+	if type(flags) == "string" then
+		local t = {}
+		for char in flags:gmatch(".") do
+			t[char] = true
+		end
+		flags = t
+	else
+		flags = flags or {}
+	end
 
 	local tree, errorMessage = parser(expr, flags)
 	if not tree then
@@ -343,7 +373,7 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 	local treeLength = tree._index
 
-	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+	local splitStr, strLength = splitStringByEachChar(str, false)
 
 	stringIndex = stringIndex or 0
 

@@ -54,6 +54,9 @@ Set.parse = function(state, tree)
 	endIndex = endIndex - 1
 
 	local set = AST.Set()
+	if state.flags.i then
+		set.isCaseInsensitive = true
+	end
 
 	local watchingForRangeSeparator
 	local currentCharacter, lastCharacter, rangeInitChar, currentCharacterValue
