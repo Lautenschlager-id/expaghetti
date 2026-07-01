@@ -406,48 +406,48 @@ assertMatch("%b()", "(ab", nil, nil, nil, "Balanced match %b(): unclosed")
 assertMatch("x%b()y", "x(a)y", true, 1, 5, "Balanced match %b(): within string")
 
 ----------------------------------------------------------------------------------------------------
-print("  [36] Assertions -- Lookarounds...")
+print("  [36] Assertions -- Positive Lookahead...")
 assertMatch("a(?=b)b", "ab", true, 1, 2, "Positive lookahead: matches")
 assertMatch("a(?=b)c", "abc", nil, nil, nil, "Positive lookahead: fails")
-assertMatch("a(?!b)c", "ac", true, 1, 2, "Negative lookahead: matches")
-assertMatch("a(?!b)b", "ab", nil, nil, nil, "Negative lookahead: fails")
-assertMatch("(?<=a)b", "ab", true, 2, 2, "Positive lookbehind: matches")
-assertMatch("(?<=a)b", "xb", nil, nil, nil, "Positive lookbehind: fails")
-assertMatch("(?<!a)b", "xb", true, 2, 2, "Negative lookbehind: matches")
-assertMatch("(?<!a)b", "ab", nil, nil, nil, "Negative lookbehind: fails")
-assertMatch("(?<=ab)c", "abc", true, 3, 3, "Positive lookbehind length > 1: matches")
-
--- Lookarounds with Sets
 assertMatch("a(?=[0-9])", "a1", true, 1, 1, "Lookahead with set: matches before digit")
 assertMatch("a(?=[0-9])", "ab", nil, nil, nil, "Lookahead with set: fails before letter")
-assertMatch("(?<=[a-z])1", "a1", true, 2, 2, "Lookbehind with set: matches after letter")
-assertMatch("(?<=[a-z])1", "A1", nil, nil, nil, "Lookbehind with set: fails after uppercase")
-
--- Lookarounds with Quantifiers (Lookaheads can be variable, Lookbehinds must be fixed)
 assertMatch("a(?=b+c)b", "abbbc", true, 1, 2, "Lookahead with greedy quantifier: matches")
 assertMatch("a(?=b{2,3}c)b", "abbc", true, 1, 2, "Lookahead with range quantifier: matches")
-assertMatch("(?<=a{3})b", "aaab", true, 4, 4, "Lookbehind with fixed quantifier: matches")
-assertMatch("(?<=a{3})b", "aab", nil, nil, nil, "Lookbehind with fixed quantifier: fails (too few)")
-
--- Lookarounds with Alternates
 assertMatch("a(?=b|c)", "ab", true, 1, 1, "Lookahead with alternate: matches branch 1")
 assertMatch("a(?=b|c)", "ac", true, 1, 1, "Lookahead with alternate: matches branch 2")
-assertMatch("(?<=a|b)c", "ac", true, 2, 2, "Lookbehind with alternate: matches branch 1")
-assertMatch("(?<=a|b)c", "bc", true, 2, 2, "Lookbehind with alternate: matches branch 2")
-assertMatch("(?<=a|b)c", "xc", nil, nil, nil, "Lookbehind with alternate: fails")
-
--- Lookarounds with Anchors
 assertMatch("^(?=a)a", "ab", true, 1, 1, "Lookahead with start anchor outside: matches")
 assertMatch("(?=^a)a", "ab", true, 1, 1, "Lookahead with start anchor inside: matches")
 assertMatch("a(?=b$)", "ab", true, 1, 1, "Lookahead with end anchor inside: matches")
-assertMatch("(?<=^a)b", "ab", true, 2, 2, "Lookbehind with start anchor inside: matches")
-assertMatch("(?<=^a)b", "xab", nil, nil, nil, "Lookbehind with start anchor inside: fails because not at start")
-
--- Lookarounds with Groups
-assertMatch("(?<=(a))b", "ab", true, 2, 2, "Lookbehind with group: matches")
-assertCapture("(?<=(a))b", "ab", 1, "a", "Lookbehind with group: captures inside lookbehind")
 assertMatch("a(?=(b))", "ab", true, 1, 1, "Lookahead with group: matches")
 assertCapture("a(?=(b))", "ab", 1, "b", "Lookahead with group: captures inside lookahead")
+assertMatch("(?=a)+a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy +")
+assertMatch("(?=a)*a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy *")
+assertMatch("(?=a)?a", "a", true, 1, 1, "Quantifier outside positive lookahead: greedy ?")
+
+print("  [37] Assertions -- Negative Lookahead...")
+assertMatch("a(?!b)c", "ac", true, 1, 2, "Negative lookahead: matches")
+assertMatch("a(?!b)b", "ab", nil, nil, nil, "Negative lookahead: fails")
+
+print("  [38] Assertions -- Positive Lookbehind...")
+assertMatch("(?<=a)b", "ab", true, 2, 2, "Positive lookbehind: matches")
+assertMatch("(?<=a)b", "xb", nil, nil, nil, "Positive lookbehind: fails")
+assertMatch("(?<=ab)c", "abc", true, 3, 3, "Positive lookbehind length > 1: matches")
+assertMatch("(?<=[a-z])1", "a1", true, 2, 2, "Lookbehind with set: matches after letter")
+assertMatch("(?<=[a-z])1", "A1", nil, nil, nil, "Lookbehind with set: fails after uppercase")
+assertMatch("(?<=a{3})b", "aaab", true, 4, 4, "Lookbehind with fixed quantifier: matches")
+assertMatch("(?<=a{3})b", "aab", nil, nil, nil, "Lookbehind with fixed quantifier: fails (too few)")
+assertMatch("(?<=a|b)c", "ac", true, 2, 2, "Lookbehind with alternate: matches branch 1")
+assertMatch("(?<=a|b)c", "bc", true, 2, 2, "Lookbehind with alternate: matches branch 2")
+assertMatch("(?<=a|b)c", "xc", nil, nil, nil, "Lookbehind with alternate: fails")
+assertMatch("(?<=^a)b", "ab", true, 2, 2, "Lookbehind with start anchor inside: matches")
+assertMatch("(?<=^a)b", "xab", nil, nil, nil, "Lookbehind with start anchor inside: fails because not at start")
+assertMatch("(?<=(a))b", "ab", true, 2, 2, "Lookbehind with group: matches")
+assertCapture("(?<=(a))b", "ab", 1, "a", "Lookbehind with group: captures inside lookbehind")
+assertMatch("(?<=a)+b", "ab", true, 2, 2, "Quantifier outside positive lookbehind: greedy +")
+
+print("  [39] Assertions -- Negative Lookbehind...")
+assertMatch("(?<!a)b", "xb", true, 2, 2, "Negative lookbehind: matches")
+assertMatch("(?<!a)b", "ab", nil, nil, nil, "Negative lookbehind: fails")
 
 
 print("All matcher tests passed!")
