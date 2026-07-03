@@ -2,6 +2,7 @@
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local parser = require("./parser")
 local MatchState = require("./match_state")
+local config = require("./config")
 ----------------------------------------------------------------------------------------------------
 local Alternate = require("./magic/alternate")
 local Anchor = require("./magic/anchor")
@@ -17,6 +18,8 @@ local elementsEnum = require("./enums/elements")
 local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
+----------------------------------------------------------------------------------------------------
+local printdebug = false
 ----------------------------------------------------------------------------------------------------
 local function matchSet(currentElement, currentCharacter)
 	local hasMatched = false
@@ -194,6 +197,13 @@ local function quantifyElement(
 	end
 
 	for occurrence = startOccurrences, endOccurrences, step do
+		if occurrence ~= startOccurrences then
+			state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
+			if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+				return
+			end
+		end
+
 		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
 		
 		hasMatched, iniStr, endStr = legacyTreeMatcher(
@@ -218,13 +228,15 @@ local function coreTreeMatcher(
 
 	local outerTreeReference = state.metaData.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
-	pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
-		debugCurrentStackFrameStr,
-		tree, treeIndex + 1,
-		outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
-		string.sub(p(tree), 1, 200),
-		"\t\t\t\t",
-		outerTree and string.sub(p(outerTree), 1, 80))
+	if printdebug then
+		pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
+			debugCurrentStackFrameStr,
+			tree, treeIndex + 1,
+			outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
+			string.sub(p(tree), 1, 200),
+			"\t\t\t\t",
+			outerTree and string.sub(p(outerTree), 1, 80))
+	end
 
 	local currentElement, currentCharacter
 	local hasQuantifier
@@ -383,6 +395,7 @@ local matcher = function(expr, str, flags, stringIndex)
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		
 		local parsedMetaData = tree._metaData
+		local limits = config.get()
 		local state = MatchState.new(
 			flags, splitStr, strLength, stringIndex, stringIndex, {
 				groupCapturesInitStringPositions = {},
@@ -391,7 +404,11 @@ local matcher = function(expr, str, flags, stringIndex)
 				outerTreeReference = {},
 				rootTree = tree,
 				parsedMetaData = parsedMetaData,
-				groupNames = parsedMetaData and parsedMetaData.groupNames
+				groupNames = parsedMetaData and parsedMetaData.groupNames,
+				recursionDepth = 0,
+				backtrackSteps = 0,
+				maxRecursionDepth = limits.maxRecursionDepth,
+				maxBacktrackDepth = limits.maxBacktrackDepth,
 			}
 		)
 		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
@@ -408,7 +425,6 @@ end
 
 ----------------------------------------------------------------------------------------------------
 -- Debugging
-local printdebug = not true
 _G.p = require("./helpers/pretty-print")
 _G.m = function(expr, str, flags)
 	local hasMatched, iniStr, endStr, matcherMetaData, splitStr = matcher(expr, str, flags)

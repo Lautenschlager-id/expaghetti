@@ -80,6 +80,13 @@ Alternate.match = function(currentElement, treeMatcher,
 
 	local hasMatched, iniStr, endStr
 	for branchIndex = 1, trees._index do
+		if branchIndex > 1 then
+			matcherMetaData.backtrackSteps = (matcherMetaData.backtrackSteps or 0) + 1
+			if matcherMetaData.backtrackSteps > matcherMetaData.maxBacktrackDepth then
+				return false
+			end
+		end
+
 		local branchTree = trees[branchIndex]
 
 		if not matcherMetaData.outerTreeReference[branchTree] and tree then

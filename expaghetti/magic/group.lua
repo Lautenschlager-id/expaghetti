@@ -375,7 +375,13 @@ Group.match = function(
 		end
 
 		if not groupTree then
-			error("Invalid recursion target")
+			return false, nil, nil, matcherMetaData, false
+		end
+
+		matcherMetaData.recursionDepth = (matcherMetaData.recursionDepth or 0) + 1
+		if matcherMetaData.recursionDepth > matcherMetaData.maxRecursionDepth then
+			matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
+			return false, nil, nil, matcherMetaData, false
 		end
 	end
 
@@ -406,6 +412,9 @@ Group.match = function(
 	if currentElement.isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
+			if currentElement.isRecursion then
+				matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
+			end
 			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
 			if currentElement.isNegative then
@@ -443,6 +452,9 @@ Group.match = function(
 	end
 
 	if currentElement.isAtomic or currentElement.isRecursion then
+		if currentElement.isRecursion then
+			matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
+		end
 		if not hasMatched then
 			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex

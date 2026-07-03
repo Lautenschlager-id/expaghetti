@@ -685,6 +685,93 @@ assertMatch("(?<A>a(?&B)?)(?<B>b(?&A)?)", "aba", true, 1, 3, "Recursion: ping po
 assertMatch("^([%w]+): ([%w]+)$[\n ]*(?R)?", "name: john\nage: 10", true, 1, 18, "Recursion: key-value multiline recursion", "m")
 
 
+print("  [48] Error Handling...")
+assertError("(?<>abc)", "", "Empty named group: parse error")
+assertError("(?P=name)", "", "PCRE-style named backref: parse error")
+assertError("(?>", "", "Unterminated atomic group: parse error")
+assertError("(?<name>", "", "Unterminated named group: parse error")
+assertError("(?&)", "", "Empty subroutine name: parse error")
+assertError("%b", "", "Balanced match missing delimiters: parse error")
+assertError("a{3,1}", "", "Reversed quantifier range: parse error")
+assertError("[z-a]", "", "Reversed set range: parse error")
+assertError("[abc", "", "Unclosed set: parse error")
+assertMatch("%1", "a", nil, nil, nil, "Undefined backreference: runtime no-match")
+assertMatch("(?5)(a)", "a", nil, nil, nil, "Non-existent group subroutine: runtime no-match")
+assertMatch("(?999)(a)", "a", nil, nil, nil, "Out-of-bounds group index: runtime no-match")
+
+print("  [49] Cross-Feature Integration...")
+-- Multi-iteration capture history
+do
+	local hasMatched, _, _, metaData = matcher("(a)+", "aaa")
+	assert(hasMatched, "Capture history: (a)+ should match")
+	local inits = metaData.groupCapturesInitStringPositions[1]
+	assert(type(inits) == "table" and #inits == 3, "Capture history: three iterations recorded")
+	assert(inits[1] == 1 and inits[2] == 2 and inits[3] == 3, "Capture history: positions 1,2,3")
+end
+do
+	local hasMatched, _, _, metaData = matcher("((a)(b))+", "abab")
+	assert(hasMatched, "Capture history: nested quantified groups should match")
+	local g1 = metaData.groupCapturesInitStringPositions[1]
+	local g2 = metaData.groupCapturesInitStringPositions[2]
+	local g3 = metaData.groupCapturesInitStringPositions[3]
+	assert(#g1 == 2 and #g2 == 2 and #g3 == 2, "Capture history: nested groups record two iterations each")
+end
+-- Nested group backtracking with capture rollback (branch isolation)
+do
+	local hasMatched, _, _, metaData = matcher("(a(b)|c(d))e", "cde")
+	assert(hasMatched, "Capture rollback: c-branch match")
+	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Capture rollback: group1 captured")
+	assert(not metaData.groupCapturesInitStringPositions[2], "Capture rollback: unused nested group2 absent")
+	assert(metaData.groupCapturesInitStringPositions[3][1] == 2, "Capture rollback: group3 captured on c-branch")
+end
+do
+	local hasMatched, _, _, metaData = matcher("(a(b)|c(d))e", "abe")
+	assert(hasMatched, "Capture rollback: a-branch match")
+	assert(metaData.groupCapturesInitStringPositions[2][1] == 2, "Capture rollback: nested group2 captured on a-branch")
+	assert(not metaData.groupCapturesInitStringPositions[3], "Capture rollback: unused group3 absent")
+end
+-- Recursion + branch reset
+assertMatch("(?|(?R)|b)", "ab", true, 2, 2, "Recursion + branch reset: second branch via recursion")
+assertMatch("(?|(?R)|b)", "b", true, 1, 1, "Recursion + branch reset: direct b branch")
+-- Recursion + atomic group
+assertMatch("a(?>(?R))?b", "aabb", true, 1, 4, "Recursion + atomic: optional atomic recursion")
+assertMatch("a(?>(?R))?b", "ab", true, 1, 2, "Recursion + atomic: skip recursion")
+-- Atomic inside recursion
+assertMatch("(a(?>b|bc)(?1)?c)", "abcc", true, 1, 3, "Atomic inside recursion: matches abc prefix")
+assertMatch("(a(?>b|bc)(?1)?c)", "abc", true, 1, 3, "Atomic inside recursion: b path")
+-- Named group + recursion + flags
+assertMatch("(?i:(?<P>a(?&P)?b))", "AaBb", true, 1, 4, "Named recursion + case-insensitive flag")
+-- Branch reset + backreferences across alternation depth
+assertMatch("(?|((a)(b))|(c))%2", "aba", true, 1, 3, "Branch reset: deep backref %2 first branch")
+assertMatch("(?|((a)(b))|(c))%2", "cb", nil, nil, nil, "Branch reset: deep backref fails on second branch")
+assertCapture("(?|((a)(b))|(c))%2", "aba", 2, "a", "Branch reset: group2 capture on deep branch")
+assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner capture on deep branch")
+
+print("  [50] Depth Limits...")
+do
+	local config = require("config")
+	local saved = config.get()
+	config.set({ maxRecursionDepth = 5 })
+	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
+	config.set(saved)
+end
+do
+	local config = require("config")
+	local saved = config.get()
+	config.set({ maxBacktrackDepth = 10 })
+	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")
+	config.set(saved)
+end
+do
+	local config = require("config")
+	local saved = config.get()
+	local expaghetti = require("expaghetti")({ maxRecursionDepth = 100, maxBacktrackDepth = 1000 })
+	assert(type(expaghetti.match) == "function", "init entry point: returns match function")
+	local hasMatched, iniStr, endStr = expaghetti.match("a", "a")
+	assert(hasMatched and iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
+	config.set(saved)
+end
+
 print("All matcher tests passed!")
 
 
