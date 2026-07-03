@@ -3,4 +3,5 @@ return {
 	MULTILINE = 'm',
 	DOTALL = 's',
 	NO_AUTO_CAPTURE = 'n',
+	UNICODE = 'u',
 }

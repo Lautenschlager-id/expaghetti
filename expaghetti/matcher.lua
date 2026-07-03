@@ -18,6 +18,7 @@ local elementsEnum = require("./enums/elements")
 local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
 local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
+local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local printdebug = false
 
@@ -559,7 +560,7 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 	local treeLength = tree._index
 
-	local splitStr, strLength = splitStringByEachChar(str, false)
+	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
 
 	stringIndex = stringIndex or 0
 

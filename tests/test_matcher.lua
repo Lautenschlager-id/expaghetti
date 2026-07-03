@@ -295,6 +295,13 @@ local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
 end
 
+local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	assert(not metaData.groupCapturesInitStringPositions[captureIndex],
+		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
+end
+
 local function assertNoCapture(expr, str, desc, flags)
 	local hasMatched, _, _, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match", desc))
@@ -303,8 +310,8 @@ local function assertNoCapture(expr, str, desc, flags)
 	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
 end
 
-local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc)
-	local hasMatched, _, _, metaData = matcher(expr, str)
+local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local pos = metaData.positionCaptures[captureIndex]
 	assert(pos ~= nil, string.format("Test '%s': position capture %d not found", desc, captureIndex))
@@ -868,6 +875,51 @@ end
 -- Contrasting greedy vs possessive nested inner quantifier
 assertMatch("(a+)+a",  "aaaaa", true, 1, 5, "Greedy inner + in group: backtracks for trailing a")
 assertMatch("(a++)+a", "aaaaa", nil,  nil, nil, "Possessive inner ++ in group: no backtrack for trailing a")
+
+----------------------------------------------------------------------------------------------------
+print("  [52] Flags -- u (Unicode)...")
+
+assertMatch("maçã", "maçã", true, 1, 6, "Unicode flag off: UTF-8 text is byte-positioned")
+assertMatch("maçã", "maçã", true, 1, 4, "Unicode flag on: UTF-8 text is codepoint-positioned", "u")
+assertMatch(".", "ã", true, 1, 1, "Unicode flag off: dot matches first byte of UTF-8 char")
+assertMatch(".", "ã", true, 1, 1, "Unicode flag on: dot matches one codepoint", "u")
+assertMatch(".+", "aã", true, 1, 3, "Unicode flag off: quantified dot counts bytes")
+assertMatch(".+", "aã", true, 1, 2, "Unicode flag on: quantified dot counts codepoints", "u")
+assertMatch("[ã]", "ã", true, 1, 1, "Unicode flag on: set member is one codepoint", "u")
+assertMatch("[ã-ã]", "ã", true, 1, 1, "Unicode flag on: set range compares codepoint strings", "u")
+assertMatch("%f[ã]ã", "ã", true, 1, 1, "Unicode flag on: frontier sees codepoint boundary", "u")
+assertMatch("(ä)", "ä", true, 1, 2, "Unicode flag off: group captures bytes")
+assertMatch("(ä)", "ä", true, 1, 1, "Unicode flag on: group captures one codepoint", "u")
+assertCapture("(ä)", "ä", 1, "ä", "Unicode flag off: captured group contains bytes")
+assertCapture("(ä)", "ä", 1, "ä", "Unicode flag on: captured group contains one codepoint", "u")
+assertMatch("ä+", "äää", true, 1, 2, "Unicode flag off: literal quantifier repeats last byte")
+assertMatch("ä+", "äää", true, 1, 3, "Unicode flag on: literal quantifier repeats codepoints", "u")
+assertMatch("(ä)+", "ää", true, 1, 4, "Unicode flag off: group quantifier repeats bytes")
+assertMatch("(ä)+", "ää", true, 1, 2, "Unicode flag on: group quantifier repeats codepoints", "u")
+assertMatch("(?=ä)ä", "ä", true, 1, 2, "Unicode flag off: positive lookahead sees bytes")
+assertMatch("(?=ä)ä", "ä", true, 1, 1, "Unicode flag on: positive lookahead sees codepoint", "u")
+assertMatch("(?!b)ä", "ä", true, 1, 2, "Unicode flag off: negative lookahead keeps byte position")
+assertMatch("(?!b)ä", "ä", true, 1, 1, "Unicode flag on: negative lookahead keeps codepoint position", "u")
+assertMatch("(?<=ä)b", "äb", true, 3, 3, "Unicode flag off: positive lookbehind sees prior bytes")
+assertMatch("(?<=ä)b", "äb", true, 2, 2, "Unicode flag on: positive lookbehind sees prior codepoint", "u")
+assertMatch("(?<!b)ä", "ä", true, 1, 2, "Unicode flag off: negative lookbehind sees prior bytes")
+assertMatch("(?<!b)ä", "ä", true, 1, 1, "Unicode flag on: negative lookbehind sees prior codepoint", "u")
+assertMatch("(ã)|(b)", "ã", true, 1, 2, "Unicode flag off: alternate first branch spans bytes")
+assertCapture("(ã)|(b)", "ã", 1, "ã", "Unicode flag off: alternate first branch captured")
+assertCaptureAbsent("(ã)|(b)", "ã", 2, "Unicode flag off: alternate second branch not captured")
+assertMatch("(ã)|(b)", "ã", true, 1, 1, "Unicode flag on: alternate first branch spans codepoint", "u")
+assertCapture("(ã)|(b)", "ã", 1, "ã", "Unicode flag on: alternate first branch captured", "u")
+assertCaptureAbsent("(ã)|(b)", "ã", 2, "Unicode flag on: alternate second branch not captured", "u")
+assertMatch("(a)|(ã)", "ã", true, 1, 2, "Unicode flag off: alternate second branch spans bytes")
+assertCaptureAbsent("(a)|(ã)", "ã", 1, "Unicode flag off: alternate first branch not captured")
+assertCapture("(a)|(ã)", "ã", 2, "ã", "Unicode flag off: alternate second branch captured")
+assertMatch("(a)|(ã)", "ã", true, 1, 1, "Unicode flag on: alternate second branch spans codepoint", "u")
+assertCaptureAbsent("(a)|(ã)", "ã", 1, "Unicode flag on: alternate first branch not captured", "u")
+assertCapture("(a)|(ã)", "ã", 2, "ã", "Unicode flag on: alternate second branch captured", "u")
+assertPositionCapture("^ã()$", "ã", 1, 3, "Unicode flag off: position capture uses byte offset")
+assertPositionCapture("^ã()$", "ã", 1, 2, "Unicode flag on: position capture uses codepoint offset", "u")
+assertError("(?u)", "", "Inline Unicode flag is not accepted")
+assertError("(?u:ã)", "ã", "Scoped Unicode flag is not accepted")
 
 print("All matcher tests passed!")
 

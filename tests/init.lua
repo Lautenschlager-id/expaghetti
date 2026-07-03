@@ -59,6 +59,7 @@ for case = 1, #cases do
 				print("\tF", "\t", "Error message expected, got valid tree.")
 				error = error + 1
 			else
+				tree._metaData = nil
 				local hasCompared, errorMessage = pcall(compareTables, caseObj.parsed, tree)
 				if hasCompared then
 					print("\t.", "\t", true)
