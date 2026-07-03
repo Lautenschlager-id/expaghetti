@@ -20,6 +20,58 @@ local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
 local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
 ----------------------------------------------------------------------------------------------------
 local printdebug = false
+
+local function treeHasNestedQuantifier(tree)
+	if not tree then
+		return false
+	end
+	for elementIndex = 1, tree._index do
+		if Quantifier.isElement(tree[elementIndex]) then
+			return true
+		end
+	end
+	return false
+end
+
+local function elementHasNestedQuantifier(element)
+	if Group.isElement(element) then
+		return treeHasNestedQuantifier(element.tree)
+	end
+	return false
+end
+
+local function elementInnerQuantifierIsPossessive(element)
+	if Group.isElement(element) and element.tree then
+		for elementIndex = 1, element.tree._index do
+			local child = element.tree[elementIndex]
+			if Quantifier.isElement(child) and child.quantifier.mode == "possessive" then
+				return true
+			end
+		end
+	elseif Quantifier.isElement(element) and element.quantifier.mode == "possessive" then
+		return true
+	end
+	return false
+end
+
+local function canBacktrackNestedQuantifier(quantifier, element)
+	local mode = quantifier.mode or "greedy"
+	return mode ~= "possessive"
+		and elementHasNestedQuantifier(element)
+		and not elementInnerQuantifierIsPossessive(element)
+end
+
+local function popCaptureForElement(metaData, element)
+	local groupIndex = element.index or element.name
+	if not groupIndex then
+		return
+	end
+	local inits = metaData.groupCapturesInitStringPositions[groupIndex]
+	if inits and #inits > 0 then
+		table.remove(inits)
+		table.remove(metaData.groupCapturesEndStringPositions[groupIndex])
+	end
+end
 ----------------------------------------------------------------------------------------------------
 local function matchSet(currentElement, currentCharacter)
 	local hasMatched = false
@@ -133,53 +185,108 @@ local function quantifyElement(
 )
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
+	local minimumOccurrences = quantifier.min
+	local mode = quantifier.mode or "greedy"
+	local canBacktrackInner = canBacktrackNestedQuantifier(quantifier, currentElement)
 
 	local totalOccurrences = 0
 	local endStringPositions = { }
+	local startStringPositions = { }
 
 	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
 	local stringIndex = state.stringIndex
-	
-	repeat
+
+	local function hasMoreOccurrencesAllowed()
+		return maximumOccurrences == 0 or totalOccurrences < maximumOccurrences
+	end
+
+	local function extendOccurrenceCollection()
+		while hasMoreOccurrencesAllowed() do
+			startStringPositions[totalOccurrences + 1] = stringIndex
+
+			hasMatched, iniStr, endStr = singleElementMatcher(
+				currentElement, currentCharacter, legacyTreeMatcher,
+				state.flags, nil, nil, nil,
+				state.splitStr, state.strLength,
+				stringIndex, state.initialStringIndex,
+				state.metaData
+			)
+
+			if not hasMatched then
+				return false
+			end
+
+			endStr = endStr or stringIndex
+
+			if state.metaData.quantifierMaxEnd and endStr > state.metaData.quantifierMaxEnd then
+				return false
+			end
+
+			totalOccurrences = totalOccurrences + 1
+			endStringPositions[totalOccurrences] = endStr
+
+			if not hasMoreOccurrencesAllowed()
+				or (iniStr and iniStr > endStr)
+				or (lastIniStr == iniStr and lastEndStr == endStr)
+			then
+				return true
+			end
+			lastIniStr, lastEndStr = iniStr, endStr
+
+			stringIndex = endStr + 1
+			currentCharacter = state.splitStr[stringIndex]
+		end
+
+		return true
+	end
+
+	extendOccurrenceCollection()
+
+	while totalOccurrences < minimumOccurrences and canBacktrackInner and totalOccurrences > 0 do
+		local lastOccurrence = totalOccurrences
+		local occurrenceStart = startStringPositions[lastOccurrence]
+		local occurrenceEnd = endStringPositions[lastOccurrence]
+
+		if not occurrenceStart or occurrenceEnd <= occurrenceStart then
+			break
+		end
+
+		state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
+		if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+			return
+		end
+
+		popCaptureForElement(state.metaData, currentElement)
+		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
+
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, currentCharacter, legacyTreeMatcher,
+			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
 			state.flags, nil, nil, nil,
 			state.splitStr, state.strLength,
-			stringIndex, state.initialStringIndex,
+			occurrenceStart, occurrenceStart,
 			state.metaData
 		)
+
+		state.metaData.quantifierMaxEnd = nil
 
 		if not hasMatched then
 			break
 		end
 
-		endStr = endStr or stringIndex
-
-		totalOccurrences = totalOccurrences + 1
-		endStringPositions[totalOccurrences] = endStr
-
-		if totalOccurrences == maximumOccurrences
-			-- Empty match
-			or (iniStr and iniStr > endStr)
-			-- Loop match
-			or (lastIniStr == iniStr and lastEndStr == endStr)
-		then
-			break
-		end
-		lastIniStr, lastEndStr = iniStr, endStr
-
+		endStr = endStr or occurrenceStart
+		endStringPositions[lastOccurrence] = endStr
 		stringIndex = endStr + 1
 		currentCharacter = state.splitStr[stringIndex]
-	until false
+		lastIniStr, lastEndStr = nil, nil
 
-	local minimumOccurrences = quantifier.min
+		extendOccurrenceCollection()
+	end
+
 	local maximumOccurrencesOfElement = totalOccurrences
 
 	if maximumOccurrencesOfElement < minimumOccurrences then
 		return
 	end
-
-	local mode = quantifier.mode or "greedy"
 	
 	local startOccurrences, endOccurrences, step
 	if mode == "greedy" then
@@ -196,6 +303,48 @@ local function quantifyElement(
 		step = 1
 	end
 
+	local function shortenOccurrenceAt(occurrenceIndex)
+		local occurrenceStart = startStringPositions[occurrenceIndex]
+		local occurrenceEnd = endStringPositions[occurrenceIndex]
+
+		if not occurrenceStart or occurrenceEnd <= occurrenceStart then
+			return false
+		end
+
+		state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
+		if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+			return false
+		end
+
+		popCaptureForElement(state.metaData, currentElement)
+		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
+
+		hasMatched, iniStr, endStr = singleElementMatcher(
+			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
+			state.flags, nil, nil, nil,
+			state.splitStr, state.strLength,
+			occurrenceStart, occurrenceStart,
+			state.metaData
+		)
+
+		state.metaData.quantifierMaxEnd = nil
+
+		if not hasMatched then
+			return false
+		end
+
+		endStr = endStr or occurrenceStart
+		endStringPositions[occurrenceIndex] = endStr
+		totalOccurrences = occurrenceIndex
+		stringIndex = endStr + 1
+		currentCharacter = state.splitStr[stringIndex]
+		lastIniStr, lastEndStr = nil, nil
+		extendOccurrenceCollection()
+		maximumOccurrencesOfElement = totalOccurrences
+
+		return true
+	end
+
 	for occurrence = startOccurrences, endOccurrences, step do
 		if occurrence ~= startOccurrences then
 			state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
@@ -204,17 +353,42 @@ local function quantifyElement(
 			end
 		end
 
-		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
-		
-		hasMatched, iniStr, endStr = legacyTreeMatcher(
-			state.flags, tree, tree._index, treeIndex,
-			state.splitStr, state.strLength,
-			targetStringIndex, state.initialStringIndex,
-			state.metaData
-		)
+		local backtrackOccurrence = occurrence
+		while backtrackOccurrence >= minimumOccurrences do
+			while true do
+				local targetStringIndex = endStringPositions[occurrence]
+					or (state.stringIndex - 1)
 
-		if hasMatched then
-			return hasMatched, iniStr, endStr, state.metaData
+				hasMatched, iniStr, endStr = legacyTreeMatcher(
+					state.flags, tree, tree._index, treeIndex,
+					state.splitStr, state.strLength,
+					targetStringIndex, state.initialStringIndex,
+					state.metaData
+				)
+
+				if hasMatched then
+					return hasMatched, iniStr, endStr, state.metaData
+				end
+
+				if not canBacktrackInner then
+					break
+				end
+
+				local occurrenceStart = startStringPositions[backtrackOccurrence]
+				if not occurrenceStart or targetStringIndex <= occurrenceStart then
+					break
+				end
+
+				if not shortenOccurrenceAt(backtrackOccurrence) then
+					break
+				end
+			end
+
+			if backtrackOccurrence <= minimumOccurrences then
+				break
+			end
+
+			backtrackOccurrence = backtrackOccurrence - 1
 		end
 	end
 end

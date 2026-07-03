@@ -261,6 +261,10 @@ assertMatch(".*c", "abcc",    true, 1, 4, "Greedy *: backtracks to match 'c'")
 assertMatch(".*?c", "abcc",   true, 1, 3, "Lazy *?: expands to match 'c'")
 -- possessive does not backtrack
 assertMatch(".*+c", "abcc",   nil,  nil, nil, "Possessive *+: fails to backtrack for 'c'")
+-- nested quantifier: inner + must backtrack when outer continuation needs chars
+assertMatch("(a+)+a", "aaaaa", true, 1, 5, "Nested quantifiers: inner + backtracks for trailing literal")
+assertMatch("(a+)+a", "aa",    true, 1, 2, "Nested quantifiers: minimal inner match + literal")
+assertMatch("(a+)+a", "a",     nil,  nil, nil, "Nested quantifiers: single a cannot satisfy trailing a")
 
 ----------------------------------------------------------------------------------------------------
 print("  [24] Quantifiers -- inside alternations...")
@@ -771,6 +775,99 @@ do
 	assert(hasMatched and iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
 	config.set(saved)
 end
+
+----------------------------------------------------------------------------------------------------
+print("  [51] Quantifiers -- extensive backtracking (greedy, lazy, possessive, groups, alternates)...")
+
+-- Greedy backtracks for trailing literals; possessive does not
+assertMatch("a+a",      "aaa",  true, 1, 3, "Greedy +: keeps one char for trailing a")
+assertMatch("a++a",     "aaa",  nil,  nil, nil, "Possessive ++: no backtrack for trailing a")
+assertMatch("a*a",      "aaa",  true, 1, 3, "Greedy *: backtracks star for trailing a")
+assertMatch("a*+a",     "aaa",  nil,  nil, nil, "Possessive *+: no backtrack for trailing a")
+assertMatch("a?a",      "aa",   true, 1, 2, "Greedy ?: backtracks optional for trailing a")
+assertMatch("a?+a",     "aa",   true, 1, 2, "Possessive ?+: zero-or-one then literal")
+
+-- Dot quantifiers with trailing literal
+assertMatch(".+b",      "abbb", true, 1, 4, "Greedy .+: backtracks to leave b")
+assertMatch(".++b",     "abbb", nil,  nil, nil, "Possessive .++: cannot backtrack for b")
+assertMatch(".+?b",     "abbb", true, 1, 2, "Lazy .+?: expands minimally to reach b")
+assertMatch(".*b",      "abbb", true, 1, 4, "Greedy .*: backtracks to leave b")
+assertMatch(".*+b",     "abbb", nil,  nil, nil, "Possessive .*+: cannot backtrack for b")
+
+-- Nested quantifiers inside groups (greedy inner must backtrack for outer continuation)
+assertMatch("(a+)+a",   "aaaaa", true, 1, 5, "Nested +: inner backtracks, trailing a matches")
+assertMatch("(a+)+a",   "aa",    true, 1, 2, "Nested +: minimal inner + trailing a")
+assertMatch("(a+)+a",   "a",     nil,  nil, nil, "Nested +: single a cannot satisfy trailing a")
+assertMatch("(a+)+b",   "aaab",  true, 1, 4, "Nested +: inner backtracks for trailing b")
+assertMatch("(a+)+b",   "aaaaa", nil,  nil, nil, "Nested +: no trailing b available")
+assertMatch("(a++)+a",   "aaaaa", nil,  nil, nil, "Nested possessive inner: no backtrack for trailing a")
+assertMatch("(?:a+)+a",  "aaaaa", true, 1, 5, "Non-cap nested +: inner backtracks for trailing a")
+assertMatch("(a)+a",     "aaaaa", true, 1, 5, "Group + (no inner quant): per-char outer + trailing a")
+assertMatch("(a)+a",     "aaa",   true, 1, 3, "Group +: three iterations + trailing a")
+
+-- Exact-count quantifiers on groups with inner +
+assertMatch("(a+){2}",   "aa",    true, 1, 2, "Exact {2} on (a+): one a per repetition")
+assertMatch("(a+){2}",   "aaa",   true, 1, 3, "Exact {2} on (a+): splits 1+2 across repetitions")
+assertMatch("(a+){2}",   "a",     nil,  nil, nil, "Exact {2} on (a+): insufficient characters")
+assertMatch("(a){2}a",  "aaa",   true, 1, 3, "Exact {2} on (a) + trailing a")
+
+-- Alternation combined with quantifiers
+assertMatch("(a|aa)+b", "aab",   true, 1, 3, "Alt quantified: a+aa+b")
+assertMatch("(a|aa)+b", "aaa",   nil,  nil, nil, "Alt quantified: no trailing b")
+assertMatch("(a|aa)+",  "aaaa",  true, 1, 4, "Alt quantified: greedy branch repetition")
+assertMatch("(ab|a)+b", "abb",   true, 1, 3, "Alt quantified: ab branch + trailing b")
+assertMatch("(ab|a)+b", "aab",   nil,  nil, nil, "Alt quantified: a branch cannot reach trailing b")
+assertMatch("a.*b|a.*c", "ac",  true, 1, 2, "Alt: left branch backtracks for c")
+assertMatch("a.*b|a.*c", "axxb", true, 1, 4, "Alt: left branch matches xxb")
+assertMatch("a.*+b|a.*c", "ac", true, 1, 2, "Alt: possessive left fails, right matches c")
+assertMatch("a.*+b|a.*c", "axxb", nil, nil, nil, "Alt: possessive left cannot backtrack for b")
+assertMatch("(a+|b+)+c", "aaabc", true, 1, 5, "Alt quantified: mixed a/b branches + c")
+assertMatch("(a+|b+)+c", "bbc",  true, 1, 3, "Alt quantified: b branch + c")
+
+-- Quantifiers with nested groups in pattern
+assertMatch("a(b+)+c",  "abbbc", true, 1, 5, "Nested group+: greedy b+ inside pattern")
+assertMatch("a(b+)+c",  "abc",   true, 1, 3, "Nested group+: single b iteration")
+assertMatch("x(a+)+y",   "xaaay", true, 1, 5, "Nested group+: bounded by literals")
+assertMatch("(a+?)+a",   "aaaaa", true, 1, 5, "Lazy inner + with outer +: expands to fit")
+
+-- Custom range quantifiers with trailing literal
+assertMatch("a{1,3}a",  "aaaa",  true, 1, 4, "Greedy {1,3}: backtracks for trailing a")
+assertMatch("a{1,3}+a", "aaaa", true, 1, 4, "Possessive {1,3}+: still leaves trailing a here")
+assertMatch("a{1,3}+a", "aaa",  nil,  nil, nil, "Possessive {1,3}+: consumes all, trailing a fails")
+assertMatch("a{2,4}b",  "aaab",  true, 1, 4, "Range {2,4}: backtracks for trailing b")
+assertMatch("a{2,4}b",  "aaaab", true, 1, 5, "Range {2,4}: longer greedy prefix + b")
+
+-- Multiple quantified elements
+assertMatch(".+.+",     "ab",    true, 1, 2, "Two greedy .+: second dot backtracks")
+assertMatch(".+.+",     "a",     nil,  nil, nil, "Two .+: insufficient chars")
+assertMatch(".++.+",    "ab",    nil,  nil, nil, "Possessive .+ then .: first blocks second")
+
+-- Atomic groups vs backtracking
+assertMatch("(?>a+)+a", "aaaaa", true, 1, 5, "Atomic inner: split across outer + for trailing a")
+assertMatch("(?>a+)+a", "aaa",   true, 1, 3, "Atomic inner: three chars via outer + split")
+assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic alt: cannot backtrack from bc to b")
+
+-- Capture behavior during quantifier backtracking
+do
+	local hasMatched, _, _, metaData, splitStr = matcher("(a+)+a", "aaaaa")
+	assert(hasMatched, "Nested +: capture history should match")
+	local inits = metaData.groupCapturesInitStringPositions[1]
+	local ends = metaData.groupCapturesEndStringPositions[1]
+	assert(#inits == 2, "Nested +: two outer repetitions recorded")
+	assert(table.concat(splitStr, "", inits[1], ends[1]) == "aaaa", "Nested +: first capture after inner backtrack")
+	assert(table.concat(splitStr, "", inits[2], ends[2]) == "a", "Nested +: second capture is trailing group iteration")
+end
+do
+	local hasMatched, _, _, metaData, splitStr = matcher("(a|aa)+b", "aab")
+	assert(hasMatched, "Alt quantified: capture history should match")
+	local inits = metaData.groupCapturesInitStringPositions[1]
+	local ends = metaData.groupCapturesEndStringPositions[1]
+	assert(table.concat(splitStr, "", inits[#inits], ends[#ends]) == "aa", "Alt quantified: last capture is winning branch")
+end
+
+-- Contrasting greedy vs possessive nested inner quantifier
+assertMatch("(a+)+a",  "aaaaa", true, 1, 5, "Greedy inner + in group: backtracks for trailing a")
+assertMatch("(a++)+a", "aaaaa", nil,  nil, nil, "Possessive inner ++ in group: no backtrack for trailing a")
 
 print("All matcher tests passed!")
 
