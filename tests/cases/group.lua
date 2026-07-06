@@ -257,9 +257,9 @@ return {
 			},
 			{
 				type = "group",
-				index = 1,
 				hasBehavior = true,
 				isAtomic = true,
+				disableCapture = true,
 				tree = {
 					_index = 3,
 					{
@@ -270,7 +270,7 @@ return {
 					},
 					{
 						type = "group",
-						index = 2,
+						index = 1,
 						tree = {
 							_index = 1,
 							{
@@ -375,6 +375,7 @@ return {
 						hasBehavior = true,
 						disableCapture = true,
 						isLookbehind = true,
+						fixedLength = 1,
 						tree = {
 							_index = 1,
 							{
@@ -396,7 +397,10 @@ return {
 			{
 				type = "group",
 				hasBehavior = true,
-				disableCapture = true
+				disableCapture = true,
+				tree = {
+					_index = 0
+                },
 			}
 		}
 	},
@@ -866,7 +870,7 @@ return {
 	},
 	{
 		regex = "a)",
-		errorMessage = "Invalid regular expression: No group to close"
+		errorMessage = "Invalid regular expression: There is no group to close"
 	},
 	{
 		regex = "(??)",

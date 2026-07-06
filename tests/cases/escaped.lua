@@ -97,4 +97,8 @@ return {
 		regex = "%.%",
 		errorMessage = "Invalid regular expression: Attempt to escape null"
 	},
+	{
+		regex = ".%B+",
+		errorMessage = "Invalid regular expression: Invalid escape \"%B\""
+	},
 }

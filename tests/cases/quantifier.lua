@@ -1646,12 +1646,4 @@ return {
 		regex = ".$+",
 		errorMessage = "Invalid regular expression: Nothing to repeat"
 	},
-	{
-		regex = "%b+.",
-		errorMessage = "Invalid regular expression: Nothing to repeat"
-	},
-	{
-		regex = ".%B+",
-		errorMessage = "Invalid regular expression: Nothing to repeat"
-	},
 }
