@@ -22,18 +22,6 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, expression, e
 	self.tokens = tokens
 	self.charactersIndex = tokens and #tokens or 0
 	
-	-- Computed for backward compatibility with magic modules
-	self.charactersList = {}
-	self.charactersValueList = {}
-	self.boolEscapedList = {}
-	if tokens then
-		for i, t in ipairs(tokens) do
-			self.charactersList[i] = t.raw
-			self.charactersValueList[i] = t.value
-			self.boolEscapedList[i] = t.isEscaped
-		end
-	end
-	
 	self.metaData = metaData
 	self.hasGroupClosed = hasGroupClosed
 	self.initialGroupIndex = metaData and metaData.groupIndex or 0

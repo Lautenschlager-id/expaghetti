@@ -27,35 +27,35 @@ local function parserCore(state)
 	}
 
 	local errorMessage
-	local currentCharacter
+	local currentToken
 
 	while state.index <= state.charactersIndex do
-		currentCharacter = state.charactersList[state.index]
+		currentToken = state.tokens[state.index]
 
-		if state.boolEscapedList[state.index] then
+		if currentToken.isEscaped then
 			state.index = state.index + 1
 
-			if type(currentCharacter) == "table" and currentCharacter.type == "boundary" then
-				local nextChar = state.charactersList[state.index]
-				if not state.boolEscapedList[state.index] and Set.isToken(nextChar) then
+			if type(currentToken.raw) == "table" and currentToken.raw.type == "boundary" then
+				local nextToken = state.tokens[state.index]
+				if not (nextToken and nextToken.isEscaped) and nextToken and Set.isToken(nextToken.raw) then
 					state.index, errorMessage = Set.parse(state, tree)
 					if errorMessage then return false, errorMessage end
 					local parsedSet = tree[tree._index]
-					currentCharacter.set = parsedSet
-					tree[tree._index] = currentCharacter
+					currentToken.raw.set = parsedSet
+					tree[tree._index] = currentToken.raw
 				else
 					errorMessage = errorsEnum.missingFrontierSet
 				end
 			else
 				tree._index = tree._index + 1
-				tree[tree._index] = currentCharacter
+				tree[tree._index] = currentToken.raw
 			end
 		else
-			if Set.isToken(currentCharacter) then
+			if Set.isToken(currentToken.raw) then
 				state.index, errorMessage = Set.parse(state, tree)
-			elseif Group.isOpeningToken(currentCharacter) then
+			elseif Group.isOpeningToken(currentToken.raw) then
 				state.index, errorMessage = Group.parse(state, tree)
-			elseif Group.isClosingToken(currentCharacter) then
+			elseif Group.isClosingToken(currentToken.raw) then
 				-- assumes hasGroupClosed = false
 				if state.isGroup then
 					state.hasGroupClosed = true
@@ -63,11 +63,11 @@ local function parserCore(state)
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
-			elseif Anchor.isToken(currentCharacter) then
-				state.index = Anchor.parse(state, currentCharacter, tree)
-			elseif Any.isToken(currentCharacter) then
+			elseif Anchor.isToken(currentToken.raw) then
+				state.index = Anchor.parse(state, currentToken.raw, tree)
+			elseif Any.isToken(currentToken.raw) then
 				state.index = Any.parse(state, tree)
-			elseif Alternate.isToken(currentCharacter) then
+			elseif Alternate.isToken(currentToken.raw) then
 				if not state.isAlternate then
 					-- First occurrence
 					state.index, errorMessage, state.hasGroupClosed = Alternate.parse(state, tree)
@@ -81,7 +81,7 @@ local function parserCore(state)
 				-- Whenever found, stop processing the rest of the expression since it's looping
 				break
 			else
-				state.index, errorMessage = Literal.parse(state, currentCharacter, tree)
+				state.index, errorMessage = Literal.parse(state, currentToken.raw, tree)
 			end
 		end
 

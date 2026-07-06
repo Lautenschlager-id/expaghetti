@@ -11,20 +11,20 @@ local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
 ----------------------------------------------------------------------------------------------------
 local Set = { }
 
-local findMagicClosingIndex = function(index, charactersList)
+local findMagicClosingIndex = function(index, tokens)
 	local firstCharacter = index
 	local positionDiff = 0
 
-	local currentCharacter
+	local token
 	repeat
-		currentCharacter = charactersList[index]
+		token = tokens[index]
 
 		-- expression ended but magic was never closed
-		if not currentCharacter then
+		if not token then
 			return false, errorsEnum.unclosedSet
-		elseif index == firstCharacter and currentCharacter == ENUM_NEGATE_SET then
+		elseif index == firstCharacter and token.raw == ENUM_NEGATE_SET then
 			positionDiff = 1
-		elseif currentCharacter == ENUM_CLOSE_SET and (index - firstCharacter) > positionDiff then
+		elseif token.raw == ENUM_CLOSE_SET and (index - firstCharacter) > positionDiff then
 			return index
 		end
 
@@ -44,9 +44,8 @@ Set.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
 
-	local endIndex, errorMessage = findMagicClosingIndex(state.index, state.charactersList)
+	local endIndex, errorMessage = findMagicClosingIndex(state.index, state.tokens)
 	if not endIndex then
-		-- state.charactersList = error message
 		return false, errorMessage
 	end
 
@@ -59,31 +58,31 @@ Set.parse = function(state, tree)
 	end
 
 	local watchingForRangeSeparator
-	local currentCharacter, lastCharacter, rangeInitChar, currentCharacterValue
+	local currentToken, lastToken, rangeInitChar, currentCharacterValue
 
 	local elementIndex = state.index - 1
 	repeat
 		elementIndex = elementIndex + 1
-		currentCharacter = state.charactersList[elementIndex]
+		currentToken = state.tokens[elementIndex]
 
 		-- first character of the set
-		if elementIndex == state.index and currentCharacter == ENUM_NEGATE_SET then
+		if elementIndex == state.index and currentToken.raw == ENUM_NEGATE_SET then
 			set.hasToNegateMatch = true
-		elseif currentCharacter.type == ENUM_ELEMENT_TYPE_SET then
+		elseif type(currentToken.raw) == "table" and currentToken.raw.type == ENUM_ELEMENT_TYPE_SET then
 			set.classIndex = set.classIndex + 1
-			set.classes[set.classIndex] = currentCharacter
+			set.classes[set.classIndex] = currentToken.raw
 		else
-			local nextCharacter, rangeEndChar
+			local nextToken, rangeEndChar
 			if endIndex > elementIndex then
-				nextCharacter = state.charactersList[elementIndex + 1]
-				rangeEndChar = state.charactersValueList[elementIndex + 1]
+				nextToken = state.tokens[elementIndex + 1]
+				rangeEndChar = nextToken.value
 			end
-			currentCharacterValue = state.charactersValueList[elementIndex]
+			currentCharacterValue = currentToken.value
 
-			-- assumes that currentCharacter == ENUM_SET_RANGE_SEPARATOR
+			-- assumes that currentToken.raw == ENUM_SET_RANGE_SEPARATOR
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false
-				rangeInitChar = state.charactersValueList[elementIndex - 1]
+				rangeInitChar = state.tokens[elementIndex - 1].value
 
 				-- both the last and next characters must be literals
 				if rangeEndChar and rangeInitChar then
@@ -105,14 +104,14 @@ Set.parse = function(state, tree)
 					set[rangeInitChar] = true
 					set[currentCharacterValue] = true
 				end
-			elseif nextCharacter == ENUM_SET_RANGE_SEPARATOR then
+			elseif nextToken and nextToken.raw == ENUM_SET_RANGE_SEPARATOR then
 				watchingForRangeSeparator = true
 			else
 				set[currentCharacterValue] = true
 			end
 		end
 
-		lastCharacter = currentCharacter
+		lastToken = currentToken
 	until elementIndex == endIndex
 
 	tree._index = tree._index + 1

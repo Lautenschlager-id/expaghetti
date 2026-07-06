@@ -18,8 +18,8 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
-local lookForCustomQuantifier = function(index, charactersList)
-	local currentCharacter
+local lookForCustomQuantifier = function(index, tokens)
+	local currentToken
 
 	local parameters, currentParameter = {
 		[1] = '',
@@ -28,19 +28,21 @@ local lookForCustomQuantifier = function(index, charactersList)
 
 	repeat
 		index = index + 1
-		currentCharacter = charactersList[index]
-		if not currentCharacter or currentCharacter.type then
+		currentToken = tokens[index]
+		if not currentToken or type(currentToken.raw) == "table" then
 			return false
 		end
 
-		if currentCharacter >= '0' and currentCharacter <= '9' then
-			parameters[currentParameter] = parameters[currentParameter] .. currentCharacter
-		elseif currentCharacter == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
+		local rawChar = currentToken.raw
+
+		if rawChar >= '0' and rawChar <= '9' then
+			parameters[currentParameter] = parameters[currentParameter] .. rawChar
+		elseif rawChar == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
 			if currentParameter == 2 then
 				return false
 			end
 			currentParameter = 2
-		elseif currentCharacter == ENUM_CLOSE_QUANTIFIER then
+		elseif rawChar == ENUM_CLOSE_QUANTIFIER then
 			index = index + 1
 			break
 		else
@@ -67,13 +69,16 @@ local lookForCustomQuantifier = function(index, charactersList)
 	return index, AST.Quantifier(parameters[1], parameters[2])
 end
 
-local checkIfAppliesToParentTreeElement = function(index, charactersList)
-	local currentCharacter = charactersList[index]
+local checkIfAppliesToParentTreeElement = function(index, tokens)
+	local currentToken = tokens[index]
+	if not currentToken then return index, false end
+	
+	local rawChar = currentToken.raw
 
-	if quantifiersEnum[currentCharacter] then
-		return index + 1, quantifiersEnum[currentCharacter]
-	elseif currentCharacter == ENUM_OPEN_QUANTIFIER then
-		local newIndex, customQuantifier = lookForCustomQuantifier(index, charactersList)
+	if quantifiersEnum[rawChar] then
+		return index + 1, quantifiersEnum[rawChar]
+	elseif rawChar == ENUM_OPEN_QUANTIFIER then
+		local newIndex, customQuantifier = lookForCustomQuantifier(index, tokens)
 		if newIndex then
 			return newIndex, customQuantifier
 		elseif customQuantifier then
@@ -85,21 +90,23 @@ local checkIfAppliesToParentTreeElement = function(index, charactersList)
 	return index, false
 end
 
-local lookForModeToken = function(index, charactersList, quantifier)
-	local quantifierMode = quantifierModesEnum[charactersList[index]]
+local lookForModeToken = function(index, tokens, quantifier)
+	local currentToken = tokens[index]
+	if currentToken then
+		local quantifierMode = quantifierModesEnum[currentToken.raw]
 
-	if quantifierMode then
-		quantifier = tblDeepCopy(quantifier)
-		quantifier.mode = quantifierMode
-		index = index + 1
+		if quantifierMode then
+			quantifier = tblDeepCopy(quantifier)
+			quantifier.mode = quantifierMode
+			index = index + 1
+		end
 	end
-
 	return index, quantifier
 end
 
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
-	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.charactersList)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.tokens)
 
 	return index and quantifier
 end
@@ -113,7 +120,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	-- If the object explicitly says quantifier = false, then a quantifier operator shouldn't exist
 	local shouldntHaveQuantifier = parentElement.quantifier == false
 
-	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.charactersList)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.tokens)
 
 	if not index then
 		-- quantifier = error message
@@ -126,7 +133,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index, quantifier = lookForModeToken(index, state.charactersList, quantifier)
+	index, quantifier = lookForModeToken(index, state.tokens, quantifier)
 	parentElement.quantifier = quantifier
 
 	return index
