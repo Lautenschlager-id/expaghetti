@@ -70,43 +70,36 @@ Alternate.parse = function(state, tree)
 	return state.index, nil, state.hasGroupClosed
 end
 
-Alternate.match = function(currentElement, treeMatcher,
-	flags, tree, treeLength, treeIndex,
-	splitStr, strLength,
-	stringIndex, initialStringIndex,
-	matcherMetaData)
-
+Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 	local trees = currentElement.trees
 
 	local hasMatched, iniStr, endStr
 	for branchIndex = 1, trees._index do
 		if branchIndex > 1 then
-			matcherMetaData.backtrackSteps = (matcherMetaData.backtrackSteps or 0) + 1
-			if matcherMetaData.backtrackSteps > matcherMetaData.maxBacktrackDepth then
+			state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
+			if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
 				return false
 			end
 		end
 
 		local branchTree = trees[branchIndex]
 
-		if not matcherMetaData.outerTreeReference[branchTree] and tree then
-			matcherMetaData.outerTreeReference[branchTree] = {
+		if not state.metaData.outerTreeReference[branchTree] and tree then
+			state.metaData.outerTreeReference[branchTree] = {
 				tree = tree,
-				treeLength = treeLength,
+				treeLength = tree._index,
 				treeIndex = treeIndex,
-				initialStringIndex = initialStringIndex
+				initialStringIndex = state.initialStringIndex
 			}
 		end
 
+		local tempState = state:branch(state.stringIndex - 1, state.initialStringIndex)
 		hasMatched, iniStr, endStr = treeMatcher(
-			flags, branchTree, branchTree._index, 0,
-			splitStr, strLength,
-			stringIndex, initialStringIndex,
-			matcherMetaData
+			tempState, branchTree, 0
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, true
+			return hasMatched, iniStr, endStr, state.metaData, true
 		end
 	end
 

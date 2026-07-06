@@ -368,48 +368,42 @@ Group.parse = function(state, tree)
 	return state.index + 1
 end
 
-Group.match = function(
-		currentElement, treeMatcher,
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
-	)
-
+Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
+	local stringIndex = state.stringIndex - 1
 	local groupTree = currentElement.tree
 
 	if currentElement.isRecursion then
 		if currentElement.isRecursionRoot then
-			groupTree = matcherMetaData.rootTree
+			groupTree = state.metaData.rootTree
 		elseif currentElement.targetIndex then
-			groupTree = matcherMetaData.parsedMetaData.groupTreesByIndex[currentElement.targetIndex]
+			groupTree = state.metaData.parsedMetaData.groupTreesByIndex[currentElement.targetIndex]
 		elseif currentElement.targetName then
-			groupTree = matcherMetaData.parsedMetaData.groupTreesByName[currentElement.targetName]
+			groupTree = state.metaData.parsedMetaData.groupTreesByName[currentElement.targetName]
 		end
 
 		if not groupTree then
-			return false, nil, nil, matcherMetaData, false
+			return false, nil, nil, state.metaData, false
 		end
 
-		matcherMetaData.recursionDepth = (matcherMetaData.recursionDepth or 0) + 1
-		if matcherMetaData.recursionDepth > matcherMetaData.maxRecursionDepth then
-			matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
-			return false, nil, nil, matcherMetaData, false
+		state.metaData.recursionDepth = (state.metaData.recursionDepth or 0) + 1
+		if state.metaData.recursionDepth > state.metaData.maxRecursionDepth then
+			state.metaData.recursionDepth = state.metaData.recursionDepth - 1
+			return false, nil, nil, state.metaData, false
 		end
 	end
 
 	local isAssertion = currentElement.isLookahead or currentElement.isLookbehind
 
-	local oldOuterTreeRef = matcherMetaData.outerTreeReference[groupTree]
+	local oldOuterTreeRef = state.metaData.outerTreeReference[groupTree]
 	
 	if currentElement.isRecursion then
-		matcherMetaData.outerTreeReference[groupTree] = nil
+		state.metaData.outerTreeReference[groupTree] = nil
 	elseif not isAssertion and not currentElement.isAtomic and tree then
-		matcherMetaData.outerTreeReference[groupTree] = {
+		state.metaData.outerTreeReference[groupTree] = {
 			tree = tree,
-			treeLength = treeLength,
+			treeLength = tree._index,
 			treeIndex = treeIndex,
-			initialStringIndex = initialStringIndex
+			initialStringIndex = state.initialStringIndex
 		}
 	end
 
@@ -426,23 +420,21 @@ Group.match = function(
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
 			if currentElement.isRecursion then
-				matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
+				state.metaData.recursionDepth = state.metaData.recursionDepth - 1
 			end
-			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
 			if currentElement.isNegative then
-				return true, nil, stringIndex, matcherMetaData, false
+				return true, nil, stringIndex, state.metaData, false
 			else
-				return false, nil, nil, matcherMetaData, false
+				return false, nil, nil, state.metaData, false
 			end
 		end
 	end
 
+	local tempState = state:branch(execStringIndex, execStringIndex)
 	local hasMatched, iniStr, endStr = treeMatcher(
-		flags, groupTree, groupTree._index, 0,
-		splitStr, strLength,
-		execStringIndex, execStringIndex,
-		matcherMetaData
+		tempState, groupTree, 0
 	)
 
 	if isAssertion then
@@ -454,42 +446,42 @@ Group.match = function(
 		end
 		hasMatched = originalHasMatched ~= currentElement.isNegative
 
-		matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+		state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 		groupTree._groupIndex = oldGroupIndex
 
 		if not hasMatched then
-			return false, nil, nil, matcherMetaData, false
+			return false, nil, nil, state.metaData, false
 		end
 
-		return true, nil, stringIndex, matcherMetaData, false
+		return true, nil, stringIndex, state.metaData, false
 	end
 
 	if currentElement.isAtomic or currentElement.isRecursion then
 		if currentElement.isRecursion then
-			matcherMetaData.recursionDepth = matcherMetaData.recursionDepth - 1
+			state.metaData.recursionDepth = state.metaData.recursionDepth - 1
 		end
 		if not hasMatched then
-			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
-			return false, nil, nil, matcherMetaData, false
+			return false, nil, nil, state.metaData, false
 		end
-		matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+		state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 		groupTree._groupIndex = oldGroupIndex
-		return true, nil, endStr, matcherMetaData, false
+		return true, nil, endStr, state.metaData, false
 	end
 
 	if not groupIndex then
 		hasMatched = hasMatched ~= currentElement.isNegative
 		if not hasMatched then
-			matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
 			return
 		end
 	end
 
-	matcherMetaData.outerTreeReference[groupTree] = oldOuterTreeRef
+	state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 	groupTree._groupIndex = oldGroupIndex
-	return hasMatched, iniStr, endStr, matcherMetaData, true
+	return hasMatched, iniStr, endStr, state.metaData, true
 end
 
 return Group

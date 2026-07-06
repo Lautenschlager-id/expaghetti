@@ -133,21 +133,9 @@ local singleElementMatcher = function(
 	elseif Balanced.isElement(currentElement) then
 		return Balanced.match(currentElement, state)
 	elseif Group.isElement(currentElement) then
-		return Group.match(
-			currentElement, treeMatcher,
-			state.flags, tree, tree and tree._index or nil, treeIndex,
-			state.splitStr, state.strLength,
-			state.stringIndex - 1, state.initialStringIndex,
-			state.metaData
-		)
+		return Group.match(currentElement, treeMatcher, state, tree, treeIndex)
 	elseif Alternate.isElement(currentElement) then
-		return Alternate.match(
-			currentElement, treeMatcher,
-			state.flags, tree, tree and tree._index or nil, treeIndex,
-			state.splitStr, state.strLength,
-			state.stringIndex - 1, state.initialStringIndex,
-			state.metaData
-		)
+		return Alternate.match(currentElement, treeMatcher, state, tree, treeIndex)
 	elseif CaptureReference.isElement(currentElement) then
 		return CaptureReference.match(currentElement, state)
 	elseif not currentCharacter then
@@ -172,11 +160,10 @@ local singleElementMatcher = function(
 end
 
 local debugCurrentStackFrame
-local legacyTreeMatcher -- Forward declaration
 local coreTreeMatcher -- Forward declaration
 
 local function quantifyElement(
-	currentElement, currentCharacter, singleElementMatcher, legacyTreeMatcher,
+	currentElement, currentCharacter, singleElementMatcher,
 	state, tree, treeIndex
 )
 	local quantifier = currentElement.quantifier
@@ -202,7 +189,7 @@ local function quantifyElement(
 
 			local tempState = state:branch(stringIndex, state.initialStringIndex)
 			hasMatched, iniStr, endStr = singleElementMatcher(
-				currentElement, currentCharacter, legacyTreeMatcher,
+				currentElement, currentCharacter, coreTreeMatcher,
 				tempState, nil, nil
 			)
 
@@ -255,7 +242,7 @@ local function quantifyElement(
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
+			currentElement, state.splitStr[occurrenceStart], coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -313,7 +300,7 @@ local function quantifyElement(
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
+			currentElement, state.splitStr[occurrenceStart], coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -349,11 +336,9 @@ local function quantifyElement(
 				local targetStringIndex = endStringPositions[occurrence]
 					or (state.stringIndex - 1)
 
-				hasMatched, iniStr, endStr = legacyTreeMatcher(
-					state.flags, tree, tree._index, treeIndex,
-					state.splitStr, state.strLength,
-					targetStringIndex, state.initialStringIndex,
-					state.metaData
+				local tempState = state:branch(targetStringIndex, state.initialStringIndex)
+				hasMatched, iniStr, endStr = coreTreeMatcher(
+					tempState, tree, treeIndex
 				)
 
 				if hasMatched then
@@ -383,7 +368,7 @@ local function quantifyElement(
 	end
 end
 
-local function coreTreeMatcher(
+coreTreeMatcher = function(
 		state, tree, treeIndex
 	)
 
@@ -421,7 +406,7 @@ local function coreTreeMatcher(
 				currentElement.value, currentElement.type, currentCharacter)
 
 			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
-				currentElement, currentCharacter, legacyTreeMatcher,
+				currentElement, currentCharacter, coreTreeMatcher,
 				state, tree, treeIndex
 			)
 
@@ -441,7 +426,7 @@ local function coreTreeMatcher(
 			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
 				state.stringIndex)
 			return quantifyElement(
-				currentElement, currentCharacter, singleElementMatcher, legacyTreeMatcher,
+				currentElement, currentCharacter, singleElementMatcher,
 				state, tree, treeIndex
 			)
 		end
@@ -510,17 +495,7 @@ local function coreTreeMatcher(
 	return true, state.initialStringIndex + 1, state.stringIndex, state.metaData
 end
 
-legacyTreeMatcher = function(
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		metaData
-	)
-	local state = MatchState.new(
-		flags, splitStr, strLength, stringIndex, initialStringIndex, metaData
-	)
-	return coreTreeMatcher(state, tree, treeIndex)
-end
+
 
 local matcher = function(expr, str, flags, stringIndex)
 	if type(expr) ~= "string" then
