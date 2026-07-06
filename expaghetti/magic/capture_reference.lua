@@ -69,10 +69,11 @@ CaptureReference.parseString = function(currentCharacter, index, expression)
 	}
 end
 
-CaptureReference.match = function(currentElement, stringIndex, splitStr, strLength, matcherMetaData)
+CaptureReference.match = function(currentElement, state)
+	local stringIndex = state.stringIndex - 1
 	local initStringPositionList, endStringPositionList =
-		matcherMetaData.groupCapturesInitStringPositions[currentElement.index],
-		matcherMetaData.groupCapturesEndStringPositions[currentElement.index]
+		state.metaData.groupCapturesInitStringPositions[currentElement.index],
+		state.metaData.groupCapturesEndStringPositions[currentElement.index]
 
 	local initStringPosition, endStringPosition
 	if type(initStringPositionList) == "table" then
@@ -86,16 +87,16 @@ CaptureReference.match = function(currentElement, stringIndex, splitStr, strLeng
 
 	if not initStringPosition then
 		return false
-	elseif stringIndex + (endStringPosition - initStringPosition + 1) > strLength then
+	elseif stringIndex + (endStringPosition - initStringPosition + 1) > state.strLength then
 		return false
 	end
 
 	local currentCharacter
 	for backreferencePosition = initStringPosition, endStringPosition do
 		stringIndex = stringIndex + 1
-		currentCharacter = splitStr[stringIndex]
+		currentCharacter = state.splitStr[stringIndex]
 
-		if currentCharacter ~= splitStr[backreferencePosition] then
+		if currentCharacter ~= state.splitStr[backreferencePosition] then
 			return false
 		end
 	end

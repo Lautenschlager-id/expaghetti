@@ -8,21 +8,22 @@ Balanced.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_BALANCED
 end
 
-Balanced.match = function(currentElement, stringIndex, splitStr, strLength)
+Balanced.match = function(currentElement, state)
+	local stringIndex = state.stringIndex - 1
 	local opener = currentElement.open
 	local closer = currentElement.close
 
 	-- The first character MUST match the opener
 	local currentStrIndex = stringIndex + 1
-	if splitStr[currentStrIndex] ~= opener then
+	if state.splitStr[currentStrIndex] ~= opener then
 		return false
 	end
 
 	local depth = 1
 	currentStrIndex = currentStrIndex + 1
 
-	while currentStrIndex <= strLength do
-		local char = splitStr[currentStrIndex]
+	while currentStrIndex <= state.strLength do
+		local char = state.splitStr[currentStrIndex]
 		if char == closer then
 			depth = depth - 1
 			if depth == 0 then

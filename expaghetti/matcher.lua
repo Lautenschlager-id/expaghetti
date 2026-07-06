@@ -121,46 +121,41 @@ local function matchSet(currentElement, currentCharacter)
 end
 ----------------------------------------------------------------------------------------------------
 local singleElementMatcher = function(
-		currentElement, currentCharacter, treeMatcher,
-		flags, tree, treeLength, treeIndex,
-		splitStr, strLength,
-		stringIndex, initialStringIndex,
-		matcherMetaData
+		currentElement, currentCharacter, treeMatcher, state, tree, treeIndex
 	)
 
 	if PositionCapture.isElement(currentElement) then
-		return PositionCapture.match(currentElement, stringIndex, matcherMetaData)
+		return PositionCapture.match(currentElement, state)
 	elseif Anchor.isElement(currentElement) then
-		return Anchor.match(currentElement, stringIndex - 1, splitStr, strLength, flags)
+		return Anchor.match(currentElement, state)
 	elseif Boundary.isElement(currentElement) then
-		return Boundary.match(currentElement, stringIndex - 1, splitStr, strLength, matchSet)
+		return Boundary.match(currentElement, state, matchSet)
 	elseif Balanced.isElement(currentElement) then
-		return Balanced.match(currentElement, stringIndex - 1, splitStr, strLength)
+		return Balanced.match(currentElement, state)
 	elseif Group.isElement(currentElement) then
 		return Group.match(
 			currentElement, treeMatcher,
-			flags, tree, treeLength, treeIndex,
-			splitStr, strLength,
-			stringIndex - 1, initialStringIndex,
-			matcherMetaData
+			state.flags, tree, tree and tree._index or nil, treeIndex,
+			state.splitStr, state.strLength,
+			state.stringIndex - 1, state.initialStringIndex,
+			state.metaData
 		)
 	elseif Alternate.isElement(currentElement) then
 		return Alternate.match(
 			currentElement, treeMatcher,
-			flags, tree, treeLength, treeIndex,
-			splitStr, strLength,
-			stringIndex - 1, initialStringIndex,
-			matcherMetaData
+			state.flags, tree, tree and tree._index or nil, treeIndex,
+			state.splitStr, state.strLength,
+			state.stringIndex - 1, state.initialStringIndex,
+			state.metaData
 		)
 	elseif CaptureReference.isElement(currentElement) then
-		return CaptureReference.match(currentElement, stringIndex - 1, splitStr, strLength,
-			matcherMetaData)
+		return CaptureReference.match(currentElement, state)
 	elseif not currentCharacter then
 		return
 	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
 		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
 		-- With DotAll flag (s), "." matches everything including newlines
-		if currentElement.isDotAll or (flags and flags.s) then
+		if currentElement.isDotAll or (state.flags and state.flags.s) then
 			return true
 		end
 		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
@@ -205,12 +200,10 @@ local function quantifyElement(
 		while hasMoreOccurrencesAllowed() do
 			startStringPositions[totalOccurrences + 1] = stringIndex
 
+			local tempState = state:branch(stringIndex, state.initialStringIndex)
 			hasMatched, iniStr, endStr = singleElementMatcher(
 				currentElement, currentCharacter, legacyTreeMatcher,
-				state.flags, nil, nil, nil,
-				state.splitStr, state.strLength,
-				stringIndex, state.initialStringIndex,
-				state.metaData
+				tempState, nil, nil
 			)
 
 			if not hasMatched then
@@ -260,12 +253,10 @@ local function quantifyElement(
 		popCaptureForElement(state.metaData, currentElement)
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
+		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
-			state.flags, nil, nil, nil,
-			state.splitStr, state.strLength,
-			occurrenceStart, occurrenceStart,
-			state.metaData
+			tempState, nil, nil
 		)
 
 		state.metaData.quantifierMaxEnd = nil
@@ -320,12 +311,10 @@ local function quantifyElement(
 		popCaptureForElement(state.metaData, currentElement)
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
+		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
 			currentElement, state.splitStr[occurrenceStart], legacyTreeMatcher,
-			state.flags, nil, nil, nil,
-			state.splitStr, state.strLength,
-			occurrenceStart, occurrenceStart,
-			state.metaData
+			tempState, nil, nil
 		)
 
 		state.metaData.quantifierMaxEnd = nil
@@ -433,10 +422,7 @@ local function coreTreeMatcher(
 
 			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
 				currentElement, currentCharacter, legacyTreeMatcher,
-				state.flags, tree, tree._index, treeIndex,
-				state.splitStr, state.strLength,
-				state.stringIndex, state.initialStringIndex,
-				state.metaData
+				state, tree, treeIndex
 			)
 
 			pdebug("\t%s%salidated stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,

@@ -20,4 +20,15 @@ function MatchState.new(flags, splitStr, strLength, stringIndex, initialStringIn
 	return self
 end
 
+function MatchState:branch(stringIndex, initialStringIndex)
+	return MatchState.new(
+		self.flags,
+		self.splitStr,
+		self.strLength,
+		stringIndex or self.stringIndex,
+		initialStringIndex or self.initialStringIndex,
+		self.metaData
+	)
+end
+
 return MatchState

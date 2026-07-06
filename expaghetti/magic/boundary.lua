@@ -8,9 +8,10 @@ Boundary.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_BOUNDARY
 end
 
-Boundary.match = function(currentElement, stringIndex, splitStr, strLength, matchSet)
-	local prevChar = splitStr[stringIndex]
-	local currChar = splitStr[stringIndex + 1]
+Boundary.match = function(currentElement, state, matchSet)
+	local stringIndex = state.stringIndex - 1
+	local prevChar = state.splitStr[stringIndex]
+	local currChar = state.splitStr[stringIndex + 1]
 
 	local isPrevInSet = prevChar and matchSet(currentElement.set, prevChar) or false
 	local isCurrInSet = currChar and matchSet(currentElement.set, currChar) or false

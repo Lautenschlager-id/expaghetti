@@ -25,23 +25,24 @@ Anchor.parse = function(state, currentCharacter, tree)
 	return state.index + 1
 end
 
-Anchor.match = function(currentElement, stringIndex, splitStr, strLength, flags)
+Anchor.match = function(currentElement, state)
+	local stringIndex = state.stringIndex - 1
 	if currentElement.isBeginning then
 		-- ^
 		if stringIndex == 0 then
 			return true, nil, stringIndex
-		elseif currentElement.isMultiline or (flags and flags.m) then
-			local prevChar = splitStr[stringIndex]
+		elseif currentElement.isMultiline or (state.flags and state.flags.m) then
+			local prevChar = state.splitStr[stringIndex]
 			if prevChar == '\n' or prevChar == '\r' then
 				return true, nil, stringIndex
 			end
 		end
 	else
 		-- $
-		if stringIndex >= strLength then
+		if stringIndex >= state.strLength then
 			return true, nil, stringIndex
-		elseif currentElement.isMultiline or (flags and flags.m) then
-			local currChar = splitStr[stringIndex + 1]
+		elseif currentElement.isMultiline or (state.flags and state.flags.m) then
+			local currChar = state.splitStr[stringIndex + 1]
 			if currChar == '\n' or currChar == '\r' then
 				return true, nil, stringIndex
 			end
