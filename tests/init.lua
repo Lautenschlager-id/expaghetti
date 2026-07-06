@@ -22,7 +22,8 @@ local cases = {
 	"group",
 	"quantifier",
 	"alternate",
-	"flag"
+	"flag",
+	"balanced"
 }
 
 local success, error = 0, 0
