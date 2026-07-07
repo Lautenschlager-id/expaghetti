@@ -11,6 +11,8 @@ local parser = require("../expaghetti/parser")
 ----------------------------------------------------------------------------------------------------
 local compareTables = require("./assertion").compareTables
 ----------------------------------------------------------------------------------------------------
+local performance = require("performance")
+----------------------------------------------------------------------------------------------------
 local cases = {
 	"literal",
 	"escaped",
@@ -25,6 +27,8 @@ local cases = {
 	"flag",
 	"balanced"
 }
+
+performance.logPerformanceAtTheEnd(function()
 
 local success, error = 0, 0
 for case = 1, #cases do
@@ -77,3 +81,7 @@ end
 print("\n\n------------------------------------")
 print(strformat("Success : %03d\nError : %03d", success, error))
 print("------------------------------------")
+
+end, {
+    runs = 1
+})

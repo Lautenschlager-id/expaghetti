@@ -1,6 +1,8 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 local matcher = require("matcher")
 
+local performance = require("performance")
+
 local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
 	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
 	if (not hasMatched) ~= (not expectedHasMatched) then
@@ -20,7 +22,47 @@ local function assertError(expr, str, desc)
 	end
 end
 
+local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
+	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	local ini = metaData.groupCapturesInitStringPositions[captureIndex]
+	local en  = metaData.groupCapturesEndStringPositions[captureIndex]
+	if type(ini) == "table" then
+		ini = ini[#ini]
+		en = en[#en]
+	end
+	assert(ini, string.format("Test '%s': capture %s not found", desc, tostring(captureIndex)))
+	local got = table.concat(splitStr, "", ini, en)
+	assert(got == expectedStr,
+		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
+end
+
+local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	assert(not metaData.groupCapturesInitStringPositions[captureIndex],
+		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
+end
+
+local function assertNoCapture(expr, str, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
+	assert(hasMatched, string.format("Test '%s': expected match", desc))
+	local hasAny = false
+	for _ in pairs(metaData.groupCapturesInitStringPositions) do hasAny = true; break end
+	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
+end
+
+local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc, flags)
+	local hasMatched, _, _, metaData = matcher(expr, str, flags)
+	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	local pos = metaData.positionCaptures[captureIndex]
+	assert(pos ~= nil, string.format("Test '%s': position capture %d not found", desc, captureIndex))
+	assert(pos == expectedPos, string.format("Test '%s': expected position=%d but got %s", desc, expectedPos, tostring(pos)))
+end
+
 print("Running matcher tests for core engine...")
+
+performance.logPerformanceAtTheEnd(function()
 
 -- 1. Malformed inputs
 do
@@ -278,46 +320,6 @@ assertMatch("a.*b|a.*c", "ac", true, 1, 2, "Alternation: full branch backtrack w
 
 ----------------------------------------------------------------------------------------------------
 -- GROUPS & CAPTURES
-----------------------------------------------------------------------------------------------------
-
-local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
-	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
-	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
-	local ini = metaData.groupCapturesInitStringPositions[captureIndex]
-	local en  = metaData.groupCapturesEndStringPositions[captureIndex]
-	if type(ini) == "table" then
-		ini = ini[#ini]
-		en = en[#en]
-	end
-	assert(ini, string.format("Test '%s': capture %s not found", desc, tostring(captureIndex)))
-	local got = table.concat(splitStr, "", ini, en)
-	assert(got == expectedStr,
-		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
-end
-
-local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
-	local hasMatched, _, _, metaData = matcher(expr, str, flags)
-	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
-	assert(not metaData.groupCapturesInitStringPositions[captureIndex],
-		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
-end
-
-local function assertNoCapture(expr, str, desc, flags)
-	local hasMatched, _, _, metaData = matcher(expr, str, flags)
-	assert(hasMatched, string.format("Test '%s': expected match", desc))
-	local hasAny = false
-	for _ in pairs(metaData.groupCapturesInitStringPositions) do hasAny = true; break end
-	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
-end
-
-local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc, flags)
-	local hasMatched, _, _, metaData = matcher(expr, str, flags)
-	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
-	local pos = metaData.positionCaptures[captureIndex]
-	assert(pos ~= nil, string.format("Test '%s': position capture %d not found", desc, captureIndex))
-	assert(pos == expectedPos, string.format("Test '%s': expected position=%d but got %s", desc, expectedPos, tostring(pos)))
-end
-
 ----------------------------------------------------------------------------------------------------
 print("  [25] Capturing groups (...)...")
 assertMatch("(a)",      "a",    true, 1, 1, "Group: single char")
@@ -924,3 +926,6 @@ assertError("(?u:ã)", "ã", "Scoped Unicode flag is not accepted")
 print("All matcher tests passed!")
 
 
+end, {
+    runs = 1
+})
