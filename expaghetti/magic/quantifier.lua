@@ -15,7 +15,6 @@ local ENUM_CLOSE_QUANTIFIER = magicEnum.CLOSE_QUANTIFIER
 local ENUM_QUANTIFIER_SEPARATOR_CHARACTER = magicEnum.QUANTIFIER_SEPARATOR_CHARACTER
 local ENUM_LAZY_QUANTIFIER = magicEnum.LAZY_QUANTIFIER
 local ENUM_POSSESSIVE_QUANTIFIER = magicEnum.POSSESSIVE_QUANTIFIER
-local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
 local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
@@ -31,7 +30,7 @@ local lookForCustomQuantifier = function(index, patternChars)
 	repeat
 		index = index + 1
 		currentToken = patternChars[index]
-		if not currentToken or currentToken == ENUM_ESCAPE_CHARACTER then
+		if not currentToken then
 			return false
 		end
 
