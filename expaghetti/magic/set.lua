@@ -8,7 +8,6 @@ local ENUM_OPEN_SET = magicEnum.OPEN_SET
 local ENUM_CLOSE_SET = magicEnum.CLOSE_SET
 local ENUM_NEGATE_SET = magicEnum.NEGATE_SET
 local ENUM_SET_RANGE_SEPARATOR = magicEnum.SET_RANGE_SEPARATOR
-local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
 local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
 ----------------------------------------------------------------------------------------------------
 local Set = { }
@@ -20,7 +19,7 @@ local findMagicClosingIndex = function(index, patternChars, patternLength)
 	while index <= patternLength do
 		local char = patternChars[index]
 		
-		if char == ENUM_ESCAPE_CHARACTER then
+		if Escaped.isToken(char) then
 			-- Skip the escape and the escaped character
 			index = index + 2
 		else
@@ -71,7 +70,7 @@ Set.parse = function(state, tree)
 		local isClass, classNode, charValue, isRangeSeparator, isEscapedLiteral
 		local originalElementIndex = elementIndex
 
-		if char == ENUM_ESCAPE_CHARACTER then
+		if Escaped.isToken(char) then
 			local nextIndex, parsedElement = Escaped.parse(elementIndex, state.patternChars)
 			if not nextIndex then return false, parsedElement end
 			if parsedElement.type == ENUM_ELEMENT_TYPE_SET then
@@ -99,7 +98,7 @@ Set.parse = function(state, tree)
 			local nextTokenValue, nextTokenIsRangeSep, skipCount
 			if endIndex > elementIndex then
 				local nextChar = state.patternChars[elementIndex + 1]
-				if nextChar == ENUM_ESCAPE_CHARACTER then
+				if Escaped.isToken(nextChar) then
 					local parsedNextIndex, parsedElement = Escaped.parse(elementIndex + 1, state.patternChars)
 					if parsedElement and parsedElement.type ~= ENUM_ELEMENT_TYPE_SET then
 						nextTokenValue = parsedElement.value
