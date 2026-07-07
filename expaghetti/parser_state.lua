@@ -1,3 +1,4 @@
+local Escaped = require("./magic/escaped")
 local ParserState = {}
 ParserState.__index = ParserState
 
@@ -35,6 +36,15 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, patternChars,
 	self.hasGroupClosed = hasGroupClosed
 	self.initialGroupIndex = self.metaData.groupIndex
 	return self
+end
+
+function ParserState:readElement(index)
+	local char = self.patternChars[index]
+	if Escaped.isToken(char) then
+		return Escaped.parse(index, self.patternChars)
+	else
+		return index + 1, char
+	end
 end
 
 function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranchReset)
