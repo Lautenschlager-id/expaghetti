@@ -2,35 +2,28 @@
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
 local AST = require("./ast")
-local Escaped = require("./magic/escaped")
 ----------------------------------------------------------------------------------------------------
 local ENUM_OPEN_SET = magicEnum.OPEN_SET
 local ENUM_CLOSE_SET = magicEnum.CLOSE_SET
 local ENUM_NEGATE_SET = magicEnum.NEGATE_SET
 local ENUM_SET_RANGE_SEPARATOR = magicEnum.SET_RANGE_SEPARATOR
-local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
 local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
 ----------------------------------------------------------------------------------------------------
 local Set = { }
 
-local findMagicClosingIndex = function(index, patternChars, patternLength)
-	local firstCharacter = index
+local findMagicClosingIndex = function(state, startIndex)
 	local positionDiff = 0
+	local elementIndex = startIndex
 
-	while index <= patternLength do
-		local char = patternChars[index]
+	while elementIndex <= state.patternLength do
+		local nextIndex, element = state:readElement(elementIndex)
 		
-		if char == ENUM_ESCAPE_CHARACTER then
-			-- Skip the escape and the escaped character
-			index = index + 2
-		else
-			if index == firstCharacter and char == ENUM_NEGATE_SET then
-				positionDiff = 1
-			elseif char == ENUM_CLOSE_SET and (index - firstCharacter) > positionDiff then
-				return index
-			end
-			index = index + 1
+		if elementIndex == startIndex and element == ENUM_NEGATE_SET then
+			positionDiff = 1
+		elseif element == ENUM_CLOSE_SET and (elementIndex - startIndex) > positionDiff then
+			return elementIndex
 		end
+		elementIndex = nextIndex
 	end
 	
 	return false, errorsEnum.unclosedSet
@@ -48,7 +41,7 @@ Set.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
 
-	local endIndex, errorMessage = findMagicClosingIndex(state.index, state.patternChars, state.patternLength)
+	local endIndex, errorMessage = findMagicClosingIndex(state, state.index)
 	if not endIndex then
 		return false, errorMessage
 	end
@@ -64,56 +57,30 @@ Set.parse = function(state, tree)
 	local watchingForRangeSeparator
 	local rangeInitChar, currentCharacterValue
 
-	local elementIndex = state.index - 1
-	repeat
-		elementIndex = elementIndex + 1
-		local char = state.patternChars[elementIndex]
-		local isClass, classNode, charValue, isRangeSeparator, isEscapedLiteral
+	local elementIndex = state.index
+	while elementIndex <= endIndex do
 		local originalElementIndex = elementIndex
-
-		if char == ENUM_ESCAPE_CHARACTER then
-			local nextIndex, parsedElement = Escaped.parse(elementIndex, state.patternChars)
-			if not nextIndex then return false, parsedElement end
-			if parsedElement.type == ENUM_ELEMENT_TYPE_SET then
-				isClass = true
-				classNode = parsedElement
-			else
-				charValue = parsedElement.value
-				isEscapedLiteral = true
-			end
-			elementIndex = nextIndex - 1
-		else
-			charValue = char
-			if char == ENUM_SET_RANGE_SEPARATOR then
-				isRangeSeparator = true
-			end
-		end
+		local nextIndex, element = state:readElement(elementIndex)
+		if not nextIndex then return false, element end
+		elementIndex = nextIndex
 
 		-- first character of the set
-		if not isEscapedLiteral and originalElementIndex == state.index and charValue == ENUM_NEGATE_SET then
+		if originalElementIndex == state.index and element == ENUM_NEGATE_SET then
 			set.hasToNegateMatch = true
-		elseif isClass then
+		elseif element.type == ENUM_ELEMENT_TYPE_SET then
 			set.classIndex = set.classIndex + 1
-			set.classes[set.classIndex] = classNode
+			set.classes[set.classIndex] = element
 		else
 			local nextTokenValue, nextTokenIsRangeSep, skipCount
-			if endIndex > elementIndex then
-				local nextChar = state.patternChars[elementIndex + 1]
-				if nextChar == ENUM_ESCAPE_CHARACTER then
-					local parsedNextIndex, parsedElement = Escaped.parse(elementIndex + 1, state.patternChars)
-					if parsedElement and parsedElement.type ~= ENUM_ELEMENT_TYPE_SET then
-						nextTokenValue = parsedElement.value
-						skipCount = parsedNextIndex - (elementIndex + 1)
-					end
-				else
-					nextTokenValue = nextChar
-					if nextChar == ENUM_SET_RANGE_SEPARATOR then
-						nextTokenIsRangeSep = true
-					end
-					skipCount = 1
+			if endIndex >= elementIndex then
+				local peekIndex, nextElement = state:readElement(elementIndex)
+				if nextElement then
+					skipCount = peekIndex - elementIndex
+					nextTokenIsRangeSep = nextElement == ENUM_SET_RANGE_SEPARATOR
+					nextTokenValue = nextElement.type ~= ENUM_ELEMENT_TYPE_SET and (nextElement.value or nextElement) or nil
 				end
 			end
-			currentCharacterValue = charValue
+			local currentCharacterValue = element.value or element
 
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false
@@ -131,7 +98,7 @@ Set.parse = function(state, tree)
 					set.ranges[set.rangeIndex] = nextTokenValue
 
 					-- skip next element(s)
-					elementIndex = elementIndex + skipCount
+					elementIndex = elementIndex + (skipCount or 0)
 				else
 					set[rangeInitChar] = true
 					set[currentCharacterValue] = true
@@ -144,7 +111,7 @@ Set.parse = function(state, tree)
 			end
 		end
 
-	until elementIndex == endIndex
+	end
 
 	tree._index = tree._index + 1
 	tree[tree._index] = set
