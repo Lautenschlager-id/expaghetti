@@ -6,6 +6,7 @@ local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
+local elementsEnum = require("./enums/elements")
 local quantifiersEnum = require("./enums/quantifiers")
 local quantifierModesEnum = require("./enums/quantifierModes")
 ----------------------------------------------------------------------------------------------------
@@ -14,7 +15,8 @@ local ENUM_CLOSE_QUANTIFIER = magicEnum.CLOSE_QUANTIFIER
 local ENUM_QUANTIFIER_SEPARATOR_CHARACTER = magicEnum.QUANTIFIER_SEPARATOR_CHARACTER
 local ENUM_LAZY_QUANTIFIER = magicEnum.LAZY_QUANTIFIER
 local ENUM_POSSESSIVE_QUANTIFIER = magicEnum.POSSESSIVE_QUANTIFIER
-local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
+local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
+local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
@@ -29,7 +31,7 @@ local lookForCustomQuantifier = function(index, patternChars)
 	repeat
 		index = index + 1
 		currentToken = patternChars[index]
-		if not currentToken or currentToken == '\\' then
+		if not currentToken or currentToken == ENUM_ESCAPE_CHARACTER then
 			return false
 		end
 
@@ -113,10 +115,10 @@ Quantifier.isElement = function(currentElement)
 end
 
 local nonQuantifiableTypes = {
-	[require("./enums/elements").anchor] = true,
-	[require("./enums/elements").boundary] = true,
-	[require("./enums/elements").balanced] = true,
-	[require("./enums/elements").position_capture] = true,
+	[elementsEnum.anchor] = true,
+	[elementsEnum.boundary] = true,
+	[elementsEnum.balanced] = true,
+	[elementsEnum.position_capture] = true,
 }
 
 Quantifier.lookForElementOperation = function(state, parentElement)

@@ -68,7 +68,7 @@ Set.parse = function(state, tree)
 	repeat
 		elementIndex = elementIndex + 1
 		local char = state.patternChars[elementIndex]
-		local isClass, classNode, val, isRangeSeparator, isEscapedLiteral
+		local isClass, classNode, charValue, isRangeSeparator, isEscapedLiteral
 		local originalElementIndex = elementIndex
 
 		if char == ENUM_ESCAPE_CHARACTER then
@@ -78,19 +78,19 @@ Set.parse = function(state, tree)
 				isClass = true
 				classNode = parsedElement
 			else
-				val = parsedElement.value
+				charValue = parsedElement.value
 				isEscapedLiteral = true
 			end
 			elementIndex = nextIndex - 1
 		else
-			val = char
+			charValue = char
 			if char == ENUM_SET_RANGE_SEPARATOR then
 				isRangeSeparator = true
 			end
 		end
 
 		-- first character of the set
-		if not isEscapedLiteral and originalElementIndex == state.index and val == ENUM_NEGATE_SET then
+		if not isEscapedLiteral and originalElementIndex == state.index and charValue == ENUM_NEGATE_SET then
 			set.hasToNegateMatch = true
 		elseif isClass then
 			set.classIndex = set.classIndex + 1
@@ -113,7 +113,7 @@ Set.parse = function(state, tree)
 					skipCount = 1
 				end
 			end
-			currentCharacterValue = val
+			currentCharacterValue = charValue
 
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false

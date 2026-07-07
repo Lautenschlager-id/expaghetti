@@ -5,6 +5,7 @@ local AST = require("./ast")
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local Literal = { }
 
@@ -15,7 +16,6 @@ Literal.parse = function(state, currentCharacter, tree)
 	end
 
 	tree._index = tree._index + 1
-	local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 	local node = AST.Literal(currentCharacter)
 	if type(currentCharacter) == "string" then
 		if state.flags.i then
