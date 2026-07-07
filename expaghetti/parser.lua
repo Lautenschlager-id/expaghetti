@@ -8,7 +8,6 @@ local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local Anchor = require("./magic/anchor")
 local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
-local Escaped = require("./magic/escaped")
 local Group = require("./magic/group")
 local Literal = require("./magic/literal")
 local Quantifier = require("./magic/Quantifier")
@@ -29,39 +28,32 @@ local function parserCore(state)
 
 	while state.index <= state.patternLength do
 		local currentIndex = state.index
-		local currentCharacter = state.patternChars[currentIndex]
-		local isEscaped = Escaped.isToken(currentCharacter)
-		local rawToken = currentCharacter
+		local nextIndex, element = state:readElement(currentIndex)
+		if not nextIndex then return false, element end
 
-		if isEscaped then
-			local nextIndex, parsedElement = Escaped.parse(currentIndex, state.patternChars)
-			if not nextIndex then return false, parsedElement end
-			rawToken = parsedElement
+		if element.type then
 			state.index = nextIndex
-		end
-
-		if isEscaped then
-			if type(rawToken) == "table" and rawToken.type == "boundary" then
-				local nextToken = state.patternChars[state.index]
-				if nextToken == '[' then
+			if element.type == "boundary" then
+				local peekIndex, nextElement = state:readElement(state.index)
+				if nextElement == '[' then
 					state.index, errorMessage = Set.parse(state, tree)
 					if errorMessage then return false, errorMessage end
 					local parsedSet = tree[tree._index]
-					rawToken.set = parsedSet
-					tree[tree._index] = rawToken
+					element.set = parsedSet
+					tree[tree._index] = element
 				else
 					errorMessage = errorsEnum.missingFrontierSet
 				end
 			else
 				tree._index = tree._index + 1
-				tree[tree._index] = rawToken
+				tree[tree._index] = element
 			end
 		else
-			if Set.isToken(rawToken) then
+			if Set.isToken(element) then
 				state.index, errorMessage = Set.parse(state, tree)
-			elseif Group.isOpeningToken(rawToken) then
+			elseif Group.isOpeningToken(element) then
 				state.index, errorMessage = Group.parse(state, tree)
-			elseif Group.isClosingToken(rawToken) then
+			elseif Group.isClosingToken(element) then
 				-- assumes hasGroupClosed = false
 				if state.isGroup then
 					state.hasGroupClosed = true
@@ -69,11 +61,11 @@ local function parserCore(state)
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
-			elseif Anchor.isToken(rawToken) then
-				state.index = Anchor.parse(state, rawToken, tree)
-			elseif Any.isToken(rawToken) then
+			elseif Anchor.isToken(element) then
+				state.index = Anchor.parse(state, element, tree)
+			elseif Any.isToken(element) then
 				state.index = Any.parse(state, tree)
-			elseif Alternate.isToken(rawToken) then
+			elseif Alternate.isToken(element) then
 				if not state.isAlternate then
 					-- First occurrence
 					state.index, errorMessage, state.hasGroupClosed = Alternate.parse(state, tree)
@@ -87,7 +79,7 @@ local function parserCore(state)
 				-- Whenever found, stop processing the rest of the expression since it's looping
 				break
 			else
-				state.index, errorMessage = Literal.parse(state, rawToken, tree)
+				state.index, errorMessage = Literal.parse(state, element, tree)
 			end
 		end
 
