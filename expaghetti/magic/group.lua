@@ -90,7 +90,7 @@ local getGroupBehavior = function(state, groupElement)
 	local parserMetaData = state.metaData
 	
 	local nextIndex, currentChar = state:readElement(index)
-	if not nextIndex or type(currentChar) ~= "string" then return index end
+	if not nextIndex or state:isElement(currentChar) then return index end
 
 	if currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
 		return index
@@ -101,7 +101,7 @@ local getGroupBehavior = function(state, groupElement)
 	if not nextIndex then return index end
 
 	local errorMessage
-	if type(currentChar) ~= "string" then
+	if state:isElement(currentChar) then
 		errorMessage = errorsEnum.invalidGroupBehavior
 	elseif currentChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
 		groupElement.disableCapture = true
@@ -120,7 +120,7 @@ local getGroupBehavior = function(state, groupElement)
 		groupElement.disableCapture = true
 	elseif currentChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
 		local lookbehindIndex, lookbehindChar = state:readElement(nextIndex)
-		if not lookbehindIndex or type(lookbehindChar) ~= "string" then
+		if not lookbehindIndex or state:isElement(lookbehindChar) then
 			errorMessage = errorsEnum.invalidGroupBehavior
 		else
 			if lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
@@ -146,7 +146,7 @@ local getGroupBehavior = function(state, groupElement)
 		if charVal == 'R' or charVal == '0' then
 			index = nextIndex
 			nextIndex, currentChar = state:readElement(index)
-			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP then
+			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.isRecursionRoot = true
 			else
@@ -158,12 +158,12 @@ local getGroupBehavior = function(state, groupElement)
 				numStr = numStr .. charVal
 				index = nextIndex
 				nextIndex, currentChar = state:readElement(index)
-				if not nextIndex or type(currentChar) ~= "string" or currentChar < '0' or currentChar > '9' then
+				if not nextIndex or state:isElement(currentChar) or currentChar < '0' or currentChar > '9' then
 					break
 				end
 				charVal = currentChar
 			end
-			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP then
+			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.targetIndex = tonumber(numStr)
 			else
@@ -173,12 +173,12 @@ local getGroupBehavior = function(state, groupElement)
 			local nameStr = ""
 			index = nextIndex
 			nextIndex, currentChar = state:readElement(index)
-			while nextIndex and type(currentChar) == "string" and currentChar ~= ENUM_CLOSE_GROUP do
+			while nextIndex and not state:isElement(currentChar) and currentChar ~= ENUM_CLOSE_GROUP do
 				nameStr = nameStr .. currentChar
 				index = nextIndex
 				nextIndex, currentChar = state:readElement(index)
 			end
-			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP and #nameStr > 0 then
+			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP and #nameStr > 0 then
 				groupElement.isRecursion = true
 				groupElement.targetName = nameStr
 			else
@@ -197,7 +197,7 @@ local getGroupBehavior = function(state, groupElement)
 				end
 				index = nextIndex
 				nextIndex, currentChar = state:readElement(index)
-				if not nextIndex or type(currentChar) ~= "string" then break end
+				if not nextIndex or state:isElement(currentChar) then break end
 				charVal = currentChar
 			end
 			
@@ -226,7 +226,7 @@ local getGroupBehavior = function(state, groupElement)
 		repeat
 			index = nextIndex
 			nextIndex, currentChar = state:readElement(index)
-			if not nextIndex or type(currentChar) ~= "string" then
+			if not nextIndex or state:isElement(currentChar) then
 				errorMessage = errorsEnum.invalidGroupName
 				break
 			end

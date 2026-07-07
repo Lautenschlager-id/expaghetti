@@ -35,7 +35,7 @@ local lookForCustomQuantifier = function(state, index)
 		index = nextIndex
 		currentToken = element
 
-		if type(currentToken) ~= "string" then
+		if state:isElement(currentToken) then
 			return false
 		elseif currentToken >= '0' and currentToken <= '9' then
 			parameters[currentParameter] = parameters[currentParameter] .. currentToken
@@ -74,7 +74,7 @@ local checkIfAppliesToParentTreeElement = function(state, index)
 	local nextIndex, currentToken = state:readElement(index)
 	if not nextIndex then return index, false end
 	
-	if type(currentToken) == "string" and quantifiersEnum[currentToken] then
+	if not state:isElement(currentToken) and quantifiersEnum[currentToken] then
 		return nextIndex, quantifiersEnum[currentToken]
 	elseif currentToken == ENUM_OPEN_QUANTIFIER then
 		local newIndex, customQuantifier = lookForCustomQuantifier(state, nextIndex)
@@ -91,7 +91,7 @@ end
 
 local lookForModeToken = function(state, index, quantifier)
 	local nextIndex, currentToken = state:readElement(index)
-	if nextIndex and type(currentToken) == "string" then
+	if nextIndex and not state:isElement(currentToken) then
 		local quantifierMode = quantifierModesEnum[currentToken]
 
 		if quantifierMode then

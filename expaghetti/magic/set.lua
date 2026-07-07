@@ -77,10 +77,10 @@ Set.parse = function(state, tree)
 				if nextElement then
 					skipCount = peekIndex - elementIndex
 					nextTokenIsRangeSep = nextElement == ENUM_SET_RANGE_SEPARATOR
-					nextTokenValue = nextElement.type ~= ENUM_ELEMENT_TYPE_SET and (nextElement.value or nextElement) or nil
+					nextTokenValue = nextElement.type ~= ENUM_ELEMENT_TYPE_SET and state:getCharacterValue(nextElement) or nil
 				end
 			end
-			local currentCharacterValue = element.value or element
+			local currentCharacterValue = state:getCharacterValue(element)
 
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false

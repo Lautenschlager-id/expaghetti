@@ -69,4 +69,15 @@ function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranch
 	return tree
 end
 
+function ParserState:isElement(element)
+	return type(element) == "table"
+end
+
+function ParserState:getCharacterValue(element)
+	if type(element) == "table" then
+		return element.value
+	end
+	return element
+end
+
 return ParserState
