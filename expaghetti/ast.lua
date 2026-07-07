@@ -6,7 +6,6 @@ function AST.Anchor(isBeginning)
 	return {
 		type = elementsEnum.anchor,
 		isBeginning = isBeginning,
-		quantifier = false,
 	}
 end
 

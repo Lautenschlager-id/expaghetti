@@ -6,7 +6,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = true,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -25,7 +25,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = true,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -34,7 +34,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = true,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -61,7 +61,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = false,
-				quantifier = false
+				
 			}
 		}
 	},
@@ -72,7 +72,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = true,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -85,7 +85,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = false,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -100,7 +100,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = false,
-				quantifier = false
+				
 			},
 			{
 				type = "set",
@@ -115,7 +115,7 @@ return {
 			{
 				type = "anchor",
 				isBeginning = true,
-				quantifier = false
+				
 			}
 		}
 	},

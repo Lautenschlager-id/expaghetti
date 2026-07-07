@@ -110,7 +110,7 @@ return {
 			{
 				type = "position_capture",
 				index = 1,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -119,7 +119,7 @@ return {
 			{
 				type = "position_capture",
 				index = 2,
-				quantifier = false
+				
 			},
 			{
 				type = "literal",
@@ -151,7 +151,7 @@ return {
 			{
 				type = "position_capture",
 				index = 1,
-				quantifier = false
+				
 			}
 		}
 	},
@@ -182,7 +182,7 @@ return {
 			{
 				type = "position_capture",
 				index = 1,
-				quantifier = false
+				
 			}
 		}
 	},

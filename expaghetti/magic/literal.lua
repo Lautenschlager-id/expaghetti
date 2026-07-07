@@ -15,10 +15,16 @@ Literal.parse = function(state, currentCharacter, tree)
 	end
 
 	tree._index = tree._index + 1
+	local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 	local node = AST.Literal(currentCharacter)
-	if state.flags.i and type(currentCharacter) == "string" then
-		node.isCaseInsensitive = true
-		node.lowercaseValue = string.lower(currentCharacter)
+	if type(currentCharacter) == "string" then
+		if state.flags.i then
+			node.isCaseInsensitive = true
+			node.lowercaseValue = string.lower(currentCharacter)
+		end
+		if not state.flags[ENUM_FLAG_UNICODE] then
+			node.byteValue = string.byte(currentCharacter)
+		end
 	end
 	tree[tree._index] = node
 

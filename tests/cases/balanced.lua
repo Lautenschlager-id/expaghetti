@@ -6,8 +6,7 @@ return {
 			{
 				type = "balanced",
                 open = "+",
-                close = ".",
-                quantifier = false
+                close = "."
 			}
 		}
 	}

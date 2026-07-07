@@ -13,15 +13,13 @@ PositionCapture.parse = function(index, tree, parserMetaData)
 	--[[
 		{
 			type = "position_capture",
-			index = 1,
-			quantifier = false
+			index = 1
 		}
 	]]
 	tree._index = tree._index + 1
 	tree[tree._index] = {
 		type = ENUM_ELEMENT_TYPE_POSITION_CAPTURE,
 		index = parserMetaData.positionCaptureIndex,
-		quantifier = false,
 	}
 
 	return index + 1

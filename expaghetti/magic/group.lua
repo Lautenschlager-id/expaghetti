@@ -87,66 +87,62 @@ end
 
 local getGroupBehavior = function(state, groupElement)
 	local index = state.index
-	local tokens = state.tokens
+	local patternChars = state.patternChars
 	local parserMetaData = state.metaData
-	local currentToken = tokens[index]
-	if not currentToken then return index end
-	local currentRaw = currentToken.raw
+	local currentChar = patternChars[index]
+	if not currentChar then return index end
 
-	if currentRaw ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
+	if currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
 		return index
 	end
 
 	index = index + 1
-	currentToken = tokens[index]
-	if not currentToken then return index end
-	currentRaw = currentToken.raw
+	currentChar = patternChars[index]
+	if not currentChar then return index end
 
 	local errorMessage
-	if currentRaw == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+	if currentChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
 		groupElement.disableCapture = true
-	elseif currentRaw == ENUM_GROUP_ATOMIC_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_ATOMIC_BEHAVIOR then
 		groupElement.isAtomic = true
 		groupElement.disableCapture = true
-	elseif currentRaw == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
 		groupElement.isBranchReset = true
 		groupElement.disableCapture = true
-	elseif currentRaw == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
 		groupElement.disableCapture = true
-	elseif currentRaw == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 		groupElement.isLookahead = true
 		groupElement.isNegative = true
 		groupElement.disableCapture = true
-	elseif currentRaw == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
 		index = index + 1
-		currentToken = tokens[index]
-		if not currentToken then
+		currentChar = patternChars[index]
+		if not currentChar then
 			errorMessage = errorsEnum.invalidGroupBehavior
 		else
-			currentRaw = currentToken.raw
-			if currentRaw == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
+			if currentChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 				groupElement.isLookbehind = true
 				groupElement.disableCapture = true
-			elseif currentRaw == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+			elseif currentChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 				groupElement.isLookbehind = true
 				groupElement.isNegative = true
 				groupElement.disableCapture = true
 			else
 				index = index - 1
-				currentToken = tokens[index]
-				currentRaw = currentToken and currentToken.raw
+				currentChar = patternChars[index]
 				errorMessage = errorsEnum.invalidGroupBehavior
 			end
 		end
-	elseif currentRaw == ENUM_GROUP_COMMENT_BEHAVIOR then
+	elseif currentChar == ENUM_GROUP_COMMENT_BEHAVIOR then
 		groupElement.disableCapture = true
 		groupElement._skipFromTree = true
 	else
-		local charVal = currentToken.value
+		local charVal = currentChar
 		if charVal == 'R' or charVal == '0' then
-			local nextToken = tokens[index + 1]
-			if nextToken and nextToken.raw == ENUM_CLOSE_GROUP then
+			local nextChar = patternChars[index + 1]
+			if nextChar == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.isRecursionRoot = true
 				index = index + 1
@@ -155,11 +151,11 @@ local getGroupBehavior = function(state, groupElement)
 			end
 		elseif charVal and charVal >= '1' and charVal <= '9' then
 			local numStr = ""
-			while tokens[index] and tokens[index].value and tokens[index].value >= '0' and tokens[index].value <= '9' do
-				numStr = numStr .. tokens[index].value
+			while patternChars[index] and patternChars[index] >= '0' and patternChars[index] <= '9' do
+				numStr = numStr .. patternChars[index]
 				index = index + 1
 			end
-			if tokens[index] and tokens[index].raw == ENUM_CLOSE_GROUP then
+			if patternChars[index] == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.targetIndex = tonumber(numStr)
 			else
@@ -168,11 +164,11 @@ local getGroupBehavior = function(state, groupElement)
 		elseif charVal == '&' then
 			local nameStr = ""
 			index = index + 1
-			while tokens[index] and tokens[index].value and tokens[index].raw ~= ENUM_CLOSE_GROUP do
-				nameStr = nameStr .. tokens[index].value
+			while patternChars[index] and patternChars[index] ~= ENUM_CLOSE_GROUP do
+				nameStr = nameStr .. patternChars[index]
 				index = index + 1
 			end
-			if tokens[index] and tokens[index].raw == ENUM_CLOSE_GROUP and #nameStr > 0 then
+			if patternChars[index] == ENUM_CLOSE_GROUP and #nameStr > 0 then
 				groupElement.isRecursion = true
 				groupElement.targetName = nameStr
 			else
@@ -190,16 +186,16 @@ local getGroupBehavior = function(state, groupElement)
 					currentTarget[charVal] = true
 				end
 				index = index + 1
-				currentToken = tokens[index]
-				charVal = currentToken and currentToken.value
+				currentChar = patternChars[index]
+				charVal = currentChar
 			end
 			
-			local nextRaw = currentToken and currentToken.raw
-			if nextRaw == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+			local nextChar = currentChar
+			if nextChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
 				-- Scoped flags (?i:...)
 				groupElement.disableCapture = true
 				groupElement.scopedFlags = { enable = enableFlags, disable = disableFlags }
-			elseif nextRaw == ENUM_CLOSE_GROUP then
+			elseif nextChar == ENUM_CLOSE_GROUP then
 				-- Inline toggle (?i)
 				groupElement._skipFromTree = true
 				groupElement.inlineFlags = { enable = enableFlags, disable = disableFlags }
@@ -212,19 +208,18 @@ local getGroupBehavior = function(state, groupElement)
 	end
 
 	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
-	if errorMessage and currentRaw == ENUM_GROUP_NAME_OPEN then
+	if errorMessage and currentChar == ENUM_GROUP_NAME_OPEN then
 		local currentCharacterValue
 		local name, nameIndex = { }, 0
 		local firstCharacter = index + 1
 		repeat
 			index = index + 1
-			currentToken = tokens[index]
-			if not currentToken then
+			currentChar = patternChars[index]
+			if not currentChar then
 				errorMessage = errorsEnum.invalidGroupName
 				break
 			end
-			currentRaw = currentToken.raw
-			currentCharacterValue = currentToken.value
+			currentCharacterValue = currentChar
 
 			if not currentCharacterValue then
 				errorMessage = errorsEnum.invalidGroupName
@@ -236,8 +231,8 @@ local getGroupBehavior = function(state, groupElement)
 					and (currentCharacterValue >= '0' and currentCharacterValue <= '9')) then
 
 				nameIndex = nameIndex + 1
-				name[nameIndex] = currentRaw
-			elseif nameIndex > 0 and currentRaw == ENUM_GROUP_NAME_CLOSE then
+				name[nameIndex] = currentChar
+			elseif nameIndex > 0 and currentChar == ENUM_GROUP_NAME_CLOSE then
 				name = tblconcat(name)
 				if parserMetaData.groupNames[name] then
 					errorMessage = strformat(errorsEnum.duplicatedGroupName, name)
@@ -305,7 +300,7 @@ Group.parse = function(state, tree)
 	-- A group with any value
 	if value.isRecursion then
 		value.tree = { _index = 0 }
-	elseif not state.tokens[state.index] or state.tokens[state.index].raw ~= ENUM_CLOSE_GROUP then
+	elseif not state.patternChars[state.index] or state.patternChars[state.index] ~= ENUM_CLOSE_GROUP then
 		if not (
 			value.disableCapture
 			or value.name

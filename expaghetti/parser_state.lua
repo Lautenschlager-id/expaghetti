@@ -1,7 +1,7 @@
 local ParserState = {}
 ParserState.__index = ParserState
 
-function ParserState.new(expr, flags, isGroup, isAlternate, index, expression, expressionLength, tokens, metaData, hasGroupClosed)
+function ParserState.new(expr, flags, isGroup, isAlternate, index, patternChars, patternLength, metaData, hasGroupClosed)
 	local self = setmetatable({}, ParserState)
 	self.expr = expr
 	self.flags = {}
@@ -16,15 +16,24 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, expression, e
 	end
 	self.isGroup = isGroup
 	self.isAlternate = isAlternate
-	self.index = index
-	self.expression = expression
-	self.expressionLength = expressionLength
-	self.tokens = tokens
-	self.charactersIndex = tokens and #tokens or 0
+	self.index = index or 1
+	self.patternChars = patternChars
+	self.patternLength = patternLength
 	
-	self.metaData = metaData
+	if metaData then
+		self.metaData = metaData
+	else
+		self.metaData = {
+			groupNames = {},
+			groupIndex = 0,
+			positionCaptureIndex = 0,
+			groupTreesByIndex = {},
+			groupTreesByName = {},
+		}
+	end
+	
 	self.hasGroupClosed = hasGroupClosed
-	self.initialGroupIndex = metaData and metaData.groupIndex or 0
+	self.initialGroupIndex = self.metaData.groupIndex
 	return self
 end
 
@@ -34,8 +43,7 @@ function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranch
 	local tree, nextIndex, newHasGroupClosed = parser(
 		nil, nil,
 		isGroup, isAlternate,
-		self.index, self.expression, self.expressionLength,
-		self.tokens,
+		self.index, self.patternChars, self.patternLength,
 		self.metaData,
 		hasGroupClosed,
 		self.flags,

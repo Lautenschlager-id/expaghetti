@@ -56,7 +56,7 @@ Alternate.parse = function(state, tree)
 
 		totalAlternates = totalAlternates + 1
 		tree[totalAlternates] = alternativeTree
-	until state.index > state.charactersIndex or (state.isGroup and state.hasGroupClosed)
+	until state.index > state.patternLength or (state.isGroup and state.hasGroupClosed)
 
 	if isBranchReset then
 		state.metaData.groupIndex = maxGroupIndex

@@ -19,7 +19,6 @@ local errorsEnum = require("./enums/errors")
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local ParserState = require("./parser_state")
-local Tokenizer = require("./tokenizer")
 
 local function parserCore(state)
 	local tree = {
@@ -27,35 +26,42 @@ local function parserCore(state)
 	}
 
 	local errorMessage
-	local currentToken
 
-	while state.index <= state.charactersIndex do
-		currentToken = state.tokens[state.index]
+	while state.index <= state.patternLength do
+		local currentIndex = state.index
+		local currentCharacter = state.patternChars[currentIndex]
+		local isEscaped = Escaped.isToken(currentCharacter)
+		local rawToken = currentCharacter
 
-		if currentToken.isEscaped then
-			state.index = state.index + 1
+		if isEscaped then
+			local nextIndex, parsedElement = Escaped.parse(currentIndex, state.patternChars)
+			if not nextIndex then return false, parsedElement end
+			rawToken = parsedElement
+			state.index = nextIndex
+		end
 
-			if type(currentToken.raw) == "table" and currentToken.raw.type == "boundary" then
-				local nextToken = state.tokens[state.index]
-				if not (nextToken and nextToken.isEscaped) and nextToken and Set.isToken(nextToken.raw) then
+		if isEscaped then
+			if type(rawToken) == "table" and rawToken.type == "boundary" then
+				local nextToken = state.patternChars[state.index]
+				if nextToken == '[' then
 					state.index, errorMessage = Set.parse(state, tree)
 					if errorMessage then return false, errorMessage end
 					local parsedSet = tree[tree._index]
-					currentToken.raw.set = parsedSet
-					tree[tree._index] = currentToken.raw
+					rawToken.set = parsedSet
+					tree[tree._index] = rawToken
 				else
 					errorMessage = errorsEnum.missingFrontierSet
 				end
 			else
 				tree._index = tree._index + 1
-				tree[tree._index] = currentToken.raw
+				tree[tree._index] = rawToken
 			end
 		else
-			if Set.isToken(currentToken.raw) then
+			if Set.isToken(rawToken) then
 				state.index, errorMessage = Set.parse(state, tree)
-			elseif Group.isOpeningToken(currentToken.raw) then
+			elseif Group.isOpeningToken(rawToken) then
 				state.index, errorMessage = Group.parse(state, tree)
-			elseif Group.isClosingToken(currentToken.raw) then
+			elseif Group.isClosingToken(rawToken) then
 				-- assumes hasGroupClosed = false
 				if state.isGroup then
 					state.hasGroupClosed = true
@@ -63,11 +69,11 @@ local function parserCore(state)
 				else
 					errorMessage = errorsEnum.noGroupToClose
 				end
-			elseif Anchor.isToken(currentToken.raw) then
-				state.index = Anchor.parse(state, currentToken.raw, tree)
-			elseif Any.isToken(currentToken.raw) then
+			elseif Anchor.isToken(rawToken) then
+				state.index = Anchor.parse(state, rawToken, tree)
+			elseif Any.isToken(rawToken) then
 				state.index = Any.parse(state, tree)
-			elseif Alternate.isToken(currentToken.raw) then
+			elseif Alternate.isToken(rawToken) then
 				if not state.isAlternate then
 					-- First occurrence
 					state.index, errorMessage, state.hasGroupClosed = Alternate.parse(state, tree)
@@ -81,7 +87,7 @@ local function parserCore(state)
 				-- Whenever found, stop processing the rest of the expression since it's looping
 				break
 			else
-				state.index, errorMessage = Literal.parse(state, currentToken.raw, tree)
+				state.index, errorMessage = Literal.parse(state, rawToken, tree)
 			end
 		end
 
@@ -105,8 +111,7 @@ function parser(expr, flags,
 	-- At least one should be true or else it's going to ignore all the next parameters
 	isGroup, isAlternate,
 	-- Parameters passed for recursion parsing
-	index, expression, expressionLength,
-	tokens,
+	index, patternChars, patternLength,
 	metaData,
 	hasGroupClosed,
 	inheritedFlags,
@@ -115,22 +120,7 @@ function parser(expr, flags,
 	if not (isGroup or isAlternate) then
 		flags = flags or { }
 
-		expression, expressionLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
-		local tokensLength
-		tokensLength, tokens = Tokenizer.tokenize(expression, expressionLength)
-
-		if not tokensLength then
-			return false, tokens
-		end
-
-		-- Data shared for all sub-groups
-		metaData = {
-			groupNames = { },
-			groupIndex = 0,
-			positionCaptureIndex = 0,
-			groupTreesByIndex = { },
-			groupTreesByName = { },
-		}
+		patternChars, patternLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
 
 		index = 1
 		hasGroupClosed = true
@@ -141,8 +131,7 @@ function parser(expr, flags,
 	end
 
 	local state = ParserState.new(
-		expr, inheritedFlags or flags, isGroup, isAlternate, index, expression, expressionLength,
-		tokens,
+		expr, inheritedFlags or flags, isGroup, isAlternate, index, patternChars, patternLength,
 		metaData, hasGroupClosed
 	)
 	state.isBranchReset = isBranchReset

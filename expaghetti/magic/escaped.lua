@@ -77,7 +77,6 @@ specialEscaped.b = function(currentCharacter, index, expression)
 		type = ENUM_ELEMENT_TYPE_BALANCED,
 		open = opener,
 		close = closer,
-		quantifier = false,
 	}
 end
 -- %f --> frontier boundary
@@ -85,7 +84,6 @@ specialEscaped.f = function(currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
 		isNegated = false,
-		quantifier = false,
 	}
 end
 -- %F --> negated frontier boundary
@@ -93,7 +91,6 @@ specialEscaped.F = function(currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
 		isNegated = true,
-		quantifier = false,
 	}
 end
 ----------------------------------------------------------------------------------------------------
