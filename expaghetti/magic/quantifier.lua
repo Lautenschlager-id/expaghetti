@@ -19,7 +19,7 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
 
-local lookForCustomQuantifier = function(index, patternChars)
+local lookForCustomQuantifier = function(state, index)
 	local currentToken
 
 	local parameters, currentParameter = {
@@ -28,13 +28,16 @@ local lookForCustomQuantifier = function(index, patternChars)
 	}, 1
 
 	repeat
-		index = index + 1
-		currentToken = patternChars[index]
-		if not currentToken then
+		local nextIndex, element = state:readElement(index)
+		if not nextIndex then
 			return false
 		end
+		index = nextIndex
+		currentToken = element
 
-		if currentToken >= '0' and currentToken <= '9' then
+		if type(currentToken) ~= "string" then
+			return false
+		elseif currentToken >= '0' and currentToken <= '9' then
 			parameters[currentParameter] = parameters[currentParameter] .. currentToken
 		elseif currentToken == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
 			if currentParameter == 2 then
@@ -42,7 +45,6 @@ local lookForCustomQuantifier = function(index, patternChars)
 			end
 			currentParameter = 2
 		elseif currentToken == ENUM_CLOSE_QUANTIFIER then
-			index = index + 1
 			break
 		else
 			return false
@@ -68,14 +70,14 @@ local lookForCustomQuantifier = function(index, patternChars)
 	return index, AST.Quantifier(parameters[1], parameters[2])
 end
 
-local checkIfAppliesToParentTreeElement = function(index, patternChars)
-	local currentToken = patternChars[index]
-	if not currentToken then return index, false end
+local checkIfAppliesToParentTreeElement = function(state, index)
+	local nextIndex, currentToken = state:readElement(index)
+	if not nextIndex then return index, false end
 	
-	if quantifiersEnum[currentToken] then
-		return index + 1, quantifiersEnum[currentToken]
+	if type(currentToken) == "string" and quantifiersEnum[currentToken] then
+		return nextIndex, quantifiersEnum[currentToken]
 	elseif currentToken == ENUM_OPEN_QUANTIFIER then
-		local newIndex, customQuantifier = lookForCustomQuantifier(index, patternChars)
+		local newIndex, customQuantifier = lookForCustomQuantifier(state, nextIndex)
 		if newIndex then
 			return newIndex, customQuantifier
 		elseif customQuantifier then
@@ -87,15 +89,15 @@ local checkIfAppliesToParentTreeElement = function(index, patternChars)
 	return index, false
 end
 
-local lookForModeToken = function(index, patternChars, quantifier)
-	local currentToken = patternChars[index]
-	if currentToken then
+local lookForModeToken = function(state, index, quantifier)
+	local nextIndex, currentToken = state:readElement(index)
+	if nextIndex and type(currentToken) == "string" then
 		local quantifierMode = quantifierModesEnum[currentToken]
 
 		if quantifierMode then
 			quantifier = tblDeepCopy(quantifier)
 			quantifier.mode = quantifierMode
-			index = index + 1
+			index = nextIndex
 		end
 	end
 	return index, quantifier
@@ -103,7 +105,7 @@ end
 
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
-	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.patternChars)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state, state.index)
 
 	return index and quantifier
 end
@@ -124,7 +126,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers
 	local shouldntHaveQuantifier = nonQuantifiableTypes[parentElement.type] == true
 
-	local index, quantifier = checkIfAppliesToParentTreeElement(state.index, state.patternChars)
+	local index, quantifier = checkIfAppliesToParentTreeElement(state, state.index)
 
 	if not index then
 		-- quantifier = error message
@@ -137,7 +139,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 		return false, errorsEnum.nothingToRepeat
 	end
 
-	index, quantifier = lookForModeToken(index, state.patternChars, quantifier)
+	index, quantifier = lookForModeToken(state, index, quantifier)
 	parentElement.quantifier = quantifier
 
 	return index

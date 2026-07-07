@@ -87,21 +87,23 @@ end
 
 local getGroupBehavior = function(state, groupElement)
 	local index = state.index
-	local patternChars = state.patternChars
 	local parserMetaData = state.metaData
-	local currentChar = patternChars[index]
-	if not currentChar then return index end
+	
+	local nextIndex, currentChar = state:readElement(index)
+	if not nextIndex or type(currentChar) ~= "string" then return index end
 
 	if currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
 		return index
 	end
 
-	index = index + 1
-	currentChar = patternChars[index]
-	if not currentChar then return index end
+	index = nextIndex
+	nextIndex, currentChar = state:readElement(index)
+	if not nextIndex then return index end
 
 	local errorMessage
-	if currentChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+	if type(currentChar) ~= "string" then
+		errorMessage = errorsEnum.invalidGroupBehavior
+	elseif currentChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
 		groupElement.disableCapture = true
 	elseif currentChar == ENUM_GROUP_ATOMIC_BEHAVIOR then
 		groupElement.isAtomic = true
@@ -117,21 +119,22 @@ local getGroupBehavior = function(state, groupElement)
 		groupElement.isNegative = true
 		groupElement.disableCapture = true
 	elseif currentChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
-		index = index + 1
-		currentChar = patternChars[index]
-		if not currentChar then
+		local lookbehindIndex, lookbehindChar = state:readElement(nextIndex)
+		if not lookbehindIndex or type(lookbehindChar) ~= "string" then
 			errorMessage = errorsEnum.invalidGroupBehavior
 		else
-			if currentChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
+			if lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
 				groupElement.isLookbehind = true
 				groupElement.disableCapture = true
-			elseif currentChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+				nextIndex = lookbehindIndex
+				currentChar = lookbehindChar
+			elseif lookbehindChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
 				groupElement.isLookbehind = true
 				groupElement.isNegative = true
 				groupElement.disableCapture = true
+				nextIndex = lookbehindIndex
+				currentChar = lookbehindChar
 			else
-				index = index - 1
-				currentChar = patternChars[index]
 				errorMessage = errorsEnum.invalidGroupBehavior
 			end
 		end
@@ -141,21 +144,26 @@ local getGroupBehavior = function(state, groupElement)
 	else
 		local charVal = currentChar
 		if charVal == 'R' or charVal == '0' then
-			local nextChar = patternChars[index + 1]
-			if nextChar == ENUM_CLOSE_GROUP then
+			index = nextIndex
+			nextIndex, currentChar = state:readElement(index)
+			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.isRecursionRoot = true
-				index = index + 1
 			else
 				errorMessage = errorsEnum.invalidGroupBehavior
 			end
-		elseif charVal and charVal >= '1' and charVal <= '9' then
+		elseif charVal >= '1' and charVal <= '9' then
 			local numStr = ""
-			while patternChars[index] and patternChars[index] >= '0' and patternChars[index] <= '9' do
-				numStr = numStr .. patternChars[index]
-				index = index + 1
+			while true do
+				numStr = numStr .. charVal
+				index = nextIndex
+				nextIndex, currentChar = state:readElement(index)
+				if not nextIndex or type(currentChar) ~= "string" or currentChar < '0' or currentChar > '9' then
+					break
+				end
+				charVal = currentChar
 			end
-			if patternChars[index] == ENUM_CLOSE_GROUP then
+			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP then
 				groupElement.isRecursion = true
 				groupElement.targetIndex = tonumber(numStr)
 			else
@@ -163,12 +171,14 @@ local getGroupBehavior = function(state, groupElement)
 			end
 		elseif charVal == '&' then
 			local nameStr = ""
-			index = index + 1
-			while patternChars[index] and patternChars[index] ~= ENUM_CLOSE_GROUP do
-				nameStr = nameStr .. patternChars[index]
-				index = index + 1
+			index = nextIndex
+			nextIndex, currentChar = state:readElement(index)
+			while nextIndex and type(currentChar) == "string" and currentChar ~= ENUM_CLOSE_GROUP do
+				nameStr = nameStr .. currentChar
+				index = nextIndex
+				nextIndex, currentChar = state:readElement(index)
 			end
-			if patternChars[index] == ENUM_CLOSE_GROUP and #nameStr > 0 then
+			if nextIndex and type(currentChar) == "string" and currentChar == ENUM_CLOSE_GROUP and #nameStr > 0 then
 				groupElement.isRecursion = true
 				groupElement.targetName = nameStr
 			else
@@ -185,8 +195,9 @@ local getGroupBehavior = function(state, groupElement)
 				else
 					currentTarget[charVal] = true
 				end
-				index = index + 1
-				currentChar = patternChars[index]
+				index = nextIndex
+				nextIndex, currentChar = state:readElement(index)
+				if not nextIndex or type(currentChar) ~= "string" then break end
 				charVal = currentChar
 			end
 			
@@ -209,23 +220,20 @@ local getGroupBehavior = function(state, groupElement)
 
 	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
 	if errorMessage and currentChar == ENUM_GROUP_NAME_OPEN then
-		local currentCharacterValue
 		local name, nameIndex = { }, 0
-		local firstCharacter = index + 1
+		local firstCharacter = nextIndex
+		
 		repeat
-			index = index + 1
-			currentChar = patternChars[index]
-			if not currentChar then
+			index = nextIndex
+			nextIndex, currentChar = state:readElement(index)
+			if not nextIndex or type(currentChar) ~= "string" then
 				errorMessage = errorsEnum.invalidGroupName
 				break
 			end
-			currentCharacterValue = currentChar
+			local currentCharacterValue = currentChar
 
-			if not currentCharacterValue then
-				errorMessage = errorsEnum.invalidGroupName
-				break
 			-- The first character must be letter
-			elseif (currentCharacterValue >= 'A' and currentCharacterValue <= 'z')
+			if (currentCharacterValue >= 'A' and currentCharacterValue <= 'z')
 				or currentCharacterValue == '$'
 				or (index > firstCharacter
 					and (currentCharacterValue >= '0' and currentCharacterValue <= '9')) then
@@ -254,7 +262,7 @@ local getGroupBehavior = function(state, groupElement)
 	end
 
 	groupElement.hasBehavior = true
-	return index + 1
+	return nextIndex
 end
 ----------------------------------------------------------------------------------------------------
 Group.isOpeningToken = function(currentCharacter)
