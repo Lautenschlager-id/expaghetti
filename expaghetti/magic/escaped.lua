@@ -38,10 +38,8 @@ specialEscaped.c = function(state, currentCharacter, index, expression)
 		return false, errorsEnum.invalidParamCtrlChar
 	end
 
-	return index + 1, {
-		type = ENUM_ELEMENT_TYPE_LITERAL,
-		value = ctrlChar
-	}
+	local value, lowerValue, upperValue = state:getExecutionValues(ctrlChar)
+	return index + 1, AST.Literal(value, lowerValue, upperValue)
 end
 -- %e00FF --> char(0x00FF)
 specialEscaped.e = function(state, currentCharacter, index, expression)
@@ -63,10 +61,8 @@ specialEscaped.e = function(state, currentCharacter, index, expression)
 		return false, errorsEnum.invalidParamUnicodeChar
 	end
 
-	return index + 4, {
-		type = ENUM_ELEMENT_TYPE_LITERAL,
-		value = hex
-	}
+	local value, lowerValue, upperValue = state:getExecutionValues(hex)
+	return index + 4, AST.Literal(value, lowerValue, upperValue)
 end
 -- %bxy --> balanced match between x and y
 specialEscaped.b = function(state, currentCharacter, index, expression)
@@ -122,10 +118,8 @@ Escaped.parse = function(state, index, expression)
 		state:compileSet(set)
 		return index, set
 	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
-		return index, {
-			type = ENUM_ELEMENT_TYPE_LITERAL,
-			value = currentCharacter
-		}
+		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter)
+		return index, AST.Literal(value, lowerValue, upperValue)
 	elseif specialEscaped[currentCharacter] then
 		return specialEscaped[currentCharacter](state, expression[index], index, expression)
 	elseif CaptureReference.isIntToken(currentCharacter) then

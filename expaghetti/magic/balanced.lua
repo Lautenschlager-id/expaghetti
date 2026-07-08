@@ -8,43 +8,17 @@ Balanced.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_BALANCED
 end
 
-Balanced.getExecutionOpen = function(element, state)
-	if state.flags.u then
-		if state.flags.i then
-			return string.lower(element.open), string.upper(element.open)
-		end
-		return element.open
-	else
-		if state.flags.i then
-			return string.byte(string.lower(element.open)), string.byte(string.upper(element.open))
-		end
-		return string.byte(element.open)
-	end
-end
-
-Balanced.getExecutionClose = function(element, state)
-	if state.flags.u then
-		if state.flags.i then
-			return string.lower(element.close), string.upper(element.close)
-		end
-		return element.close
-	else
-		if state.flags.i then
-			return string.byte(string.lower(element.close)), string.byte(string.upper(element.close))
-		end
-		return string.byte(element.close)
-	end
-end
-
 Balanced.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
-	local opener, openerAlt = Balanced.getExecutionOpen(currentElement, state)
-	local closer, closerAlt = Balanced.getExecutionClose(currentElement, state)
+
+	local lowerOpen, upperOpen, lowerClose, upperClose = 
+		currentElement.lowerOpen, currentElement.upperOpen,
+		currentElement.lowerClose, currentElement.upperClose
 
 	-- The first character MUST match the opener
 	local currentStrIndex = stringIndex + 1
 	local firstChar = state:getTargetCharacter(currentStrIndex)
-	if firstChar ~= opener and firstChar ~= openerAlt then
+	if firstChar ~= lowerOpen and firstChar ~= upperOpen then
 		return false
 	end
 
@@ -53,12 +27,12 @@ Balanced.match = function(currentElement, state)
 
 	while currentStrIndex <= state.targetStringLength do
 		local char = state:getTargetCharacter(currentStrIndex)
-		if char == closer or char == closerAlt then
+		if char == lowerClose or char == upperClose then
 			depth = depth - 1
 			if depth == 0 then
 				return true, nil, currentStrIndex
 			end
-		elseif char == opener or char == openerAlt then
+		elseif char == lowerOpen or char == upperOpen then
 			-- It's possible opener == closer. If so, it was already handled by the first `if` and depth decreased.
 			-- So this only increments depth if opener ~= closer.
 			depth = depth + 1
