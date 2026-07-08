@@ -120,4 +120,50 @@ Set.parse = function(state, tree)
 	return endIndex + 2
 end
 
+Set.match = function(currentElement, currentCharacter)
+	local hasMatched = false
+
+	if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
+		local lowerChar = string.lower(currentCharacter)
+		local upperChar = string.upper(currentCharacter)
+		if currentElement[lowerChar] or currentElement[upperChar] then
+			hasMatched = true
+		end
+	elseif currentElement[currentCharacter] then
+		hasMatched = true
+	end
+
+	if not hasMatched then
+		local ranges = currentElement.ranges
+		for rangeIndex = 1, currentElement.rangeIndex, 2 do
+			local rStart = ranges[rangeIndex]
+			local rEnd = ranges[rangeIndex + 1]
+			
+			if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
+				local lowerChar = string.lower(currentCharacter)
+				local upperChar = string.upper(currentCharacter)
+				if (lowerChar >= rStart and lowerChar <= rEnd) or (upperChar >= rStart and upperChar <= rEnd) then
+					hasMatched = true
+					break
+				end
+			elseif currentCharacter >= rStart and currentCharacter <= rEnd then
+				hasMatched = true
+				break
+			end
+		end
+
+		if not hasMatched then
+			local classes = currentElement.classes
+			for classIndex = 1, currentElement.classIndex do
+				if Set.match(classes[classIndex], currentCharacter) then
+					hasMatched = true
+					break
+				end
+			end
+		end
+	end
+
+	return currentElement.hasToNegateMatch ~= hasMatched
+end
+
 return Set

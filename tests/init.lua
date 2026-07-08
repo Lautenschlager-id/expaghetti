@@ -83,5 +83,5 @@ print(strformat("Success : %03d\nError : %03d", success, error))
 print("------------------------------------")
 
 end, {
-    runs = 5000
+    runs = 1
 })

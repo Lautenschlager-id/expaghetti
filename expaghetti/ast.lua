@@ -55,4 +55,38 @@ function AST.Alternate(trees)
 	}
 end
 
+AST.hasNestedQuantifier = function(tree)
+	if not tree then
+		return false
+	end
+	for elementIndex = 1, tree._index do
+		local child = tree[elementIndex]
+		if child.quantifier and child.quantifier.type == elementsEnum.quantifier then
+			return true
+		end
+	end
+	return false
+end
+
+AST.elementHasNestedQuantifier = function(element)
+	if element.type == elementsEnum.group then
+		return AST.hasNestedQuantifier(element.tree)
+	end
+	return false
+end
+
+AST.elementInnerQuantifierIsPossessive = function(element)
+	if element.type == elementsEnum.group and element.tree then
+		for elementIndex = 1, element.tree._index do
+			local child = element.tree[elementIndex]
+			if child.quantifier and child.quantifier.type == elementsEnum.quantifier and child.quantifier.mode == "possessive" then
+				return true
+			end
+		end
+	elseif element.quantifier and element.quantifier.type == elementsEnum.quantifier and element.quantifier.mode == "possessive" then
+		return true
+	end
+	return false
+end
+
 return AST

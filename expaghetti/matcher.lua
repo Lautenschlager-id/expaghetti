@@ -14,102 +14,24 @@ local PositionCapture = require("./magic/position_capture")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
-local elementsEnum = require("./enums/elements")
-local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
-local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
-local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
+local Any = require("./magic/any")
+local Literal = require("./magic/literal")
+----------------------------------------------------------------------------------------------------
+local AST = require("./ast")
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local printdebug = false
 
-local function treeHasNestedQuantifier(tree)
-	if not tree then
-		return false
-	end
-	for elementIndex = 1, tree._index do
-		if Quantifier.isElement(tree[elementIndex]) then
-			return true
-		end
-	end
-	return false
-end
-
-local function elementHasNestedQuantifier(element)
-	if Group.isElement(element) then
-		return treeHasNestedQuantifier(element.tree)
-	end
-	return false
-end
-
-local function elementInnerQuantifierIsPossessive(element)
-	if Group.isElement(element) and element.tree then
-		for elementIndex = 1, element.tree._index do
-			local child = element.tree[elementIndex]
-			if Quantifier.isElement(child) and child.quantifier.mode == "possessive" then
-				return true
-			end
-		end
-	elseif Quantifier.isElement(element) and element.quantifier.mode == "possessive" then
-		return true
-	end
-	return false
-end
-
 local function canBacktrackNestedQuantifier(quantifier, element)
 	local mode = quantifier.mode or "greedy"
 	return mode ~= "possessive"
-		and elementHasNestedQuantifier(element)
-		and not elementInnerQuantifierIsPossessive(element)
+		and AST.elementHasNestedQuantifier(element)
+		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 
 
 ----------------------------------------------------------------------------------------------------
-local function matchSet(currentElement, currentCharacter)
-	local hasMatched = false
 
-	if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
-		local lowerChar = string.lower(currentCharacter)
-		local upperChar = string.upper(currentCharacter)
-		if currentElement[lowerChar] or currentElement[upperChar] then
-			hasMatched = true
-		end
-	elseif currentElement[currentCharacter] then
-		hasMatched = true
-	end
-
-	if not hasMatched then
-		local ranges = currentElement.ranges
-		for rangeIndex = 1, currentElement.rangeIndex, 2 do
-			local rStart = ranges[rangeIndex]
-			local rEnd = ranges[rangeIndex + 1]
-			
-			if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
-				local lowerChar = string.lower(currentCharacter)
-				local upperChar = string.upper(currentCharacter)
-				if (lowerChar >= rStart and lowerChar <= rEnd) or (upperChar >= rStart and upperChar <= rEnd) then
-					hasMatched = true
-					break
-				end
-			elseif currentCharacter >= rStart and currentCharacter <= rEnd then
-				hasMatched = true
-				break
-			end
-		end
-
-		if not hasMatched then
-			local classes = currentElement.classes
-			for classIndex = 1, currentElement.classIndex do
-				if matchSet(classes[classIndex], currentCharacter) then
-					hasMatched = true
-					break
-				end
-			end
-		end
-	end
-
-	return currentElement.hasToNegateMatch ~= hasMatched
-end
-----------------------------------------------------------------------------------------------------
 local singleElementMatcher = function(
 		currentElement, currentCharacter, treeMatcher, state, tree, treeIndex
 	)
@@ -119,7 +41,7 @@ local singleElementMatcher = function(
 	elseif Anchor.isElement(currentElement) then
 		return Anchor.match(currentElement, state)
 	elseif Boundary.isElement(currentElement) then
-		return Boundary.match(currentElement, state, matchSet)
+		return Boundary.match(currentElement, state)
 	elseif Balanced.isElement(currentElement) then
 		return Balanced.match(currentElement, state)
 	elseif Group.isElement(currentElement) then
@@ -130,20 +52,12 @@ local singleElementMatcher = function(
 		return CaptureReference.match(currentElement, state)
 	elseif not currentCharacter then
 		return
-	elseif currentElement.type == ENUM_ELEMENT_TYPE_ANY then
-		-- Wiki: "." matches any character but EOL, equivalent to [^\r\n]
-		-- With DotAll flag (s), "." matches everything including newlines
-		if currentElement.isDotAll or (state.flags and state.flags.s) then
-			return true
-		end
-		return currentCharacter ~= "\r" and currentCharacter ~= "\n"
-	elseif currentElement.type == ENUM_ELEMENT_TYPE_SET then
-		return matchSet(currentElement, currentCharacter)
-	elseif currentElement.type == ENUM_ELEMENT_TYPE_LITERAL then
-		if currentElement.isCaseInsensitive then
-			return string.lower(currentCharacter) == currentElement.lowercaseValue
-		end
-		return currentElement.value == currentCharacter
+	elseif Any.isElement(currentElement) then
+		return Any.match(currentElement, currentCharacter, state)
+	elseif Set.isElement(currentElement) then
+		return Set.match(currentElement, currentCharacter)
+	elseif Literal.isElement(currentElement) then
+		return Literal.match(currentElement, currentCharacter)
 	end
 
 	return false

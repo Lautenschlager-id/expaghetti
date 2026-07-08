@@ -22,4 +22,11 @@ Any.parse = function(state, tree)
 	return state.index + 1
 end
 
+Any.match = function(currentElement, currentCharacter, state)
+	if currentElement.isDotAll or (state.flags and state.flags.s) then
+		return true
+	end
+	return currentCharacter ~= "\r" and currentCharacter ~= "\n"
+end
+
 return Any

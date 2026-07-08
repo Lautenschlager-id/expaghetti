@@ -9,6 +9,10 @@ local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
 local Literal = { }
 
+Literal.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_LITERAL
+end
+
 Literal.parse = function(state, currentCharacter, tree)
 	-- tree is a bad parameter, but if it's true then an error is thrown anyway
 	if Quantifier.isToken(state, tree) then
@@ -22,13 +26,17 @@ Literal.parse = function(state, currentCharacter, tree)
 			node.isCaseInsensitive = true
 			node.lowercaseValue = string.lower(currentCharacter)
 		end
-		if not state.flags[ENUM_FLAG_UNICODE] then
-			node.byteValue = string.byte(currentCharacter)
-		end
 	end
 	tree[tree._index] = node
 
 	return state.index + 1
+end
+
+Literal.match = function(currentElement, currentCharacter)
+	if currentElement.isCaseInsensitive then
+		return string.lower(currentCharacter) == currentElement.lowercaseValue
+	end
+	return currentElement.value == currentCharacter
 end
 
 return Literal
