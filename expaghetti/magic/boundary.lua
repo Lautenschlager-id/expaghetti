@@ -10,8 +10,8 @@ end
 
 Boundary.match = function(currentElement, state, matchSet)
 	local stringIndex = state.stringIndex - 1
-	local prevChar = state.splitStr[stringIndex]
-	local currChar = state.splitStr[stringIndex + 1]
+	local prevChar = state.targetStringChars[stringIndex]
+	local currChar = state.targetStringChars[stringIndex + 1]
 
 	local isPrevInSet = prevChar and matchSet(currentElement.set, prevChar) or false
 	local isCurrInSet = currChar and matchSet(currentElement.set, currChar) or false

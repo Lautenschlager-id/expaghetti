@@ -72,8 +72,8 @@ end
 CaptureReference.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local initStringPositionList, endStringPositionList =
-		state.metaData.groupCapturesInitStringPositions[currentElement.index],
-		state.metaData.groupCapturesEndStringPositions[currentElement.index]
+		state.metaData.captureStarts[currentElement.index],
+		state.metaData.captureEnds[currentElement.index]
 
 	local initStringPosition, endStringPosition
 	if type(initStringPositionList) == "table" then
@@ -87,16 +87,16 @@ CaptureReference.match = function(currentElement, state)
 
 	if not initStringPosition then
 		return false
-	elseif stringIndex + (endStringPosition - initStringPosition + 1) > state.strLength then
+	elseif stringIndex + (endStringPosition - initStringPosition + 1) > state.targetStringLength then
 		return false
 	end
 
 	local currentCharacter
 	for backreferencePosition = initStringPosition, endStringPosition do
 		stringIndex = stringIndex + 1
-		currentCharacter = state.splitStr[stringIndex]
+		currentCharacter = state.targetStringChars[stringIndex]
 
-		if currentCharacter ~= state.splitStr[backreferencePosition] then
+		if currentCharacter ~= state.targetStringChars[backreferencePosition] then
 			return false
 		end
 	end

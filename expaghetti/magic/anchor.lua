@@ -32,17 +32,17 @@ Anchor.match = function(currentElement, state)
 		if stringIndex == 0 then
 			return true, nil, stringIndex
 		elseif currentElement.isMultiline or (state.flags and state.flags.m) then
-			local prevChar = state.splitStr[stringIndex]
+			local prevChar = state.targetStringChars[stringIndex]
 			if prevChar == '\n' or prevChar == '\r' then
 				return true, nil, stringIndex
 			end
 		end
 	else
 		-- $
-		if stringIndex >= state.strLength then
+		if stringIndex >= state.targetStringLength then
 			return true, nil, stringIndex
 		elseif currentElement.isMultiline or (state.flags and state.flags.m) then
-			local currChar = state.splitStr[stringIndex + 1]
+			local currChar = state.targetStringChars[stringIndex + 1]
 			if currChar == '\n' or currChar == '\r' then
 				return true, nil, stringIndex
 			end

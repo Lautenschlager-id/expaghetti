@@ -76,8 +76,7 @@ Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 	local hasMatched, iniStr, endStr
 	for branchIndex = 1, trees._index do
 		if branchIndex > 1 then
-			state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
-			if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+			if state:incrementBacktrack() then
 				return false
 			end
 		end

@@ -62,17 +62,7 @@ local function canBacktrackNestedQuantifier(quantifier, element)
 		and not elementInnerQuantifierIsPossessive(element)
 end
 
-local function popCaptureForElement(metaData, element)
-	local groupIndex = element.index or element.name
-	if not groupIndex then
-		return
-	end
-	local inits = metaData.groupCapturesInitStringPositions[groupIndex]
-	if inits and #inits > 0 then
-		table.remove(inits)
-		table.remove(metaData.groupCapturesEndStringPositions[groupIndex])
-	end
-end
+
 ----------------------------------------------------------------------------------------------------
 local function matchSet(currentElement, currentCharacter)
 	local hasMatched = false
@@ -215,7 +205,7 @@ local function quantifyElement(
 			lastIniStr, lastEndStr = iniStr, endStr
 
 			stringIndex = endStr + 1
-			currentCharacter = state.splitStr[stringIndex]
+			currentCharacter = state.targetStringChars[stringIndex]
 		end
 
 		return true
@@ -232,17 +222,16 @@ local function quantifyElement(
 			break
 		end
 
-		state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
-		if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+		if state:incrementBacktrack() then
 			return
 		end
 
-		popCaptureForElement(state.metaData, currentElement)
+		state:popCapture(currentElement.index or currentElement.name)
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.splitStr[occurrenceStart], coreTreeMatcher,
+			currentElement, state.targetStringChars[occurrenceStart], coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -255,7 +244,7 @@ local function quantifyElement(
 		endStr = endStr or occurrenceStart
 		endStringPositions[lastOccurrence] = endStr
 		stringIndex = endStr + 1
-		currentCharacter = state.splitStr[stringIndex]
+		currentCharacter = state.targetStringChars[stringIndex]
 		lastIniStr, lastEndStr = nil, nil
 
 		extendOccurrenceCollection()
@@ -290,17 +279,16 @@ local function quantifyElement(
 			return false
 		end
 
-		state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
-		if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+		if state:incrementBacktrack() then
 			return false
 		end
 
-		popCaptureForElement(state.metaData, currentElement)
+		state:popCapture(currentElement.index or currentElement.name)
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.splitStr[occurrenceStart], coreTreeMatcher,
+			currentElement, state.targetStringChars[occurrenceStart], coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -314,7 +302,7 @@ local function quantifyElement(
 		endStringPositions[occurrenceIndex] = endStr
 		totalOccurrences = occurrenceIndex
 		stringIndex = endStr + 1
-		currentCharacter = state.splitStr[stringIndex]
+		currentCharacter = state.targetStringChars[stringIndex]
 		lastIniStr, lastEndStr = nil, nil
 		extendOccurrenceCollection()
 		maximumOccurrencesOfElement = totalOccurrences
@@ -324,8 +312,7 @@ local function quantifyElement(
 
 	for occurrence = startOccurrences, endOccurrences, step do
 		if occurrence ~= startOccurrences then
-			state.metaData.backtrackSteps = (state.metaData.backtrackSteps or 0) + 1
-			if state.metaData.backtrackSteps > state.metaData.maxBacktrackDepth then
+			if state:incrementBacktrack() then
 				return
 			end
 		end
@@ -396,7 +383,7 @@ coreTreeMatcher = function(
 		currentElement = tree[treeIndex]
 
 		state.stringIndex = state.stringIndex + 1
-		currentCharacter = state.splitStr[state.stringIndex]
+		currentCharacter = state.targetStringChars[state.stringIndex]
 
 		hasQuantifier = Quantifier.isElement(currentElement)
 
@@ -438,21 +425,7 @@ coreTreeMatcher = function(
 		local groupIndex = tree._groupIndex
 		local pushedCapture = false
 		if groupIndex then
-			local gIni = state.initialStringIndex + 1
-			local gEnd = state.stringIndex
-			local inits = state.metaData.groupCapturesInitStringPositions
-			local ends = state.metaData.groupCapturesEndStringPositions
-			if not inits[groupIndex] then
-				inits[groupIndex] = {}
-				ends[groupIndex] = {}
-			end
-			if gIni <= gEnd then
-				table.insert(inits[groupIndex], gIni)
-				table.insert(ends[groupIndex], gEnd)
-			else
-				table.insert(inits[groupIndex], 2)
-				table.insert(ends[groupIndex], 1)
-			end
+			state:recordCapture(groupIndex, state.initialStringIndex + 1, state.stringIndex)
 			pushedCapture = true
 		end
 
@@ -464,10 +437,7 @@ coreTreeMatcher = function(
 		)
 
 		if not hasMatched and pushedCapture then
-			local inits = state.metaData.groupCapturesInitStringPositions[groupIndex]
-			local ends = state.metaData.groupCapturesEndStringPositions[groupIndex]
-			table.remove(inits)
-			table.remove(ends)
+			state:popCapture(groupIndex)
 		end
 
 		return hasMatched, oIni, oEnd, oMeta
@@ -475,21 +445,7 @@ coreTreeMatcher = function(
 
 	local groupIndex = tree._groupIndex
 	if groupIndex then
-		local gIni = state.initialStringIndex + 1
-		local gEnd = state.stringIndex
-		local inits = state.metaData.groupCapturesInitStringPositions
-		local ends = state.metaData.groupCapturesEndStringPositions
-		if not inits[groupIndex] then
-			inits[groupIndex] = {}
-			ends[groupIndex] = {}
-		end
-		if gIni <= gEnd then
-			table.insert(inits[groupIndex], gIni)
-			table.insert(ends[groupIndex], gEnd)
-		else
-			table.insert(inits[groupIndex], 2)
-			table.insert(ends[groupIndex], 1)
-		end
+		state:recordCapture(groupIndex, state.initialStringIndex + 1, state.stringIndex)
 	end
 
 	return true, state.initialStringIndex + 1, state.stringIndex, state.metaData
@@ -521,38 +477,24 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 	local treeLength = tree._index
 
-	local splitStr, strLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+	local targetStringChars, targetStringLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
 
 	stringIndex = stringIndex or 0
 
 	local hasMatched, iniStr, endStr, matcherMetaData
-	while stringIndex <= strLength do
+	while stringIndex <= targetStringLength do
 		debugCurrentStackFrame = 0
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		
-		local parsedMetaData = tree._metaData
-		local limits = config.get()
 		local state = MatchState.new(
-			flags, splitStr, strLength, stringIndex, stringIndex, {
-				groupCapturesInitStringPositions = {},
-				groupCapturesEndStringPositions = {},
-				positionCaptures = {},
-				outerTreeReference = {},
-				rootTree = tree,
-				parsedMetaData = parsedMetaData,
-				groupNames = parsedMetaData and parsedMetaData.groupNames,
-				recursionDepth = 0,
-				backtrackSteps = 0,
-				maxRecursionDepth = limits.maxRecursionDepth,
-				maxBacktrackDepth = limits.maxBacktrackDepth,
-			}
+			flags, targetStringChars, targetStringLength, stringIndex, stringIndex, tree, tree._metaData
 		)
 		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
 			state, tree, 0
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, splitStr
+			return hasMatched, iniStr, endStr, matcherMetaData, targetStringChars
 		end
 
 		stringIndex = stringIndex + 1
@@ -563,32 +505,32 @@ end
 -- Debugging
 _G.p = require("./helpers/pretty-print")
 _G.m = function(expr, str, flags)
-	local hasMatched, iniStr, endStr, matcherMetaData, splitStr = matcher(expr, str, flags)
+	local hasMatched, iniStr, endStr, matcherMetaData, targetStringChars = matcher(expr, str, flags)
 
 	if not hasMatched then
 		return print(string.format("match(%q, %q) = %q", expr, str, iniStr))
 	end
 
-	print(string.format("match(%q, %q) = %q", expr, str, table.concat(splitStr, '', iniStr, endStr)))
+	print(string.format("match(%q, %q) = %q", expr, str, table.concat(targetStringChars, '', iniStr, endStr)))
 
-	local groupCapturesInitStringPositions = matcherMetaData.groupCapturesInitStringPositions
-	if #groupCapturesInitStringPositions > 0 then
-		local groupCapturesEndStringPositions = matcherMetaData.groupCapturesEndStringPositions
+	local captureStarts = matcherMetaData.captureStarts
+	if #captureStarts > 0 then
+		local captureEnds = matcherMetaData.captureEnds
 
 		print("\t---------Captures---------")
-		for posIndex = 1, #groupCapturesInitStringPositions do
-			iniStr, endStr = groupCapturesInitStringPositions[posIndex] or 0,
-				groupCapturesEndStringPositions[posIndex] or 0
+		for posIndex = 1, #captureStarts do
+			iniStr, endStr = captureStarts[posIndex] or 0,
+				captureEnds[posIndex] or 0
 			print(string.format("\t\t[%02d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
-				table.concat(splitStr, '', iniStr, endStr)))
+				table.concat(targetStringChars, '', iniStr, endStr)))
 		end
 
 		print("\t---------Named Captures---------")
-		for key, value in next, groupCapturesInitStringPositions do
+		for key, value in next, captureStarts do
 			if not tonumber(key) then
-				iniStr, endStr = v or 0, groupCapturesEndStringPositions[key] or 0
+				iniStr, endStr = value or 0, captureEnds[key] or 0
 				print(string.format("\t\t[%q]\t=\t(%d, %d)\t=\t%q", key, iniStr, endStr,
-					table.concat(splitStr, '', iniStr, endStr)))
+					table.concat(targetStringChars, '', iniStr, endStr)))
 			end
 		end
 	end
@@ -599,8 +541,8 @@ _G.m = function(expr, str, flags)
 		for posIndex = 1, #positionCaptures do
 			iniStr = positionCaptures[posIndex]
 			print(string.format("\t\t[%02d]\t=\t\"%s(%d)%s\"", posIndex,
-				table.concat(splitStr, '', 1, iniStr - 1), iniStr,
-				table.concat(splitStr, '', iniStr)))
+				table.concat(targetStringChars, '', 1, iniStr - 1), iniStr,
+				table.concat(targetStringChars, '', iniStr)))
 		end
 	end
 

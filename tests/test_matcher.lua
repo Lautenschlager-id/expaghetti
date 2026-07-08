@@ -25,8 +25,8 @@ end
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
-	local ini = metaData.groupCapturesInitStringPositions[captureIndex]
-	local en  = metaData.groupCapturesEndStringPositions[captureIndex]
+	local ini = metaData.captureStarts[captureIndex]
+	local en  = metaData.captureEnds[captureIndex]
 	if type(ini) == "table" then
 		ini = ini[#ini]
 		en = en[#en]
@@ -40,7 +40,7 @@ end
 local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
 	local hasMatched, _, _, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
-	assert(not metaData.groupCapturesInitStringPositions[captureIndex],
+	assert(not metaData.captureStarts[captureIndex],
 		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
 end
 
@@ -48,7 +48,7 @@ local function assertNoCapture(expr, str, desc, flags)
 	local hasMatched, _, _, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match", desc))
 	local hasAny = false
-	for _ in pairs(metaData.groupCapturesInitStringPositions) do hasAny = true; break end
+	for _ in pairs(metaData.captureStarts) do hasAny = true; break end
 	assert(not hasAny, string.format("Test '%s': expected no captures", desc))
 end
 
@@ -346,10 +346,10 @@ assertCapture("(?<foo>ab)c", "abc", "foo", "ab", "Named group captures correctly
 do
 	local hasMatched, _, _, metaData, splitStr = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
 	assert(hasMatched, "Named groups: expected match")
-	local fi = metaData.groupCapturesInitStringPositions["first"]
-	local fe = metaData.groupCapturesEndStringPositions["first"]
-	local si = metaData.groupCapturesInitStringPositions["second"]
-	local se = metaData.groupCapturesEndStringPositions["second"]
+	local fi = metaData.captureStarts["first"]
+	local fe = metaData.captureEnds["first"]
+	local si = metaData.captureStarts["second"]
+	local se = metaData.captureEnds["second"]
 	if type(fi) == "table" then
 		fi = fi[#fi] fe = fe[#fe]
 		si = si[#si] se = se[#se]
@@ -612,17 +612,17 @@ do
 	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "bcef")
 	assert(hasMatched, "Branch reset: bcef should match")
 	-- b=group1, c=group2. outer f=group3 (max inside was 2)
-	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Branch reset bcef: group1 init=1")
-	assert(metaData.groupCapturesInitStringPositions[2][1] == 2, "Branch reset bcef: group2 init=2")
-	assert(metaData.groupCapturesInitStringPositions[3][1] == 4, "Branch reset bcef: group3 init=4")
+	assert(metaData.captureStarts[1][1] == 1, "Branch reset bcef: group1 init=1")
+	assert(metaData.captureStarts[2][1] == 2, "Branch reset bcef: group2 init=2")
+	assert(metaData.captureStarts[3][1] == 4, "Branch reset bcef: group3 init=4")
 end
 -- Capture alignment: branch with 1 group (shorter branch)
 do
 	local hasMatched, _, _, metaData = matcher("(?|(a)|(b)(c)|(d))e(f)", "def")
 	assert(hasMatched, "Branch reset: def should match")
-	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Branch reset def: group1=d")
-	assert(not metaData.groupCapturesInitStringPositions[2],     "Branch reset def: group2 is nil")
-	assert(metaData.groupCapturesInitStringPositions[3][1] == 3, "Branch reset def: group3=f")
+	assert(metaData.captureStarts[1][1] == 1, "Branch reset def: group1=d")
+	assert(not metaData.captureStarts[2],     "Branch reset def: group2 is nil")
+	assert(metaData.captureStarts[3][1] == 3, "Branch reset def: group3=f")
 end
 -- Backreferences inside branch reset
 assertMatch("(?|(a)|(b))%1", "aa", true, 1, 2, "Branch reset: backref %1 to first branch")
@@ -717,31 +717,31 @@ print("  [49] Cross-Feature Integration...")
 do
 	local hasMatched, _, _, metaData = matcher("(a)+", "aaa")
 	assert(hasMatched, "Capture history: (a)+ should match")
-	local inits = metaData.groupCapturesInitStringPositions[1]
+	local inits = metaData.captureStarts[1]
 	assert(type(inits) == "table" and #inits == 3, "Capture history: three iterations recorded")
 	assert(inits[1] == 1 and inits[2] == 2 and inits[3] == 3, "Capture history: positions 1,2,3")
 end
 do
 	local hasMatched, _, _, metaData = matcher("((a)(b))+", "abab")
 	assert(hasMatched, "Capture history: nested quantified groups should match")
-	local g1 = metaData.groupCapturesInitStringPositions[1]
-	local g2 = metaData.groupCapturesInitStringPositions[2]
-	local g3 = metaData.groupCapturesInitStringPositions[3]
+	local g1 = metaData.captureStarts[1]
+	local g2 = metaData.captureStarts[2]
+	local g3 = metaData.captureStarts[3]
 	assert(#g1 == 2 and #g2 == 2 and #g3 == 2, "Capture history: nested groups record two iterations each")
 end
 -- Nested group backtracking with capture rollback (branch isolation)
 do
 	local hasMatched, _, _, metaData = matcher("(a(b)|c(d))e", "cde")
 	assert(hasMatched, "Capture rollback: c-branch match")
-	assert(metaData.groupCapturesInitStringPositions[1][1] == 1, "Capture rollback: group1 captured")
-	assert(not metaData.groupCapturesInitStringPositions[2], "Capture rollback: unused nested group2 absent")
-	assert(metaData.groupCapturesInitStringPositions[3][1] == 2, "Capture rollback: group3 captured on c-branch")
+	assert(metaData.captureStarts[1][1] == 1, "Capture rollback: group1 captured")
+	assert(not metaData.captureStarts[2], "Capture rollback: unused nested group2 absent")
+	assert(metaData.captureStarts[3][1] == 2, "Capture rollback: group3 captured on c-branch")
 end
 do
 	local hasMatched, _, _, metaData = matcher("(a(b)|c(d))e", "abe")
 	assert(hasMatched, "Capture rollback: a-branch match")
-	assert(metaData.groupCapturesInitStringPositions[2][1] == 2, "Capture rollback: nested group2 captured on a-branch")
-	assert(not metaData.groupCapturesInitStringPositions[3], "Capture rollback: unused group3 absent")
+	assert(metaData.captureStarts[2][1] == 2, "Capture rollback: nested group2 captured on a-branch")
+	assert(not metaData.captureStarts[3], "Capture rollback: unused group3 absent")
 end
 -- Recursion + branch reset
 assertMatch("(?|(?R)|b)", "ab", true, 2, 2, "Recursion + branch reset: second branch via recursion")
@@ -860,8 +860,8 @@ assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic alt: cannot backtrack fr
 do
 	local hasMatched, _, _, metaData, splitStr = matcher("(a+)+a", "aaaaa")
 	assert(hasMatched, "Nested +: capture history should match")
-	local inits = metaData.groupCapturesInitStringPositions[1]
-	local ends = metaData.groupCapturesEndStringPositions[1]
+	local inits = metaData.captureStarts[1]
+	local ends = metaData.captureEnds[1]
 	assert(#inits == 2, "Nested +: two outer repetitions recorded")
 	assert(table.concat(splitStr, "", inits[1], ends[1]) == "aaaa", "Nested +: first capture after inner backtrack")
 	assert(table.concat(splitStr, "", inits[2], ends[2]) == "a", "Nested +: second capture is trailing group iteration")
@@ -869,8 +869,8 @@ end
 do
 	local hasMatched, _, _, metaData, splitStr = matcher("(a|aa)+b", "aab")
 	assert(hasMatched, "Alt quantified: capture history should match")
-	local inits = metaData.groupCapturesInitStringPositions[1]
-	local ends = metaData.groupCapturesEndStringPositions[1]
+	local inits = metaData.captureStarts[1]
+	local ends = metaData.captureEnds[1]
 	assert(table.concat(splitStr, "", inits[#inits], ends[#ends]) == "aa", "Alt quantified: last capture is winning branch")
 end
 

@@ -388,9 +388,7 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 			return false, nil, nil, state.metaData, false
 		end
 
-		state.metaData.recursionDepth = (state.metaData.recursionDepth or 0) + 1
-		if state.metaData.recursionDepth > state.metaData.maxRecursionDepth then
-			state.metaData.recursionDepth = state.metaData.recursionDepth - 1
+		if state:enterRecursion() then
 			return false, nil, nil, state.metaData, false
 		end
 	end
@@ -423,7 +421,7 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
 			if currentElement.isRecursion then
-				state.metaData.recursionDepth = state.metaData.recursionDepth - 1
+				state:leaveRecursion()
 			end
 			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
@@ -461,7 +459,7 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 
 	if currentElement.isAtomic or currentElement.isRecursion then
 		if currentElement.isRecursion then
-			state.metaData.recursionDepth = state.metaData.recursionDepth - 1
+			state:leaveRecursion()
 		end
 		if not hasMatched then
 			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef

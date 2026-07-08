@@ -15,15 +15,15 @@ Balanced.match = function(currentElement, state)
 
 	-- The first character MUST match the opener
 	local currentStrIndex = stringIndex + 1
-	if state.splitStr[currentStrIndex] ~= opener then
+	if state.targetStringChars[currentStrIndex] ~= opener then
 		return false
 	end
 
 	local depth = 1
 	currentStrIndex = currentStrIndex + 1
 
-	while currentStrIndex <= state.strLength do
-		local char = state.splitStr[currentStrIndex]
+	while currentStrIndex <= state.targetStringLength do
+		local char = state.targetStringChars[currentStrIndex]
 		if char == closer then
 			depth = depth - 1
 			if depth == 0 then
