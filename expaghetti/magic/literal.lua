@@ -21,11 +21,9 @@ Literal.parse = function(state, currentCharacter, tree)
 
 	tree._index = tree._index + 1
 	local node = AST.Literal(currentCharacter)
-	if not state:isElement(currentCharacter) then
-		if state.flags.i then
-			node.isCaseInsensitive = true
-			node.lowercaseValue = string.lower(currentCharacter)
-		end
+	if state.flags.i then
+		node.isCaseInsensitive = true
+		node.lowercaseValue = string.lower(currentCharacter)
 	end
 	tree[tree._index] = node
 

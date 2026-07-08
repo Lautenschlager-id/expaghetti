@@ -23,7 +23,7 @@ Any.parse = function(state, tree)
 end
 
 Any.match = function(currentElement, currentCharacter, state)
-	if currentElement.isDotAll or (state.flags and state.flags.s) then
+	if currentElement.isDotAll then
 		return true
 	end
 	return currentCharacter ~= "\r" and currentCharacter ~= "\n"
