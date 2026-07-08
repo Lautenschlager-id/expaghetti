@@ -34,6 +34,11 @@ function AST.Set()
 		hasToNegateMatch = false,
 		rangeIndex = 0,
 		ranges = {},
+		unicodeRanges = {},
+		byteRanges = {},
+		keys = {},
+		unicodeKeys = {},
+		byteKeys = {},
 		classIndex = 0,
 		classes = {},
 	}

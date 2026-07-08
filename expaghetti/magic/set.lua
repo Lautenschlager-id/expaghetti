@@ -37,6 +37,49 @@ Set.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_SET
 end
 
+local function addKey(set, char, isCaseInsensitive)
+	set.keys[char] = true
+	set.unicodeKeys[char] = true
+	set.byteKeys[string.byte(char)] = true
+	
+	if isCaseInsensitive then
+		local lower = string.lower(char)
+		local upper = string.upper(char)
+		set.unicodeKeys[lower] = true
+		set.unicodeKeys[upper] = true
+		set.byteKeys[string.byte(lower)] = true
+		set.byteKeys[string.byte(upper)] = true
+	end
+end
+
+local function addRange(set, startChar, endChar, isCaseInsensitive)
+	set.rangeIndex = set.rangeIndex + 1
+	set.ranges[set.rangeIndex] = startChar
+	set.ranges[set.rangeIndex + 1] = endChar
+	
+	table.insert(set.unicodeRanges, startChar)
+	table.insert(set.unicodeRanges, endChar)
+	table.insert(set.byteRanges, string.byte(startChar))
+	table.insert(set.byteRanges, string.byte(endChar))
+	
+	if isCaseInsensitive then
+		local lowerStart = string.lower(startChar)
+		local lowerEnd = string.lower(endChar)
+		local upperStart = string.upper(startChar)
+		local upperEnd = string.upper(endChar)
+		
+		table.insert(set.unicodeRanges, lowerStart)
+		table.insert(set.unicodeRanges, lowerEnd)
+		table.insert(set.unicodeRanges, upperStart)
+		table.insert(set.unicodeRanges, upperEnd)
+		
+		table.insert(set.byteRanges, string.byte(lowerStart))
+		table.insert(set.byteRanges, string.byte(lowerEnd))
+		table.insert(set.byteRanges, string.byte(upperStart))
+		table.insert(set.byteRanges, string.byte(upperEnd))
+	end
+end
+
 Set.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
@@ -50,12 +93,10 @@ Set.parse = function(state, tree)
 	endIndex = endIndex - 1
 
 	local set = AST.Set()
-	if state.flags.i then
-		set.isCaseInsensitive = true
-	end
+	local isCaseInsensitive = state.flags.i and true or false
 
 	local watchingForRangeSeparator
-	local rangeInitChar, currentCharacterValue
+	local rangeInitChar
 
 	local elementIndex = state.index
 	while elementIndex <= endIndex do
@@ -91,23 +132,19 @@ Set.parse = function(state, tree)
 						return false, errorsEnum.unorderedSetRange
 					end
 
-					set.rangeIndex = set.rangeIndex + 1
-					set.ranges[set.rangeIndex] = rangeInitChar
-
-					set.rangeIndex = set.rangeIndex + 1
-					set.ranges[set.rangeIndex] = nextTokenValue
+					addRange(set, rangeInitChar, nextTokenValue, isCaseInsensitive)
 
 					-- skip next element(s)
 					elementIndex = elementIndex + (skipCount or 0)
 				else
-					set[rangeInitChar] = true
-					set[currentCharacterValue] = true
+					addKey(set, rangeInitChar, isCaseInsensitive)
+					addKey(set, currentCharacterValue, isCaseInsensitive)
 				end
 			elseif nextTokenIsRangeSep then
 				watchingForRangeSeparator = true
 				rangeInitChar = currentCharacterValue
 			else
-				set[currentCharacterValue] = true
+				addKey(set, currentCharacterValue, isCaseInsensitive)
 			end
 		end
 
@@ -120,33 +157,21 @@ Set.parse = function(state, tree)
 	return endIndex + 2
 end
 
-Set.match = function(currentElement, currentCharacter)
+Set.match = function(currentElement, currentCharacter, state)
 	local hasMatched = false
+	local keys = state:getExecutionKeys(currentElement)
 
-	if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
-		local lowerChar = string.lower(currentCharacter)
-		local upperChar = string.upper(currentCharacter)
-		if currentElement[lowerChar] or currentElement[upperChar] then
-			hasMatched = true
-		end
-	elseif currentElement[currentCharacter] then
+	if keys[currentCharacter] then
 		hasMatched = true
 	end
 
 	if not hasMatched then
-		local ranges = currentElement.ranges
-		for rangeIndex = 1, currentElement.rangeIndex, 2 do
+		local ranges = state:getExecutionRanges(currentElement)
+		for rangeIndex = 1, #ranges, 2 do
 			local rStart = ranges[rangeIndex]
 			local rEnd = ranges[rangeIndex + 1]
 			
-			if currentElement.isCaseInsensitive and type(currentCharacter) == "string" then
-				local lowerChar = string.lower(currentCharacter)
-				local upperChar = string.upper(currentCharacter)
-				if (lowerChar >= rStart and lowerChar <= rEnd) or (upperChar >= rStart and upperChar <= rEnd) then
-					hasMatched = true
-					break
-				end
-			elseif currentCharacter >= rStart and currentCharacter <= rEnd then
+			if currentCharacter >= rStart and currentCharacter <= rEnd then
 				hasMatched = true
 				break
 			end
@@ -155,7 +180,7 @@ Set.match = function(currentElement, currentCharacter)
 		if not hasMatched then
 			local classes = currentElement.classes
 			for classIndex = 1, currentElement.classIndex do
-				if Set.match(classes[classIndex], currentCharacter) then
+				if Set.match(classes[classIndex], currentCharacter, state) then
 					hasMatched = true
 					break
 				end

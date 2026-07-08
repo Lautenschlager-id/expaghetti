@@ -1,16 +1,36 @@
 local config = require("./config")
+local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 
 local MatchState = {}
 MatchState.__index = MatchState
 
-function MatchState.new(flags, targetStringChars, targetStringLength, stringIndex, initialStringIndex, rootTree, parsedMetaData)
+function MatchState.new(flags, targetString, targetStringChars, targetStringLength, stringIndex, initialStringIndex, rootTree, parsedMetaData)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags or {}
-	self.targetStringChars = targetStringChars
 	self.targetStringLength = targetStringLength
 	self.stringIndex = stringIndex or 0
 	self.initialStringIndex = initialStringIndex or self.stringIndex
+
+	if self.flags[ENUM_FLAG_UNICODE] then
+		self.getTargetCharacter = function(self, index) return targetStringChars[index] end
+		self.getExecutionValue = function(self, element) return element.unicodeValue end
+		self.getExecutionLowerValue = function(self, element) return element.unicodeLowerValue end
+		self.getExecutionUpperValue = function(self, element) return element.unicodeUpperValue end
+		self.getExecutionRanges = function(self, element) return element.unicodeRanges end
+		self.getExecutionKeys = function(self, element) return element.unicodeKeys end
+		self.NEWLINE = "\n"
+		self.CARRIAGE_RETURN = "\r"
+	else
+		self.getTargetCharacter = function(self, index) return string.byte(targetString, index) end
+		self.getExecutionValue = function(self, element) return element.byteValue end
+		self.getExecutionLowerValue = function(self, element) return element.byteLowerValue end
+		self.getExecutionUpperValue = function(self, element) return element.byteUpperValue end
+		self.getExecutionRanges = function(self, element) return element.byteRanges end
+		self.getExecutionKeys = function(self, element) return element.byteKeys end
+		self.NEWLINE = 10
+		self.CARRIAGE_RETURN = 13
+	end
 	
 	local limits = config.get()
 
@@ -34,7 +54,14 @@ end
 function MatchState:branch(stringIndex, initialStringIndex)
 	local child = setmetatable({}, MatchState)
 	child.flags = self.flags
-	child.targetStringChars = self.targetStringChars
+	child.getTargetCharacter = self.getTargetCharacter
+	child.getExecutionValue = self.getExecutionValue
+	child.getExecutionLowerValue = self.getExecutionLowerValue
+	child.getExecutionUpperValue = self.getExecutionUpperValue
+	child.getExecutionRanges = self.getExecutionRanges
+	child.getExecutionKeys = self.getExecutionKeys
+	child.NEWLINE = self.NEWLINE
+	child.CARRIAGE_RETURN = self.CARRIAGE_RETURN
 	child.targetStringLength = self.targetStringLength
 	child.stringIndex = stringIndex or self.stringIndex
 	child.initialStringIndex = initialStringIndex or self.initialStringIndex
