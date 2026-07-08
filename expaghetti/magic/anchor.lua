@@ -5,6 +5,7 @@ local AST = require("./ast")
 local ENUM_ANCHOR_START = magicEnum.ANCHOR_START
 local ENUM_ANCHOR_END = magicEnum.ANCHOR_END
 local ENUM_ELEMENT_TYPE_ANCHOR = require("./enums/elements").anchor
+local ENUM_LINE_BREAKS = require("./enums/constants").LINE_BREAKS
 ----------------------------------------------------------------------------------------------------
 local Anchor = { }
 
@@ -32,8 +33,8 @@ Anchor.match = function(currentElement, state)
 		if stringIndex == 0 then
 			return true, nil, stringIndex
 		elseif currentElement.isMultiline then
-			local prevChar = state.targetStringChars[stringIndex]
-			if prevChar == '\n' or prevChar == '\r' then
+			local prevChar = state:getTargetCharacter(stringIndex)
+			if ENUM_LINE_BREAKS[prevChar] then
 				return true, nil, stringIndex
 			end
 		end
@@ -42,8 +43,8 @@ Anchor.match = function(currentElement, state)
 		if stringIndex >= state.targetStringLength then
 			return true, nil, stringIndex
 		elseif currentElement.isMultiline then
-			local currChar = state.targetStringChars[stringIndex + 1]
-			if currChar == '\n' or currChar == '\r' then
+			local currChar = state:getTargetCharacter(stringIndex + 1)
+			if ENUM_LINE_BREAKS[currChar] then
 				return true, nil, stringIndex
 			end
 		end

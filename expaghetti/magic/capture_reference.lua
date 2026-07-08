@@ -20,7 +20,7 @@ CaptureReference.isElement = function(currentElement)
 end
 
 -- %1 --> reference capture N
-CaptureReference.parseInt = function(currentCharacter, index)
+CaptureReference.parseInt = function(state, currentCharacter, index)
 	currentCharacter = currentCharacter + 0
 
 	--[[
@@ -36,7 +36,7 @@ CaptureReference.parseInt = function(currentCharacter, index)
 end
 
 -- %k<NN> --> reference capture NN
-CaptureReference.parseString = function(currentCharacter, index, expression)
+CaptureReference.parseString = function(state, currentCharacter, index, expression)
 	if expression[index] ~= ENUM_GROUP_NAME_OPEN then
 		return false, errorsEnum.invalidBackreferenceSyntax
 	end
@@ -94,9 +94,9 @@ CaptureReference.match = function(currentElement, state)
 	local currentCharacter
 	for backreferencePosition = initStringPosition, endStringPosition do
 		stringIndex = stringIndex + 1
-		currentCharacter = state.targetStringChars[stringIndex]
+		currentCharacter = state:getTargetCharacter(stringIndex)
 
-		if currentCharacter ~= state.targetStringChars[backreferencePosition] then
+		if currentCharacter ~= state:getTargetCharacter(backreferencePosition) then
 			return false
 		end
 	end

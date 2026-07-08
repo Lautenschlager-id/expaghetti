@@ -14,39 +14,27 @@ Literal.isElement = function(currentElement)
 end
 
 Literal.parse = function(state, currentCharacter, tree)
+	-- tree is a bad parameter, but if it's true then an error is thrown anyway
 	if Quantifier.isToken(state, tree) then
 		return false, errorsEnum.nothingToRepeat
 	end
 
 	tree._index = tree._index + 1
-	local node = AST.Literal(currentCharacter)
-	
-	node.unicodeValue = currentCharacter
-	node.byteValue = string.byte(currentCharacter)
 
-	if state.flags.i then
-		node.isCaseInsensitive = true
-		local lowerChar = string.lower(currentCharacter)
-		local upperChar = string.upper(currentCharacter)
-		
-		node.unicodeLowerValue = lowerChar
-		node.unicodeUpperValue = upperChar
-		
-		node.byteLowerValue = string.byte(lowerChar)
-		node.byteUpperValue = string.byte(upperChar)
-	end
-	
+	local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter)
+	local node = AST.Literal(value, lowerValue, upperValue)
+
 	tree[tree._index] = node
+
 	return state.index + 1
 end
 
-Literal.match = function(currentElement, currentCharacter, state)
+Literal.match = function(currentElement, currentCharacter)
 	if currentElement.isCaseInsensitive then
-		return currentCharacter == state:getExecutionLowerValue(currentElement)
-			or currentCharacter == state:getExecutionUpperValue(currentElement)
+		return currentCharacter == currentElement.lowerValue
+			or currentCharacter == currentElement.upperValue
 	end
-	
-	return currentCharacter == state:getExecutionValue(currentElement)
+	return currentCharacter == currentElement.value
 end
 
 return Literal

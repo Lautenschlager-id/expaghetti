@@ -1,4 +1,9 @@
+----------------------------------------------------------------------------------------------------
 local Escaped = require("./magic/escaped")
+local flagsEnum = require("./enums/flags")
+local ENUM_FLAG_UNICODE = flagsEnum.UNICODE
+local ENUM_FLAG_CASE_INSENSITIVE = flagsEnum.CASE_INSENSITIVE
+----------------------------------------------------------------------------------------------------
 local ParserState = {}
 ParserState.__index = ParserState
 
@@ -41,7 +46,7 @@ end
 function ParserState:readElement(index)
 	local char = self.patternChars[index]
 	if Escaped.isToken(char) then
-		return Escaped.parse(index, self.patternChars)
+		return Escaped.parse(self, index, self.patternChars)
 	else
 		return index + 1, char
 	end
@@ -78,6 +83,65 @@ function ParserState:getCharacterValue(element)
 		return element.value
 	end
 	return element
+end
+
+function ParserState:getExecutionValues(char)
+	local hasFlagUnicode = self.flags[ENUM_FLAG_UNICODE]
+	local lowerChar, upperChar
+
+	if self.flags[ENUM_FLAG_CASE_INSENSITIVE] then
+		lowerChar = string.lower(char)
+		upperChar = string.upper(char)
+
+		lowerChar = hasFlagUnicode and lowerChar or string.byte(lowerChar)
+		upperChar = hasFlagUnicode and upperChar or string.byte(upperChar)
+	end
+	char = hasFlagUnicode and char or string.byte(char)
+
+	return char, lowerChar, upperChar
+end
+
+function ParserState:compileSet(set)
+    local values = {}
+
+    for char in pairs(set.values) do
+        local value, lowerValue, upperValue = self:getExecutionValues(char)
+
+        if lowerValue then
+            values[lowerValue] = true
+            values[upperValue] = true
+		else
+			values[value] = true
+        end
+    end
+
+    set.values = values
+
+    local ranges, index = {}, 0
+
+    for i = 1, set.rangeIndex, 2 do
+        local startValue, startLower, startUpper = self:getExecutionValues(set.ranges[i])
+        local endValue, endLower, endUpper = self:getExecutionValues(set.ranges[i + 1])
+
+		index = index + 1
+        if startLower then
+            ranges[index] = startLower
+			index = index + 1
+            ranges[index] = endLower
+
+			index = index + 1
+            ranges[index] = startUpper
+			index = index + 1
+            ranges[index] = endUpper
+		else
+			ranges[index] = startValue
+			index = index + 1
+			ranges[index] = endValue
+        end
+    end
+
+    set.ranges = ranges
+	set.rangeIndex = index
 end
 
 return ParserState

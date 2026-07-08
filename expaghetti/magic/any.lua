@@ -2,6 +2,7 @@
 local ENUM_ANY_CHARACTER = require("./enums/magic").ANY_CHARACTER
 local AST = require("./ast")
 local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").any
+local ENUM_LINE_BREAKS = require("./enums/constants").LINE_BREAKS
 ----------------------------------------------------------------------------------------------------
 local Any = { }
 
@@ -26,7 +27,7 @@ Any.match = function(currentElement, currentCharacter, state)
 	if currentElement.isDotAll then
 		return true
 	end
-	return currentCharacter ~= "\r" and currentCharacter ~= "\n"
+	return not ENUM_LINE_BREAKS[currentCharacter]
 end
 
 return Any

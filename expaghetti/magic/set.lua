@@ -37,47 +37,12 @@ Set.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_SET
 end
 
-local function addKey(set, char, isCaseInsensitive)
-	set.keys[char] = true
-	set.unicodeKeys[char] = true
-	set.byteKeys[string.byte(char)] = true
-	
-	if isCaseInsensitive then
-		local lower = string.lower(char)
-		local upper = string.upper(char)
-		set.unicodeKeys[lower] = true
-		set.unicodeKeys[upper] = true
-		set.byteKeys[string.byte(lower)] = true
-		set.byteKeys[string.byte(upper)] = true
-	end
-end
-
-local function addRange(set, startChar, endChar, isCaseInsensitive)
+local function addRange(set, startChar, endChar)
 	set.rangeIndex = set.rangeIndex + 1
 	set.ranges[set.rangeIndex] = startChar
-	set.ranges[set.rangeIndex + 1] = endChar
 	
-	table.insert(set.unicodeRanges, startChar)
-	table.insert(set.unicodeRanges, endChar)
-	table.insert(set.byteRanges, string.byte(startChar))
-	table.insert(set.byteRanges, string.byte(endChar))
-	
-	if isCaseInsensitive then
-		local lowerStart = string.lower(startChar)
-		local lowerEnd = string.lower(endChar)
-		local upperStart = string.upper(startChar)
-		local upperEnd = string.upper(endChar)
-		
-		table.insert(set.unicodeRanges, lowerStart)
-		table.insert(set.unicodeRanges, lowerEnd)
-		table.insert(set.unicodeRanges, upperStart)
-		table.insert(set.unicodeRanges, upperEnd)
-		
-		table.insert(set.byteRanges, string.byte(lowerStart))
-		table.insert(set.byteRanges, string.byte(lowerEnd))
-		table.insert(set.byteRanges, string.byte(upperStart))
-		table.insert(set.byteRanges, string.byte(upperEnd))
-	end
+	set.rangeIndex = set.rangeIndex + 1
+	set.ranges[set.rangeIndex] = endChar
 end
 
 Set.parse = function(state, tree)
@@ -132,23 +97,25 @@ Set.parse = function(state, tree)
 						return false, errorsEnum.unorderedSetRange
 					end
 
-					addRange(set, rangeInitChar, nextTokenValue, isCaseInsensitive)
+					addRange(set, rangeInitChar, nextTokenValue)
 
 					-- skip next element(s)
 					elementIndex = elementIndex + (skipCount or 0)
 				else
-					addKey(set, rangeInitChar, isCaseInsensitive)
-					addKey(set, currentCharacterValue, isCaseInsensitive)
+					set.values[rangeInitChar] = true
+					set.values[currentCharacterValue] = true
 				end
 			elseif nextTokenIsRangeSep then
 				watchingForRangeSeparator = true
 				rangeInitChar = currentCharacterValue
 			else
-				addKey(set, currentCharacterValue, isCaseInsensitive)
+				set.values[currentCharacterValue] = true
 			end
 		end
 
 	end
+
+	state:compileSet(set)
 
 	tree._index = tree._index + 1
 	tree[tree._index] = set
@@ -159,14 +126,13 @@ end
 
 Set.match = function(currentElement, currentCharacter, state)
 	local hasMatched = false
-	local keys = state:getExecutionKeys(currentElement)
 
-	if keys[currentCharacter] then
+	if currentElement.values[currentCharacter] then
 		hasMatched = true
 	end
 
 	if not hasMatched then
-		local ranges = state:getExecutionRanges(currentElement)
+		local ranges = currentElement.ranges
 		for rangeIndex = 1, #ranges, 2 do
 			local rStart = ranges[rangeIndex]
 			local rEnd = ranges[rangeIndex + 1]

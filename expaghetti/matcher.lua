@@ -55,9 +55,9 @@ local singleElementMatcher = function(
 	elseif Any.isElement(currentElement) then
 		return Any.match(currentElement, currentCharacter, state)
 	elseif Set.isElement(currentElement) then
-		return Set.match(currentElement, currentCharacter)
+		return Set.match(currentElement, currentCharacter, state)
 	elseif Literal.isElement(currentElement) then
-		return Literal.match(currentElement, currentCharacter)
+		return Literal.match(currentElement, currentCharacter, state)
 	end
 
 	return false
@@ -119,7 +119,7 @@ local function quantifyElement(
 			lastIniStr, lastEndStr = iniStr, endStr
 
 			stringIndex = endStr + 1
-			currentCharacter = state.targetStringChars[stringIndex]
+			currentCharacter = state:getTargetCharacter(stringIndex)
 		end
 
 		return true
@@ -145,7 +145,7 @@ local function quantifyElement(
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.targetStringChars[occurrenceStart], coreTreeMatcher,
+			currentElement, state:getTargetCharacter(occurrenceStart), coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -158,7 +158,7 @@ local function quantifyElement(
 		endStr = endStr or occurrenceStart
 		endStringPositions[lastOccurrence] = endStr
 		stringIndex = endStr + 1
-		currentCharacter = state.targetStringChars[stringIndex]
+		currentCharacter = state:getTargetCharacter(stringIndex)
 		lastIniStr, lastEndStr = nil, nil
 
 		extendOccurrenceCollection()
@@ -202,7 +202,7 @@ local function quantifyElement(
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state.targetStringChars[occurrenceStart], coreTreeMatcher,
+			currentElement, state:getTargetCharacter(occurrenceStart), coreTreeMatcher,
 			tempState, nil, nil
 		)
 
@@ -216,7 +216,7 @@ local function quantifyElement(
 		endStringPositions[occurrenceIndex] = endStr
 		totalOccurrences = occurrenceIndex
 		stringIndex = endStr + 1
-		currentCharacter = state.targetStringChars[stringIndex]
+		currentCharacter = state:getTargetCharacter(stringIndex)
 		lastIniStr, lastEndStr = nil, nil
 		extendOccurrenceCollection()
 		maximumOccurrencesOfElement = totalOccurrences
@@ -297,7 +297,7 @@ coreTreeMatcher = function(
 		currentElement = tree[treeIndex]
 
 		state.stringIndex = state.stringIndex + 1
-		currentCharacter = state.targetStringChars[state.stringIndex]
+		currentCharacter = state:getTargetCharacter(state.stringIndex)
 
 		hasQuantifier = Quantifier.isElement(currentElement)
 
@@ -391,7 +391,10 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 	local treeLength = tree._index
 
-	local targetStringChars, targetStringLength = splitStringByEachChar(str, not not flags[ENUM_FLAG_UNICODE])
+	local targetStringChars, targetStringLength = nil, #str
+	if flags[ENUM_FLAG_UNICODE] then
+		targetStringChars, targetStringLength = splitStringByEachChar(str, true)
+	end
 
 	stringIndex = stringIndex or 0
 
@@ -401,7 +404,7 @@ local matcher = function(expr, str, flags, stringIndex)
 		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		
 		local state = MatchState.new(
-			flags, targetStringChars, targetStringLength, stringIndex, stringIndex, tree, tree._metaData
+			flags, str, targetStringChars, targetStringLength, stringIndex, stringIndex, tree, tree._metaData
 		)
 		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
 			state, tree, 0
@@ -425,7 +428,14 @@ _G.m = function(expr, str, flags)
 		return print(string.format("match(%q, %q) = %q", expr, str, iniStr))
 	end
 
-	print(string.format("match(%q, %q) = %q", expr, str, table.concat(targetStringChars, '', iniStr, endStr)))
+	local function getSubstring(ini, endPos)
+		if targetStringChars then
+			return table.concat(targetStringChars, '', ini, endPos)
+		end
+		return string.sub(str, ini, endPos)
+	end
+
+	print(string.format("match(%q, %q) = %q", expr, str, getSubstring(iniStr, endStr)))
 
 	local captureStarts = matcherMetaData.captureStarts
 	if #captureStarts > 0 then
@@ -436,7 +446,7 @@ _G.m = function(expr, str, flags)
 			iniStr, endStr = captureStarts[posIndex] or 0,
 				captureEnds[posIndex] or 0
 			print(string.format("\t\t[%02d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
-				table.concat(targetStringChars, '', iniStr, endStr)))
+				getSubstring(iniStr, endStr)))
 		end
 
 		print("\t---------Named Captures---------")
@@ -444,7 +454,7 @@ _G.m = function(expr, str, flags)
 			if not tonumber(key) then
 				iniStr, endStr = value or 0, captureEnds[key] or 0
 				print(string.format("\t\t[%q]\t=\t(%d, %d)\t=\t%q", key, iniStr, endStr,
-					table.concat(targetStringChars, '', iniStr, endStr)))
+					getSubstring(iniStr, endStr)))
 			end
 		end
 	end
@@ -455,8 +465,8 @@ _G.m = function(expr, str, flags)
 		for posIndex = 1, #positionCaptures do
 			iniStr = positionCaptures[posIndex]
 			print(string.format("\t\t[%02d]\t=\t\"%s(%d)%s\"", posIndex,
-				table.concat(targetStringChars, '', 1, iniStr - 1), iniStr,
-				table.concat(targetStringChars, '', iniStr)))
+				getSubstring(1, iniStr - 1), iniStr,
+				getSubstring(iniStr, -1)))
 		end
 	end
 

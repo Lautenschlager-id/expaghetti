@@ -7,6 +7,8 @@ local tonumber = tonumber
 local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
 ----------------------------------------------------------------------------------------------------
+local AST = require("./ast")
+----------------------------------------------------------------------------------------------------
 local CaptureReference = require("./magic/capture_reference")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
@@ -30,7 +32,7 @@ local specialEscaped = {
 }
 
 -- %cA --> ctrl char A
-specialEscaped.c = function(currentCharacter, index, expression)
+specialEscaped.c = function(state, currentCharacter, index, expression)
 	local ctrlChar = currentCharacter and stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
 		return false, errorsEnum.invalidParamCtrlChar
@@ -42,7 +44,7 @@ specialEscaped.c = function(currentCharacter, index, expression)
 	}
 end
 -- %e00FF --> char(0x00FF)
-specialEscaped.e = function(currentCharacter, index, expression)
+specialEscaped.e = function(state, currentCharacter, index, expression)
 	local hex = ''
 
 	-- Must be exactly 4 characters long
@@ -67,27 +69,32 @@ specialEscaped.e = function(currentCharacter, index, expression)
 	}
 end
 -- %bxy --> balanced match between x and y
-specialEscaped.b = function(currentCharacter, index, expression)
+specialEscaped.b = function(state, currentCharacter, index, expression)
 	local opener = expression[index]
 	local closer = expression[index + 1]
 	if not opener or not closer then
 		return false, errorsEnum.incompleteEscape
 	end
-	return index + 2, {
-		type = ENUM_ELEMENT_TYPE_BALANCED,
-		open = opener,
-		close = closer,
-	}
+
+	local opener, openerLower, openerUpper = state:getExecutionValues(opener)
+	local closer, closerLower, closerUpper = state:getExecutionValues(closer)
+
+	return index + 2, AST.Balanced(
+		openerLower or opener,
+		openerUpper or opener,
+		closerLower or closer,
+		closerUpper or closer
+	)
 end
 -- %f --> frontier boundary
-specialEscaped.f = function(currentCharacter, index)
+specialEscaped.f = function(state, currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
 		isNegated = false,
 	}
 end
 -- %F --> negated frontier boundary
-specialEscaped.F = function(currentCharacter, index)
+specialEscaped.F = function(state, currentCharacter, index)
 	return index, {
 		type = ENUM_ELEMENT_TYPE_BOUNDARY,
 		isNegated = true,
@@ -98,7 +105,7 @@ Escaped.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ESCAPE_CHARACTER
 end
 
-Escaped.parse = function(index, expression)
+Escaped.parse = function(state, index, expression)
 	-- Skip escape
 	index = index + 1
 
@@ -111,16 +118,18 @@ Escaped.parse = function(index, expression)
 	index = index + 1
 
 	if characterClasses[currentCharacter] then
-		return index, tblDeepCopy(characterClasses[currentCharacter])
+		local set = tblDeepCopy(characterClasses[currentCharacter])
+		state:compileSet(set)
+		return index, set
 	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
 		return index, {
 			type = ENUM_ELEMENT_TYPE_LITERAL,
 			value = currentCharacter
 		}
 	elseif specialEscaped[currentCharacter] then
-		return specialEscaped[currentCharacter](expression[index], index, expression)
+		return specialEscaped[currentCharacter](state, expression[index], index, expression)
 	elseif CaptureReference.isIntToken(currentCharacter) then
-		return specialEscaped.int(currentCharacter, index)
+		return specialEscaped.int(state, currentCharacter, index)
 	end
 
 	return false, strformat(errorsEnum.invalidEscape, currentCharacter)

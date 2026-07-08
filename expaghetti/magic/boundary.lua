@@ -11,11 +11,11 @@ end
 
 Boundary.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
-	local prevChar = state.targetStringChars[stringIndex]
-	local currChar = state.targetStringChars[stringIndex + 1]
+	local prevChar = stringIndex > 0 and state:getTargetCharacter(stringIndex) or nil
+	local currChar = state:getTargetCharacter(stringIndex + 1)
 
-	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar) or false
-	local isCurrInSet = currChar and Set.match(currentElement.set, currChar) or false
+	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar, state) or false
+	local isCurrInSet = currChar and Set.match(currentElement.set, currChar, state) or false
 
 	if currentElement.isNegated then
 		-- %F (non-frontier boundary): Matches if BOTH are in set, or NEITHER are in set

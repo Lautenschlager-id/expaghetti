@@ -9,9 +9,20 @@ local function compareTables(tbl1, tbl2, name, isSecondCheck)
 
 	assert(tbl2, strformat("%s: Table not found", name))
 
+	local ignoredKeys = {
+		byteValue = true, unicodeValue = true,
+		byteLowerValue = true, unicodeLowerValue = true,
+		byteUpperValue = true, unicodeUpperValue = true,
+		byteRanges = true, unicodeRanges = true,
+		byteKeys = true, unicodeKeys = true,
+		byteOpen = true, unicodeOpen = true,
+		byteClose = true, unicodeClose = true,
+		keys = true -- also ignore generic keys map added to set
+	}
+
 	local valueType, compValueType
 	for key, value in next, tbl1 do
-		if key ~= "byteValue" then
+		if not ignoredKeys[key] then
 			valueType = type(value)
 			if valueType == "table" then
 				compareTables(value, tbl2[key], strformat("%s%s.", name, key), isSecondCheck)

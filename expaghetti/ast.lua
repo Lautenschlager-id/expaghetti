@@ -15,10 +15,13 @@ function AST.Any()
 	}
 end
 
-function AST.Literal(value)
+function AST.Literal(value, lowerValue, upperValue)
 	return {
 		type = elementsEnum.literal,
-		value = value
+		value = value,
+		isCaseInsensitive = not not lowerValue,
+		lowerValue = lowerValue,
+		upperValue = upperValue,
 	}
 end
 
@@ -34,11 +37,7 @@ function AST.Set()
 		hasToNegateMatch = false,
 		rangeIndex = 0,
 		ranges = {},
-		unicodeRanges = {},
-		byteRanges = {},
-		keys = {},
-		unicodeKeys = {},
-		byteKeys = {},
+		values = {},
 		classIndex = 0,
 		classes = {},
 	}
@@ -57,6 +56,16 @@ function AST.Alternate(trees)
 	return {
 		type = elementsEnum.alternate,
 		trees = trees,
+	}
+end
+
+function AST.Balanced(lowerOpen, upperOpen, lowerClose, upperClose)
+	return {
+		type = elementsEnum.balanced,
+		lowerOpen = lowerOpen,
+		upperOpen = upperOpen,
+		lowerClose = lowerClose,
+		upperClose = upperClose,
 	}
 end
 
