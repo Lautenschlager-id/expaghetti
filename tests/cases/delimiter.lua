@@ -1,122 +1,128 @@
 return {
 	{
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			_index = 3,
+		},
 		regex = "^ab",
-		parsed = {
-			_index = 3,
-			{
-				type = "anchor",
-				isBeginning = true,
-				
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'b'
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("^"),
+			},
+			{
+				isBeginning = true,
+				type = "anchor",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			_index = 5,
+		},
 		regex = "^%^^ab",
-		parsed = {
-			_index = 5,
-			{
-				type = "anchor",
-				isBeginning = true,
-				
-			},
-			{
-				type = "literal",
-				value = '^'
-			},
-			{
-				type = "anchor",
-				isBeginning = true,
-				
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'b'
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+			},
+			_index = 3,
+		},
 		regex = "ab$",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'b'
-			},
-			{
-				type = "anchor",
-				isBeginning = false,
-				
-			}
-		}
 	},
 	{
-		regex = "^ab$%$",
 		parsed = {
-			_index = 5,
 			{
-				type = "anchor",
 				isBeginning = true,
-				
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'b'
-			},
-			{
 				type = "anchor",
-				isBeginning = false,
-				
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = '$'
-			}
-		}
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("$"),
+			},
+			_index = 5,
+		},
+		regex = "^ab$%$",
 	},
 	{
-		regex = "$[^$$^]^",
 		parsed = {
-			_index = 3,
 			{
-				type = "anchor",
 				isBeginning = false,
-				
+				type = "anchor",
 			},
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
 				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['$'] = true,
-				['^'] = true
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("$")] = true,
+					[string.byte("^")] = true,
+				},
 			},
 			{
-				type = "anchor",
 				isBeginning = true,
-				
-			}
-		}
+				type = "anchor",
+			},
+			_index = 3,
+		},
+		regex = "$[^$$^]^",
 	},
 }

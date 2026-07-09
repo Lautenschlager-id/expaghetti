@@ -20,15 +20,12 @@ local Literal = require("./magic/literal")
 local AST = require("./ast")
 local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
 ----------------------------------------------------------------------------------------------------
-local printdebug = false
-
 local function canBacktrackNestedQuantifier(quantifier, element)
 	local mode = quantifier.mode or "greedy"
 	return mode ~= "possessive"
 		and AST.elementHasNestedQuantifier(element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
-
 
 ----------------------------------------------------------------------------------------------------
 
@@ -55,9 +52,9 @@ local singleElementMatcher = function(
 	elseif Any.isElement(currentElement) then
 		return Any.match(currentElement, currentCharacter, state)
 	elseif Set.isElement(currentElement) then
-		return Set.match(currentElement, currentCharacter, state)
+		return Set.match(currentElement, currentCharacter)
 	elseif Literal.isElement(currentElement) then
-		return Literal.match(currentElement, currentCharacter, state)
+		return Literal.match(currentElement, currentCharacter)
 	end
 
 	return false
@@ -278,15 +275,6 @@ coreTreeMatcher = function(
 
 	local outerTreeReference = state.metaData.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
-	if printdebug then
-		pdebug("\n%sStarting tree %s at position %d with outer tree being %s at position %s",
-			debugCurrentStackFrameStr,
-			tree, treeIndex + 1,
-			outerTree, outerTreeReference and outerTreeReference.treeIndex + 1,
-			string.sub(p(tree), 1, 200),
-			"\t\t\t\t",
-			outerTree and string.sub(p(outerTree), 1, 80))
-	end
 
 	local currentElement, currentCharacter
 	local hasQuantifier
@@ -302,18 +290,10 @@ coreTreeMatcher = function(
 		hasQuantifier = Quantifier.isElement(currentElement)
 
 		if not hasQuantifier then
-			pdebug("\t%sValidating stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
-				state.stringIndex,
-				currentElement.value, currentElement.type, currentCharacter)
-
 			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
 				currentElement, currentCharacter, coreTreeMatcher,
 				state, tree, treeIndex
 			)
-
-			pdebug("\t%s%salidated stringIndex %d -> %q<%s> == %q", debugCurrentStackFrameStr,
-				(hasMatched and 'V' or "Not v"),
-				state.stringIndex, currentElement.value, currentElement.type, currentCharacter)
 
 			-- Groups continue the execution of the previous tree in another stack
 			if shouldEndThisExecution then
@@ -324,8 +304,6 @@ coreTreeMatcher = function(
 				state.stringIndex = endStr
 			end
 		else
-			pdebug("\t%s@ Will quantify starting in stringIndex %d", debugCurrentStackFrameStr,
-				state.stringIndex)
 			return quantifyElement(
 				currentElement, currentCharacter, singleElementMatcher,
 				state, tree, treeIndex
@@ -334,8 +312,6 @@ coreTreeMatcher = function(
 	end
 
 	if outerTreeReference then
-		pdebug("&%sTree Matching outerTreeReference:", debugCurrentStackFrameStr)
-		
 		local groupIndex = tree._groupIndex
 		local pushedCapture = false
 		if groupIndex then
@@ -401,7 +377,6 @@ local matcher = function(expr, str, flags, stringIndex)
 	local hasMatched, iniStr, endStr, matcherMetaData
 	while stringIndex <= targetStringLength do
 		debugCurrentStackFrame = 0
-		pdebug("\n# Matching starting in new stringIndex %d", stringIndex)
 		
 		local state = MatchState.new(
 			flags, str, targetStringChars, targetStringLength, stringIndex, stringIndex, tree, tree._metaData
@@ -411,87 +386,12 @@ local matcher = function(expr, str, flags, stringIndex)
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData, targetStringChars
+			return hasMatched, iniStr, endStr, matcherMetaData
 		end
 
 		stringIndex = stringIndex + 1
 	end
 end
-
-----------------------------------------------------------------------------------------------------
--- Debugging
-_G.p = require("./helpers/pretty-print")
-_G.m = function(expr, str, flags)
-	local hasMatched, iniStr, endStr, matcherMetaData, targetStringChars = matcher(expr, str, flags)
-
-	if not hasMatched then
-		return print(string.format("match(%q, %q) = %q", expr, str, iniStr))
-	end
-
-	local function getSubstring(ini, endPos)
-		if targetStringChars then
-			return table.concat(targetStringChars, '', ini, endPos)
-		end
-		return string.sub(str, ini, endPos)
-	end
-
-	print(string.format("match(%q, %q) = %q", expr, str, getSubstring(iniStr, endStr)))
-
-	local captureStarts = matcherMetaData.captureStarts
-	if #captureStarts > 0 then
-		local captureEnds = matcherMetaData.captureEnds
-
-		print("\t---------Captures---------")
-		for posIndex = 1, #captureStarts do
-			iniStr, endStr = captureStarts[posIndex] or 0,
-				captureEnds[posIndex] or 0
-			print(string.format("\t\t[%02d]\t=\t(%d, %d)\t=\t%q", posIndex, iniStr, endStr,
-				getSubstring(iniStr, endStr)))
-		end
-
-		print("\t---------Named Captures---------")
-		for key, value in next, captureStarts do
-			if not tonumber(key) then
-				iniStr, endStr = value or 0, captureEnds[key] or 0
-				print(string.format("\t\t[%q]\t=\t(%d, %d)\t=\t%q", key, iniStr, endStr,
-					getSubstring(iniStr, endStr)))
-			end
-		end
-	end
-
-	local positionCaptures = matcherMetaData.positionCaptures
-	if #positionCaptures > 0 then
-		print("\t---------Position Captures---------")
-		for posIndex = 1, #positionCaptures do
-			iniStr = positionCaptures[posIndex]
-			print(string.format("\t\t[%02d]\t=\t\"%s(%d)%s\"", posIndex,
-				getSubstring(1, iniStr - 1), iniStr,
-				getSubstring(iniStr, -1)))
-		end
-	end
-
-	print('\n')
-end
-_G.pdebug = function(str, ...)
-	if printdebug then
-		if type(str) == "table" then
-			return print(str, ...)
-		end
-
-		local args = { ... }
-		local _, countFormats = string.gsub(str, '%%', '')
-
-		print(
-			string.format(
-				str,
-				table.unpack(args, 1, countFormats)
-			),
-			"\t\t\t\t",
-			table.unpack(args, countFormats + 1, select('#', ...))
-		)
-	end
-end
-----------------------------------------------------------------------------------------------------
 
 -- m("()a()(b)()c()(d)()(e)()f()", "abcdef") -- valid (abcdefg)
 -- m("()a()(b)()c()(()(d)()(e()(f)())()g())", "abcdefg") -- valid (abcdefg)

@@ -1,410 +1,438 @@
 return {
 	{
-		regex = "a|b|c|d",
 		parsed = {
-			_index = 1,
 			{
-				type = "alternate",
 				trees = {
+					{
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("a"),
+						},
+						_index = 1,
+					},
+					{
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("b"),
+						},
+						_index = 1,
+					},
+					{
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("c"),
+						},
+						_index = 1,
+					},
+					{
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("d"),
+						},
+						_index = 1,
+					},
 					_index = 4,
-					{
-						_index = 1,
-						{
-							type = "literal",
-							value = 'a'
-						}
-					},
-					{
-						_index = 1,
-						{
-							type = "literal",
-							value = 'b'
-						}
-					},
-					{
-						_index = 1,
-						{
-							type = "literal",
-							value = 'c'
-						}
-					},
-					{
-						_index = 1,
-						{
-							type = "literal",
-							value = 'd'
-						}
-					}
-				}
-			}
-		}
+				},
+				type = "alternate",
+			},
+			_index = 1,
+		},
+		regex = "a|b|c|d",
 	},
 	{
-		regex = "abc||d(e|.+)",
 		parsed = {
-			_index = 1,
 			{
-				type = "alternate",
 				trees = {
-					_index = 3,
 					{
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("a"),
+						},
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("b"),
+						},
+						{
+							isCaseInsensitive = false,
+							type = "literal",
+							value = string.byte("c"),
+						},
 						_index = 3,
-						{
-							type = "literal",
-							value = 'a'
-						},
-						{
-							type = "literal",
-							value = 'b'
-						},
-						{
-							type = "literal",
-							value = 'c'
-						}
 					},
 					{
-						_index = 0
+						_index = 0,
 					},
 					{
-						_index = 2,
 						{
+							isCaseInsensitive = false,
 							type = "literal",
-							value = 'd'
+							value = string.byte("d"),
 						},
 						{
-							type = "group",
 							index = 1,
 							tree = {
-								_index = 1,
 								{
-									type = "alternate",
 									trees = {
-										_index = 2,
 										{
-											_index = 1,
 											{
+												isCaseInsensitive = false,
 												type = "literal",
-												value = 'e'
-											}
+												value = string.byte("e"),
+											},
+											_index = 1,
 										},
 										{
-											_index = 1,
 											{
-												type = "any",
 												quantifier = {
-													type = "quantifier",
+													max = 0,
 													min = 1,
-													max = 0
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+													type = "quantifier",
+												},
+												type = "any",
+											},
+											_index = 1,
+										},
+										_index = 2,
+									},
+									type = "alternate",
+								},
+								_index = 1,
+							},
+							type = "group",
+						},
+						_index = 2,
+					},
+					_index = 3,
+				},
+				type = "alternate",
+			},
+			_index = 1,
+		},
+		regex = "abc||d(e|.+)",
 	},
 	{
-		regex = "|a((b|c||||d(e|))|.+)|.|",
 		parsed = {
-			_index = 1,
 			{
-				type = "alternate",
 				trees = {
-					_index = 4,
 					{
-						_index = 0
+						_index = 0,
 					},
 					{
-						_index = 2,
 						{
+							isCaseInsensitive = false,
 							type = "literal",
-							value = 'a'
+							value = string.byte("a"),
 						},
 						{
-							type = "group",
 							index = 1,
 							tree = {
-								_index = 1,
 								{
-									type = "alternate",
 									trees = {
-										_index = 2,
 										{
-											_index = 1,
 											{
-												type = "group",
 												index = 2,
 												tree = {
-													_index = 1,
 													{
-														type = "alternate",
 														trees = {
-															_index = 6,
 															{
+																{
+																	isCaseInsensitive = false,
+																	type = "literal",
+																	value = string.byte("b"),
+																},
 																_index = 1,
-																{
-																	type = "literal",
-																	value = 'b'
-																}
 															},
 															{
+																{
+																	isCaseInsensitive = false,
+																	type = "literal",
+																	value = string.byte("c"),
+																},
 																_index = 1,
+															},
+															{
+																_index = 0,
+															},
+															{
+																_index = 0,
+															},
+															{
+																_index = 0,
+															},
+															{
 																{
+																	isCaseInsensitive = false,
 																	type = "literal",
-																	value = 'c'
-																}
-															},
-															{
-																_index = 0
-															},
-															{
-																_index = 0
-															},
-															{
-																_index = 0
-															},
-															{
-																_index = 2,
-																{
-																	type = "literal",
-																	value = 'd'
+																	value = string.byte("d"),
 																},
 																{
-																	type = "group",
 																	index = 3,
 																	tree = {
-																		_index = 1,
 																		{
-																			type = "alternate",
 																			trees = {
-																				_index = 2,
 																				{
-																					_index = 1,
 																					{
+																						isCaseInsensitive = false,
 																						type = "literal",
-																						value = 'e'
-																					}
+																						value = string.byte("e"),
+																					},
+																					_index = 1,
 																				},
 																				{
-																					_index = 0
-																				}
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
+																					_index = 0,
+																				},
+																				_index = 2,
+																			},
+																			type = "alternate",
+																		},
+																		_index = 1,
+																	},
+																	type = "group",
+																},
+																_index = 2,
+															},
+															_index = 6,
+														},
+														type = "alternate",
+													},
+													_index = 1,
+												},
+												type = "group",
+											},
+											_index = 1,
 										},
 										{
-											_index = 1,
 											{
-												type = "any",
 												quantifier = {
-													type = "quantifier",
+													max = 0,
 													min = 1,
-													max = 0
-												}
-											}
-										}
-									}
-								}
-							}
-						}
+													type = "quantifier",
+												},
+												type = "any",
+											},
+											_index = 1,
+										},
+										_index = 2,
+									},
+									type = "alternate",
+								},
+								_index = 1,
+							},
+							type = "group",
+						},
+						_index = 2,
 					},
 					{
-						_index = 1,
 						{
-							type = "any"
-						}
+							type = "any",
+						},
+						_index = 1,
 					},
 					{
-						_index = 0
-					}
-				}
-			}
-		}
+						_index = 0,
+					},
+					_index = 4,
+				},
+				type = "alternate",
+			},
+			_index = 1,
+		},
+		regex = "|a((b|c||||d(e|))|.+)|.|",
 	},
 	{
-		regex = "a(?:%?|%|%))++c",
 		parsed = {
-			_index = 3,
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'a'
+				value = string.byte("a"),
 			},
 			{
-				type = "group",
-				hasBehavior = true,
 				disableCapture = true,
+				hasBehavior = true,
+				quantifier = {
+					max = 0,
+					min = 1,
+					mode = "possessive",
+					type = "quantifier",
+				},
 				tree = {
-					_index = 1,
 					{
-						type = "alternate",
 						trees = {
-							_index = 2,
 							{
-								_index = 1,
 								{
+									isCaseInsensitive = false,
 									type = "literal",
-									value = '?'
-								}
+									value = string.byte("?"),
+								},
+								_index = 1,
 							},
 							{
-								_index = 2,
 								{
+									isCaseInsensitive = false,
 									type = "literal",
-									value = '|'
+									value = string.byte("|"),
 								},
 								{
+									isCaseInsensitive = false,
 									type = "literal",
-									value = ')'
-								}
-							}
-						}
-					}
+									value = string.byte(")"),
+								},
+								_index = 2,
+							},
+							_index = 2,
+						},
+						type = "alternate",
+					},
+					_index = 1,
 				},
-				quantifier = {
-					type = "quantifier",
-					min = 1,
-					max = 0,
-					mode = "possessive"
-				}
+				type = "group",
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'c'
-			}
-		}
+				value = string.byte("c"),
+			},
+			_index = 3,
+		},
+		regex = "a(?:%?|%|%))++c",
 	},
 	{
-		regex = "a[b|c]d",
 		parsed = {
-			_index = 3,
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'a'
+				value = string.byte("a"),
 			},
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['b'] = true,
-				['|'] = true,
-				['c'] = true
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("b")] = true,
+					[string.byte("c")] = true,
+					[string.byte("|")] = true,
+				},
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'd'
-			}
-		}
+				value = string.byte("d"),
+			},
+			_index = 3,
+		},
+		regex = "a[b|c]d",
 	},
 	{
-		regex = '((a)|(b))',
 		parsed = {
-			_index = 1,
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "alternate",
 						trees = {
-							_index = 2,
 							{
-								_index = 1,
 								{
-									type = "group",
 									index = 2,
 									tree = {
-										_index = 1,
 										{
+											isCaseInsensitive = false,
 											type = "literal",
-											value = 'a'
-										}
-									}
-								}
+											value = string.byte("a"),
+										},
+										_index = 1,
+									},
+									type = "group",
+								},
+								_index = 1,
 							},
 							{
-								_index = 1,
 								{
-									type = "group",
 									index = 3,
 									tree = {
-										_index = 1,
 										{
+											isCaseInsensitive = false,
 											type = "literal",
-											value = 'b'
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+											value = string.byte("b"),
+										},
+										_index = 1,
+									},
+									type = "group",
+								},
+								_index = 1,
+							},
+							_index = 2,
+						},
+						type = "alternate",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 1,
+		},
+		regex = "((a)|(b))",
 	},
 	{
-		regex = '|',
 		parsed = {
-			_index = 1,
 			{
-				type = "alternate",
 				trees = {
-					_index = 2,
 					{
-						_index = 0
+						_index = 0,
 					},
 					{
-						_index = 0
-					}
-				}
-			}
-		}
+						_index = 0,
+					},
+					_index = 2,
+				},
+				type = "alternate",
+			},
+			_index = 1,
+		},
+		regex = "|",
 	},
 	{
-		regex = '|%+',
 		parsed = {
-			_index = 1,
 			{
-				type = "alternate",
 				trees = {
-					_index = 2,
 					{
-						_index = 0
+						_index = 0,
 					},
 					{
-						_index = 1,
 						{
+							isCaseInsensitive = false,
 							type = "literal",
-							value = '+'
-						}
-					}
-				}
-			}
-		}
+							value = string.byte("+"),
+						},
+						_index = 1,
+					},
+					_index = 2,
+				},
+				type = "alternate",
+			},
+			_index = 1,
+		},
+		regex = "|%+",
 	},
 	{
-		regex = '|(|',
-		errorMessage = "Invalid regular expression: Unterminated group"
+		errorMessage = "Invalid regular expression: Unterminated group",
+		regex = "|(|",
 	},
 	{
-		regex = '|+',
-		errorMessage = "Invalid regular expression: Nothing to repeat"
+		errorMessage = "Invalid regular expression: Nothing to repeat",
+		regex = "|+",
 	},
 	{
-		regex = '|++',
-		errorMessage = "Invalid regular expression: Nothing to repeat"
+		errorMessage = "Invalid regular expression: Nothing to repeat",
+		regex = "|++",
 	},
 }

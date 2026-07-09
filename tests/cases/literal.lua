@@ -1,80 +1,95 @@
 return {
 	{
-		regex = '',
 		parsed = {
-			_index = 0
-		}
+			_index = 0,
+		},
+		regex = "",
 	},
 	{
-		regex = 'a',
 		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
 			_index = 1,
-			{
-				type = "literal",
-				value = 'a'
-			}
-		}
+		},
+		regex = "a",
 	},
 	{
-		regex = "aBcD_!@#&}{~>:",
 		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("B"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("D"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("_"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("!"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("@"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("#"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("&"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("}"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("{"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("~"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte(">"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte(":"),
+			},
 			_index = 14,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'B'
-			},
-			{
-				type = "literal",
-				value = 'c'
-			},
-			{
-				type = "literal",
-				value = 'D'
-			},
-			{
-				type = "literal",
-				value = '_'
-			},
-			{
-				type = "literal",
-				value = '!'
-			},
-			{
-				type = "literal",
-				value = '@'
-			},
-			{
-				type = "literal",
-				value = '#'
-			},
-			{
-				type = "literal",
-				value = '&'
-			},
-			{
-				type = "literal",
-				value = '}'
-			},
-			{
-				type = "literal",
-				value = '{'
-			},
-			{
-				type = "literal",
-				value = '~'
-			},
-			{
-				type = "literal",
-				value = '>'
-			},
-			{
-				type = "literal",
-				value = ':'
-			}
-		}
+		},
+		regex = "aBcD_!@#&}{~>:",
 	},
 }

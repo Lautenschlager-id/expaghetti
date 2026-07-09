@@ -78,14 +78,10 @@ function ParserState:isElement(element)
 	return type(element) == "table"
 end
 
-function ParserState:getCharacterValue(element)
-	if type(element) == "table" then
-		return element.value
-	end
-	return element
-end
-
 function ParserState:getExecutionValues(char)
+	if type(char) == "number" then
+		char = string.char(char)
+	end
 	local hasFlagUnicode = self.flags[ENUM_FLAG_UNICODE]
 	local lowerChar, upperChar
 

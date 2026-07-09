@@ -1,483 +1,544 @@
 return {
 	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("B")] = true,
+					[string.byte("D")] = true,
+					[string.byte("[")] = true,
+					[string.byte("\1")] = true,
+					[string.byte("a")] = true,
+					[string.byte("c")] = true,
+				},
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			_index = 3,
+		},
 		regex = "a[aB%cAc[D]b",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "set",
-				hasToNegateMatch = false,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['a'] = true,
-				['B'] = true,
-				['c'] = true,
-				['['] = true,
-				['D'] = true,
-				['\1'] = true
-			},
-			{
-				type = "literal",
-				value = 'b'
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					string.byte("a"),
+					string.byte("b"),
+					string.byte("c"),
+					string.byte("d"),
+				},
+				type = "set",
+				values = {
+					[string.byte("-")] = true,
+				},
+			},
+			_index = 1,
+		},
 		regex = "[a-b-c-d]",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
-				hasToNegateMatch = false,
-				rangeIndex = 4,
-				ranges = {
-					'a', 'b',
-					'c', 'd'
-				},
-				classIndex = 0,
-				classes = { },
-				['-'] = true
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("]")] = true,
+					[string.byte("a")] = true,
+				},
+			},
+			_index = 1,
+		},
 		regex = "[]a]",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
-				hasToNegateMatch = false,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				[']'] = true,
-				['a'] = true
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("]")] = true,
+				},
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("]"),
+			},
+			_index = 3,
+		},
 		regex = "[]]a]",
-		parsed = {
-			_index = 3,
-			{
-				type = "set",
-				hasToNegateMatch = false,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				[']'] = true
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = ']'
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("]")] = true,
+					[string.byte("a")] = true,
+				},
+			},
+			_index = 1,
+		},
 		regex = "[^]a]",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
-				hasToNegateMatch = true,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				[']'] = true,
-				['a'] = true
-			}
-		}
 	},
 	{
-		regex = "[^]]a]",
 		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("]")] = true,
+				},
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("]"),
+			},
 			_index = 3,
-			{
-				type = "set",
-				hasToNegateMatch = true,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				[']'] = true
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = ']'
-			}
-		}
+		},
+		regex = "[^]]a]",
 	},
 	{
-		regex = "[^a]]",
 		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = true,
+				rangeIndex = 0,
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("a")] = true,
+				},
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("]"),
+			},
 			_index = 2,
-			{
-				type = "set",
-				hasToNegateMatch = true,
-				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['a'] = true
-			},
-			{
-				type = "literal",
-				value = ']'
-			}
-		}
+		},
+		regex = "[^a]]",
 	},
 	{
-		regex = "[-a-b-c-d-]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 4,
 				ranges = {
-					'a', 'b',
-					'c', 'd'
+					string.byte("a"),
+					string.byte("b"),
+					string.byte("c"),
+					string.byte("d"),
 				},
-				classIndex = 0,
-				classes = { },
-				['-'] = true
-			}
-		}
+				type = "set",
+				values = {
+					[string.byte("-")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "[-a-b-c-d-]",
 	},
 	{
-		regex = "[%cA-%cb]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 2,
 				ranges = {
-					'\1', '\2'
+					string.byte("\1"),
+					string.byte("\2"),
 				},
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "[%cA-%cb]",
 	},
 	{
-		regex = "[%w.%a^%U]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
+				classIndex = 3,
+				classes = {
+					{
+						classIndex = 0,
+						classes = {
+						},
+						hasToNegateMatch = false,
+						rangeIndex = 6,
+						ranges = {
+							string.byte("0"),
+							string.byte("9"),
+							string.byte("a"),
+							string.byte("z"),
+							string.byte("A"),
+							string.byte("Z"),
+						},
+						type = "set",
+						values = {
+							[string.byte("_")] = true,
+						},
+					},
+					{
+						classIndex = 0,
+						classes = {
+						},
+						hasToNegateMatch = false,
+						rangeIndex = 4,
+						ranges = {
+							string.byte("a"),
+							string.byte("z"),
+							string.byte("A"),
+							string.byte("Z"),
+						},
+						type = "set",
+						values = {
+						},
+					},
+					{
+						classIndex = 0,
+						classes = {
+						},
+						hasToNegateMatch = true,
+						rangeIndex = 2,
+						ranges = {
+							string.byte("A"),
+							string.byte("Z"),
+						},
+						type = "set",
+						values = {
+						},
+					},
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 0,
-				ranges = { },
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte(".")] = true,
+					[string.byte("^")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "[%w.%a^%U]",
+	},
+	{
+		parsed = {
+			{
 				classIndex = 3,
 				classes = {
 					{
-						type = "set",
-
+						classIndex = 0,
+						classes = {
+						},
 						hasToNegateMatch = false,
-
 						rangeIndex = 6,
 						ranges = {
-							'0',
-							'9',
-
-							'a',
-							'z',
-
-							'A',
-							'Z'
+							string.byte("0"),
+							string.byte("9"),
+							string.byte("a"),
+							string.byte("z"),
+							string.byte("A"),
+							string.byte("Z"),
 						},
-
-						classIndex = 0,
-						classes = { },
-
-						['_'] = true
+						type = "set",
+						values = {
+							[string.byte("_")] = true,
+						},
 					},
 					{
-						type = "set",
-
+						classIndex = 0,
+						classes = {
+						},
 						hasToNegateMatch = false,
-
 						rangeIndex = 4,
 						ranges = {
-							'a',
-							'z',
-
-							'A',
-							'Z'
+							string.byte("a"),
+							string.byte("z"),
+							string.byte("A"),
+							string.byte("Z"),
 						},
-
-						classIndex = 0,
-						classes = { }
+						type = "set",
+						values = {
+						},
 					},
 					{
-						type = "set",
-
+						classIndex = 0,
+						classes = {
+						},
 						hasToNegateMatch = true,
-
 						rangeIndex = 2,
 						ranges = {
-							'A',
-							'Z'
+							string.byte("A"),
+							string.byte("Z"),
 						},
-
-						classIndex = 0,
-						classes = { }
-					}
+						type = "set",
+						values = {
+						},
+					},
 				},
-				['.'] = true,
-				['^'] = true
-			}
-		}
-	},
-	{
-		regex = "[%w.-~%aa^%U]",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
 				hasToNegateMatch = false,
 				rangeIndex = 2,
 				ranges = {
-					'.', '~'
+					string.byte("."),
+					string.byte("~"),
 				},
-				classIndex = 3,
-				classes = {
-					{
-						type = "set",
-
-						hasToNegateMatch = false,
-
-						rangeIndex = 6,
-						ranges = {
-							'0',
-							'9',
-
-							'a',
-							'z',
-
-							'A',
-							'Z'
-						},
-
-						classIndex = 0,
-						classes = { },
-
-						['_'] = true
-					},
-					{
-						type = "set",
-
-						hasToNegateMatch = false,
-
-						rangeIndex = 4,
-						ranges = {
-							'a',
-							'z',
-
-							'A',
-							'Z'
-						},
-
-						classIndex = 0,
-						classes = { }
-					},
-					{
-						type = "set",
-
-						hasToNegateMatch = true,
-
-						rangeIndex = 2,
-						ranges = {
-							'A',
-							'Z'
-						},
-
-						classIndex = 0,
-						classes = { }
-					}
+				type = "set",
+				values = {
+					[string.byte("^")] = true,
+					[string.byte("a")] = true,
 				},
-				['^'] = true,
-				['a'] = true
-			}
-		}
+			},
+			_index = 1,
+		},
+		regex = "[%w.-~%aa^%U]",
 	},
 	{
-		regex = "[^%UU-ZZ-]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-				hasToNegateMatch = true,
-				rangeIndex = 2,
-				ranges = {
-					'U', 'Z'
-				},
 				classIndex = 1,
 				classes = {
 					{
-						type = "set",
-
+						classIndex = 0,
+						classes = {
+						},
 						hasToNegateMatch = true,
-
 						rangeIndex = 2,
 						ranges = {
-							'A',
-							'Z'
+							string.byte("A"),
+							string.byte("Z"),
 						},
-
-						classIndex = 0,
-						classes = { }
-					}
+						type = "set",
+						values = {
+						},
+					},
 				},
-				['Z'] = true,
-				['-'] = true
-			}
-		}
+				hasToNegateMatch = true,
+				rangeIndex = 2,
+				ranges = {
+					string.byte("U"),
+					string.byte("Z"),
+				},
+				type = "set",
+				values = {
+					[string.byte("-")] = true,
+					[string.byte("Z")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "[^%UU-ZZ-]",
 	},
 	{
-		regex = "[^^$|.%%()?:>=!<{},+*[%]a%-b]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
 				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['^'] = true,
-				['$'] = true,
-				['|'] = true,
-				['.'] = true,
-				['%'] = true,
-				['('] = true,
-				[')'] = true,
-				['?'] = true,
-				[':'] = true,
-				['>'] = true,
-				['='] = true,
-				['!'] = true,
-				['<'] = true,
-				['{'] = true,
-				['}'] = true,
-				[','] = true,
-				['+'] = true,
-				['*'] = true,
-				['['] = true,
-				[']'] = true,
-				['a'] = true,
-				['-'] = true,
-				['b'] = true
-			}
-		}
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("!")] = true,
+					[string.byte("$")] = true,
+					[string.byte("%")] = true,
+					[string.byte("(")] = true,
+					[string.byte(")")] = true,
+					[string.byte("*")] = true,
+					[string.byte("+")] = true,
+					[string.byte(",")] = true,
+					[string.byte("-")] = true,
+					[string.byte(".")] = true,
+					[string.byte(":")] = true,
+					[string.byte("<")] = true,
+					[string.byte("=")] = true,
+					[string.byte(">")] = true,
+					[string.byte("?")] = true,
+					[string.byte("[")] = true,
+					[string.byte("]")] = true,
+					[string.byte("^")] = true,
+					[string.byte("a")] = true,
+					[string.byte("b")] = true,
+					[string.byte("{")] = true,
+					[string.byte("|")] = true,
+					[string.byte("}")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "[^^$|.%%()?:>=!<{},+*[%]a%-b]",
 	},
 	{
-		regex = "[%^^$|.%%()?:>=!<{},+*[%]a%-b]",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 0,
-				ranges = { },
-				classIndex = 0,
-				classes = { },
-				['^'] = true,
-				['$'] = true,
-				['|'] = true,
-				['.'] = true,
-				['%'] = true,
-				['('] = true,
-				[')'] = true,
-				['?'] = true,
-				[':'] = true,
-				['>'] = true,
-				['='] = true,
-				['!'] = true,
-				['<'] = true,
-				['{'] = true,
-				['}'] = true,
-				[','] = true,
-				['+'] = true,
-				['*'] = true,
-				['['] = true,
-				[']'] = true,
-				['a'] = true,
-				['-'] = true,
-				['b'] = true
-			}
-		}
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte("!")] = true,
+					[string.byte("$")] = true,
+					[string.byte("%")] = true,
+					[string.byte("(")] = true,
+					[string.byte(")")] = true,
+					[string.byte("*")] = true,
+					[string.byte("+")] = true,
+					[string.byte(",")] = true,
+					[string.byte("-")] = true,
+					[string.byte(".")] = true,
+					[string.byte(":")] = true,
+					[string.byte("<")] = true,
+					[string.byte("=")] = true,
+					[string.byte(">")] = true,
+					[string.byte("?")] = true,
+					[string.byte("[")] = true,
+					[string.byte("]")] = true,
+					[string.byte("^")] = true,
+					[string.byte("a")] = true,
+					[string.byte("b")] = true,
+					[string.byte("{")] = true,
+					[string.byte("|")] = true,
+					[string.byte("}")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "[%^^$|.%%()?:>=!<{},+*[%]a%-b]",
 	},
 	{
-		regex = "%c %[[%^%%w[-%]]%]",
 		parsed = {
-			_index = 4,
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = '`'
+				value = string.byte("`"),
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = '['
+				value = string.byte("["),
 			},
 			{
-				type = "set",
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
 				rangeIndex = 2,
 				ranges = {
-					'[', ']'
+					string.byte("["),
+					string.byte("]"),
 				},
-				classIndex = 0,
-				classes = { },
-				['^'] = true,
-				['%'] = true,
-				['w'] = true
+				type = "set",
+				values = {
+					[string.byte("%")] = true,
+					[string.byte("^")] = true,
+					[string.byte("w")] = true,
+				},
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = ']'
-			}
-		}
+				value = string.byte("]"),
+			},
+			_index = 4,
+		},
+		regex = "%c %[[%^%%w[-%]]%]",
 	},
 	{
+		errorMessage = "Invalid regular expression: Missing ']' to close set",
 		regex = "[",
-		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		errorMessage = "Invalid regular expression: Missing ']' to close set",
 		regex = "[^",
-		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		errorMessage = "Invalid regular expression: Missing ']' to close set",
 		regex = "[]",
-		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		errorMessage = "Invalid regular expression: Missing ']' to close set",
 		regex = "[^]",
-		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		errorMessage = "Invalid regular expression: Missing ']' to close set",
 		regex = "[%]",
-		errorMessage = "Invalid regular expression: Missing ']' to close set"
 	},
 	{
+		errorMessage = "Invalid regular expression: Range out of order in set",
 		regex = "[b-a]",
-		errorMessage = "Invalid regular expression: Range out of order in set"
 	},
 }

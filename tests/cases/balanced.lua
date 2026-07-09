@@ -1,13 +1,15 @@
 return {
-    {
-		regex = "%b+.",
+	{
 		parsed = {
-			_index = 1,
 			{
+				lowerClose = string.byte("."),
+				lowerOpen = string.byte("+"),
 				type = "balanced",
-                open = "+",
-                close = "."
-			}
-		}
-	}
+				upperClose = string.byte("."),
+				upperOpen = string.byte("+"),
+			},
+			_index = 1,
+		},
+		regex = "%b+.",
+	},
 }

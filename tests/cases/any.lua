@@ -1,34 +1,36 @@
 return {
 	{
-		regex = '..',
 		parsed = {
-			_index = 2,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "any"
-			}
-		}
+				type = "any",
+			},
+			_index = 2,
+		},
+		regex = "..",
 	},
 	{
-		regex = '.%..%.',
 		parsed = {
+			{
+				type = "any",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("."),
+			},
+			{
+				type = "any",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("."),
+			},
 			_index = 4,
-			{
-				type = "any"
-			},
-			{
-				type = "literal",
-				value = '.'
-			},
-			{
-				type = "any"
-			},
-			{
-				type = "literal",
-				value = '.'
-			}
-		}
-	}
+		},
+		regex = ".%..%.",
+	},
 }

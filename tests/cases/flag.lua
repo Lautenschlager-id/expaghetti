@@ -1,87 +1,103 @@
 return {
 	{
-		regex = "maçã",
 		flags = {
-			['u'] = false
+			u = false,
 		},
 		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("m"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("�"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("�"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("�"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("�"),
+			},
 			_index = 6,
-			{
-				type = "literal",
-				value = 'm'
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = ('ç'):sub(1, 1)
-			},
-			{
-				type = "literal",
-				value = ('ç'):sub(2, 2)
-			},
-			{
-				type = "literal",
-				value = ('ã'):sub(1, 1)
-			},
-			{
-				type = "literal",
-				value = ('ã'):sub(2, 2)
-			}
-		}
-	},
-	{
+		},
 		regex = "maçã",
-		flags = {
-			['u'] = true
-		},
-		parsed = {
-			_index = 4,
-			{
-				type = "literal",
-				value = 'm'
-			},
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "literal",
-				value = 'ç'
-			},
-			{
-				type = "literal",
-				value = 'ã'
-			}
-		}
 	},
 	{
-		regex = "\xC2\xA0[^ª-º]↓",
 		flags = {
-			['u'] = true
+			u = true,
 		},
 		parsed = {
-			_index = 3,
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = "\xC2\xA0"
+				value = "m",
 			},
 			{
-				type = "set",
+				isCaseInsensitive = false,
+				type = "literal",
+				value = "a",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = "ç",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = "ã",
+			},
+			_index = 4,
+		},
+		regex = "maçã",
+	},
+	{
+		flags = {
+			u = true,
+		},
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = " ",
+			},
+			{
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
 				rangeIndex = 2,
 				ranges = {
-					'ª', 'º'
+					"ª",
+					"º",
 				},
-				classIndex = 0,
-				classes = { }
+				type = "set",
+				values = {
+				},
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = '↓'
-			}
-		}
+				value = "↓",
+			},
+			_index = 3,
+		},
+		regex = " [^ª-º]↓",
 	},
 }

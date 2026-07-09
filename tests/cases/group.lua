@@ -1,931 +1,954 @@
 return {
 	{
-		regex = "(a)",
 		parsed = {
+			{
+				index = 1,
+				tree = {
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("a"),
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
 			_index = 1,
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "literal",
-						value = 'a'
-					}
-				}
-			}
-		}
+		},
+		regex = "(a)",
 	},
 	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				index = 1,
+				tree = {
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("b"),
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			_index = 3,
+		},
 		regex = "a(b)c",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "literal",
-						value = 'b'
-					}
-				}
-			},
-			{
-				type = "literal",
-				value = 'c'
-			}
-		}
 	},
 	{
-		regex = "a(b((%((%.))%)))c",
 		parsed = {
-			_index = 3,
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'a'
+				value = string.byte("a"),
 			},
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 2,
 					{
+						isCaseInsensitive = false,
 						type = "literal",
-						value = 'b'
+						value = string.byte("b"),
 					},
 					{
-						type = "group",
 						index = 2,
 						tree = {
-							_index = 2,
 							{
-								type = "group",
 								index = 3,
 								tree = {
-									_index = 2,
 									{
+										isCaseInsensitive = false,
 										type = "literal",
-										value = '('
+										value = string.byte("("),
 									},
 									{
-										type = "group",
 										index = 4,
 										tree = {
-											_index = 1,
 											{
+												isCaseInsensitive = false,
 												type = "literal",
-												value = '.'
-											}
-										}
-									}
-								}
+												value = string.byte("."),
+											},
+											_index = 1,
+										},
+										type = "group",
+									},
+									_index = 2,
+								},
+								type = "group",
 							},
 							{
+								isCaseInsensitive = false,
 								type = "literal",
-								value = ')'
-							}
+								value = string.byte(")"),
+							},
+							_index = 2,
 						},
-					}
-				}
-			},
-			{
-				type = "literal",
-				value = 'c'
-			}
-		}
-	},
-	{
-		regex = "a()b()c",
-		parsed = {
-			_index = 5,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "position_capture",
-				index = 1,
-				
-			},
-			{
-				type = "literal",
-				value = 'b'
-			},
-			{
-				type = "position_capture",
-				index = 2,
-				
-			},
-			{
-				type = "literal",
-				value = 'c'
-			}
-		}
-	},
-	{
-		regex = "%a()",
-		parsed = {
-			_index = 2,
-			{
-				type = "set",
-
-				hasToNegateMatch = false,
-
-				rangeIndex = 4,
-				ranges = {
-					'a',
-					'z',
-
-					'A',
-					'Z'
-				},
-
-				classIndex = 0,
-				classes = { }
-			},
-			{
-				type = "position_capture",
-				index = 1,
-				
-			}
-		}
-	},
-	{
-		regex = "%a.()",
-		parsed = {
-			_index = 3,
-			{
-				type = "set",
-
-				hasToNegateMatch = false,
-
-				rangeIndex = 4,
-				ranges = {
-					'a',
-					'z',
-
-					'A',
-					'Z'
-				},
-
-				classIndex = 0,
-				classes = { }
-			},
-			{
-				type = "any"
-			},
-			{
-				type = "position_capture",
-				index = 1,
-				
-			}
-		}
-	},
-	{
-		regex = "a(%?:b)",
-		parsed = {
-			_index = 2,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 3,
-					{
-						type = "literal",
-						value = '?'
-					},
-					{
-						type = "literal",
-						value = ':'
-					},
-					{
-						type = "literal",
-						value = 'b'
-					},
-				}
-			}
-		}
-	},
-	{
-		regex = "a(?:(~))b",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "group",
-				hasBehavior = true,
-				disableCapture = true,
-				tree = {
-					_index = 1,
-					{
 						type = "group",
+					},
+					_index = 2,
+				},
+				type = "group",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			_index = 3,
+		},
+		regex = "a(b((%((%.))%)))c",
+	},
+	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				index = 1,
+				type = "position_capture",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("b"),
+			},
+			{
+				index = 2,
+				type = "position_capture",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			_index = 5,
+		},
+		regex = "a()b()c",
+	},
+	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
+				},
+				type = "set",
+				values = {
+				},
+			},
+			{
+				index = 1,
+				type = "position_capture",
+			},
+			_index = 2,
+		},
+		regex = "%a()",
+	},
+	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
+				},
+				type = "set",
+				values = {
+				},
+			},
+			{
+				type = "any",
+			},
+			{
+				index = 1,
+				type = "position_capture",
+			},
+			_index = 3,
+		},
+		regex = "%a.()",
+	},
+	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				index = 1,
+				tree = {
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("?"),
+					},
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte(":"),
+					},
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("b"),
+					},
+					_index = 3,
+				},
+				type = "group",
+			},
+			_index = 2,
+		},
+		regex = "a(%?:b)",
+	},
+	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				disableCapture = true,
+				hasBehavior = true,
+				tree = {
+					{
 						index = 1,
 						tree = {
-							_index = 1,
 							{
+								isCaseInsensitive = false,
 								type = "literal",
-								value = '~'
-							}
-						}
-					}
-				}
+								value = string.byte("~"),
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
+				isCaseInsensitive = false,
 				type = "literal",
-				value = 'b'
-			}
-		}
+				value = string.byte("b"),
+			},
+			_index = 3,
+		},
+		regex = "a(?:(~))b",
 	},
 	{
-		regex = ".(?>..(.)).",
 		parsed = {
-			_index = 3,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
+				disableCapture = true,
 				hasBehavior = true,
 				isAtomic = true,
-				disableCapture = true,
 				tree = {
-					_index = 3,
 					{
-						type = "any"
+						type = "any",
 					},
 					{
-						type = "any"
+						type = "any",
 					},
 					{
-						type = "group",
 						index = 1,
 						tree = {
-							_index = 1,
 							{
-								type = "any"
-							}
-						}
-					}
-				}
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 3,
+				},
+				type = "group",
 			},
 			{
-				type = "any"
-			}
-		}
+				type = "any",
+			},
+			_index = 3,
+		},
+		regex = ".(?>..(.)).",
 	},
 	{
-		regex = ".(?!(?=.)).",
 		parsed = {
-			_index = 3,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
-				hasBehavior = true,
 				disableCapture = true,
+				hasBehavior = true,
 				isLookahead = true,
 				isNegative = true,
 				tree = {
-					_index = 1,
 					{
-						type = "group",
-						hasBehavior = true,
 						disableCapture = true,
+						hasBehavior = true,
 						isLookahead = true,
 						tree = {
-							_index = 1,
 							{
-								type = "any"
-							}
-						}
-					}
-				}
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "any"
-			}
-		}
+				type = "any",
+			},
+			_index = 3,
+		},
+		regex = ".(?!(?=.)).",
 	},
 	{
+		parsed = {
+			{
+				type = "any",
+			},
+			{
+				disableCapture = true,
+				fixedLength = 0,
+				hasBehavior = true,
+				isLookbehind = true,
+				isNegative = true,
+				tree = {
+					{
+						disableCapture = true,
+						hasBehavior = true,
+						isLookahead = true,
+						tree = {
+							{
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				type = "any",
+			},
+			_index = 3,
+		},
 		regex = ".(?<!(?=.)).",
-		parsed = {
-			_index = 3,
-			{
-				type = "any"
-			},
-			{
-				type = "group",
-				hasBehavior = true,
-				disableCapture = true,
-				isLookbehind = true,
-				isNegative = true,
-				fixedLength = 0,
-				tree = {
-					_index = 1,
-					{
-						type = "group",
-						hasBehavior = true,
-						disableCapture = true,
-						isLookahead = true,
-						tree = {
-							_index = 1,
-							{
-								type = "any"
-							}
-						}
-					}
-				}
-			},
-			{
-				type = "any"
-			}
-		}
 	},
 	{
-		regex = ".(?<!(?<=.)).",
 		parsed = {
-			_index = 3,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
-				hasBehavior = true,
 				disableCapture = true,
+				fixedLength = 0,
+				hasBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
-				fixedLength = 0,
 				tree = {
-					_index = 1,
 					{
-						type = "group",
-						hasBehavior = true,
 						disableCapture = true,
-						isLookbehind = true,
 						fixedLength = 1,
+						hasBehavior = true,
+						isLookbehind = true,
 						tree = {
-							_index = 1,
 							{
-								type = "any"
-							}
-						}
-					}
-				}
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "any"
-			}
-		}
-	},
-	{
-		regex = "(?:)",
-		parsed = {
-			_index = 1,
-			{
-				type = "group",
-				hasBehavior = true,
-				disableCapture = true,
-				tree = {
-					_index = 0
-                },
-			}
-		}
-	},
-	{
-		regex = "(.)(?:.)(.)",
-		parsed = {
+				type = "any",
+			},
 			_index = 3,
+		},
+		regex = ".(?<!(?<=.)).",
+	},
+	{
+		parsed = {
 			{
+				disableCapture = true,
+				hasBehavior = true,
+				tree = {
+					_index = 0,
+				},
 				type = "group",
+			},
+			_index = 1,
+		},
+		regex = "(?:)",
+	},
+	{
+		parsed = {
+			{
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
-				hasBehavior = true,
 				disableCapture = true,
+				hasBehavior = true,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 2,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
-			}
-		}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 3,
+		},
+		regex = "(.)(?:.)(.)",
 	},
 	{
-		regex = "(.)(?:.(.(.)))(.)",
 		parsed = {
-			_index = 3,
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
-				hasBehavior = true,
 				disableCapture = true,
+				hasBehavior = true,
 				tree = {
-					_index = 2,
 					{
-						type = "any"
+						type = "any",
 					},
 					{
-						type = "group",
 						index = 2,
 						tree = {
-							_index = 2,
 							{
-								type = "any"
+								type = "any",
 							},
 							{
-								type = "group",
 								index = 3,
 								tree = {
-									_index = 1,
 									{
-										type = "any"
-									}
-								}
-							}
-						}
-					}
-				}
+										type = "any",
+									},
+									_index = 1,
+								},
+								type = "group",
+							},
+							_index = 2,
+						},
+						type = "group",
+					},
+					_index = 2,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 4,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
-			}
-		}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 3,
+		},
+		regex = "(.)(?:.(.(.)))(.)",
 	},
 	{
-		regex = ".((?<named>.))",
 		parsed = {
-			_index = 2,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "group",
 						hasBehavior = true,
 						name = "named",
 						tree = {
-							_index = 1,
 							{
-								type = "any"
-							}
-						}
-					}
-				}
-			}
-		}
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 2,
+		},
+		regex = ".((?<named>.))",
 	},
 	{
-		regex = ".((?<n4m3d_>.))",
 		parsed = {
-			_index = 2,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "group",
 						hasBehavior = true,
 						name = "n4m3d_",
 						tree = {
-							_index = 1,
 							{
-								type = "any"
-							}
-						}
-					}
-				}
-			}
-		}
+								type = "any",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 2,
+		},
+		regex = ".((?<n4m3d_>.))",
 	},
 	{
-		regex = ".(?<_007>.)",
 		parsed = {
-			_index = 2,
 			{
-				type = "any"
+				type = "any",
 			},
 			{
-				type = "group",
 				hasBehavior = true,
 				name = "_007",
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
-			}
-		}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			_index = 2,
+		},
+		regex = ".(?<_007>.)",
 	},
 	{
+		parsed = {
+			{
+				index = 1,
+				tree = {
+					{
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				index = 2,
+				tree = {
+					{
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				index = 1,
+				type = "capture_reference",
+			},
+			{
+				index = 2,
+				type = "capture_reference",
+			},
+			{
+				index = 3,
+				type = "capture_reference",
+			},
+			_index = 5,
+		},
 		regex = "(.)(.)%1%2%3",
-		parsed = {
-			_index = 5,
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "any"
-					}
-				}
-			},
-			{
-				type = "group",
-				index = 2,
-				tree = {
-					_index = 1,
-					{
-						type = "any"
-					}
-				}
-			},
-			{
-				type = "capture_reference",
-				index = 1
-			},
-			{
-				type = "capture_reference",
-				index = 2
-			},
-			{
-				type = "capture_reference",
-				index = 3
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				index = 1,
+				tree = {
+					{
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("%"),
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("1"),
+			},
+			{
+				index = 3,
+				type = "capture_reference",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("0"),
+			},
+			_index = 5,
+		},
 		regex = "(.)%%1%30",
-		parsed = {
-			_index = 5,
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "any"
-					}
-				}
-			},
-			{
-				type = "literal",
-				value = '%'
-			},
-			{
-				type = "literal",
-				value = '1'
-			},
-			{
-				type = "capture_reference",
-				index = 3
-			},
-			{
-				type = "literal",
-				value = '0'
-			}
-		}
 	},
 	{
-		regex = "(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)%k<12>",
 		parsed = {
-			_index = 13,
 			{
-				type = "group",
 				index = 1,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 2,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 3,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 4,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 5,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 6,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 7,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 8,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 9,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 10,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 11,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
-				type = "group",
 				index = 12,
 				tree = {
-					_index = 1,
 					{
-						type = "any"
-					}
-				}
+						type = "any",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
+				index = 12,
 				type = "capture_reference",
-				index = 12
-			}
-		}
+			},
+			_index = 13,
+		},
+		regex = "(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)%k<12>",
 	},
 	{
-		regex = "(?<abc>(?<def>(?<ghi>%k<abc>)))%k<ghi>%k<def>",
 		parsed = {
-			_index = 3,
 			{
-				type = "group",
 				hasBehavior = true,
 				name = "abc",
 				tree = {
-					_index = 1,
 					{
-						type = "group",
 						hasBehavior = true,
 						name = "def",
 						tree = {
-							_index = 1,
 							{
-								type = "group",
 								hasBehavior = true,
 								name = "ghi",
 								tree = {
-									_index = 1,
 									{
+										index = "abc",
 										type = "capture_reference",
-										index = "abc"
-									}
-								}
-							}
-						}
-					}
-				}
+									},
+									_index = 1,
+								},
+								type = "group",
+							},
+							_index = 1,
+						},
+						type = "group",
+					},
+					_index = 1,
+				},
+				type = "group",
 			},
 			{
+				index = "ghi",
 				type = "capture_reference",
-				index = "ghi"
 			},
 			{
+				index = "def",
 				type = "capture_reference",
-				index = "def"
-			}
-		}
+			},
+			_index = 3,
+		},
+		regex = "(?<abc>(?<def>(?<ghi>%k<abc>)))%k<ghi>%k<def>",
 	},
 	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				index = 1,
+				tree = {
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("b"),
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			_index = 3,
+		},
 		regex = "a(b(?#this is a random message that can never affect the pattern))c",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "literal",
-						value = 'b'
-					}
-				}
-			},
-			{
-				type = "literal",
-				value = 'c'
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("a"),
+			},
+			{
+				index = 1,
+				tree = {
+					{
+						isCaseInsensitive = false,
+						type = "literal",
+						value = string.byte("b"),
+					},
+					_index = 1,
+				},
+				type = "group",
+			},
+			{
+				isCaseInsensitive = false,
+				type = "literal",
+				value = string.byte("c"),
+			},
+			_index = 3,
+		},
 		regex = "a(?#hi)(b(?#hi))(?#hi)c(?#hi)",
-		parsed = {
-			_index = 3,
-			{
-				type = "literal",
-				value = 'a'
-			},
-			{
-				type = "group",
-				index = 1,
-				tree = {
-					_index = 1,
-					{
-						type = "literal",
-						value = 'b'
-					}
-				}
-			},
-			{
-				type = "literal",
-				value = 'c'
-			}
-		}
 	},
 	{
+		errorMessage = "Invalid regular expression: Unterminated group",
 		regex = "a(",
-		errorMessage = "Invalid regular expression: Unterminated group"
 	},
 	{
+		errorMessage = "Invalid regular expression: There is no group to close",
 		regex = "a)",
-		errorMessage = "Invalid regular expression: There is no group to close"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group behavior",
 		regex = "(??)",
-		errorMessage = "Invalid regular expression: Invalid group behavior"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<b)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<>)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<007>)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<_ 007>)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Duplicated group name <abc>",
 		regex = "(?<abc>)(?<abc>)",
-		errorMessage = "Invalid regular expression: Duplicated group name <abc>"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<o%w>)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group behavior",
 		regex = "(?%w)",
-		errorMessage = "Invalid regular expression: Invalid group behavior"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid group name",
 		regex = "(?<%>>)",
-		errorMessage = "Invalid regular expression: Invalid group name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid backreference call: Missing '<'",
 		regex = "%k",
-		errorMessage = "Invalid regular expression: Invalid backreference call: Missing '<'"
 	},
 	{
+		errorMessage = "Invalid regular expression: Unterminated backreference: Missing '>'",
 		regex = "%k<",
-		errorMessage = "Invalid regular expression: Unterminated backreference: Missing '>'"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid backreference name",
 		regex = "%k<>",
-		errorMessage = "Invalid regular expression: Invalid backreference name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid backreference name",
 		regex = "%k<$.>",
-		errorMessage = "Invalid regular expression: Invalid backreference name"
 	},
 	{
+		errorMessage = "Invalid regular expression: Invalid backreference name",
 		regex = "%k<oi%>",
-		errorMessage = "Invalid regular expression: Invalid backreference name"
 	},
 }

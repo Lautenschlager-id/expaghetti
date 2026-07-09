@@ -1,420 +1,400 @@
 return {
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 4,
+				ranges = {
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
+				},
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
 		regex = "%a",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
-
-				hasToNegateMatch = false,
-
-				rangeIndex = 4,
-				ranges = {
-					'a',
-					'z',
-
-					'A',
-					'Z'
-				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
 	},
 	{
+		parsed = {
+			{
+				classIndex = 0,
+				classes = {
+				},
+				hasToNegateMatch = false,
+				rangeIndex = 2,
+				ranges = {
+					string.byte("0"),
+					string.byte("9"),
+				},
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
 		regex = "%d",
-		parsed = {
-			_index = 1,
-			{
-				type = "set",
-
-				hasToNegateMatch = false,
-
-				rangeIndex = 2,
-				ranges = {
-					'0',
-					'9'
-				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
 	},
 	{
-		regex = "%h%x",
 		parsed = {
-			_index = 2,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'f',
-
-					'A',
-					'F'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("f"),
+					string.byte("A"),
+					string.byte("F"),
 				},
-
-				classIndex = 0,
-				classes = { }
+				type = "set",
+				values = {
+				},
 			},
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'f',
-
-					'A',
-					'F'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("f"),
+					string.byte("A"),
+					string.byte("F"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 2,
+		},
+		regex = "%h%x",
 	},
 	{
-		regex = "%l",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 2,
 				ranges = {
-					'a',
-					'z'
+					string.byte("a"),
+					string.byte("z"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%l",
 	},
 	{
-		regex = "%p",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 8,
 				ranges = {
-					'!',
-					'/',
-
-					':',
-					'@',
-
-					'[',
-					'`',
-
-					'{',
-					'~'
+					string.byte("!"),
+					string.byte("/"),
+					string.byte(":"),
+					string.byte("@"),
+					string.byte("["),
+					string.byte("`"),
+					string.byte("{"),
+					string.byte("~"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%p",
 	},
 	{
-		regex = "%s",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 0,
-				ranges = { },
-
-				classIndex = 0,
-				classes = { },
-
-				['\f'] = true,
-				['\n'] = true,
-				['\r'] = true,
-				['\t'] = true,
-				[' '] = true
-			}
-		}
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte(" ")] = true,
+					[string.byte("\
+")] = true,
+					[string.byte("\12")] = true,
+					[string.byte("\13")] = true,
+					[string.byte("\9")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "%s",
 	},
 	{
-		regex = "%u",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 2,
 				ranges = {
-					'A',
-					'Z'
+					string.byte("A"),
+					string.byte("Z"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%u",
 	},
 	{
-		regex = "%w",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = false,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'z',
-
-					'A',
-					'Z'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
 				},
-
-				classIndex = 0,
-				classes = { },
-
-				['_'] = true
-			}
-		}
+				type = "set",
+				values = {
+					[string.byte("_")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "%w",
 	},
 	{
-		regex = "%A",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 4,
 				ranges = {
-					'a',
-					'z',
-
-					'A',
-					'Z'
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%A",
 	},
 	{
-		regex = "%D",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 2,
 				ranges = {
-					'0',
-					'9'
+					string.byte("0"),
+					string.byte("9"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%D",
 	},
 	{
-		regex = "%H%X",
 		parsed = {
-			_index = 2,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'f',
-
-					'A',
-					'F'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("f"),
+					string.byte("A"),
+					string.byte("F"),
 				},
-
-				classIndex = 0,
-				classes = { }
+				type = "set",
+				values = {
+				},
 			},
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'f',
-
-					'A',
-					'F'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("f"),
+					string.byte("A"),
+					string.byte("F"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 2,
+		},
+		regex = "%H%X",
 	},
 	{
-		regex = "%L",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 2,
 				ranges = {
-					'a',
-					'z'
+					string.byte("a"),
+					string.byte("z"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%L",
 	},
 	{
-		regex = "%P",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 8,
 				ranges = {
-					'!',
-					'/',
-
-					':',
-					'@',
-
-					'[',
-					'`',
-
-					'{',
-					'~'
+					string.byte("!"),
+					string.byte("/"),
+					string.byte(":"),
+					string.byte("@"),
+					string.byte("["),
+					string.byte("`"),
+					string.byte("{"),
+					string.byte("~"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%P",
 	},
 	{
-		regex = "%S",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 0,
-				ranges = { },
-
-				classIndex = 0,
-				classes = { },
-
-				['\f'] = true,
-				['\n'] = true,
-				['\r'] = true,
-				['\t'] = true,
-				[' '] = true
-			}
-		}
+				ranges = {
+				},
+				type = "set",
+				values = {
+					[string.byte(" ")] = true,
+					[string.byte("\
+")] = true,
+					[string.byte("\12")] = true,
+					[string.byte("\13")] = true,
+					[string.byte("\9")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "%S",
 	},
 	{
-		regex = "%U",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 2,
 				ranges = {
-					'A',
-					'Z'
+					string.byte("A"),
+					string.byte("Z"),
 				},
-
-				classIndex = 0,
-				classes = { }
-			}
-		}
+				type = "set",
+				values = {
+				},
+			},
+			_index = 1,
+		},
+		regex = "%U",
 	},
 	{
-		regex = "%W",
 		parsed = {
-			_index = 1,
 			{
-				type = "set",
-
+				classIndex = 0,
+				classes = {
+				},
 				hasToNegateMatch = true,
-
 				rangeIndex = 6,
 				ranges = {
-					'0',
-					'9',
-
-					'a',
-					'z',
-
-					'A',
-					'Z'
+					string.byte("0"),
+					string.byte("9"),
+					string.byte("a"),
+					string.byte("z"),
+					string.byte("A"),
+					string.byte("Z"),
 				},
-
-				classIndex = 0,
-				classes = { },
-
-				['_'] = true
-			}
-		}
+				type = "set",
+				values = {
+					[string.byte("_")] = true,
+				},
+			},
+			_index = 1,
+		},
+		regex = "%W",
 	},
 }
