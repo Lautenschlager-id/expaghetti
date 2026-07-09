@@ -32,17 +32,17 @@ local specialEscaped = {
 }
 
 -- %cA --> ctrl char A
-specialEscaped.c = function(state, currentCharacter, index, expression)
+specialEscaped.c = function(state, currentCharacter, index, expression, isInsideSet)
 	local ctrlChar = currentCharacter and stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
 		return false, errorsEnum.invalidParamCtrlChar
 	end
 
-	local value, lowerValue, upperValue = state:getExecutionValues(ctrlChar)
+	local value, lowerValue, upperValue = state:getExecutionValues(ctrlChar, isInsideSet)
 	return index + 1, AST.Literal(value, lowerValue, upperValue)
 end
 -- %e00FF --> char(0x00FF)
-specialEscaped.e = function(state, currentCharacter, index, expression)
+specialEscaped.e = function(state, currentCharacter, index, expression, isInsideSet)
 	local hex = ''
 
 	-- Must be exactly 4 characters long
@@ -61,7 +61,7 @@ specialEscaped.e = function(state, currentCharacter, index, expression)
 		return false, errorsEnum.invalidParamUnicodeChar
 	end
 
-	local value, lowerValue, upperValue = state:getExecutionValues(hex)
+	local value, lowerValue, upperValue = state:getExecutionValues(hex, isInsideSet)
 	return index + 4, AST.Literal(value, lowerValue, upperValue)
 end
 -- %bxy --> balanced match between x and y
@@ -101,7 +101,7 @@ Escaped.isToken = function(currentCharacter)
 	return currentCharacter == ENUM_ESCAPE_CHARACTER
 end
 
-Escaped.parse = function(state, index, expression)
+Escaped.parse = function(state, index, expression, isInsideSet)
 	-- Skip escape
 	index = index + 1
 
@@ -118,10 +118,10 @@ Escaped.parse = function(state, index, expression)
 		state:compileSet(set)
 		return index, set
 	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
-		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter)
+		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
 		return index, AST.Literal(value, lowerValue, upperValue)
 	elseif specialEscaped[currentCharacter] then
-		return specialEscaped[currentCharacter](state, expression[index], index, expression)
+		return specialEscaped[currentCharacter](state, expression[index], index, expression, isInsideSet)
 	elseif CaptureReference.isIntToken(currentCharacter) then
 		return specialEscaped.int(state, currentCharacter, index)
 	end

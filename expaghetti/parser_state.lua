@@ -43,10 +43,10 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, patternChars,
 	return self
 end
 
-function ParserState:readElement(index)
+function ParserState:readElement(index, isInsideSet)
 	local char = self.patternChars[index]
 	if Escaped.isToken(char) then
-		return Escaped.parse(self, index, self.patternChars)
+		return Escaped.parse(self, index, self.patternChars, isInsideSet)
 	else
 		return index + 1, char
 	end
@@ -78,21 +78,19 @@ function ParserState:isElement(element)
 	return type(element) == "table"
 end
 
-function ParserState:getExecutionValues(char)
-	if type(char) == "number" then
-		char = string.char(char)
-	end
+function ParserState:getExecutionValues(char, isInsideSet)
 	local hasFlagUnicode = self.flags[ENUM_FLAG_UNICODE]
+	local returnString = hasFlagUnicode or isInsideSet
 	local lowerChar, upperChar
 
 	if self.flags[ENUM_FLAG_CASE_INSENSITIVE] then
 		lowerChar = string.lower(char)
 		upperChar = string.upper(char)
 
-		lowerChar = hasFlagUnicode and lowerChar or string.byte(lowerChar)
-		upperChar = hasFlagUnicode and upperChar or string.byte(upperChar)
+		lowerChar = returnString and lowerChar or string.byte(lowerChar)
+		upperChar = returnString and upperChar or string.byte(upperChar)
 	end
-	char = hasFlagUnicode and char or string.byte(char)
+	char = returnString and char or string.byte(char)
 
 	return char, lowerChar, upperChar
 end

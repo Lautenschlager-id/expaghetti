@@ -10,6 +10,7 @@ local tostring = tostring
 local parser = require("../expaghetti/parser")
 ----------------------------------------------------------------------------------------------------
 local compareTables = require("./assertion").compareTables
+local prettyPrint = require("../expaghetti/helpers/pretty-print")
 ----------------------------------------------------------------------------------------------------
 local performance = require("performance")
 ----------------------------------------------------------------------------------------------------
@@ -40,7 +41,10 @@ for case = 1, #cases do
 
 		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex, caseObj.flags)
 
-		if not tree then
+		if not hasParsed then
+			print("\tF", "\t", "Parser crashed: " .. tostring(tree))
+			error = error + 1
+		elseif not tree then
 			if caseObj.errorMessage then
 				if errorMessage ~= caseObj.errorMessage then
 					print("\tF", "\t", strformat(
@@ -71,6 +75,7 @@ for case = 1, #cases do
 					success = success + 1
 				else
 					print("\tF", "\t", errorMessage)
+					print(prettyPrint(tree, true))
 					error = error + 1
 				end
 			end

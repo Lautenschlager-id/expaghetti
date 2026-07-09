@@ -3,8 +3,26 @@ local matcher = require("matcher")
 
 local performance = require("performance")
 
+local splitStringByEachChar = require("helpers.string").splitStringByEachChar
+local ENUM_FLAG_UNICODE = require("enums.flags").UNICODE
+
+local function getSubstring(str, ini, en, flags)
+	local isUnicode = false
+	if type(flags) == "string" then
+		isUnicode = flags:find("u")
+	elseif type(flags) == "table" then
+		isUnicode = flags[ENUM_FLAG_UNICODE] or flags.u
+	end
+
+	if isUnicode then
+		local chars = splitStringByEachChar(str, true)
+		return table.concat(chars, "", ini, en)
+	end
+	return string.sub(str, ini, en)
+end
+
 local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
-	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
+	local hasMatched, iniStr, endStr, metaData = matcher(expr, str, flags)
 	if (not hasMatched) ~= (not expectedHasMatched) then
 		error(string.format("Test '%s' failed: Expected hasMatched=%s for expr='%s', str='%s' but got %s", desc, tostring(expectedHasMatched), expr, str, tostring(hasMatched)))
 	end
@@ -23,7 +41,7 @@ local function assertError(expr, str, desc)
 end
 
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
-	local hasMatched, iniStr, endStr, metaData, splitStr = matcher(expr, str, flags)
+	local hasMatched, iniStr, endStr, metaData = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local ini = metaData.captureStarts[captureIndex]
 	local en  = metaData.captureEnds[captureIndex]
@@ -32,7 +50,7 @@ local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 		en = en[#en]
 	end
 	assert(ini, string.format("Test '%s': capture %s not found", desc, tostring(captureIndex)))
-	local got = table.concat(splitStr, "", ini, en)
+	local got = getSubstring(str, ini, en, flags)
 	assert(got == expectedStr,
 		string.format("Test '%s': expected capture=%q but got=%q", desc, expectedStr, got))
 end
@@ -344,7 +362,7 @@ print("  [27] Named capturing groups (?<name>...)...")
 assertMatch("(?<foo>ab)c", "abc", true, 1, 3, "Named group: then literal")
 assertCapture("(?<foo>ab)c", "abc", "foo", "ab", "Named group captures correctly")
 do
-	local hasMatched, _, _, metaData, splitStr = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
+	local hasMatched, _, _, metaData = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
 	assert(hasMatched, "Named groups: expected match")
 	local fi = metaData.captureStarts["first"]
 	local fe = metaData.captureEnds["first"]
@@ -354,8 +372,8 @@ do
 		fi = fi[#fi] fe = fe[#fe]
 		si = si[#si] se = se[#se]
 	end
-	assert(table.concat(splitStr, "", fi, fe) == "hello", "Named capture 'first' should be 'hello'")
-	assert(table.concat(splitStr, "", si, se) == "world", "Named capture 'second' should be 'world'")
+	assert(getSubstring("hello_world", fi, fe) == "hello", "Named capture 'first' should be 'hello'")
+	assert(getSubstring("hello_world", si, se) == "world", "Named capture 'second' should be 'world'")
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -858,20 +876,20 @@ assertMatch("a(?>bc|b)c", "abc", nil, nil, nil, "Atomic alt: cannot backtrack fr
 
 -- Capture behavior during quantifier backtracking
 do
-	local hasMatched, _, _, metaData, splitStr = matcher("(a+)+a", "aaaaa")
+	local hasMatched, _, _, metaData = matcher("(a+)+a", "aaaaa")
 	assert(hasMatched, "Nested +: capture history should match")
 	local inits = metaData.captureStarts[1]
 	local ends = metaData.captureEnds[1]
 	assert(#inits == 2, "Nested +: two outer repetitions recorded")
-	assert(table.concat(splitStr, "", inits[1], ends[1]) == "aaaa", "Nested +: first capture after inner backtrack")
-	assert(table.concat(splitStr, "", inits[2], ends[2]) == "a", "Nested +: second capture is trailing group iteration")
+	assert(getSubstring("aaaaa", inits[1], ends[1]) == "aaaa", "Nested +: first capture after inner backtrack")
+	assert(getSubstring("aaaaa", inits[2], ends[2]) == "a", "Nested +: second capture is trailing group iteration")
 end
 do
-	local hasMatched, _, _, metaData, splitStr = matcher("(a|aa)+b", "aab")
+	local hasMatched, _, _, metaData = matcher("(a|aa)+b", "aab")
 	assert(hasMatched, "Alt quantified: capture history should match")
 	local inits = metaData.captureStarts[1]
 	local ends = metaData.captureEnds[1]
-	assert(table.concat(splitStr, "", inits[#inits], ends[#ends]) == "aa", "Alt quantified: last capture is winning branch")
+	assert(getSubstring("aab", inits[#inits], ends[#ends]) == "aa", "Alt quantified: last capture is winning branch")
 end
 
 -- Contrasting greedy vs possessive nested inner quantifier

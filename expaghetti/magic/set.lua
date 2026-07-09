@@ -16,7 +16,7 @@ local findMagicClosingIndex = function(state, startIndex)
 	local elementIndex = startIndex
 
 	while elementIndex <= state.patternLength do
-		local nextIndex, element = state:readElement(elementIndex)
+		local nextIndex, element = state:readElement(elementIndex, true)
 		
 		if elementIndex == startIndex and element == ENUM_NEGATE_SET then
 			positionDiff = 1
@@ -66,7 +66,7 @@ Set.parse = function(state, tree)
 	local elementIndex = state.index
 	while elementIndex <= endIndex do
 		local originalElementIndex = elementIndex
-		local nextIndex, element = state:readElement(elementIndex)
+		local nextIndex, element = state:readElement(elementIndex, true)
 		if not nextIndex then return false, element end
 		elementIndex = nextIndex
 
@@ -79,16 +79,16 @@ Set.parse = function(state, tree)
 		else
 			local nextTokenValue, nextTokenIsRangeSep, skipCount
 			if endIndex >= elementIndex then
-				local peekIndex, nextElement = state:readElement(elementIndex)
+				local peekIndex, nextElement = state:readElement(elementIndex, true)
 				if nextElement then
 					skipCount = peekIndex - elementIndex
 					nextTokenIsRangeSep = nextElement == ENUM_SET_RANGE_SEPARATOR
 					nextTokenValue = (nextElement.type ~= ENUM_ELEMENT_TYPE_SET) and (
-						nextElement.value or state:getExecutionValues(nextElement)
+						nextElement.value or nextElement--nextElement.value or state:getExecutionValues(nextElement)
 					) or nil
 				end
 			end
-			local currentCharacterValue = element.value or state:getExecutionValues(element)
+			local currentCharacterValue = element.value or element -- state:getExecutionValues(element)
 
 			if watchingForRangeSeparator then
 				watchingForRangeSeparator = false
@@ -114,9 +114,8 @@ Set.parse = function(state, tree)
 				set.values[currentCharacterValue] = true
 			end
 		end
-
 	end
-
+	
 	state:compileSet(set)
 
 	tree._index = tree._index + 1
