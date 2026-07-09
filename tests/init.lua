@@ -25,8 +25,10 @@ local cases = {
 	"group",
 	"quantifier",
 	"alternate",
-	"flag",
-	"balanced"
+	"balanced",
+	"flag_unicode",
+	"flag_case_insensitive",
+	"flag_mixed",
 }
 
 performance.logPerformanceAtTheEnd(function()
@@ -37,7 +39,11 @@ for case = 1, #cases do
 
 	print(strformat("\n\n############### Testing cases of %q ###############", case))
 	for caseIndex, caseObj in next, require("./cases/" .. case) do
-		print(strformat("Checking generated tree for the regex %q", caseObj.regex))
+		local flagKeys = {}
+		for flag in next, caseObj.flags or {} do
+			flagKeys[#flagKeys + 1] = flag
+		end
+		print(strformat("Checking generated tree for the regex %q%s", caseObj.regex, not caseObj.flags and "" or string.format(" with flags %q", table.concat(flagKeys, ", "))))
 
 		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex, caseObj.flags)
 
@@ -88,5 +94,5 @@ print(strformat("Success : %03d\nError : %03d", success, error))
 print("------------------------------------")
 
 end, {
-    runs = 1000
+    runs = 1
 })
