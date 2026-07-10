@@ -8,14 +8,14 @@ local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local Anchor = require("./magic/anchor")
 local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
-local Group = require("./magic/group")
+local Group = require("./magic/group/group")
 local Literal = require("./magic/literal")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
-local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
+local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
 ----------------------------------------------------------------------------------------------------
 local ParserState = require("./parser_state")
 

@@ -82,6 +82,15 @@ print("Running matcher tests for core engine...")
 
 performance.logPerformanceAtTheEnd(function()
 
+print(
+	-- matcher("a(?R)?b", "aabb")
+	-- matcher("a(?0)?b", "aabb")
+	-- matcher("(a)(?1)", "aa")
+	matcher("(?<P>a)(?&P)", "aa")
+)
+
+do return end
+
 -- 1. Malformed inputs
 do
 	local hasMatched, err = matcher(123, "abc")

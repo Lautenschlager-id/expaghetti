@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------------------------
 local Escaped = require("./magic/escaped")
-local flagsEnum = require("./enums/flags")
+local flagsEnum = require("./enums/flags").flags
 local ENUM_FLAG_UNICODE = flagsEnum.UNICODE
 local ENUM_FLAG_CASE_INSENSITIVE = flagsEnum.CASE_INSENSITIVE
 ----------------------------------------------------------------------------------------------------

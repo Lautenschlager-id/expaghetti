@@ -24,11 +24,117 @@ function AST.Literal(value, lowerValue, upperValue)
 		upperValue = upperValue,
 	}
 end
-
-function AST.Group()
+local function baseGroup()
 	return {
 		type = elementsEnum.group,
+		-- Common
+		tree = nil,
+		index = nil,
+		name = nil,
+		hasBehavior = nil,
+		disableCapture = nil,
+		quantifier = nil,
+		-- Lookarounds
+		isLookahead = nil,
+		isLookbehind = nil,
+		isNegative = nil,
+		fixedLength = nil,
+		-- Special Behaviors
+		isAtomic = nil,
+		isBranchReset = nil,
+		-- Flags
+		inlineFlags = nil,
+		scopedFlags = nil,
+		-- Recursion
+		isRecursion = nil,
+		isRecursionRoot = nil,
+		targetIndex = nil,
+		targetName = nil,
+		-- Internal
+		_skipFromTree = nil,
 	}
+end
+
+function AST.Group()
+	return baseGroup()
+end
+
+function AST.GroupCapture()
+	return baseGroup()
+end
+
+function AST.GroupNonCapturing()
+	local node = baseGroup()
+	node.disableCapture = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupNamed()
+	local node = baseGroup()
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupAtomic()
+	local node = baseGroup()
+	node.disableCapture = true
+	node.isAtomic = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupBranchReset()
+	local node = baseGroup()
+	node.disableCapture = true
+	node.isBranchReset = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupLookahead()
+	local node = baseGroup()
+	node.isLookahead = true
+	node.disableCapture = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupLookbehind()
+	local node = baseGroup()
+	node.isLookbehind = true
+	node.disableCapture = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupRecursion()
+	local node = baseGroup()
+	node.isRecursion = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupComment()
+	local node = baseGroup()
+	node.disableCapture = true
+	node._skipFromTree = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupInlineFlags()
+	local node = baseGroup()
+	node._skipFromTree = true
+	node.hasBehavior = true
+	return node
+end
+
+function AST.GroupScopedFlags()
+	local node = baseGroup()
+	node.disableCapture = true
+	node.hasBehavior = true
+	return node
 end
 
 function AST.Set()

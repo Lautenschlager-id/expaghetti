@@ -9,7 +9,7 @@ local Anchor = require("./magic/anchor")
 local Balanced = require("./magic/balanced")
 local Boundary = require("./magic/boundary")
 local CaptureReference = require("./magic/capture_reference")
-local Group = require("./magic/group")
+local Group = require("./magic/group/group")
 local PositionCapture = require("./magic/position_capture")
 local Quantifier = require("./magic/Quantifier")
 local Set = require("./magic/set")
@@ -18,7 +18,7 @@ local Any = require("./magic/any")
 local Literal = require("./magic/literal")
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
-local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
+local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
 ----------------------------------------------------------------------------------------------------
 local function canBacktrackNestedQuantifier(quantifier, element)
 	local mode = quantifier.mode or "greedy"
@@ -362,7 +362,7 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 
 	local tree, errorMessage = parser(expr, flags)
-	print('>>>>>>', expr, errorMessage, require("./helpers/pretty-print")(tree, true))
+	-- print('>>>>>>', expr, errorMessage, require("./helpers/pretty-print")(tree, true))
 	if not tree then
 		return false, errorMessage
 	end

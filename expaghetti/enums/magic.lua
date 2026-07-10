@@ -11,19 +11,37 @@ local characters = {
 	OPEN_GROUP = '(', -- (abc)
 	CLOSE_GROUP = ')', -- (abc)
 	GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
+
 	GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
+
 	GROUP_ATOMIC_BEHAVIOR = '>', -- (?>abc)
+
 	GROUP_BRANCH_RESET_BEHAVIOR = '|', -- (?|abc)
+
 	GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
 	GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
 	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
+
 	GROUP_NAME_OPEN = '<', -- (?<name>abc)
 	GROUP_NAME_CLOSE = '>', -- (?<name>abc)
+
 	GROUP_COMMENT_BEHAVIOR = '#', -- (?# any message )
+	
+	GROUP_SCOPED_FLAGS_BEHAVIOR = ':', -- (?i:abc)
+	GROUP_FLAGS_DISABLE_BEHAVIOR = '-', -- (?-i:abc)
+	GROUP_FLAG_IGNORE_CASE = 'i',
+	GROUP_FLAG_MULTILINE = 'm',
+	GROUP_FLAG_DOTALL = 's',
+	GROUP_FLAG_NO_CAPTURE = 'n',
+	
+	GROUP_RECURSION_ROOT_BEHAVIOR = 'R', -- (?R)
+	GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = '0', -- (?0)
+	GROUP_RECURSION_NAMED_BEHAVIOR = '&', -- (?&name)
 
 	OPEN_QUANTIFIER = '{', -- {1,2}
 	CLOSE_QUANTIFIER = '}', -- {1,2}
 	QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
+
 	ONE_OR_MORE_QUANTIFIER = '+', -- a+
 	ZERO_OR_MORE_QUANTIFIER = '*', -- a*
 	ZERO_OR_ONE_QUANTIFIER = '?', -- a?

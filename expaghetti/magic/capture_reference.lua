@@ -13,10 +13,6 @@ local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = require("./enums/elements").capture_
 ----------------------------------------------------------------------------------------------------
 local CaptureReference = { }
 
-CaptureReference.isIntToken = function(currentCharacter)
-	return currentCharacter >= '1' and currentCharacter <= '9'
-end
-
 CaptureReference.isNameToken = function(currentCharacter)
 	return (currentCharacter >= 'A' and currentCharacter <= 'z')
 		or (currentCharacter >= '0' and currentCharacter <= '9')

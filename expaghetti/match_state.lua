@@ -1,5 +1,5 @@
 local config = require("./config")
-local ENUM_FLAG_UNICODE = require("./enums/flags").UNICODE
+local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
 
 local MatchState = {}
 MatchState.__index = MatchState

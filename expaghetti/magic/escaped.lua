@@ -6,6 +6,7 @@ local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
 local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
+local isPositiveIntegerChar = require("./helpers/token").isPositiveIntegerChar
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 		return index, AST.Literal(value, lowerValue, upperValue)
 	elseif specialEscaped[currentCharacter] then
 		return specialEscaped[currentCharacter](state, expression[index], index, expression, isInsideSet)
-	elseif CaptureReference.isIntToken(currentCharacter) then
+	elseif isPositiveIntegerChar(currentCharacter) then
 		return specialEscaped.int(state, currentCharacter, index)
 	end
 

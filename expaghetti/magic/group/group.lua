@@ -3,11 +3,21 @@ local strformat = string.format
 local tblconcat = table.concat
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
+local isPositiveIntegerChar = require("./helpers/token").isPositiveIntegerChar
+----------------------------------------------------------------------------------------------------
 local PositionCapture = require("./magic/position_capture")
 ----------------------------------------------------------------------------------------------------
+local behaviorCapture = require("./magic/group/behavior_capture")
+local behaviorAtomic = require("./magic/group/behavior_atomic")
+local behaviorBranchReset = require("./magic/group/behavior_branch_reset")
+local behaviorLookaround = require("./magic/group/behavior_lookaround")
+local behaviorRecursion = require("./magic/group/behavior_recursion")
+local behaviorComment = require("./magic/group/behavior_comment")
+local behaviorFlags = require("./magic/group/behavior_flags")
 local magicEnum = require("./enums/magic")
 local elementsEnum = require("./enums/elements")
 local errorsEnum = require("./enums/errors")
+local inlineFlagsEnum = require("./enums/flags").inlineFlags
 ----------------------------------------------------------------------------------------------------
 local ENUM_OPEN_GROUP = magicEnum.OPEN_GROUP
 local ENUM_CLOSE_GROUP = magicEnum.CLOSE_GROUP
@@ -85,184 +95,72 @@ local function getFixedLength(tree)
 	return totalLen
 end
 
-local getGroupBehavior = function(state, groupElement)
+local GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
+local GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS
+local ENUM_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
+
+local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
+local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
+local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
+local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
+local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
+
+local parseGroupBehavior = function(state)
 	local index = state.index
-	local parserMetaData = state.metaData
-	
 	local nextIndex, currentChar = state:readElement(index)
-	if not nextIndex or state:isElement(currentChar) then return index end
 
-	if currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
-		return index
+	-- Standard capturing group (no `?` behavior prefix)
+	if not nextIndex or state:isElement(currentChar) or currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
+		return behaviorCapture(state, index)
 	end
 
-	index = nextIndex
-	nextIndex, currentChar = state:readElement(index)
-	if not nextIndex then return index end
-
-	local errorMessage
-	if state:isElement(currentChar) then
-		errorMessage = errorsEnum.invalidGroupBehavior
-	elseif currentChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
-		groupElement.disableCapture = true
-	elseif currentChar == ENUM_GROUP_ATOMIC_BEHAVIOR then
-		groupElement.isAtomic = true
-		groupElement.disableCapture = true
-	elseif currentChar == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
-		groupElement.isBranchReset = true
-		groupElement.disableCapture = true
-	elseif currentChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
-		groupElement.isLookahead = true
-		groupElement.disableCapture = true
-	elseif currentChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
-		groupElement.isLookahead = true
-		groupElement.isNegative = true
-		groupElement.disableCapture = true
-	elseif currentChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
-		local lookbehindIndex, lookbehindChar = state:readElement(nextIndex)
-		if not lookbehindIndex or state:isElement(lookbehindChar) then
-			errorMessage = errorsEnum.invalidGroupBehavior
-		else
-			if lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR then
-				groupElement.isLookbehind = true
-				groupElement.disableCapture = true
-				nextIndex = lookbehindIndex
-				currentChar = lookbehindChar
-			elseif lookbehindChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
-				groupElement.isLookbehind = true
-				groupElement.isNegative = true
-				groupElement.disableCapture = true
-				nextIndex = lookbehindIndex
-				currentChar = lookbehindChar
-			else
-				errorMessage = errorsEnum.invalidGroupBehavior
-			end
-		end
-	elseif currentChar == ENUM_GROUP_COMMENT_BEHAVIOR then
-		groupElement.disableCapture = true
-		groupElement._skipFromTree = true
-	else
-		local charVal = currentChar
-		if charVal == 'R' or charVal == '0' then
-			index = nextIndex
-			nextIndex, currentChar = state:readElement(index)
-			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP then
-				groupElement.isRecursion = true
-				groupElement.isRecursionRoot = true
-			else
-				errorMessage = errorsEnum.invalidGroupBehavior
-			end
-		elseif charVal >= '1' and charVal <= '9' then
-			local numStr = ""
-			while true do
-				numStr = numStr .. charVal
-				index = nextIndex
-				nextIndex, currentChar = state:readElement(index)
-				if not nextIndex or state:isElement(currentChar) or currentChar < '0' or currentChar > '9' then
-					break
-				end
-				charVal = currentChar
-			end
-			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP then
-				groupElement.isRecursion = true
-				groupElement.targetIndex = tonumber(numStr)
-			else
-				errorMessage = errorsEnum.invalidGroupBehavior
-			end
-		elseif charVal == '&' then
-			local nameStr = ""
-			index = nextIndex
-			nextIndex, currentChar = state:readElement(index)
-			while nextIndex and not state:isElement(currentChar) and currentChar ~= ENUM_CLOSE_GROUP do
-				nameStr = nameStr .. currentChar
-				index = nextIndex
-				nextIndex, currentChar = state:readElement(index)
-			end
-			if nextIndex and not state:isElement(currentChar) and currentChar == ENUM_CLOSE_GROUP and #nameStr > 0 then
-				groupElement.isRecursion = true
-				groupElement.targetName = nameStr
-			else
-				errorMessage = errorsEnum.invalidGroupName
-			end
-		-- Check for inline flags
-		elseif charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' then
-			local enableFlags = {}
-			local disableFlags = {}
-			local currentTarget = enableFlags
-			while charVal == 'i' or charVal == 'm' or charVal == 's' or charVal == 'n' or charVal == '-' do
-				if charVal == '-' then
-					currentTarget = disableFlags
-				else
-					currentTarget[charVal] = true
-				end
-				index = nextIndex
-				nextIndex, currentChar = state:readElement(index)
-				if not nextIndex or state:isElement(currentChar) then break end
-				charVal = currentChar
-			end
-			
-			local nextChar = currentChar
-			if nextChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
-				-- Scoped flags (?i:...)
-				groupElement.disableCapture = true
-				groupElement.scopedFlags = { enable = enableFlags, disable = disableFlags }
-			elseif nextChar == ENUM_CLOSE_GROUP then
-				-- Inline toggle (?i)
-				groupElement._skipFromTree = true
-				groupElement.inlineFlags = { enable = enableFlags, disable = disableFlags }
-			else
-				errorMessage = errorsEnum.invalidGroupBehavior
-			end
-		else
-			errorMessage = errorsEnum.invalidGroupBehavior
-		end
+	local peekIndex, peekChar = state:readElement(nextIndex)
+	if not peekIndex or state:isElement(peekChar) then 
+		return false, nil, errorsEnum.invalidGroupBehavior
 	end
 
-	-- Since ENUM_GROUP_LOOKBEHIND_BEHAVIOR == ENUM_GROUP_NAME_OPEN, it needs to be in another chunk
-	if errorMessage and currentChar == ENUM_GROUP_NAME_OPEN then
-		local name, nameIndex = { }, 0
-		local firstCharacter = nextIndex
+	-- Branch reset groups: (?|...)
+	if peekChar == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
+		return behaviorBranchReset(state, peekIndex)
+	
+	-- Non-capturing groups: (?:...)
+	elseif peekChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+		return behaviorCapture(state, index, peekIndex, peekChar)
 		
-		repeat
-			index = nextIndex
-			nextIndex, currentChar = state:readElement(index)
-			if not nextIndex or state:isElement(currentChar) then
-				errorMessage = errorsEnum.invalidGroupName
-				break
-			end
-			local currentCharacterValue = currentChar
-
-			-- The first character must be letter
-			if (currentCharacterValue >= 'A' and currentCharacterValue <= 'z')
-				or currentCharacterValue == '$'
-				or (index > firstCharacter
-					and (currentCharacterValue >= '0' and currentCharacterValue <= '9')) then
-
-				nameIndex = nameIndex + 1
-				name[nameIndex] = currentChar
-			elseif nameIndex > 0 and currentChar == ENUM_GROUP_NAME_CLOSE then
-				name = tblconcat(name)
-				if parserMetaData.groupNames[name] then
-					errorMessage = strformat(errorsEnum.duplicatedGroupName, name)
-				else
-					parserMetaData.groupNames[name] = true
-					groupElement.name = name
-					errorMessage = nil
-				end
-				break
-			else
-				errorMessage = errorsEnum.invalidGroupName
-				break
-			end
-		until false
+	-- Atomic groups: (?>...)
+	elseif peekChar == ENUM_GROUP_ATOMIC_BEHAVIOR then
+		return behaviorAtomic(state, peekIndex)
+		
+	-- Positive / Negative Lookahead: (?=...), (?!...)
+	elseif peekChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or peekChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+		return behaviorLookaround(state, peekIndex, peekChar)
+		
+	-- Positive / Negative Lookbehind: (?<=...), (?<!...)
+	elseif peekChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
+		local lookbehindIndex, lookbehindChar = state:readElement(peekIndex)
+		if lookbehindIndex and not state:isElement(lookbehindChar) and (lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or lookbehindChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR) then
+			return behaviorLookaround(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
+		else
+			-- Fallback to Named Capture which also uses `<` i.e. `(?<name>...)`
+			return behaviorCapture(state, index, peekIndex, peekChar)
+		end
+		
+	-- Comments: (?#...)
+	elseif peekChar == ENUM_GROUP_COMMENT_BEHAVIOR then
+		return behaviorComment(state, peekIndex)
+		
+	-- Recursion: (?R), (?0), (?123), (?&name)
+	elseif peekChar == GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS or peekChar == ENUM_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar) then
+		return behaviorRecursion(state, peekIndex, peekChar)
+		
+	-- Inline and Scoped Flags: (?i), (?i:...)
+	elseif inlineFlagsEnum[peekChar] then
+		return behaviorFlags(state)
+		
+	-- Unrecognized behavior token after `(?`
+	else
+		return false, nil, errorsEnum.invalidGroupBehavior
 	end
-
-	if errorMessage then
-		return false, errorMessage
-	end
-
-	groupElement.hasBehavior = true
-	return nextIndex
 end
 ----------------------------------------------------------------------------------------------------
 Group.isOpeningToken = function(currentCharacter)
@@ -282,10 +180,8 @@ Group.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
 
-	local value = AST.Group()
-
-	local errorMessage
-	state.index, errorMessage = getGroupBehavior(state, value)
+	local value, errorMessage
+	state.index, value, errorMessage = parseGroupBehavior(state)
 	if not state.index then
 		return false, errorMessage
 	end
