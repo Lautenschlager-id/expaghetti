@@ -28,25 +28,14 @@ end
 
 Anchor.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
-	if currentElement.isBeginning then
-		-- ^
-		if stringIndex == 0 then
+	local isBeginning = currentElement.isBeginning
+
+	if (isBeginning and stringIndex == 0) or (not isBeginning and stringIndex >= state.targetStringLength) then
+		return true, nil, stringIndex
+	elseif currentElement.isMultiline then
+		local charIndex = stringIndex + (isBeginning and 0 or 1)
+		if ENUM_LINE_BREAKS[state:getTargetCharacter(charIndex)] then
 			return true, nil, stringIndex
-		elseif currentElement.isMultiline then
-			local prevChar = state:getTargetCharacter(stringIndex)
-			if ENUM_LINE_BREAKS[prevChar] then
-				return true, nil, stringIndex
-			end
-		end
-	else
-		-- $
-		if stringIndex >= state.targetStringLength then
-			return true, nil, stringIndex
-		elseif currentElement.isMultiline then
-			local currChar = state:getTargetCharacter(stringIndex + 1)
-			if ENUM_LINE_BREAKS[currChar] then
-				return true, nil, stringIndex
-			end
 		end
 	end
 

@@ -2,6 +2,8 @@
 local tblconcat = table.concat
 local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
+local AST = require("./ast")
+----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
@@ -15,28 +17,23 @@ CaptureReference.isIntToken = function(currentCharacter)
 	return currentCharacter >= '1' and currentCharacter <= '9'
 end
 
+CaptureReference.isNameToken = function(currentCharacter)
+	return (currentCharacter >= 'A' and currentCharacter <= 'z')
+		or (currentCharacter >= '0' and currentCharacter <= '9')
+		or currentCharacter == '$'
+end
+
 CaptureReference.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE
 end
 
 -- %1 --> reference capture N
-CaptureReference.parseInt = function(state, currentCharacter, index)
-	currentCharacter = currentCharacter + 0
-
-	--[[
-		{
-			type = "capture_reference",
-			index = 1
-		}
-	]]
-	return index, {
-		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
-		index = currentCharacter
-	}
+CaptureReference.parseByIndex = function(state, currentCharacter, index)
+	return index, AST.CaptureReference(currentCharacter + 0)
 end
 
 -- %k<NN> --> reference capture NN
-CaptureReference.parseString = function(state, currentCharacter, index, expression)
+CaptureReference.parseByName = function(state, currentCharacter, index, expression)
 	if expression[index] ~= ENUM_GROUP_NAME_OPEN then
 		return false, errorsEnum.invalidBackreferenceSyntax
 	end
@@ -48,11 +45,7 @@ CaptureReference.parseString = function(state, currentCharacter, index, expressi
 
 		if not currentCharacter then
 			return false, errorsEnum.unterminatedBackreference
-		-- The first character must be letter
-		elseif (currentCharacter >= 'A' and currentCharacter <= 'z')
-			or (currentCharacter >= '0' and currentCharacter <= '9')
-			or currentCharacter == '$' then
-
+		elseif CaptureReference.isNameToken(currentCharacter) then
 			nameIndex = nameIndex + 1
 			name[nameIndex] = currentCharacter
 		elseif nameIndex > 0 and currentCharacter == ENUM_GROUP_NAME_CLOSE then
@@ -63,31 +56,22 @@ CaptureReference.parseString = function(state, currentCharacter, index, expressi
 		end
 	until false
 
-	return index + 1, {
-		type = ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE,
-		index = tonumber(name) or name
-	}
+	return index + 1, AST.CaptureReference(tonumber(name) or name)
 end
 
 CaptureReference.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
-	local initStringPositionList, endStringPositionList =
-		state.metaData.captureStarts[currentElement.index],
-		state.metaData.captureEnds[currentElement.index]
+	local initStringPositionList = state.metaData.captureStarts[currentElement.index]
+	local endStringPositionList = state.metaData.captureEnds[currentElement.index]
 
-	local initStringPosition, endStringPosition
-	if type(initStringPositionList) == "table" then
-		if #initStringPositionList == 0 then return false end
-		initStringPosition = initStringPositionList[#initStringPositionList]
-		endStringPosition = endStringPositionList[#endStringPositionList]
-	else
-		initStringPosition = initStringPositionList
-		endStringPosition = endStringPositionList
+	if not initStringPositionList or #initStringPositionList == 0 then
+		return false
 	end
 
-	if not initStringPosition then
-		return false
-	elseif stringIndex + (endStringPosition - initStringPosition + 1) > state.targetStringLength then
+	local initStringPosition = initStringPositionList[#initStringPositionList]
+	local endStringPosition = endStringPositionList[#endStringPositionList]
+
+	if stringIndex + (endStringPosition - initStringPosition + 1) > state.targetStringLength then
 		return false
 	end
 

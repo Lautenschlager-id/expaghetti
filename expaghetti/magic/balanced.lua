@@ -1,4 +1,7 @@
 ----------------------------------------------------------------------------------------------------
+local AST = require("./ast")
+----------------------------------------------------------------------------------------------------
+local errorsEnum = require("./enums/errors")
 local elementsEnum = require("./enums/elements")
 local ENUM_ELEMENT_TYPE_BALANCED = elementsEnum.balanced
 ----------------------------------------------------------------------------------------------------
@@ -6,6 +9,24 @@ local Balanced = { }
 
 Balanced.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_BALANCED
+end
+
+Balanced.parse = function(state, currentCharacter, index, expression)
+	local opener = expression[index]
+	local closer = expression[index + 1]
+	if not opener or not closer then
+		return false, errorsEnum.incompleteEscape
+	end
+
+	local opener, openerLower, openerUpper = state:getExecutionValues(opener)
+	local closer, closerLower, closerUpper = state:getExecutionValues(closer)
+
+	return index + 2, AST.Balanced(
+		openerLower or opener,
+		openerUpper or opener,
+		closerLower or closer,
+		closerUpper or closer
+	)
 end
 
 Balanced.match = function(currentElement, state)

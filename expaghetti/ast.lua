@@ -43,6 +43,14 @@ function AST.Set()
 	}
 end
 
+function AST.Boundary(isNegated, set)
+	return {
+		type = elementsEnum.boundary,
+		isNegated = isNegated,
+		set = set,
+	}
+end
+
 function AST.Quantifier(min, max)
 	return {
 		type = elementsEnum.quantifier,
@@ -56,6 +64,20 @@ function AST.Alternate(trees)
 	return {
 		type = elementsEnum.alternate,
 		trees = trees,
+	}
+end
+
+function AST.PositionCapture(index)
+	return {
+		type = elementsEnum.position_capture,
+		index = index,
+	}
+end
+
+function AST.CaptureReference(index)
+	return {
+		type = elementsEnum.capture_reference,
+		index = index,
 	}
 end
 

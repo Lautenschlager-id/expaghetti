@@ -10,6 +10,8 @@ local tblDeepCopy = require("./helpers/table").tblDeepCopy
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local CaptureReference = require("./magic/capture_reference")
+local Boundary = require("./magic/boundary")
+local Balanced = require("./magic/balanced")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local elementsEnum = require("./enums/elements")
@@ -17,18 +19,17 @@ local errorsEnum = require("./enums/errors")
 local characterClasses = require("./enums/classes")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
-local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
-local ENUM_ELEMENT_TYPE_BOUNDARY = elementsEnum.boundary
-local ENUM_ELEMENT_TYPE_BALANCED = elementsEnum.balanced
 local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
 ----------------------------------------------------------------------------------------------------
 local Escaped = { }
 
 local specialEscaped = {
 	-- %1 --> reference capture N
-	int = CaptureReference.parseInt,
+	int = CaptureReference.parseByIndex,
 	-- %k<NN> --> reference capture NN
-	k = CaptureReference.parseString,
+	k = CaptureReference.parseByName,
+	-- %bxy --> balanced match between x and y
+	b = Balanced.parse,
 }
 
 -- %cA --> ctrl char A
@@ -64,37 +65,13 @@ specialEscaped.e = function(state, currentCharacter, index, expression, isInside
 	local value, lowerValue, upperValue = state:getExecutionValues(hex, isInsideSet)
 	return index + 4, AST.Literal(value, lowerValue, upperValue)
 end
--- %bxy --> balanced match between x and y
-specialEscaped.b = function(state, currentCharacter, index, expression)
-	local opener = expression[index]
-	local closer = expression[index + 1]
-	if not opener or not closer then
-		return false, errorsEnum.incompleteEscape
-	end
-
-	local opener, openerLower, openerUpper = state:getExecutionValues(opener)
-	local closer, closerLower, closerUpper = state:getExecutionValues(closer)
-
-	return index + 2, AST.Balanced(
-		openerLower or opener,
-		openerUpper or opener,
-		closerLower or closer,
-		closerUpper or closer
-	)
-end
 -- %f --> frontier boundary
-specialEscaped.f = function(state, currentCharacter, index)
-	return index, {
-		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		isNegated = false,
-	}
+specialEscaped.f = function(state, currentCharacter, index, expression, isInsideSet)
+	return Boundary.parse(state, index, false)
 end
 -- %F --> negated frontier boundary
-specialEscaped.F = function(state, currentCharacter, index)
-	return index, {
-		type = ENUM_ELEMENT_TYPE_BOUNDARY,
-		isNegated = true,
-	}
+specialEscaped.F = function(state, currentCharacter, index, expression, isInsideSet)
+	return Boundary.parse(state, index, true)
 end
 ----------------------------------------------------------------------------------------------------
 Escaped.isToken = function(currentCharacter)

@@ -941,6 +941,30 @@ assertPositionCapture("^ã()$", "ã", 1, 2, "Unicode flag on: position capture u
 assertError("(?u)", "", "Inline Unicode flag is not accepted")
 assertError("(?u:ã)", "ã", "Scoped Unicode flag is not accepted")
 
+----------------------------------------------------------------------------------------------------
+print("  [53] Combined Flags...")
+
+assertMatch("ÁBC", "ÁBC", true, 1, 3, "Global iu flags: Unicode literal", "iu")
+assertMatch("[Á-Ã]", "Â", true, 1, 1, "Global iu flags: Unicode range", "iu")
+assertMatch("[Á-Ã]", "Ä", nil, nil, nil, "Global iu flags: outside unicode range", "iu")
+assertMatch("a.b", "A\nB", true, 1, 3, "Global is flags: dotall + case-insensitive", "is")
+assertMatch("^abc$", "ABC\nxyz", true, 1, 3, "Global im flags: multiline + case-insensitive", "im")
+assertMatch("^xyz$", "ABC\nXYZ", true, 5, 7, "Global im flags: second line", "im")
+assertMatch("^a.*c$", "a\nb\nc", true, 1, 5, "Global ms flags: multiline + dotall", "ms")
+assertNoCapture("(abc)", "ABC", "Global in flags: no auto capture + case-insensitive", "in")
+assertCapture("(?<word>abc)", "ABC", "word", "ABC", "Global in flags: named captures still work", "in")
+assertMatch("Á.B", "Á\nB", true, 1, 3, "Global ius flags: Unicode + dotall", "ius")
+assertMatch("(?i)ÁBC", "ÁBC", true, 1, 3, "Inline iu flags", "u")
+assertMatch("(?is)a.b", "A\nB", true, 1, 3, "Inline is flags")
+assertMatch("(?i:ÁBC)", "ÁBC", true, 1, 3, "Scoped iu flags", "u")
+assertMatch("a(?is:.)b", "a\nB", nil, nil, nil, "Scoped is flags: i does not leak outside scope")
+assertMatch("(?i)a(?-i)(?i)b", "AB", true, 1, 2, "Nested enable/disable of i")
+assertMatch("(?is)a(?-s:.)b", "A\nB", nil, nil, nil, "Disable only s inside is scope")
+assertMatch("(?is)a(?-i:.)b", "A\nB", true, 1, 3, "Disable only i inside is scope")
+assertMatch("(?im-s)^abc$", "ABC\nDEF", true, 1, 3, "Enable i,m disable s together")
+assertMatch("(?ims)^a.*c$", "A\nB\nC", true, 1, 5, "Enable i,m,s together")
+
+----------------------------------------------------------------------------------------------------
 print("All matcher tests passed!")
 
 

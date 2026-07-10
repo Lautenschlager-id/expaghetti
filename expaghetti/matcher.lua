@@ -362,6 +362,7 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 
 	local tree, errorMessage = parser(expr, flags)
+	print('>>>>>>', expr, errorMessage, require("./helpers/pretty-print")(tree, true))
 	if not tree then
 		return false, errorMessage
 	end

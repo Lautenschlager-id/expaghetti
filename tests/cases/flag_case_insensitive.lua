@@ -1271,4 +1271,44 @@ return {
 			_index = 1,
 		},
 	},
+	{
+		regex = "(?i)a",
+		flags = {},
+		parsed = {
+			{
+				type = "literal",
+				value = string.byte("a"),
+				lowerValue = string.byte("a"),
+				upperValue = string.byte("A"),
+				isCaseInsensitive = true,
+			},
+			_index = 1,
+		},
+	},
+	{
+		regex = "(?i:a)",
+		flags = {},
+		parsed = {
+			{
+				type = "group",
+				hasBehavior = true,
+				disableCapture = true,
+				scopedFlags = {
+					enable = { i = true },
+					disable = {}
+				},
+				tree = {
+					{
+						type = "literal",
+						value = string.byte("a"),
+						lowerValue = string.byte("a"),
+						upperValue = string.byte("A"),
+						isCaseInsensitive = true,
+					},
+					_index = 1,
+				},
+			},
+			_index = 1,
+		},
+	},
 }

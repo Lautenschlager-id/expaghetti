@@ -103,6 +103,12 @@ local lookForModeToken = function(state, index, quantifier)
 	return index, quantifier
 end
 
+local nonQuantifiableTypes = {
+	[elementsEnum.anchor] = true,
+	[elementsEnum.boundary] = true,
+	[elementsEnum.balanced] = true,
+	[elementsEnum.position_capture] = true,
+}
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
 	local index, quantifier = checkIfAppliesToParentTreeElement(state, state.index)
@@ -114,13 +120,6 @@ Quantifier.isElement = function(currentElement)
 	return currentElement.quantifier
 		and currentElement.quantifier.type == ENUM_ELEMENT_TYPE_QUANTIFIER
 end
-
-local nonQuantifiableTypes = {
-	[elementsEnum.anchor] = true,
-	[elementsEnum.boundary] = true,
-	[elementsEnum.balanced] = true,
-	[elementsEnum.position_capture] = true,
-}
 
 Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers

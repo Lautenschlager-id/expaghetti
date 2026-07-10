@@ -28,7 +28,7 @@ local cases = {
 	"balanced",
 	"flag_unicode",
 	"flag_case_insensitive",
-	"flag_mixed",
+	"flag_combined",
 }
 
 performance.logPerformanceAtTheEnd(function()

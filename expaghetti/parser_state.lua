@@ -75,7 +75,7 @@ function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranch
 end
 
 function ParserState:isElement(element)
-	return type(element) == "table"
+	return element and (not not element.type)
 end
 
 function ParserState:getExecutionValues(char, isInsideSet)

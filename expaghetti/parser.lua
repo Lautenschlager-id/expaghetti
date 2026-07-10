@@ -33,21 +33,8 @@ local function parserCore(state)
 
 		if element.type then
 			state.index = nextIndex
-			if element.type == "boundary" then
-				local peekIndex, nextElement = state:readElement(state.index)
-				if nextElement == '[' then
-					state.index, errorMessage = Set.parse(state, tree)
-					if errorMessage then return false, errorMessage end
-					local parsedSet = tree[tree._index]
-					element.set = parsedSet
-					tree[tree._index] = element
-				else
-					errorMessage = errorsEnum.missingFrontierSet
-				end
-			else
-				tree._index = tree._index + 1
-				tree[tree._index] = element
-			end
+			tree._index = tree._index + 1
+			tree[tree._index] = element
 		else
 			if Set.isToken(element) then
 				state.index, errorMessage = Set.parse(state, tree)
