@@ -12,44 +12,40 @@ local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
 local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
 local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
 
-return function(state)
-	local index = state.index
-	local nextIndex, currentChar = state:readElement(index)
-	local loopIndex, charVal = state:readElement(nextIndex)
-	
+return function(state, peekIndex, peekChar)
 	local enableFlags = {}
 	local disableFlags = {}
 	local currentTarget = enableFlags
 	
-	local nextLoopIndex, nextChar
+	local nextPeekIndex, nextChar
 	
 	-- Parse all inline flags (e.g. `i`, `m`, `s`) and switch target if `-` is encountered
-	while inlineFlagsEnum[charVal] do
-		if charVal == ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR then
+	while inlineFlagsEnum[peekChar] do
+		if peekChar == ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR then
 			currentTarget = disableFlags
 		else
-			currentTarget[charVal] = true
+			currentTarget[peekChar] = true
 		end
-		nextLoopIndex, nextChar = state:readElement(loopIndex)
-		if not nextLoopIndex or state:isElement(nextChar) then
-			charVal = nextChar
+		nextPeekIndex, nextChar = state:readElement(peekIndex)
+		if not nextPeekIndex or state:isElement(nextChar) then
+			peekChar = nextChar
 			break
 		end
-		charVal = nextChar
-		loopIndex = nextLoopIndex
+		peekChar = nextChar
+		peekIndex = nextPeekIndex
 	end
 	
 	-- Handle scoped flags e.g. `(?i:abc)`
-	if charVal == ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR then
+	if peekChar == ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR then
 		local node = AST.GroupScopedFlags()
 		node.scopedFlags = { enable = enableFlags, disable = disableFlags }
-		return loopIndex, node
+		return peekIndex, node
 		
 	-- Handle standard inline flag toggles e.g. `(?i)`
-	elseif charVal == ENUM_CLOSE_GROUP then
+	elseif peekChar == ENUM_CLOSE_GROUP then
 		local node = AST.GroupInlineFlags()
 		node.inlineFlags = { enable = enableFlags, disable = disableFlags }
-		return loopIndex, node
+		return peekIndex, node
 	else
 		return false, nil, errorsEnum.invalidGroupBehavior
 	end

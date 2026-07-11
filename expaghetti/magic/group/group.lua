@@ -155,7 +155,7 @@ local parseGroupBehavior = function(state)
 		
 	-- Inline and Scoped Flags: (?i), (?i:...)
 	elseif inlineFlagsEnum[peekChar] then
-		return behaviorFlags(state)
+		return behaviorFlags(state, peekIndex, peekChar)
 		
 	-- Unrecognized behavior token after `(?`
 	else
