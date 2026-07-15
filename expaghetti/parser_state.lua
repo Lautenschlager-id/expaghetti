@@ -96,45 +96,45 @@ function ParserState:getExecutionValues(char, isInsideSet)
 end
 
 function ParserState:compileSet(set)
-    local values = {}
+	local values = {}
 
-    for char in pairs(set.values) do
-        local value, lowerValue, upperValue = self:getExecutionValues(char)
+	for char in pairs(set.values) do
+		local value, lowerValue, upperValue = self:getExecutionValues(char)
 
-        if lowerValue then
-            values[lowerValue] = true
-            values[upperValue] = true
+		if lowerValue then
+			values[lowerValue] = true
+			values[upperValue] = true
 		else
 			values[value] = true
-        end
-    end
+		end
+	end
 
-    set.values = values
+	set.values = values
 
-    local ranges, index = {}, 0
+	local ranges, index = {}, 0
 
-    for i = 1, set.rangeIndex, 2 do
-        local startValue, startLower, startUpper = self:getExecutionValues(set.ranges[i])
-        local endValue, endLower, endUpper = self:getExecutionValues(set.ranges[i + 1])
+	for i = 1, set.rangeIndex, 2 do
+		local startValue, startLower, startUpper = self:getExecutionValues(set.ranges[i])
+		local endValue, endLower, endUpper = self:getExecutionValues(set.ranges[i + 1])
 
 		index = index + 1
-        if startLower then
-            ranges[index] = startLower
+		if startLower then
+			ranges[index] = startLower
 			index = index + 1
-            ranges[index] = endLower
+			ranges[index] = endLower
 
 			index = index + 1
-            ranges[index] = startUpper
+			ranges[index] = startUpper
 			index = index + 1
-            ranges[index] = endUpper
+			ranges[index] = endUpper
 		else
 			ranges[index] = startValue
 			index = index + 1
 			ranges[index] = endValue
-        end
-    end
+		end
+	end
 
-    set.ranges = ranges
+	set.ranges = ranges
 	set.rangeIndex = index
 end
 

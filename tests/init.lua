@@ -92,7 +92,7 @@ for case = 1, #cases do
 					success = success + 1
 				else
 					print("\tF", "\t", errorMessage)
-					print(1, prettyPrint(tree, true))
+					print(prettyPrint(tree, true))
 					error = error + 1
 				end
 			end
@@ -105,5 +105,5 @@ print(strformat("Success : %03d\nError : %03d", success, error))
 print("------------------------------------")
 
 end, {
-    runs = 1
+	runs = 1
 })

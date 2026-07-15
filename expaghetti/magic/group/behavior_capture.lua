@@ -23,9 +23,9 @@ local function isValidNameCharacter(char, isFirstCharacter)
 end
 
 -- Parses capture-oriented group behaviors:
---   Standard capturing groups: (...)
---   Non-capturing groups:      (?:...)
---   Named capturing groups:    (?<name>...)
+--	Standard capturing groups:	(...)
+--	Non-capturing groups:		(?:...)
+--	Named capturing groups:		(?<name>...)
 return function(state, index, peekIndex, peekChar)
 	-- No behavior token found: standard capturing group
 	if not peekIndex then

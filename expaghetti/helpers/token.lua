@@ -7,6 +7,6 @@ local isPositiveOrZeroIntegerChar = function(char)
 end
 
 return {
-    isPositiveIntegerChar = isPositiveIntegerChar,
-    isPositiveOrZeroIntegerChar = isPositiveOrZeroIntegerChar
+	isPositiveIntegerChar = isPositiveIntegerChar,
+	isPositiveOrZeroIntegerChar = isPositiveOrZeroIntegerChar
 }
