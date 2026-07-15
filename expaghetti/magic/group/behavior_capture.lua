@@ -62,15 +62,13 @@ return function(state, index, peekIndex, peekChar)
 					return false, nil, strformat(errorsEnum.duplicatedGroupName, name)
 				else
 					state.metaData.groupNames[name] = true
-					local node = AST.GroupNamed()
-					node.name = name
-					return loopIndex, node
+					return loopIndex, AST.GroupNamed(name)
 				end
 			else
 				return false, nil, errorsEnum.invalidGroupName
 			end
 		until false
 	end
-
+	
 	return false, nil, errorsEnum.invalidGroupBehaviorindex
 end

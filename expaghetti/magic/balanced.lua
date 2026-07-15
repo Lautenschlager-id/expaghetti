@@ -15,7 +15,7 @@ Balanced.parse = function(state, currentCharacter, index, expression)
 	local opener = expression[index]
 	local closer = expression[index + 1]
 	if not opener or not closer then
-		return false, errorsEnum.incompleteEscape
+		return false, errorsEnum.missingBalancedDelimiter
 	end
 
 	local opener, openerLower, openerUpper = state:getExecutionValues(opener)

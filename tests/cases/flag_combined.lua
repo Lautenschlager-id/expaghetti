@@ -711,4 +711,720 @@ return {
 			_index = 1,
 		},
 	},
+	{
+		regex = ".*",
+		flags = {
+			["s"] = true,
+			i = true
+		},
+		parsed = {
+			{
+				quantifier = {
+					min = 0,
+					type = "quantifier",
+					max = 0
+				},
+				isDotAll = true,
+				type = "any"
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "(?is).",
+		flags = {},
+		parsed = {
+			{
+				type = "any",
+				isDotAll = true
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "^abc$",
+		flags = {
+			["m"] = true,
+			i = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				upperValue = 65,
+				value = string.byte("a"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 97
+			},
+			{
+				upperValue = 66,
+				value = string.byte("b"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 98
+			},
+			{
+				upperValue = 67,
+				value = string.byte("c"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 99
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 5
+		}
+	},
+	{
+		regex = "(?im)^abc$",
+		flags = {},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				upperValue = 65,
+				value = string.byte("a"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 97
+			},
+			{
+				upperValue = 66,
+				value = string.byte("b"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 98
+			},
+			{
+				upperValue = 67,
+				value = string.byte("c"),
+				type = "literal",
+				isCaseInsensitive = true,
+				lowerValue = 99
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 5
+		}
+	},
+	{
+		regex = "(abc)",
+		flags = {
+			["n"] = true,
+			i = true
+		},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						upperValue = 65,
+						value = string.byte("a"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 97
+					},
+					{
+						upperValue = 66,
+						value = string.byte("b"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 98
+					},
+					{
+						upperValue = 67,
+						value = string.byte("c"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 99
+					},
+					_index = 3
+				},
+				disableCapture = true
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "(?in)(abc)",
+		flags = {},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						upperValue = 65,
+						value = string.byte("a"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 97
+					},
+					{
+						upperValue = 66,
+						value = string.byte("b"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 98
+					},
+					{
+						upperValue = 67,
+						value = string.byte("c"),
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = 99
+					},
+					_index = 3
+				},
+				disableCapture = true
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = ".*",
+		flags = {
+			["s"] = true,
+			u = true
+		},
+		parsed = {
+			{
+				quantifier = {
+					min = 0,
+					type = "quantifier",
+					max = 0
+				},
+				isDotAll = true,
+				type = "any"
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "(?s:.)",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				hasBehavior = true,
+				type = "group",
+				tree = {
+					{
+						type = "any",
+						isDotAll = true
+					},
+					_index = 1
+				},
+				disableCapture = true,
+				scopedFlags = {
+					disable = {},
+					enable = {
+						["s"] = true
+					}
+				}
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "^abc$",
+		flags = {
+			["m"] = true,
+			u = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				value = "a",
+				type = "literal",
+				isCaseInsensitive = false
+			},
+			{
+				value = "b",
+				type = "literal",
+				isCaseInsensitive = false
+			},
+			{
+				value = "c",
+				type = "literal",
+				isCaseInsensitive = false
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 5
+		}
+	},
+	{
+		regex = "(?m:^abc$)",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				hasBehavior = true,
+				type = "group",
+				tree = {
+					{
+						isBeginning = true,
+						type = "anchor",
+						isMultiline = true
+					},
+					{
+						value = "a",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					{
+						value = "b",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					{
+						value = "c",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					{
+						isBeginning = false,
+						type = "anchor",
+						isMultiline = true
+					},
+					_index = 5
+				},
+				disableCapture = true,
+				scopedFlags = {
+					disable = {},
+					enable = {
+						["m"] = true
+					}
+				}
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "(abc)",
+		flags = {
+			["n"] = true,
+			u = true
+		},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						value = "a",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					{
+						value = "b",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					{
+						value = "c",
+						type = "literal",
+						isCaseInsensitive = false
+					},
+					_index = 3
+				},
+				disableCapture = true
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "(?n:(abc))",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				hasBehavior = true,
+				type = "group",
+				tree = {
+					{
+						type = "group",
+						tree = {
+							{
+								value = "a",
+								type = "literal",
+								isCaseInsensitive = false
+							},
+							{
+								value = "b",
+								type = "literal",
+								isCaseInsensitive = false
+							},
+							{
+								value = "c",
+								type = "literal",
+								isCaseInsensitive = false
+							},
+							_index = 3
+						},
+						disableCapture = true
+					},
+					_index = 1
+				},
+				disableCapture = true,
+				scopedFlags = {
+					disable = {},
+					enable = {
+						["n"] = true
+					}
+				}
+			},
+			_index = 1
+		}
+	},
+	{
+		regex = "^.*$",
+		flags = {
+			["s"] = true,
+			["m"] = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				quantifier = {
+					min = 0,
+					type = "quantifier",
+					max = 0
+				},
+				isDotAll = true,
+				type = "any"
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 3
+		}
+	},
+	{
+		regex = "(?ms)^.*$",
+		flags = {},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				quantifier = {
+					min = 0,
+					type = "quantifier",
+					max = 0
+				},
+				isDotAll = true,
+				type = "any"
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 3
+		}
+	},
+	{
+		regex = "(.+).",
+		flags = {
+			["n"] = true,
+			["s"] = true
+		},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						},
+						isDotAll = true,
+						type = "any"
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				type = "any",
+				isDotAll = true
+			},
+			_index = 2
+		}
+	},
+	{
+		regex = "(?sn)(.+).",
+		flags = {},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						},
+						isDotAll = true,
+						type = "any"
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				type = "any",
+				isDotAll = true
+			},
+			_index = 2
+		}
+	},
+	{
+		regex = "^(.+)$",
+		flags = {
+			["n"] = true,
+			["m"] = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				type = "group",
+				tree = {
+					{
+						type = "any",
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						}
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 3
+		}
+	},
+	{
+		regex = "(?mn)^(.+)$",
+		flags = {},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				type = "group",
+				tree = {
+					{
+						type = "any",
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						}
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 3
+		}
+	},
+	{
+		regex = "^(.+).$",
+		flags = {
+			["s"] = true,
+			i = true,
+			["n"] = true,
+			u = true,
+			["m"] = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				type = "group",
+				tree = {
+					{
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						},
+						isDotAll = true,
+						type = "any"
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				type = "any",
+				isDotAll = true
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 4
+		}
+	},
+	{
+		regex = "(?imsn)^(.+).$",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				type = "group",
+				tree = {
+					{
+						quantifier = {
+							min = 1,
+							type = "quantifier",
+							max = 0
+						},
+						isDotAll = true,
+						type = "any"
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				type = "any",
+				isDotAll = true
+			},
+			{
+				isBeginning = false,
+				type = "anchor",
+				isMultiline = true
+			},
+			_index = 4
+		}
+	},
+	{
+		regex = "(?ims)^.*(?-s).(?-m)$",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				isBeginning = true,
+				type = "anchor",
+				isMultiline = true
+			},
+			{
+				quantifier = {
+					min = 0,
+					type = "quantifier",
+					max = 0
+				},
+				isDotAll = true,
+				type = "any"
+			},
+			{
+				type = "any"
+			},
+			{
+				type = "anchor",
+				isBeginning = false
+			},
+			_index = 4
+		}
+	},
+	{
+		regex = "(?in)(a)(?-n)(b)",
+		flags = {
+			u = true
+		},
+		parsed = {
+			{
+				type = "group",
+				tree = {
+					{
+						upperValue = "A",
+						value = "a",
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = "a"
+					},
+					_index = 1
+				},
+				disableCapture = true
+			},
+			{
+				type = "group",
+				index = 1,
+				tree = {
+					{
+						upperValue = "B",
+						value = "b",
+						type = "literal",
+						isCaseInsensitive = true,
+						lowerValue = "b"
+					},
+					_index = 1
+				}
+			},
+			_index = 2
+		}
+	}
 }

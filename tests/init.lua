@@ -22,13 +22,24 @@ local cases = {
 	"any",
 	"set",
 	"delimiter",
+
 	"group",
-	"quantifier",
 	"alternate",
-	"balanced",
-	"flag_unicode",
+	"quantifier",
+
 	"flag_case_insensitive",
+	"flag_unicode",
+	"flag_case_multiline",
+	"flag_case_dotall",
+	"flag_case_no_auto_capture",
 	"flag_combined",
+
+	"comment",
+	"position_capture",
+	"backreference",
+	"recursion",
+	"balanced",
+	"boundary",
 }
 
 performance.logPerformanceAtTheEnd(function()
@@ -81,7 +92,7 @@ for case = 1, #cases do
 					success = success + 1
 				else
 					print("\tF", "\t", errorMessage)
-					print(prettyPrint(tree, true))
+					print(1, prettyPrint(tree, true))
 					error = error + 1
 				end
 			end

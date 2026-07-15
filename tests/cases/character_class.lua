@@ -142,8 +142,7 @@ return {
 				type = "set",
 				values = {
 					[string.byte(" ")] = true,
-					[string.byte("\
-")] = true,
+					[string.byte("\n")] = true,
 					[string.byte("\12")] = true,
 					[string.byte("\13")] = true,
 					[string.byte("\9")] = true,
@@ -341,8 +340,7 @@ return {
 				type = "set",
 				values = {
 					[string.byte(" ")] = true,
-					[string.byte("\
-")] = true,
+					[string.byte("\n")] = true,
 					[string.byte("\12")] = true,
 					[string.byte("\13")] = true,
 					[string.byte("\9")] = true,

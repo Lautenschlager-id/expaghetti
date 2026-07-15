@@ -22,13 +22,17 @@ end
 -- Helper to consume consecutive characters matching a specific condition
 local function consumeWhile(state, loopIndex, conditionFn)
 	local str = ""
-	local nextLoopIndex, nextChar = state:readElement(loopIndex)
-	while nextLoopIndex and not state:isElement(nextChar) and conditionFn(nextChar) do
+
+	while true do
+		local nextLoopIndex, nextChar = state:readElement(loopIndex)
+		
+		if not nextLoopIndex or not nextChar or state:isElement(nextChar) or not conditionFn(nextChar) then
+			return str, nextLoopIndex, nextChar
+		end
+
 		str = str .. nextChar
 		loopIndex = nextLoopIndex
-		nextLoopIndex, nextChar = state:readElement(loopIndex)
 	end
-	return str, nextLoopIndex, nextChar
 end
 
 return function(state, peekIndex, peekChar)
@@ -51,12 +55,14 @@ return function(state, peekIndex, peekChar)
 	-- Handle named target recursion e.g. `(?&name)`
 	elseif peekChar == ENUM_GROUP_RECURSION_NAMED then
 		local nameStr, afterLoopIndex, afterLoopChar = consumeWhile(state, peekIndex, isNotCloseGroup)
+
+		errorToThrow = errorsEnum.invalidGroupRecursionName
 		if #nameStr == 0 then
-			return false, nil, errorsEnum.invalidGroupName
+			return false, nil, errorToThrow
 		end
+
 		node.targetName = nameStr
 		finalIndex, nextChar = afterLoopIndex, afterLoopChar
-		errorToThrow = errorsEnum.invalidGroupName
 	else
 		return false, nil, errorsEnum.invalidGroupBehavior
 	end

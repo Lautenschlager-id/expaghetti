@@ -70,9 +70,10 @@ function AST.GroupNonCapturing()
 	return node
 end
 
-function AST.GroupNamed()
+function AST.GroupNamed(name)
 	local node = baseGroup()
 	node.hasBehavior = true
+	node.name = name
 	return node
 end
 

@@ -42,6 +42,10 @@ local errors = {
 	invalidBackreferenceName = "Invalid backreference name",
 
 	missingFrontierSet = "Missing set after frontier pattern",
+
+	missingBalancedDelimiter = "Balanced pattern requires two delimiters",
+
+	invalidGroupRecursionName = "Invalid group recursion name",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "
