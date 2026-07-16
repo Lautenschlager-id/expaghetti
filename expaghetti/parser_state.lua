@@ -138,4 +138,34 @@ function ParserState:compileSet(set)
 	set.rangeIndex = index
 end
 
+function ParserState:applyInlineFlags(flagConfig)
+	local flags = self.flags
+
+	for flag in pairs(flagConfig.enable) do
+		flags[flag] = true
+	end
+
+	for flag in pairs(flagConfig.disable) do
+		flags[flag] = nil
+	end
+end
+
+function ParserState:pushScopedFlags(flagConfig)
+	local previousFlags = self.flags
+
+	local flags = {}
+	self.flags = flags
+
+	for flag, value in pairs(previousFlags) do
+		flags[flag] = value
+	end
+
+	self:applyInlineFlags(flagConfig)
+	return previousFlags
+end
+
+function ParserState:popScopedFlags(previousFlags)
+	self.flags = previousFlags
+end
+
 return ParserState

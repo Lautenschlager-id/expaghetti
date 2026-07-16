@@ -37,10 +37,19 @@ local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
 local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
 local ENUM_ELEMENT_TYPE_ALTERNATE = elementsEnum.alternate
 local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
+local GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
+local GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS
+local ENUM_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
+local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
+local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
+local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
+local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
+local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
 ----------------------------------------------------------------------------------------------------
 local Group = { }
-
-local function getFixedLength(tree)
+----------------------------------------------------------------------------------------------------
+local getLookbehindFixedLength
+function getLookbehindFixedLength(tree)
 	if not tree then return 0 end
 	local totalLen = 0
 	for i = 1, (tree._index or 0) do
@@ -61,7 +70,7 @@ local function getFixedLength(tree)
 				totalLen = totalLen + 1
 			end
 		elseif elem.type == ENUM_ELEMENT_TYPE_GROUP then
-			local gLen = getFixedLength(elem.tree)
+			local gLen = getLookbehindFixedLength(elem.tree)
 			if not gLen then return nil end
 			local q = elem.quantifier
 			if q then
@@ -73,7 +82,7 @@ local function getFixedLength(tree)
 		elseif elem.type == ENUM_ELEMENT_TYPE_ALTERNATE then
 			local altLen = nil
 			for _, branchTree in ipairs(elem.trees) do
-				local bLen = getFixedLength(branchTree)
+				local bLen = getLookbehindFixedLength(branchTree)
 				if not bLen then return nil end
 				if altLen == nil then
 					altLen = bLen
@@ -94,16 +103,6 @@ local function getFixedLength(tree)
 	end
 	return totalLen
 end
-
-local GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
-local GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS
-local ENUM_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
-
-local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
-local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
-local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
-local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
-local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
 
 local parseGroupBehavior = function(state)
 	local index = state.index
@@ -176,7 +175,6 @@ Group.isElement = function(currentElement)
 end
 
 Group.parse = function(state, tree)
-
 	-- skip magic opening
 	state.index = state.index + 1
 
@@ -188,17 +186,13 @@ Group.parse = function(state, tree)
 	
 	-- Apply inline toggle flags immediately to state
 	if value.inlineFlags then
-		for k, v in pairs(value.inlineFlags.enable) do state.flags[k] = true end
-		for k, v in pairs(value.inlineFlags.disable) do state.flags[k] = nil end
+		state:applyInlineFlags(value.inlineFlags)
 		return state.index
 	end
 	
-	local restoreFlags = nil
+	local previousFlags
 	if value.scopedFlags then
-		restoreFlags = {}
-		for k, v in pairs(state.flags) do restoreFlags[k] = v end
-		for k, v in pairs(value.scopedFlags.enable) do state.flags[k] = true end
-		for k, v in pairs(value.scopedFlags.disable) do state.flags[k] = nil end
+		previousFlags = state:pushScopedFlags(value.scopedFlags)
 	end
 
 	-- A group with any value
@@ -239,14 +233,12 @@ Group.parse = function(state, tree)
 		value.tree = { _index = 0 }
 	end
 	
-	if restoreFlags then
-		-- Clear current flags table and restore previous state
-		for k in pairs(state.flags) do state.flags[k] = nil end
-		for k, v in pairs(restoreFlags) do state.flags[k] = v end
+	if previousFlags then
+		state:popScopedFlags(previousFlags)
 	end
 
 	if value.isLookbehind then
-		local len = getFixedLength(value.tree)
+		local len = getLookbehindFixedLength(value.tree)
 		if not len then
 			return false, errorsEnum.variableLengthLookbehind
 		end
@@ -306,11 +298,7 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 
 	local oldGroupIndex = groupTree._groupIndex
 	local groupIndex = currentElement.index or currentElement.name
-	if groupIndex then
-		groupTree._groupIndex = groupIndex
-	else
-		groupTree._groupIndex = nil
-	end
+	groupTree._groupIndex = groupIndex
 
 	local execStringIndex = stringIndex
 	if currentElement.isLookbehind then
@@ -357,13 +345,13 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 		if currentElement.isRecursion then
 			state:leaveRecursion()
 		end
-		if not hasMatched then
-			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
-			groupTree._groupIndex = oldGroupIndex
-			return false, nil, nil, state.metaData, false
-		end
+
 		state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 		groupTree._groupIndex = oldGroupIndex
+
+		if not hasMatched then
+			return false, nil, nil, state.metaData, false
+		end
 		return true, nil, endStr, state.metaData, false
 	end
 
