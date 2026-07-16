@@ -1,9 +1,10 @@
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
-local token = require("./helpers/token")
-local isPositiveOrZeroIntegerChar = token.isPositiveOrZeroIntegerChar
-local isPositiveIntegerChar = token.isPositiveIntegerChar
+local parserHelpers = require("./helpers/parser_helpers")
+local isPositiveOrZeroIntegerChar = parserHelpers.isPositiveOrZeroIntegerChar
+local isPositiveIntegerChar = parserHelpers.isPositiveIntegerChar
+local consumeWhile = parserHelpers.consumeWhile
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
@@ -17,22 +18,6 @@ local ENUM_GROUP_RECURSION_NAMED = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
 -- Helper to validate if a character is not a closing group parenthesis
 local function isNotCloseGroup(char)
 	return char ~= ENUM_CLOSE_GROUP
-end
-
--- Helper to consume consecutive characters matching a specific condition
-local function consumeWhile(state, loopIndex, conditionFn)
-	local str = ""
-
-	while true do
-		local nextLoopIndex, nextChar = state:readElement(loopIndex)
-		
-		if not nextLoopIndex or not nextChar or state:isElement(nextChar) or not conditionFn(nextChar) then
-			return str, nextLoopIndex, nextChar
-		end
-
-		str = str .. nextChar
-		loopIndex = nextLoopIndex
-	end
 end
 
 return function(state, peekIndex, peekChar)

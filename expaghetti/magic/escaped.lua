@@ -6,7 +6,7 @@ local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
 local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
 local tblDeepCopy = require("./helpers/table").tblDeepCopy
-local isPositiveIntegerChar = require("./helpers/token").isPositiveIntegerChar
+local isPositiveIntegerChar = require("./helpers/parser_helpers").isPositiveIntegerChar
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------

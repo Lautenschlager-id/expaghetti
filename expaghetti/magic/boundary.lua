@@ -13,7 +13,7 @@ Boundary.isElement = function(currentElement)
 end
 
 Boundary.parse = function(state, index, isNegated)
-	local peekIndex, nextElement = state:readElement(index)
+	local _, nextElement = state:readElement(index)
 	if not Set.isToken(nextElement) then
 		return false, errorsEnum.missingFrontierSet
 	end
@@ -24,7 +24,9 @@ Boundary.parse = function(state, index, isNegated)
 	local nextStateIndex, errorMessage = Set.parse(state, tempTree)
 	state.index = oldIndex
 	
-	if errorMessage then return false, errorMessage end
+	if errorMessage then
+		return false, errorMessage
+	end
 	
 	return nextStateIndex, AST.Boundary(isNegated, tempTree[1])
 end
@@ -37,18 +39,10 @@ Boundary.match = function(currentElement, state)
 	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar, state) or false
 	local isCurrInSet = currChar and Set.match(currentElement.set, currChar, state) or false
 
-	if currentElement.isNegated then
-		-- %F (non-frontier boundary): Matches if BOTH are in set, or NEITHER are in set
-		if isPrevInSet == isCurrInSet then
-			return true, nil, stringIndex
-		end
-	else
-		-- %f (frontier boundary): Matches if EXACTLY ONE is in set
-		if isPrevInSet ~= isCurrInSet then
-			return true, nil, stringIndex
-		end
+	local hasBoundary = isPrevInSet ~= isCurrInSet
+	if hasBoundary ~= currentElement.isNegated then
+		return true, nil, stringIndex
 	end
-
 	return false
 end
 

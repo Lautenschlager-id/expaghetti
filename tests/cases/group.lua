@@ -624,7 +624,7 @@ return {
 		regex = "%k",
 	},
 	{
-		errorMessage = "Invalid regular expression: Unterminated backreference: Missing '>'",
+		errorMessage = "Invalid regular expression: Invalid backreference name",
 		regex = "%k<",
 	},
 	{

@@ -23,11 +23,11 @@ end
 Alternate.parse = function(state, tree)
 
 	local totalAlternates = 1
-	local firstAlternative = { _index = tree._index }
+	local firstBranch = { _index = tree._index }
 	for i = 1, tree._index do
-		firstAlternative[i] = tree[i]
+		firstBranch[i] = tree[i]
 	end
-	tree[1] = firstAlternative
+	tree[1] = firstBranch
 
 	local isBranchReset = state.isBranchReset
 	local initialGroupIndex = state.initialGroupIndex
@@ -83,7 +83,7 @@ Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 
 		local branchTree = trees[branchIndex]
 
-		if not state.metaData.outerTreeReference[branchTree] and tree then
+		if tree and not state.metaData.outerTreeReference[branchTree] then
 			state.metaData.outerTreeReference[branchTree] = {
 				tree = tree,
 				treeLength = tree._index,

@@ -20,7 +20,9 @@ end
 Anchor.parse = function(state, currentCharacter, tree)
 	tree._index = tree._index + 1
 	local node = AST.Anchor(currentCharacter == ENUM_ANCHOR_START)
-	if state.flags.m then node.isMultiline = true end
+	if state.flags.m then
+		node.isMultiline = true
+	end
 	tree[tree._index] = node
 
 	return state.index + 1

@@ -1,9 +1,5 @@
 ----------------------------------------------------------------------------------------------------
-local strformat = string.format
-local tblconcat = table.concat
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local isPositiveIntegerChar = require("./helpers/token").isPositiveIntegerChar
+local isPositiveIntegerChar = require("./helpers/parser_helpers").isPositiveIntegerChar
 ----------------------------------------------------------------------------------------------------
 local PositionCapture = require("./magic/position_capture")
 ----------------------------------------------------------------------------------------------------

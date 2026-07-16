@@ -17,17 +17,16 @@ end
 Any.parse = function(state, tree)
 	tree._index = tree._index + 1
 	local node = AST.Any()
-	if state.flags.s then node.isDotAll = true end
+	if state.flags.s then
+		node.isDotAll = true
+	end
 	tree[tree._index] = node
 
 	return state.index + 1
 end
 
 Any.match = function(currentElement, currentCharacter, state)
-	if currentElement.isDotAll then
-		return true
-	end
-	return not ENUM_LINE_BREAKS[currentCharacter]
+	return currentElement.isDotAll or not ENUM_LINE_BREAKS[currentCharacter]
 end
 
 return Any

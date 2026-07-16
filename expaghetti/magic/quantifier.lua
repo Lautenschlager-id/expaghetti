@@ -6,73 +6,59 @@ local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
-local elementsEnum = require("./enums/elements")
+local nonQuantifiableTypes = require("./enums/nonQuantifiableTypes")
 local quantifiersEnum = require("./enums/quantifiers")
 local quantifierModesEnum = require("./enums/quantifierModes")
+local parserHelpers = require("./helpers/parser_helpers")
+----------------------------------------------------------------------------------------------------
+local consumeWhile = parserHelpers.consumeWhile
+local isPositiveOrZeroIntegerChar = parserHelpers.isPositiveOrZeroIntegerChar
 ----------------------------------------------------------------------------------------------------
 local ENUM_OPEN_QUANTIFIER = magicEnum.OPEN_QUANTIFIER
 local ENUM_CLOSE_QUANTIFIER = magicEnum.CLOSE_QUANTIFIER
 local ENUM_QUANTIFIER_SEPARATOR_CHARACTER = magicEnum.QUANTIFIER_SEPARATOR_CHARACTER
-local ENUM_LAZY_QUANTIFIER = magicEnum.LAZY_QUANTIFIER
-local ENUM_POSSESSIVE_QUANTIFIER = magicEnum.POSSESSIVE_QUANTIFIER
-local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
+local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
 ----------------------------------------------------------------------------------------------------
 local Quantifier = { }
-
+----------------------------------------------------------------------------------------------------
 local lookForCustomQuantifier = function(state, index)
-	local currentToken
+	local min, index, currentToken = consumeWhile(state, index, isPositiveOrZeroIntegerChar)
+	local max
 
-	local parameters, currentParameter = {
-		[1] = '',
-		[2] = ''
-	}, 1
+	if currentToken == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
+		max, index, currentToken = consumeWhile(state, index, isPositiveOrZeroIntegerChar)
+	end
 
-	repeat
-		local nextIndex, element = state:readElement(index)
-		if not nextIndex then
-			return false
-		end
-		index = nextIndex
-		currentToken = element
+	if currentToken ~= ENUM_CLOSE_QUANTIFIER then
+		return false
+	end
 
-		if state:isElement(currentToken) then
-			return false
-		elseif currentToken >= '0' and currentToken <= '9' then
-			parameters[currentParameter] = parameters[currentParameter] .. currentToken
-		elseif currentToken == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
-			if currentParameter == 2 then
-				return false
-			end
-			currentParameter = 2
-		elseif currentToken == ENUM_CLOSE_QUANTIFIER then
-			break
-		else
-			return false
-		end
-	until false
+	-- {N}
+	min = tonumber(min)
 
-	parameters[1] = tonumber(parameters[1])
-
-	-- If no separator was given the regex much exactly that number
-	if currentParameter == 1 then
-		parameters[2] = parameters[1]
+	if max == nil then
+		max = min
 	else
-		parameters[2] = tonumber(parameters[2])
-		if (parameters[1] and parameters[2]) and (parameters[1] > parameters[2]) then
+		-- {N,M}, {N,}, {,M}
+		max = tonumber(max)
+
+		if min and max and min > max then
 			return false, errorsEnum.unorderedCustomQuantifier
 		end
 	end
 
-	if not (parameters[1] or parameters[2]) or parameters[2] == 0 then
+	if not (min or max) or max == 0 then
 		return false
 	end
 
-	return index, AST.Quantifier(parameters[1], parameters[2])
+	return index, AST.Quantifier(min, max)
 end
 
-local checkIfAppliesToParentTreeElement = function(state, index)
+local parseQuantifier = function(state, index)
 	local nextIndex, currentToken = state:readElement(index)
-	if not nextIndex then return index, false end
+	if not nextIndex then
+		return index, false
+	end
 	
 	if not state:isElement(currentToken) and quantifiersEnum[currentToken] then
 		return nextIndex, quantifiersEnum[currentToken]
@@ -103,15 +89,10 @@ local lookForModeToken = function(state, index, quantifier)
 	return index, quantifier
 end
 
-local nonQuantifiableTypes = {
-	[elementsEnum.anchor] = true,
-	[elementsEnum.boundary] = true,
-	[elementsEnum.balanced] = true,
-	[elementsEnum.position_capture] = true,
-}
+
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
-	local index, quantifier = checkIfAppliesToParentTreeElement(state, state.index)
+	local index, quantifier = parseQuantifier(state, state.index)
 
 	return index and quantifier
 end
@@ -125,7 +106,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers
 	local shouldntHaveQuantifier = nonQuantifiableTypes[parentElement.type] == true
 
-	local index, quantifier = checkIfAppliesToParentTreeElement(state, state.index)
+	local index, quantifier = parseQuantifier(state, state.index)
 
 	if not index then
 		-- quantifier = error message
