@@ -307,8 +307,10 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 			if currentElement.isRecursion then
 				state:leaveRecursion()
 			end
+
 			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
+
 			if currentElement.isNegative then
 				return true, nil, stringIndex, state.metaData, false
 			else
@@ -322,6 +324,9 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 		tempState, groupTree, 0
 	)
 
+	state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
+	groupTree._groupIndex = oldGroupIndex
+
 	if isAssertion then
 		local originalHasMatched = hasMatched
 		if currentElement.isLookbehind then
@@ -330,9 +335,6 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 			end
 		end
 		hasMatched = originalHasMatched ~= currentElement.isNegative
-
-		state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
-		groupTree._groupIndex = oldGroupIndex
 
 		if not hasMatched then
 			return false, nil, nil, state.metaData, false
@@ -346,9 +348,6 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 			state:leaveRecursion()
 		end
 
-		state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
-		groupTree._groupIndex = oldGroupIndex
-
 		if not hasMatched then
 			return false, nil, nil, state.metaData, false
 		end
@@ -358,14 +357,10 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 	if not groupIndex then
 		hasMatched = hasMatched ~= currentElement.isNegative
 		if not hasMatched then
-			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
-			groupTree._groupIndex = oldGroupIndex
 			return
 		end
 	end
 
-	state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
-	groupTree._groupIndex = oldGroupIndex
 	return hasMatched, iniStr, endStr, state.metaData, true
 end
 
