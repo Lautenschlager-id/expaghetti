@@ -12,6 +12,7 @@ local behaviorComment = require("./magic/group/behavior_comment")
 local behaviorFlags = require("./magic/group/behavior_flags")
 local magicEnum = require("./enums/magic")
 local elementsEnum = require("./enums/elements")
+local elementLengths = require("./enums/elementLengths")
 local errorsEnum = require("./enums/errors")
 local inlineFlagsEnum = require("./enums/flags").inlineFlags
 ----------------------------------------------------------------------------------------------------
@@ -41,62 +42,56 @@ local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
 local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
 local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
 local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
+local ZERO_LENGTH_ELEMENTS = elementLengths.ZERO_LENGTH_ELEMENTS
+local SINGLE_LENGTH_ELEMENTS = elementLengths.SINGLE_LENGTH_ELEMENTS
 ----------------------------------------------------------------------------------------------------
 local Group = { }
 ----------------------------------------------------------------------------------------------------
 local getLookbehindFixedLength
 function getLookbehindFixedLength(tree)
-	if not tree then return 0 end
 	local totalLen = 0
-	for i = 1, (tree._index or 0) do
-		local elem = tree[i]
+	local elem, quantifier, groupLength, errorMessage, alternateLength, trees, expectedAlternateLength
+	for i = 1, tree._index do
+		elem = tree[i]
+		quantifier = elem.quantifier
+		if quantifier and (quantifier.min ~= quantifier.max or quantifier.max == 0) then
+			return nil
+		end
 		
 		-- Elements that don't consume characters
-		if elementsEnum.anchor == elem.type or elementsEnum.boundary == elem.type or elementsEnum.position_capture == elem.type then
-			-- Length 0
-		elseif elem.isLookahead or elem.isLookbehind then
-			-- Length 0
+		if ZERO_LENGTH_ELEMENTS[elem.type] or (elem.isLookahead or elem.isLookbehind) then
 		-- Elements that consume 1 character
-		elseif elem.type == ENUM_ELEMENT_TYPE_LITERAL or elem.type == ENUM_ELEMENT_TYPE_ANY or elem.type == ENUM_ELEMENT_TYPE_SET then
-			local q = elem.quantifier
-			if q then
-				if q.min ~= q.max or q.max == 0 then return nil end
-				totalLen = totalLen + q.min
-			else
-				totalLen = totalLen + 1
-			end
+		elseif SINGLE_LENGTH_ELEMENTS[elem.type] then
+			totalLen = totalLen + (quantifier and quantifier.min or 1)
 		elseif elem.type == ENUM_ELEMENT_TYPE_GROUP then
-			local gLen = getLookbehindFixedLength(elem.tree)
-			if not gLen then return nil end
-			local q = elem.quantifier
-			if q then
-				if q.min ~= q.max or q.max == 0 then return nil end
-				totalLen = totalLen + (gLen * q.min)
-			else
-				totalLen = totalLen + gLen
+			groupLength, errorMessage = getLookbehindFixedLength(elem.tree)
+			if not groupLength then
+				return nil, errorMessage
 			end
+			totalLen = totalLen + (groupLength * (quantifier and quantifier.min or 1))
 		elseif elem.type == ENUM_ELEMENT_TYPE_ALTERNATE then
-			local altLen = nil
-			for _, branchTree in ipairs(elem.trees) do
-				local bLen = getLookbehindFixedLength(branchTree)
-				if not bLen then return nil end
-				if altLen == nil then
-					altLen = bLen
-				elseif altLen ~= bLen then
+			trees = elem.trees
+			expectedAlternateLength = nil
+
+			for branch = 1, trees._index do
+				alternateLength, errorMessage = getLookbehindFixedLength(trees[branch])
+				if not alternateLength then
+					return nil, errorMessage
+				end
+
+				-- Alternates must all have the same fixed length
+				expectedAlternateLength = expectedAlternateLength or alternateLength
+				if expectedAlternateLength ~= alternateLength then
 					return nil
 				end
 			end
-			local q = elem.quantifier
-			if q then
-				if q.min ~= q.max or q.max == 0 then return nil end
-				totalLen = totalLen + ((altLen or 0) * q.min)
-			else
-				totalLen = totalLen + (altLen or 0)
-			end
+
+			totalLen = totalLen + (alternateLength * (quantifier and quantifier.min or 1))
 		else
-			return nil -- Unknown element, cannot determine length safely
+			-- Unknown element, cannot determine length safely
+			return nil, string.format(errorsEnum.unknownElementLength, tostring(elem.type or elem))
 		end
-	end
+    end
 	return totalLen
 end
 
@@ -234,9 +229,9 @@ Group.parse = function(state, tree)
 	end
 
 	if value.isLookbehind then
-		local len = getLookbehindFixedLength(value.tree)
+		local len, errorMessage = getLookbehindFixedLength(value.tree)
 		if not len then
-			return false, errorsEnum.variableLengthLookbehind
+			return false, errorMessage or errorsEnum.variableLengthLookbehind
 		end
 		value.fixedLength = len
 	end

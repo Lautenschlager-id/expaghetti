@@ -46,6 +46,8 @@ local errors = {
 	missingBalancedDelimiter = "Balanced pattern requires two delimiters",
 
 	invalidGroupRecursionName = "Invalid group recursion name",
+
+	unknownElementLength = "Unknown element <%s>, cannot determine length safely",
 }
 ----------------------------------------------------------------------------------------------------
 local base = "Invalid regular expression: "

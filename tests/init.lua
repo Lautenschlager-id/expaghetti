@@ -42,7 +42,7 @@ local cases = {
 	"boundary",
 }
 
-local breakOnFirstError = false
+local breakOnFirstError = true
 
 performance.logPerformanceAtTheEnd(function()
 
