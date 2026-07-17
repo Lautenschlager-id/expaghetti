@@ -3,7 +3,7 @@ local tonumber = tonumber
 ----------------------------------------------------------------------------------------------------
 local parserHelpers = require("./helpers/parser_helpers")
 local consumeWhileArray = parserHelpers.consumeWhileArray
-local isNameToken = parserHelpers.isNameToken
+local isAlphanumeric = parserHelpers.isAlphanumeric
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ CaptureReference.parseByName = function(state, currentCharacter, index, expressi
 		return false, errorsEnum.invalidBackreferenceSyntax
 	end
 
-	local name, afterIndex, closeChar = consumeWhileArray(expression, index, isNameToken)
+	local name, afterIndex, closeChar = consumeWhileArray(expression, index, isAlphanumeric)
 
 	if #name == 0 then
 		return false, errorsEnum.invalidBackreferenceName

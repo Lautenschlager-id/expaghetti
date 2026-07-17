@@ -42,9 +42,11 @@ local cases = {
 	"boundary",
 }
 
+local breakOnFirstError = false
+
 performance.logPerformanceAtTheEnd(function()
 
-local success, error = 0, 0
+local success, error, stop = 0, 0
 for case = 1, #cases do
 	case = cases[case]
 
@@ -97,6 +99,15 @@ for case = 1, #cases do
 				end
 			end
 		end
+
+		if error > 0 and breakOnFirstError then
+			stop = true
+			break
+		end
+	end
+
+	if stop then
+		break
 	end
 end
 

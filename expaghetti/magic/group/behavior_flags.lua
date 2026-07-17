@@ -38,13 +38,19 @@ return function(state, peekIndex, peekChar)
 	-- Handle scoped flags e.g. `(?i:abc)`
 	if peekChar == ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR then
 		local node = AST.GroupScopedFlags()
-		node.scopedFlags = { enable = enableFlags, disable = disableFlags }
+		node.scopedFlags = {
+			enable = enableFlags,
+			disable = disableFlags
+		}
 		return peekIndex, node
 		
 	-- Handle standard inline flag toggles e.g. `(?i)`
 	elseif peekChar == ENUM_CLOSE_GROUP then
 		local node = AST.GroupInlineFlags()
-		node.inlineFlags = { enable = enableFlags, disable = disableFlags }
+		node.inlineFlags = {
+			enable = enableFlags,
+			disable = disableFlags
+		}
 		return peekIndex, node
 	else
 		return false, nil, errorsEnum.invalidGroupBehavior
