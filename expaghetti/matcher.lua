@@ -19,14 +19,17 @@ local Literal = require("./magic/literal")
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
+local quantifierModesEnum = require("./enums/quantifierModes")
+local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
+local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
+local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
 ----------------------------------------------------------------------------------------------------
 local function canBacktrackNestedQuantifier(quantifier, element)
-	local mode = quantifier.mode or "greedy"
-	return mode ~= "possessive"
+	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
+	return mode ~= ENUM_QUANTIFIER_MODE_POSSESSIVE
 		and AST.elementHasNestedQuantifier(element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
-
 ----------------------------------------------------------------------------------------------------
 
 local singleElementMatcher = function(
@@ -70,7 +73,7 @@ local function quantifyElement(
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
 	local minimumOccurrences = quantifier.min
-	local mode = quantifier.mode or "greedy"
+	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
 	local canBacktrackInner = canBacktrackNestedQuantifier(quantifier, currentElement)
 
 	local totalOccurrences = 0
@@ -168,15 +171,15 @@ local function quantifyElement(
 	end
 	
 	local startOccurrences, endOccurrences, step
-	if mode == "greedy" then
+	if mode == ENUM_QUANTIFIER_MODE_GREEDY then
 		startOccurrences = maximumOccurrencesOfElement
 		endOccurrences = minimumOccurrences
 		step = -1
-	elseif mode == "lazy" then
+	elseif mode == ENUM_QUANTIFIER_MODE_LAZY then
 		startOccurrences = minimumOccurrences
 		endOccurrences = maximumOccurrencesOfElement
 		step = 1
-	elseif mode == "possessive" then
+	elseif mode == ENUM_QUANTIFIER_MODE_POSSESSIVE then
 		startOccurrences = maximumOccurrencesOfElement
 		endOccurrences = maximumOccurrencesOfElement
 		step = 1

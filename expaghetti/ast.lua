@@ -1,4 +1,7 @@
 local elementsEnum = require("./enums/elements")
+local quantifierModesEnum = require("./enums/quantifierModes")
+
+local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 
 local AST = {}
 
@@ -220,16 +223,17 @@ end
 
 AST.elementInnerQuantifierIsPossessive = function(element)
 	if element.type == elementsEnum.group and element.tree then
+		local quantifier
 		for elementIndex = 1, element.tree._index do
-			local child = element.tree[elementIndex]
-			if child.quantifier and child.quantifier.type == elementsEnum.quantifier and child.quantifier.mode == "possessive" then
+			quantifier = element.tree[elementIndex].quantifier
+			if quantifier and quantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE then
 				return true
 			end
 		end
-	elseif element.quantifier and element.quantifier.type == elementsEnum.quantifier and element.quantifier.mode == "possessive" then
-		return true
 	end
-	return false
+
+	local quantifier = element.quantifier
+	return quantifier and quantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE or false
 end
 
 return AST
