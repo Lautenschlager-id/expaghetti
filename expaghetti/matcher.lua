@@ -50,7 +50,7 @@ local singleElementMatcher = function(
 	elseif not currentCharacter then
 		return
 	elseif Any.isElement(currentElement) then
-		return Any.match(currentElement, currentCharacter, state)
+		return Any.match(currentElement, currentCharacter)
 	elseif Set.isElement(currentElement) then
 		return Set.match(currentElement, currentCharacter)
 	elseif Literal.isElement(currentElement) then

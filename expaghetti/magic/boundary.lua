@@ -36,8 +36,8 @@ Boundary.match = function(currentElement, state)
 	local prevChar = stringIndex > 0 and state:getTargetCharacter(stringIndex) or nil
 	local currChar = state:getTargetCharacter(stringIndex + 1)
 
-	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar, state) or false
-	local isCurrInSet = currChar and Set.match(currentElement.set, currChar, state) or false
+	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar) or false
+	local isCurrInSet = currChar and Set.match(currentElement.set, currChar) or false
 
 	local hasBoundary = isPrevInSet ~= isCurrInSet
 	if hasBoundary ~= currentElement.isNegated then

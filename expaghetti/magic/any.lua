@@ -25,7 +25,7 @@ Any.parse = function(state, tree)
 	return state.index + 1
 end
 
-Any.match = function(currentElement, currentCharacter, state)
+Any.match = function(currentElement, currentCharacter)
 	return currentElement.isDotAll or not ENUM_LINE_BREAKS[currentCharacter]
 end
 

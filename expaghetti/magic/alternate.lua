@@ -21,7 +21,6 @@ Alternate.transformIntoParsedTrees = function(tree)
 end
 
 Alternate.parse = function(state, tree)
-
 	local totalAlternates = 1
 	local firstBranch = { _index = tree._index }
 	for i = 1, tree._index do

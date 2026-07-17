@@ -54,7 +54,7 @@ local lookForCustomQuantifier = function(state, index)
 	return index, AST.Quantifier(min, max)
 end
 
-local parseQuantifier = function(state, index)
+local tryParseQuantifier = function(state, index)
 	local nextIndex, currentToken = state:readElement(index)
 	if not nextIndex then
 		return index, false
@@ -88,12 +88,9 @@ local lookForModeToken = function(state, index, quantifier)
 	end
 	return index, quantifier
 end
-
-
 ----------------------------------------------------------------------------------------------------
 Quantifier.isToken = function(state, parentElement)
-	local index, quantifier = parseQuantifier(state, state.index)
-
+	local index, quantifier = tryParseQuantifier(state, state.index)
 	return index and quantifier
 end
 
@@ -106,7 +103,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers
 	local shouldntHaveQuantifier = nonQuantifiableTypes[parentElement.type] == true
 
-	local index, quantifier = parseQuantifier(state, state.index)
+	local index, quantifier = tryParseQuantifier(state, state.index)
 
 	if not index then
 		-- quantifier = error message
