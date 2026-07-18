@@ -415,6 +415,7 @@ do
 	hasMatched = matcher("(?<w>[a-z]+)_%k<w>", "hello_world")
 	assert(not hasMatched, "Named backreference: different words should not match")
 end
+assertMatch("(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)%k<15>", "abcdefghijklmnoo", true, 1, 16, "Access 15th capture via %k<15>")
 
 ----------------------------------------------------------------------------------------------------
 print("  [29] Inline comments (?#...)...")
@@ -495,6 +496,8 @@ assertMatch("%b()", "(a(b)c)", true, 1, 7, "Balanced match %b(): nested parenthe
 assertMatch("%b{}", "{abc{def}}", true, 1, 10, "Balanced match %b{}: nested curly braces")
 assertMatch("%b()", "(ab", nil, nil, nil, "Balanced match %b(): unclosed")
 assertMatch("x%b()y", "x(a)y", true, 1, 5, "Balanced match %b(): within string")
+assertMatch("%b()+", "(a)(b)", true, 1, 6, "Balanced match %b(): quantified")
+assertMatch("%b()?", "(a)", true, 1, 3, "Balanced match %b(): optional")
 
 ----------------------------------------------------------------------------------------------------
 print("  [36] Assertions -- Positive Lookahead...")

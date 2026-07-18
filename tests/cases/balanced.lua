@@ -131,5 +131,23 @@ return {
 			},
 			_index = 1
 		}
+	},
+	{
+		parsed = {
+			{
+				upperOpen = string.byte("("),
+				lowerOpen = string.byte("("),
+				upperClose = string.byte(")"),
+				lowerClose = string.byte(")"),
+				type = "balanced",
+				quantifier = {
+					max = 0,
+					min = 1,
+					type = "quantifier"
+				}
+			},
+			_index = 1
+		},
+		regex = "%b()+"
 	}
 }
