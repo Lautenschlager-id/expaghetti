@@ -208,17 +208,13 @@ local function quantifyElement(
 
 		state.metaData.quantifierMaxEnd = nil
 
-		if not hasMatched then
+		if not hasMatched or (endStr and endStr >= occurrenceEnd) then
 			return false
 		end
 
 		endStr = endStr or occurrenceStart
 		endStringPositions[occurrenceIndex] = endStr
 		totalOccurrences = occurrenceIndex
-		stringIndex = endStr + 1
-		currentCharacter = state:getTargetCharacter(stringIndex)
-		lastIniStr, lastEndStr = nil, nil
-		extendOccurrenceCollection()
 		maximumOccurrencesOfElement = totalOccurrences
 
 		return true
@@ -231,13 +227,27 @@ local function quantifyElement(
 			end
 		end
 
-		local backtrackOccurrence = occurrence
-		while backtrackOccurrence >= minimumOccurrences do
-			while true do
-				local targetStringIndex = endStringPositions[occurrence]
+		-- Try continuation from end of this many occurrences
+		local targetStringIndex = endStringPositions[occurrence]
+			or (state.stringIndex - 1)
+
+		local tempState = state:branch(targetStringIndex, state.initialStringIndex)
+		hasMatched, iniStr, endStr = coreTreeMatcher(
+			tempState, tree, treeIndex
+		)
+
+		if hasMatched then
+			return hasMatched, iniStr, endStr, state.metaData
+		end
+
+		-- Inner backtracking: shorten the current last occurrence
+		if canBacktrackInner and occurrence > 0 then
+			totalOccurrences = occurrence
+			while shortenOccurrenceAt(totalOccurrences) do
+				targetStringIndex = endStringPositions[totalOccurrences]
 					or (state.stringIndex - 1)
 
-				local tempState = state:branch(targetStringIndex, state.initialStringIndex)
+				tempState = state:branch(targetStringIndex, state.initialStringIndex)
 				hasMatched, iniStr, endStr = coreTreeMatcher(
 					tempState, tree, treeIndex
 				)
@@ -245,26 +255,7 @@ local function quantifyElement(
 				if hasMatched then
 					return hasMatched, iniStr, endStr, state.metaData
 				end
-
-				if not canBacktrackInner then
-					break
-				end
-
-				local occurrenceStart = startStringPositions[backtrackOccurrence]
-				if not occurrenceStart or targetStringIndex <= occurrenceStart then
-					break
-				end
-
-				if not shortenOccurrenceAt(backtrackOccurrence) then
-					break
-				end
 			end
-
-			if backtrackOccurrence <= minimumOccurrences then
-				break
-			end
-
-			backtrackOccurrence = backtrackOccurrence - 1
 		end
 	end
 end

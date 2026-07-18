@@ -325,6 +325,26 @@ assertMatch(".*+c", "abcc",   nil,  nil, nil, "Possessive *+: fails to backtrack
 assertMatch("(a+)+a", "aaaaa", true, 1, 5, "Nested quantifiers: inner + backtracks for trailing literal")
 assertMatch("(a+)+a", "aa",    true, 1, 2, "Nested quantifiers: minimal inner match + literal")
 assertMatch("(a+)+a", "a",     nil,  nil, nil, "Nested quantifiers: single a cannot satisfy trailing a")
+-- others
+assertMatch("a(b?c?a)te", "abacate", true, 3, 7, "Optional elements: group matches shortest valid variant")
+assertMatch("a?((b?c?)a)+", "abacate", true, 1, 5, "Repeated group: optional elements across iterations")
+assertMatch("(b?c?a)+te", "abacate", true, 1, 7, "Repeated optional elements with trailing literal")
+assertMatch("(b?c?t?a?)+", "abacate", true, 1, 6, "Repeated optional character sequence")
+assertMatch("(b?c?a?)+", "abacate", true, 1, 5, "Repeated optional character sequence two")
+assertMatch("(x?)?", "x", true, 1, 1, "Nested optional quantifiers")
+assertMatch("a([bc]a)+", "abacate", true, 1, 5, "Repeated character class group")
+assertMatch("([bc]a)+", "abacate", true, 2, 5, "Repeated character class group without prefix")
+assertMatch("a([bct]a?)+", "abacate", true, 1, 6, "Repeated character class group with optional suffix")
+assertMatch("([bct]a?)+", "abacate", true, 2, 6, "Repeated character class group with optional suffix two")
+assertMatch("([bct]a?)+?", "abacate", true, 2, 3, "Lazy repetition of character class group")
+assertMatch("([abc])*d", "abbbcd", true, 1, 6, "Repeated character class with trailing literal")
+assertMatch("([abc])*bcd", "abcd", true, 1, 4, "Repeated character class backtracks for trailing literal")
+assertMatch("([^N]*N)+", "abNNxyzN", true, 1, 8, "Repeated negated character class")
+assertMatch("([^N]*N)+", "abNNxyz", true, 1, 4, "Repeated negated character class with partial match")
+assertMatch("aba(c+)ate", "abacccccccccccaty ou abaccccccate?", true, 22, 33, "Greedy quantifier: finds longest valid match")
+assertMatch("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi", true, 10, 37, "Nested quantified groups with heavy backtracking")
+assertMatch("(a+b+)+(a+b+)+a", "abbbbbbbcaaaaaaaaaaaaabaaaaba", true, 10, 29, "Nested quantified groups with partition backtracking")
+assertMatch("([^/]*/)*sub1/", "d:msgs/tdir/sub1/trial/away.cpp", true, 1, 17, "Group with inner quantifier: reduce outer count to find match")
 
 ----------------------------------------------------------------------------------------------------
 print("  [24] Quantifiers -- inside alternations...")
@@ -350,12 +370,17 @@ assertCapture("a(b)c", "abc", 1, "b",  "Capture 1: middle char")
 assertCapture("(a)(b)(c)", "abc", 1, "a", "Capture 1 of 3")
 assertCapture("(a)(b)(c)", "abc", 2, "b", "Capture 2 of 3")
 assertCapture("(a)(b)(c)", "abc", 3, "c", "Capture 3 of 3")
+assertMatch("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", ".", true, 1, 1, "Deeply nested optional groups")
+assertMatch(".?((a+()(((b+)))()))().?", "aaacbab", true, 5, 7, "Nested captures with position captures")
+assertMatch("(x+x+)+()y", "xxxxxxxxxxy", true, 1, 11, "Nested quantified groups with position capture")
+assertMatch("(?:b?c?t?(a?))+", "abacate", true, 1, 6, "Repeated non-capturing group with inner capture")
 
 ----------------------------------------------------------------------------------------------------
 print("  [26] Non-capturing groups (?:...)...")
 assertMatch("(?:ab)c",  "abc",  true, 1, 3, "Non-cap group: then literal")
 assertMatch("(?:a)+",   "aaa",  true, 1, 3, "Non-cap group: with quantifier")
 assertNoCapture("(?:ab)c", "abc", "Non-cap group: creates no capture")
+assertMatch("\"(?:\\\\\"|[^\"])*?\"", "\"\"\"", true, 1, 2, "Quoted string with escaped quote support")
 
 ----------------------------------------------------------------------------------------------------
 print("  [27] Named capturing groups (?<name>...)...")
@@ -538,6 +563,7 @@ assertMatch("(?<=ab)(?<=b)c", "xbc", nil, nil, nil, "Consecutive positive lookbe
 assertMatch("(?<=(?<=a)b)c", "abc", true, 3, 3, "Nested positive lookbehinds: matches")
 assertMatch("(?<=(a))%1", "aa", true, 2, 2, "Lookbehind with group and backreference: matches")
 assertMatch("(?<=(a))%1", "ab", nil, nil, nil, "Lookbehind with group and backreference: fails")
+assertMatch("([ab]*?)(?<=(b))c", "abc", true, 1, 3, "Lookbehind after lazy repetition")
 
 print("  [39] Assertions -- Negative Lookbehind...")
 assertMatch("(?<!a)b", "xb", true, 2, 2, "Negative lookbehind: matches")
@@ -880,9 +906,8 @@ do
 	assert(hasMatched, "Nested +: capture history should match")
 	local inits = metaData.captureStarts[1]
 	local ends = metaData.captureEnds[1]
-	assert(#inits == 2, "Nested +: two outer repetitions recorded")
+	assert(#inits == 1, "Nested +: one outer repetition recorded due to greedy inner +")
 	assert(getSubstring("aaaaa", inits[1], ends[1]) == "aaaa", "Nested +: first capture after inner backtrack")
-	assert(getSubstring("aaaaa", inits[2], ends[2]) == "a", "Nested +: second capture is trailing group iteration")
 end
 do
 	local hasMatched, _, _, metaData = matcher("(a|aa)+b", "aab")
@@ -965,8 +990,34 @@ assertMatch("(?im-s)^abc$", "ABC\nDEF", true, 1, 3, "Enable i,m disable s togeth
 assertMatch("(?ims)^a.*c$", "A\nB\nC", true, 1, 5, "Enable i,m,s together")
 
 ----------------------------------------------------------------------------------------------------
-print("All matcher tests passed!")
+print("  [X] Old uncategorized tests")
+assertMatch("aba(c+)ate", "abacccccccccccaty ou abaccccccate?", true, 22, 33, "Legacy: greedy capture")
+assertMatch("a(b?c?a)te", "abacate", true, 3, 7, "Legacy: optional chars")
+assertMatch("a?((b?c?)a)+", "abacate", true, 1, 5, "Legacy: repeated optional")
+assertMatch("a([bc]a)+", "abacate", true, 1, 5, "Legacy: set repetition")
+assertMatch("([bc]a)+", "abacate", true, 2, 5, "Legacy: set repetition 2")
+assertMatch("a([bct]a?)+", "abacate", true, 1, 6, "Legacy: optional set")
+assertMatch("([bct]a?)+", "abacate", true, 2, 6, "Legacy: optional set 2")
+assertMatch("([bct]a?)+?", "abacate", true, 2, 3, "Legacy: lazy repetition")
+assertMatch("((((((((((((((((((((((((((((((((((.)?))))))))))))))))))))))))))?)))))))", ".", true, 1, 1, "Legacy: deeply nested")
+assertMatch(".?((a+()(((b+)))()))().?", "aaacbab", true, 5, 7, "Legacy: nested groups")
+assertMatch("(x+x+)+()y", "xxxxxxxxxxy", true, 1, 11, "Legacy: nested quantifiers")
+assertMatch("(b?c?a)+te", "abacate", true, 1, 7, "Legacy: optional repetition")
+assertMatch("(ab?(cd?e)*f)+.", "ldskfsdpkabcdefacdefacefacdececdecefasjdoasdi", true, 10, 37, "Legacy: complex repetition")
+assertMatch("(b?c?t?a?)+", "abacate", true, 1, 6, "Legacy: optional repetition 2")
+assertMatch("(b?c?a?)+", "abacate", true, 1, 5, "Legacy: optional repetition 3")
+assertMatch("(?:b?c?t?(a?))+", "abacate", true, 1, 6, "Legacy: non-capturing group")
+assertMatch("([^N]*N)+", "abNNxyzN", true, 1, 8, "Legacy: negated class")
+assertMatch("([^N]*N)+", "abNNxyz", true, 1, 4, "Legacy: negated class partial")
+assertMatch("(x?)?", "x", true, 1, 1, "Legacy: nested optional")
+assertMatch("([abc])*d", "abbbcd", true, 1, 6, "Legacy: repeated class")
+assertMatch("([abc])*bcd", "abcd", true, 1, 4, "Legacy: repeated class")
+assertMatch("\"(?:\\\\\"|[^\"])*?\"", "\"\"\"", true, 1, 2, "Legacy: quoted string")
+assertMatch("(a+b+)+(a+b+)+a", "abbbbbbbcaaaaaaaaaaaaabaaaaba", true, 10, 29, "Legacy: nested quantifiers")
+assertMatch("([ab]*?)(?<=(b))c", "abc", true, 1, 3, "Legacy: lookahead with empty match")
+----------------------------------------------------------------------------------------------------
 
+print("All matcher tests passed!")
 
 end, {
 	runs = 1
