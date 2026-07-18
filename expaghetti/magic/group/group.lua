@@ -202,7 +202,11 @@ Group.parse = function(state, tree)
 			end
 		end
 
-		local groupTree, groupErrorMessage = state:parseSubTree(true, false, nil, value.isBranchReset)
+		local childState = state:fork()
+		childState.isGroup = true
+		childState.isAlternate = false
+		childState.isBranchReset = value.isBranchReset
+		local groupTree, groupErrorMessage = state:parseSubTree(childState)
 
 		if not groupTree then
 			return groupErrorMessage
@@ -252,11 +256,9 @@ end
 
 Group.parseClosing = function(state)
 	if state.isGroup then
-		state.hasGroupClosed = true
 		return true, nil
-	else
-		return false, errorsEnum.noGroupToClose
 	end
+	return false, errorsEnum.noGroupToClose
 end
 
 Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)

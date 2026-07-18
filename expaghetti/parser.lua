@@ -24,14 +24,14 @@ local function parserCore(state)
 		_index = 0
 	}
 
-	local errorMessage
+	local stopParsing, errorMessage
 
 	while state.index <= state.patternLength do
 		local currentIndex = state.index
 		local nextIndex, element = state:readElement(currentIndex)
 		if not nextIndex then return false, element end
 
-		if element.type then
+		if state:isElement(element) then
 			state.index = nextIndex
 			tree._index = tree._index + 1
 			tree[tree._index] = element
@@ -41,14 +41,8 @@ local function parserCore(state)
 			elseif Group.isOpeningToken(element) then
 				errorMessage = Group.parse(state, tree)
 			elseif Group.isClosingToken(element) then
-				local stopParsing
 				stopParsing, errorMessage = Group.parseClosing(state)
-
-				if errorMessage then
-					return false, errorMessage
-				end
-
-				if stopParsing then
+				if not errorMessage and stopParsing then
 					break
 				end
 			elseif Anchor.isToken(element) then
@@ -56,14 +50,8 @@ local function parserCore(state)
 			elseif Any.isToken(element) then
 				errorMessage = Any.parse(state, tree)
 			elseif Alternate.isToken(element) then
-				local stopParsing
 				tree, stopParsing, errorMessage = Alternate.parse(state, tree)
-
-				if errorMessage then
-					return false, errorMessage
-				end
-
-				if stopParsing then
+				if not errorMessage and stopParsing then
 					break
 				end
 			else
@@ -80,8 +68,11 @@ local function parserCore(state)
 		end
 	end
 
-	if state.isGroup and not state.hasGroupClosed and not state.isAlternate then
-		return false, errorsEnum.unterminatedGroup
+	if state.isGroup and not state.isAlternate then
+		local currentToken = state.patternChars[state.index]
+		if not Group.isClosingToken(currentToken) then
+			return false, errorsEnum.unterminatedGroup
+		end
 	end
 
 	return tree
@@ -114,5 +105,7 @@ function parser(exprOrState, flags)
 
 	return tree
 end
+
+ParserState.parser = parser
 
 return parser

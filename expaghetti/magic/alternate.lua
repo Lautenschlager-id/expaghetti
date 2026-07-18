@@ -1,4 +1,5 @@
 local AST = require("./ast")
+local Group = require("./magic/group/group")
 ----------------------------------------------------------------------------------------------------
 local ENUM_ALTERNATE_SEPARATOR = require("./enums/magic").ALTERNATE_SEPARATOR
 local ENUM_ELEMENT_TYPE_ALTERNATE = require("./enums/elements").alternate
@@ -11,13 +12,6 @@ end
 
 Alternate.isElement = function(currentElement)
 	return currentElement.type == ENUM_ELEMENT_TYPE_ALTERNATE
-end
-
-Alternate.transformIntoParsedTrees = function(tree)
-	return {
-		[1] = AST.Alternate(tree),
-		_index = 1
-	}
 end
 
 Alternate.parse = function(state, tree)
@@ -44,7 +38,12 @@ Alternate.parse = function(state, tree)
 			state.metaData.groupIndex = initialGroupIndex
 		end
 
-		alternativeTree, altErrorMessage = state:parseSubTree(state.isGroup, true, state.hasGroupClosed)
+		local childState = state:fork()
+		childState.isAlternate = true
+		alternativeTree, altErrorMessage = state:parseSubTree(childState)
+		if not alternativeTree then
+			return nil, false, altErrorMessage
+		end
 
 		if isBranchReset then
 			if state.metaData.groupIndex > maxGroupIndex then
@@ -52,14 +51,9 @@ Alternate.parse = function(state, tree)
 			end
 		end
 
-		if not alternativeTree then
-			-- index = error message
-			return nil, false, altErrorMessage
-		end
-
 		totalAlternates = totalAlternates + 1
 		tree[totalAlternates] = alternativeTree
-	until state.index > state.patternLength or (state.isGroup and state.hasGroupClosed)
+	until state.index > state.patternLength or (state.isGroup and Group.isClosingToken(state.patternChars[state.index]))
 
 	if isBranchReset then
 		state.metaData.groupIndex = maxGroupIndex
@@ -70,7 +64,10 @@ Alternate.parse = function(state, tree)
 	end
 	tree._index = totalAlternates
 
-	tree = Alternate.transformIntoParsedTrees(tree)
+	tree = {
+		[1] = AST.Alternate(tree),
+		_index = 1
+	}
 
 	return tree, true, nil
 end
