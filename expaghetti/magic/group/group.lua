@@ -169,16 +169,16 @@ Group.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
 
-	local value, errorMessage
-	state.index, value, errorMessage = parseGroupBehavior(state)
-	if not state.index then
-		return false, errorMessage
+	local newIndex, value, errorMessage = parseGroupBehavior(state)
+	if not newIndex then
+		return errorMessage
 	end
+	state.index = newIndex
 	
 	-- Apply inline toggle flags immediately to state
 	if value.inlineFlags then
 		state:applyInlineFlags(value.inlineFlags)
-		return state.index
+		return nil
 	end
 	
 	local previousFlags
@@ -205,8 +205,7 @@ Group.parse = function(state, tree)
 		local groupTree, groupErrorMessage = state:parseSubTree(true, false, nil, value.isBranchReset)
 
 		if not groupTree then
-			-- index = error message
-			return false, groupErrorMessage
+			return groupErrorMessage
 		end
 
 		value.tree = groupTree
@@ -219,7 +218,8 @@ Group.parse = function(state, tree)
 			state.metaData.groupTreesByName[value.name] = groupTree
 		end
 	elseif not value.hasBehavior then
-		return PositionCapture.parse(state.index, tree, state.metaData)
+		state.index = PositionCapture.parse(state.index, tree, state.metaData)
+		return nil
 	else
 		value.tree = { _index = 0 }
 	end
@@ -231,7 +231,7 @@ Group.parse = function(state, tree)
 	if value.isLookbehind then
 		local len, errorMessage = getLookbehindFixedLength(value.tree)
 		if not len then
-			return false, errorMessage or errorsEnum.variableLengthLookbehind
+			return errorMessage or errorsEnum.variableLengthLookbehind
 		end
 		value.fixedLength = len
 	end
@@ -242,12 +242,21 @@ Group.parse = function(state, tree)
 	end
 
 	-- For recursion, getGroupBehavior already consumed the `)`, so state.index is pointing at the NEXT character.
-	-- We return state.index instead of state.index + 1
 	if value.isRecursion then
-		return state.index
+		return nil
 	end
 
-	return state.index + 1
+	state.index = state.index + 1
+	return nil
+end
+
+Group.parseClosing = function(state)
+	if state.isGroup then
+		state.hasGroupClosed = true
+		return true, nil
+	else
+		return false, errorsEnum.noGroupToClose
+	end
 end
 
 Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)

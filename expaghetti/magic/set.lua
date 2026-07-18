@@ -61,7 +61,7 @@ Set.parse = function(state, tree)
 
 	local endIndex, errorMessage = findSetClosingIndex(state, state.index)
 	if not endIndex then
-		return false, errorMessage
+		return errorMessage
 	end
 
 	-- Set boundary [index, endIndex)
@@ -79,7 +79,7 @@ Set.parse = function(state, tree)
 
 		local nextIndex, element = state:readElement(elementIndex, true)
 		if not nextIndex then
-			return false, element
+			return element
 		end
 
 		elementIndex = nextIndex
@@ -111,7 +111,7 @@ Set.parse = function(state, tree)
 				-- both the last and next characters must be literals
 				if nextTokenValue then
 					if rangeInitChar > nextTokenValue then
-						return false, errorsEnum.unorderedSetRange
+						return errorsEnum.unorderedSetRange
 					end
 
 					addRange(set, rangeInitChar, nextTokenValue)
@@ -138,7 +138,8 @@ Set.parse = function(state, tree)
 	tree[tree._index] = set
 
 	-- skip magic closing (+ 1 to undo the boundary, then + 1)
-	return endIndex + 2
+	state.index = endIndex + 2
+	return nil
 end
 
 Set.match = function(currentElement, currentCharacter)

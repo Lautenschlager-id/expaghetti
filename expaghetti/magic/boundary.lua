@@ -21,7 +21,8 @@ Boundary.parse = function(state, index, isNegated)
 	local oldIndex = state.index
 	state.index = index
 	local tempTree = { _index = 0 }
-	local nextStateIndex, errorMessage = Set.parse(state, tempTree)
+	local errorMessage = Set.parse(state, tempTree)
+	local nextStateIndex = state.index
 	state.index = oldIndex
 	
 	if errorMessage then

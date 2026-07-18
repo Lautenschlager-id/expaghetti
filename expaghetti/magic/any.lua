@@ -22,7 +22,8 @@ Any.parse = function(state, tree)
 	end
 	tree[tree._index] = node
 
-	return state.index + 1
+	state.index = state.index + 1
+	return nil
 end
 
 Any.match = function(currentElement, currentCharacter)

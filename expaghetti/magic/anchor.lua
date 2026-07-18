@@ -25,7 +25,8 @@ Anchor.parse = function(state, currentCharacter, tree)
 	end
 	tree[tree._index] = node
 
-	return state.index + 1
+	state.index = state.index + 1
+	return nil
 end
 
 Anchor.match = function(currentElement, state)

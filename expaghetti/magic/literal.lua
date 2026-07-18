@@ -14,9 +14,8 @@ Literal.isElement = function(currentElement)
 end
 
 Literal.parse = function(state, currentCharacter, tree)
-	-- tree is a bad parameter, but if it's true then an error is thrown anyway
 	if Quantifier.isToken(state, tree) then
-		return false, errorsEnum.nothingToRepeat
+		return errorsEnum.nothingToRepeat
 	end
 
 	tree._index = tree._index + 1
@@ -26,7 +25,8 @@ Literal.parse = function(state, currentCharacter, tree)
 
 	tree[tree._index] = node
 
-	return state.index + 1
+	state.index = state.index + 1
+	return nil
 end
 
 Literal.match = function(currentElement, currentCharacter)

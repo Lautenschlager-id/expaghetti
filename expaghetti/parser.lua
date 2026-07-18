@@ -37,41 +37,42 @@ local function parserCore(state)
 			tree[tree._index] = element
 		else
 			if Set.isToken(element) then
-				state.index, errorMessage = Set.parse(state, tree)
+				errorMessage = Set.parse(state, tree)
 			elseif Group.isOpeningToken(element) then
-				state.index, errorMessage = Group.parse(state, tree)
+				errorMessage = Group.parse(state, tree)
 			elseif Group.isClosingToken(element) then
-				-- assumes hasGroupClosed = false
-				if state.isGroup then
-					state.hasGroupClosed = true
+				local stopParsing
+				stopParsing, errorMessage = Group.parseClosing(state)
+
+				if errorMessage then
+					return false, errorMessage
+				end
+
+				if stopParsing then
 					break
-				else
-					errorMessage = errorsEnum.noGroupToClose
 				end
 			elseif Anchor.isToken(element) then
-				state.index = Anchor.parse(state, element, tree)
+				errorMessage = Anchor.parse(state, element, tree)
 			elseif Any.isToken(element) then
-				state.index = Any.parse(state, tree)
+				errorMessage = Any.parse(state, tree)
 			elseif Alternate.isToken(element) then
-				if not state.isAlternate then
-					-- First occurrence
-					state.index, errorMessage, state.hasGroupClosed = Alternate.parse(state, tree)
+				local stopParsing
+				tree, stopParsing, errorMessage = Alternate.parse(state, tree)
 
-					if errorMessage then
-						return false, errorMessage
-					end
-
-					tree = Alternate.transformIntoParsedTrees(tree)
+				if errorMessage then
+					return false, errorMessage
 				end
-				-- Whenever found, stop processing the rest of the expression since it's looping
-				break
+
+				if stopParsing then
+					break
+				end
 			else
-				state.index, errorMessage = Literal.parse(state, element, tree)
+				errorMessage = Literal.parse(state, element, tree)
 			end
 		end
 
 		if not errorMessage and tree[tree._index] then
-			state.index, errorMessage = Quantifier.lookForElementOperation(state, tree[tree._index])
+			errorMessage = Quantifier.lookForElementOperation(state, tree[tree._index])
 		end
 
 		if errorMessage then
@@ -86,45 +87,32 @@ local function parserCore(state)
 	return tree
 end
 
-function parser(expr, flags,
-	-- At least one should be true or else it's going to ignore all the next parameters
-	isGroup, isAlternate,
-	-- Parameters passed for recursion parsing
-	index, patternChars, patternLength,
-	metaData,
-	hasGroupClosed,
-	inheritedFlags,
-	isBranchReset)
-
-	if not (isGroup or isAlternate) then
+function parser(exprOrState, flags)
+	local state
+	if type(exprOrState) == "table" and exprOrState.index then
+		state = exprOrState
+	else
+		local expr = exprOrState
 		flags = flags or { }
 
-		patternChars, patternLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
+		local patternChars, patternLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
 
-		index = 1
-		hasGroupClosed = true
-
-	-- If hasGroupClosed is not nil, then it's already inside a loop
-	elseif isGroup and hasGroupClosed == nil then
-		hasGroupClosed = false
+		state = ParserState.new(
+			expr, flags, false, false, 1, patternChars, patternLength,
+			nil, true
+		)
 	end
-
-	local state = ParserState.new(
-		expr, inheritedFlags or flags, isGroup, isAlternate, index, patternChars, patternLength,
-		metaData, hasGroupClosed
-	)
-	state.isBranchReset = isBranchReset
 
 	local tree, errorMessage = parserCore(state)
 	if not tree then
 		return false, errorMessage or tree
 	end
 	
-	if not isGroup and not isAlternate then
+	if not state.isGroup and not state.isAlternate then
 		tree._metaData = state.metaData
 	end
 
-	return tree, state.index, state.hasGroupClosed
+	return tree
 end
 
 return parser

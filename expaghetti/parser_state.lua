@@ -37,8 +37,11 @@ function ParserState.new(expr, flags, isGroup, isAlternate, index, patternChars,
 			groupTreesByName = {},
 		}
 	end
-	
-	self.hasGroupClosed = hasGroupClosed
+	if isGroup and hasGroupClosed == nil then
+		self.hasGroupClosed = false
+	else
+		self.hasGroupClosed = hasGroupClosed
+	end
 	self.initialGroupIndex = self.metaData.groupIndex
 	return self
 end
@@ -52,25 +55,41 @@ function ParserState:readElement(index, isInsideSet)
 	end
 end
 
+function ParserState:fork(isGroup, isAlternate, hasGroupClosed, isBranchReset)
+	local child = setmetatable({}, ParserState)
+	child.expr = self.expr
+	child.flags = self.flags
+	child.isGroup = isGroup
+	child.isAlternate = isAlternate
+	child.index = self.index
+	child.patternChars = self.patternChars
+	child.patternLength = self.patternLength
+	child.metaData = self.metaData
+	if isGroup and hasGroupClosed == nil then
+		child.hasGroupClosed = false
+	else
+		child.hasGroupClosed = hasGroupClosed
+	end
+	child.initialGroupIndex = self.initialGroupIndex
+	child.isBranchReset = isBranchReset
+	return child
+end
+
 function ParserState:parseSubTree(isGroup, isAlternate, hasGroupClosed, isBranchReset)
 	-- To avoid circular dependency, we require parser dynamically, or inject it
 	local parser = require("./parser")
-	local tree, nextIndex, newHasGroupClosed = parser(
-		nil, nil,
-		isGroup, isAlternate,
-		self.index, self.patternChars, self.patternLength,
-		self.metaData,
-		hasGroupClosed,
-		self.flags,
-		isBranchReset
-	)
+	local childState = self:fork(isGroup, isAlternate, hasGroupClosed, isBranchReset)
+	local tree, errorMessage = parser(childState)
+
 	if not tree then
-		return false, nextIndex
+		return false, errorMessage
 	end
-	self.index = nextIndex
+
+	self.index = childState.index
 	if hasGroupClosed ~= nil then
-		self.hasGroupClosed = newHasGroupClosed
+		self.hasGroupClosed = childState.hasGroupClosed
 	end
+
 	return tree
 end
 

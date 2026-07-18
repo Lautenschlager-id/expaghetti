@@ -107,19 +107,20 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 
 	if not index then
 		-- quantifier = error message
-		return false, quantifier
+		return quantifier
 	elseif not quantifier then
 		-- not a quantifier
-		return index
+		return nil
 	elseif shouldntHaveQuantifier then
 		-- has a quantifier but shouldn't
-		return false, errorsEnum.nothingToRepeat
+		return errorsEnum.nothingToRepeat
 	end
 
 	index, quantifier = lookForModeToken(state, index, quantifier)
 	parentElement.quantifier = quantifier
 
-	return index
+	state.index = index
+	return nil
 end
 
 return Quantifier

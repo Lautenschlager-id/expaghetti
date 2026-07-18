@@ -21,6 +21,10 @@ Alternate.transformIntoParsedTrees = function(tree)
 end
 
 Alternate.parse = function(state, tree)
+	if state.isAlternate then
+		return tree, true, nil
+	end
+
 	local totalAlternates = 1
 	local firstBranch = { _index = tree._index }
 	for i = 1, tree._index do
@@ -50,7 +54,7 @@ Alternate.parse = function(state, tree)
 
 		if not alternativeTree then
 			-- index = error message
-			return false, altErrorMessage
+			return nil, false, altErrorMessage
 		end
 
 		totalAlternates = totalAlternates + 1
@@ -66,7 +70,9 @@ Alternate.parse = function(state, tree)
 	end
 	tree._index = totalAlternates
 
-	return state.index, nil, state.hasGroupClosed
+	tree = Alternate.transformIntoParsedTrees(tree)
+
+	return tree, true, nil
 end
 
 Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
