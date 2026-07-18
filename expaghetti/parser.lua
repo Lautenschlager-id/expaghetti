@@ -3,8 +3,6 @@ package.path = package.path
 	.. ";./helpers/?.lua"
 	.. ";./magic/?.lua"
 ----------------------------------------------------------------------------------------------------
-local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
-----------------------------------------------------------------------------------------------------
 local Anchor = require("./magic/anchor")
 local Alternate = require("./magic/alternate")
 local Any = require("./magic/any")
@@ -18,8 +16,8 @@ local errorsEnum = require("./enums/errors")
 local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
 ----------------------------------------------------------------------------------------------------
 local ParserState = require("./parser_state")
-
-local function parserCore(state)
+----------------------------------------------------------------------------------------------------
+local parserCore = function(state)
 	local tree = {
 		_index = 0
 	}
@@ -29,7 +27,9 @@ local function parserCore(state)
 	while state.index <= state.patternLength do
 		local currentIndex = state.index
 		local nextIndex, element = state:readElement(currentIndex)
-		if not nextIndex then return false, element end
+		if not nextIndex then
+			return false, element
+		end
 
 		if state:isElement(element) then
 			state.index = nextIndex
@@ -77,26 +77,18 @@ local function parserCore(state)
 
 	return tree
 end
-
-function parser(exprOrState, flags)
+----------------------------------------------------------------------------------------------------
+local parser = function(exprOrState, flags)
 	local state
-	if type(exprOrState) == "table" and exprOrState.index then
+	if exprOrState.__index then
 		state = exprOrState
 	else
-		local expr = exprOrState
-		flags = flags or { }
-
-		local patternChars, patternLength = splitStringByEachChar(expr, not not flags[ENUM_FLAG_UNICODE])
-
-		state = ParserState.new(
-			expr, flags, false, false, 1, patternChars, patternLength,
-			nil, true
-		)
+		state = ParserState.new(exprOrState, flags)
 	end
 
 	local tree, errorMessage = parserCore(state)
 	if not tree then
-		return false, errorMessage or tree
+		return false, errorMessage
 	end
 	
 	if not state.isGroup and not state.isAlternate then

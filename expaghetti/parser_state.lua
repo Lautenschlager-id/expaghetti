@@ -1,4 +1,5 @@
 ----------------------------------------------------------------------------------------------------
+local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 local Escaped = require("./magic/escaped")
 local flagsEnum = require("./enums/flags").flags
 local ENUM_FLAG_UNICODE = flagsEnum.UNICODE
@@ -9,37 +10,41 @@ local ParserState = {
 }
 ParserState.__index = ParserState
 
-function ParserState.new(expr, flags, isGroup, isAlternate, index, patternChars, patternLength, metaData)
+function ParserState.new(expr, flags)
 	local self = setmetatable({}, ParserState)
+
 	self.expr = expr
+
 	self.flags = {}
-	if type(flags) == "string" then
-		for char in flags:gmatch(".") do
-			self.flags[char] = true
-		end
-	elseif type(flags) == "table" then
-		for k, v in pairs(flags) do
-			self.flags[k] = v
+	if flags then
+		if type(flags) == "string" then 
+			for char in flags:gmatch(".") do
+				self.flags[char] = true
+			end
+		elseif type(flags) == "table" then
+			for k, v in pairs(flags) do
+				self.flags[k] = v
+			end
 		end
 	end
-	self.isGroup = isGroup
-	self.isAlternate = isAlternate
-	self.index = index or 1
-	self.patternChars = patternChars
-	self.patternLength = patternLength
-	
-	if metaData then
-		self.metaData = metaData
-	else
-		self.metaData = {
-			groupNames = {},
-			groupIndex = 0,
-			positionCaptureIndex = 0,
-			groupTreesByIndex = {},
-			groupTreesByName = {},
-		}
-	end
-	self.initialGroupIndex = self.metaData.groupIndex
+
+	self.isGroup = false
+	self.isAlternate = false
+	self.isBranchReset = false
+
+	self.initialGroupIndex = 0
+
+	self.metaData = {
+		groupNames = {},
+		groupIndex = 0,
+		positionCaptureIndex = 0,
+		groupTreesByIndex = {},
+		groupTreesByName = {},
+	}
+
+	self.index = 1
+	self.patternChars, self.patternLength = splitStringByEachChar(expr, not not self.flags[ENUM_FLAG_UNICODE])
+
 	return self
 end
 
@@ -54,16 +59,23 @@ end
 
 function ParserState:fork()
 	local child = setmetatable({}, ParserState)
+
 	child.expr = self.expr
+
 	child.flags = self.flags
-	child.index = self.index
-	child.metaData = self.metaData
-	child.patternChars = self.patternChars
-	child.patternLength = self.patternLength
-	child.initialGroupIndex = self.initialGroupIndex
+
 	child.isGroup = self.isGroup
 	child.isAlternate = self.isAlternate
 	child.isBranchReset = self.isBranchReset
+
+	child.initialGroupIndex = self.initialGroupIndex
+
+	child.metaData = self.metaData
+
+	child.index = self.index
+	child.patternChars = self.patternChars
+	child.patternLength = self.patternLength
+
 	return child
 end
 
