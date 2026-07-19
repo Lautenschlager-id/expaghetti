@@ -1,40 +1,62 @@
 local config = require("./config")
 local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
+local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 
 local MatchState = {}
 MatchState.__index = MatchState
 
-function MatchState.new(flags, targetString, targetStringChars, targetStringLength, stringIndex, initialStringIndex, rootTree, parsedMetaData)
+function MatchState.new(flags, targetString, rootTree)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags or {}
-	self.targetStringLength = targetStringLength
-	self.stringIndex = stringIndex or 0
-	self.initialStringIndex = initialStringIndex or self.stringIndex
 
 	if self.flags[ENUM_FLAG_UNICODE] then
-		self.getTargetCharacter = function(self, index) return targetStringChars[index] end
+		local targetStringChars, targetStringLength = splitStringByEachChar(targetString, true)
+		self.getTargetCharacter = function(self, index)
+			return targetStringChars[index]
+		end
+		self.targetStringLength = targetStringLength
 	else
-		self.getTargetCharacter = function(self, index) return string.byte(targetString, index) end
+		self.getTargetCharacter = function(self, index)
+			return string.byte(targetString, index)
+		end
+		self.targetStringLength = #targetString
 	end
+
+	self.rootTree = rootTree
+	self.parsedMetaData = rootTree and rootTree._metaData or nil
 	
 	local limits = config.get()
-
 	self.metaData = {
 		captureStarts = {},
 		captureEnds = {},
+		captureCounts = {},
 		positionCaptures = {},
 		outerTreeReference = {},
-		rootTree = rootTree,
-		parsedMetaData = parsedMetaData,
-		groupNames = parsedMetaData and parsedMetaData.groupNames,
+		rootTree = self.rootTree,
+		parsedMetaData = self.parsedMetaData,
+		groupNames = self.parsedMetaData and self.parsedMetaData.groupNames,
 		recursionDepth = 0,
 		backtrackSteps = 0,
 		maxRecursionDepth = limits.maxRecursionDepth,
 		maxBacktrackDepth = limits.maxBacktrackDepth,
 	}
-	
+
 	return self
+end
+
+function MatchState:reset(stringIndex)
+	self.stringIndex = stringIndex or 0
+	self.initialStringIndex = self.stringIndex
+
+	local metaData = self.metaData
+	metaData.captureStarts = {}
+	metaData.captureEnds = {}
+	metaData.captureCounts = {}
+	metaData.positionCaptures = {}
+	metaData.outerTreeReference = {}
+	metaData.recursionDepth = 0
+	metaData.backtrackSteps = 0
 end
 
 function MatchState:branch(stringIndex, initialStringIndex)
@@ -45,6 +67,8 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	child.stringIndex = stringIndex or self.stringIndex
 	child.initialStringIndex = initialStringIndex or self.initialStringIndex
 	child.metaData = self.metaData
+	child.rootTree = self.rootTree
+	child.parsedMetaData = self.parsedMetaData
 	return child
 end
 
@@ -71,28 +95,41 @@ function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	
 	local inits = self.metaData.captureStarts
 	local ends = self.metaData.captureEnds
+	local counts = self.metaData.captureCounts
 	
-	if not inits[groupIndex] then
-		inits[groupIndex] = {}
-		ends[groupIndex] = {}
+	local groupInits = inits[groupIndex]
+	local groupEnds = ends[groupIndex]
+
+	if not groupInits then
+		groupInits = {}
+		groupEnds = {}
+		counts[groupIndex] = 0
+		inits[groupIndex] = groupInits
+		ends[groupIndex] = groupEnds
 	end
 	
+	local nextIndex = counts[groupIndex] + 1
+	counts[groupIndex] = nextIndex
+
 	if startIndex <= endIndex then
-		table.insert(inits[groupIndex], startIndex)
-		table.insert(ends[groupIndex], endIndex)
+		groupInits[nextIndex] = startIndex
+		groupEnds[nextIndex] = endIndex
 	else
-		table.insert(inits[groupIndex], 2)
-		table.insert(ends[groupIndex], 1)
+		groupInits[nextIndex] = 2
+		groupEnds[nextIndex] = 1
 	end
 end
 
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
 	
-	local inits = self.metaData.captureStarts[groupIndex]
-	if inits and #inits > 0 then
-		table.remove(inits)
-		table.remove(self.metaData.captureEnds[groupIndex])
+	local counts = self.metaData.captureCounts
+	local length = counts[groupIndex] or 0
+	
+	if length > 0 then
+		self.metaData.captureStarts[groupIndex][length] = nil
+		self.metaData.captureEnds[groupIndex][length] = nil
+		counts[groupIndex] = length - 1
 	end
 end
 

@@ -356,26 +356,21 @@ local matcher = function(expr, str, flags, stringIndex)
 	end
 
 	local tree, errorMessage = parser(expr, flags)
-	-- print('>>>>>>', expr, errorMessage, require("./helpers/pretty-print")(tree, true))
 	if not tree then
 		return false, errorMessage
 	end
 	local treeLength = tree._index
 
-	local targetStringChars, targetStringLength = nil, #str
-	if flags[ENUM_FLAG_UNICODE] then
-		targetStringChars, targetStringLength = splitStringByEachChar(str, true)
-	end
-
 	stringIndex = stringIndex or 0
 
+	local state = MatchState.new(flags, str, tree)
+
 	local hasMatched, iniStr, endStr, matcherMetaData
-	while stringIndex <= targetStringLength do
+	while stringIndex <= state.targetStringLength do
 		debugCurrentStackFrame = 0
 		
-		local state = MatchState.new(
-			flags, str, targetStringChars, targetStringLength, stringIndex, stringIndex, tree, tree._metaData
-		)
+		state:reset(stringIndex)
+		
 		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
 			state, tree, 0
 		)

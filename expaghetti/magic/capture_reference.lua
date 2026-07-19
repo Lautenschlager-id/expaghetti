@@ -48,13 +48,14 @@ CaptureReference.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local initStringPositionList = state.metaData.captureStarts[currentElement.index]
 	local endStringPositionList = state.metaData.captureEnds[currentElement.index]
+	local length = state.metaData.captureCounts[currentElement.index] or 0
 
-	if not initStringPositionList or #initStringPositionList == 0 then
+	if length == 0 then
 		return false
 	end
 
-	local initStringPosition = initStringPositionList[#initStringPositionList]
-	local endStringPosition = endStringPositionList[#endStringPositionList]
+	local initStringPosition = initStringPositionList[length]
+	local endStringPosition = endStringPositionList[length]
 
 	if stringIndex + (endStringPosition - initStringPosition + 1) > state.targetStringLength then
 		return false
