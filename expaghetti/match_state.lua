@@ -111,13 +111,8 @@ function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	local nextIndex = counts[groupIndex] + 1
 	counts[groupIndex] = nextIndex
 
-	if startIndex <= endIndex then
-		groupInits[nextIndex] = startIndex
-		groupEnds[nextIndex] = endIndex
-	else
-		groupInits[nextIndex] = 2
-		groupEnds[nextIndex] = 1
-	end
+	groupInits[nextIndex] = startIndex
+	groupEnds[nextIndex] = endIndex
 end
 
 function MatchState:popCapture(groupIndex)
