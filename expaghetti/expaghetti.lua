@@ -1,5 +1,5 @@
 local config = require("config")
-local matcher = require("matcher")
+local matcher = require("matcher.init")
 
 local function create(options)
 	if options then

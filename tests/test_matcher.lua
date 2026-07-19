@@ -1,5 +1,5 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
-local matcher = require("matcher")
+local matcher = require("matcher.init")
 
 local performance = require("performance")
 
