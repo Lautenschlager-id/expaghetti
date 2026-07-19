@@ -15,6 +15,11 @@ function QuantifierMatcher.canBacktrackNestedQuantifier(quantifier, element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 
+function QuantifierMatcher.continueMatching(state, targetStringIndex)
+	local tempState = state:branch(targetStringIndex, state.initialStringIndex)
+	return state.matcher(tempState)
+end
+
 function QuantifierMatcher.collectOccurrences(
 	state,
 	currentElement,
@@ -23,11 +28,10 @@ function QuantifierMatcher.collectOccurrences(
 	maximumOccurrences,
 	startStringPositions,
 	endStringPositions,
-	totalOccurrences,
-	lastIniStr,
-	lastEndStr
+	totalOccurrences
 )
 	local hasMatched, iniStr, endStr
+	local lastIniStr, lastEndStr
 
 	while maximumOccurrences == 0 or totalOccurrences < maximumOccurrences do
 		startStringPositions[totalOccurrences + 1] = stringIndex
@@ -40,13 +44,13 @@ function QuantifierMatcher.collectOccurrences(
 		)
 
 		if not hasMatched then
-			return false, totalOccurrences, stringIndex, currentCharacter, lastIniStr, lastEndStr
+			return totalOccurrences, stringIndex, currentCharacter
 		end
 
 		endStr = endStr or stringIndex
 
-		if state.metaData.quantifierMaxEnd and endStr > state.metaData.quantifierMaxEnd then
-			return false, totalOccurrences, stringIndex, currentCharacter, lastIniStr, lastEndStr
+		if tempState.quantifierMaxEnd and endStr > tempState.quantifierMaxEnd then
+			return totalOccurrences, stringIndex, currentCharacter
 		end
 
 		totalOccurrences = totalOccurrences + 1
@@ -56,15 +60,15 @@ function QuantifierMatcher.collectOccurrences(
 			or (iniStr and iniStr > endStr)
 			or (lastIniStr == iniStr and lastEndStr == endStr)
 		then
-			return true, totalOccurrences, stringIndex, currentCharacter, lastIniStr, lastEndStr
+			return totalOccurrences, stringIndex, currentCharacter
 		end
+		
 		lastIniStr, lastEndStr = iniStr, endStr
-
 		stringIndex = endStr + 1
 		currentCharacter = state:getTargetCharacter(stringIndex)
 	end
 
-	return true, totalOccurrences, stringIndex, currentCharacter, lastIniStr, lastEndStr
+	return totalOccurrences, stringIndex, currentCharacter
 end
 
 function QuantifierMatcher.shortenOccurrenceAt(
@@ -86,16 +90,15 @@ function QuantifierMatcher.shortenOccurrenceAt(
 	end
 
 	state:popCapture(currentElement.index or currentElement.name)
-	state.metaData.quantifierMaxEnd = occurrenceEnd - 1
-
+	
 	local tempState = state:branch(occurrenceStart, occurrenceStart)
+	tempState.quantifierMaxEnd = occurrenceEnd - 1
 	tempState.tree = nil
 	tempState.treeIndex = nil
+	
 	local hasMatched, iniStr, endStr = singleElementMatcher(
 		currentElement, state:getTargetCharacter(occurrenceStart), tempState
 	)
-
-	state.metaData.quantifierMaxEnd = nil
 
 	if not hasMatched or (endStr and endStr >= occurrenceEnd) then
 		return false
@@ -104,7 +107,7 @@ function QuantifierMatcher.shortenOccurrenceAt(
 	endStr = endStr or occurrenceStart
 	endStringPositions[occurrenceIndex] = endStr
 
-	return true, endStr
+	return true
 end
 
 function QuantifierMatcher.match(currentElement, currentCharacter, state)
@@ -118,13 +121,28 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 	local endStringPositions = {}
 	local startStringPositions = {}
 
-	local hasMatched, iniStr, endStr, lastIniStr, lastEndStr
 	local stringIndex = state.stringIndex
-	local coreTreeMatcher = state.matcher
 
-	local function extend()
-		local _
-		_, totalOccurrences, stringIndex, currentCharacter, lastIniStr, lastEndStr = QuantifierMatcher.collectOccurrences(
+	totalOccurrences, stringIndex, currentCharacter = QuantifierMatcher.collectOccurrences(
+		state,
+		currentElement,
+		currentCharacter,
+		stringIndex,
+		maximumOccurrences,
+		startStringPositions,
+		endStringPositions,
+		totalOccurrences
+	)
+
+	while totalOccurrences < minimumOccurrences and canBacktrackInner and totalOccurrences > 0 do
+		if not QuantifierMatcher.shortenOccurrenceAt(state, currentElement, totalOccurrences, startStringPositions, endStringPositions) then
+			break
+		end
+		
+		stringIndex = endStringPositions[totalOccurrences] + 1
+		currentCharacter = state:getTargetCharacter(stringIndex)
+		
+		totalOccurrences, stringIndex, currentCharacter = QuantifierMatcher.collectOccurrences(
 			state,
 			currentElement,
 			currentCharacter,
@@ -132,50 +150,8 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 			maximumOccurrences,
 			startStringPositions,
 			endStringPositions,
-			totalOccurrences,
-			lastIniStr,
-			lastEndStr
+			totalOccurrences
 		)
-	end
-
-	extend()
-
-	while totalOccurrences < minimumOccurrences and canBacktrackInner and totalOccurrences > 0 do
-		local lastOccurrence = totalOccurrences
-		local occurrenceStart = startStringPositions[lastOccurrence]
-		local occurrenceEnd = endStringPositions[lastOccurrence]
-
-		if not occurrenceStart or occurrenceEnd <= occurrenceStart then
-			break
-		end
-
-		if state:incrementBacktrack() then
-			return
-		end
-
-		state:popCapture(currentElement.index or currentElement.name)
-		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
-
-		local tempState = state:branch(occurrenceStart, occurrenceStart)
-		tempState.tree = nil
-		tempState.treeIndex = nil
-		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state:getTargetCharacter(occurrenceStart), tempState
-		)
-
-		state.metaData.quantifierMaxEnd = nil
-
-		if not hasMatched then
-			break
-		end
-
-		endStr = endStr or occurrenceStart
-		endStringPositions[lastOccurrence] = endStr
-		stringIndex = endStr + 1
-		currentCharacter = state:getTargetCharacter(stringIndex)
-		lastIniStr, lastEndStr = nil, nil
-
-		extend()
 	end
 
 	local maximumOccurrencesOfElement = totalOccurrences
@@ -206,20 +182,13 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 			end
 		end
 
-		-- Try continuation from end of this many occurrences
-		local targetStringIndex = endStringPositions[occurrence]
-			or (state.stringIndex - 1)
-
-		local tempState = state:branch(targetStringIndex, state.initialStringIndex)
-		hasMatched, iniStr, endStr = coreTreeMatcher(
-			tempState
-		)
-
+		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
+		local hasMatched, iniStr, endStr, meta = QuantifierMatcher.continueMatching(state, targetStringIndex)
+		
 		if hasMatched then
-			return hasMatched, iniStr, endStr, state.metaData
+			return hasMatched, iniStr, endStr, meta
 		end
 
-		-- Inner backtracking: shorten the current last occurrence
 		if canBacktrackInner and occurrence > 0 then
 			totalOccurrences = occurrence
 			local didShorten
@@ -233,16 +202,11 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 				)
 
 				if didShorten then
-					targetStringIndex = endStringPositions[totalOccurrences]
-						or (state.stringIndex - 1)
-
-					tempState = state:branch(targetStringIndex, state.initialStringIndex)
-					hasMatched, iniStr, endStr = coreTreeMatcher(
-						tempState
-					)
+					targetStringIndex = endStringPositions[totalOccurrences] or (state.stringIndex - 1)
+					hasMatched, iniStr, endStr, meta = QuantifierMatcher.continueMatching(state, targetStringIndex)
 
 					if hasMatched then
-						return hasMatched, iniStr, endStr, state.metaData
+						return hasMatched, iniStr, endStr, meta
 					end
 				end
 			until not didShorten

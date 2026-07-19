@@ -73,6 +73,7 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	child.parsedMetaData = self.parsedMetaData
 	child.tree = self.tree
 	child.treeIndex = self.treeIndex
+	child.quantifierMaxEnd = self.quantifierMaxEnd
 	return child
 end
 
