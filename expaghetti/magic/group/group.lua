@@ -261,9 +261,12 @@ Group.parseClosing = function(state)
 	return false, errorsEnum.noGroupToClose
 end
 
-Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
+Group.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local groupTree = currentElement.tree
+	local tree = state.tree
+	local treeIndex = state.treeIndex
+	local matcher = state.matcher
 
 	if currentElement.isRecursion then
 		if currentElement.isRecursionRoot then
@@ -322,8 +325,10 @@ Group.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 	end
 
 	local tempState = state:branch(execStringIndex, execStringIndex)
-	local hasMatched, iniStr, endStr = treeMatcher(
-		tempState, groupTree, 0
+	tempState.tree = groupTree
+	tempState.treeIndex = 0
+	local hasMatched, iniStr, endStr = matcher(
+		tempState
 	)
 
 	state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef

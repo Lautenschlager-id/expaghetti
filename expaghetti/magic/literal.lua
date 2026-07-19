@@ -29,7 +29,7 @@ Literal.parse = function(state, currentCharacter, tree)
 	return nil
 end
 
-Literal.match = function(currentElement, currentCharacter)
+Literal.match = function(currentElement, _, currentCharacter)
 	if currentElement.isCaseInsensitive then
 		return currentCharacter == currentElement.lowerValue
 			or currentCharacter == currentElement.upperValue

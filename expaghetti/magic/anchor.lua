@@ -29,15 +29,17 @@ Anchor.parse = function(state, currentCharacter, tree)
 	return nil
 end
 
-Anchor.match = function(currentElement, state)
+Anchor.match = function(currentElement, state, currentCharacter)
 	local stringIndex = state.stringIndex - 1
 	local isBeginning = currentElement.isBeginning
 
 	if (isBeginning and stringIndex == 0) or (not isBeginning and stringIndex >= state.targetStringLength) then
 		return true, nil, stringIndex
 	elseif currentElement.isMultiline then
-		local charIndex = stringIndex + (isBeginning and 0 or 1)
-		if ENUM_LINE_BREAKS[state:getTargetCharacter(charIndex)] then
+		if isBeginning then
+			currentCharacter = state:getTargetCharacter(stringIndex)
+		end
+		if ENUM_LINE_BREAKS[currentCharacter] then
 			return true, nil, stringIndex
 		end
 	end

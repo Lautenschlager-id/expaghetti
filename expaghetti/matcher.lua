@@ -24,6 +24,18 @@ local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
 local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
 ----------------------------------------------------------------------------------------------------
+local enumElements = require("./enums/elements")
+local ENUM_ELEMENT_TYPE_ALTERNATE = enumElements.alternate
+local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.anchor
+local ENUM_ELEMENT_TYPE_ANY = enumElements.any
+local ENUM_ELEMENT_TYPE_BALANCED = enumElements.balanced
+local ENUM_ELEMENT_TYPE_BOUNDARY = enumElements.boundary
+local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = enumElements.capture_reference
+local ENUM_ELEMENT_TYPE_GROUP = enumElements.group
+local ENUM_ELEMENT_TYPE_LITERAL = enumElements.literal
+local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = enumElements.position_capture
+local ENUM_ELEMENT_TYPE_SET = enumElements.set
+----------------------------------------------------------------------------------------------------
 local function canBacktrackNestedQuantifier(quantifier, element)
 	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
 	return mode ~= ENUM_QUANTIFIER_MODE_POSSESSIVE
@@ -31,44 +43,66 @@ local function canBacktrackNestedQuantifier(quantifier, element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 ----------------------------------------------------------------------------------------------------
+local elementMatchers = {
+	[ENUM_ELEMENT_TYPE_ALTERNATE] = {
+		matcher = Alternate.match,
+		requiresCharacter = false,
+	},
+	[ENUM_ELEMENT_TYPE_ANCHOR] = {
+		matcher = Anchor.match,
+		requiresCharacter = false,
+	},
+	[ENUM_ELEMENT_TYPE_ANY] = {
+		matcher = Any.match,
+		requiresCharacter = true,
+	},
+	[ENUM_ELEMENT_TYPE_BALANCED] = {
+		matcher = Balanced.match,
+		requiresCharacter = true,
+	},
+	[ENUM_ELEMENT_TYPE_BOUNDARY] = {
+		matcher = Boundary.match,
+		requiresCharacter = true,
+	},
+	[ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE] = {
+		matcher = CaptureReference.match,
+		requiresCharacter = false,
+	},
+	[ENUM_ELEMENT_TYPE_GROUP] = {
+		matcher = Group.match,
+		requiresCharacter = false,
+	},
+	[ENUM_ELEMENT_TYPE_LITERAL] = {
+		matcher = Literal.match,
+		requiresCharacter = true,
+	},
+	[ENUM_ELEMENT_TYPE_POSITION_CAPTURE] = {
+		matcher = PositionCapture.match,
+		requiresCharacter = false,
+	},
+	[ENUM_ELEMENT_TYPE_SET] = {
+		matcher = Set.match,
+		requiresCharacter = true,
+	},
+}
 
-local singleElementMatcher = function(
-		currentElement, currentCharacter, treeMatcher, state, tree, treeIndex
-	)
-
-	if PositionCapture.isElement(currentElement) then
-		return PositionCapture.match(currentElement, state)
-	elseif Anchor.isElement(currentElement) then
-		return Anchor.match(currentElement, state)
-	elseif Boundary.isElement(currentElement) then
-		return Boundary.match(currentElement, state)
-	elseif Balanced.isElement(currentElement) then
-		return Balanced.match(currentElement, state)
-	elseif Group.isElement(currentElement) then
-		return Group.match(currentElement, treeMatcher, state, tree, treeIndex)
-	elseif Alternate.isElement(currentElement) then
-		return Alternate.match(currentElement, treeMatcher, state, tree, treeIndex)
-	elseif CaptureReference.isElement(currentElement) then
-		return CaptureReference.match(currentElement, state)
-	elseif not currentCharacter then
-		return
-	elseif Any.isElement(currentElement) then
-		return Any.match(currentElement, currentCharacter)
-	elseif Set.isElement(currentElement) then
-		return Set.match(currentElement, currentCharacter)
-	elseif Literal.isElement(currentElement) then
-		return Literal.match(currentElement, currentCharacter)
+local singleElementMatcher = function(currentElement, currentCharacter, state)
+	local elementClass = elementMatchers[currentElement.type]
+	if not elementClass then
+		return false
 	end
 
-	return false
+	if elementClass.requiresCharacter and not currentCharacter then
+		return false
+	end
+
+	return elementClass.matcher(currentElement, state, currentCharacter)
 end
 
-local debugCurrentStackFrame
 local coreTreeMatcher -- Forward declaration
 
 local function quantifyElement(
-	currentElement, currentCharacter, singleElementMatcher,
-	state, tree, treeIndex
+	currentElement, currentCharacter, state
 )
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
@@ -92,9 +126,10 @@ local function quantifyElement(
 			startStringPositions[totalOccurrences + 1] = stringIndex
 
 			local tempState = state:branch(stringIndex, state.initialStringIndex)
+			tempState.tree = nil
+			tempState.treeIndex = nil
 			hasMatched, iniStr, endStr = singleElementMatcher(
-				currentElement, currentCharacter, coreTreeMatcher,
-				tempState, nil, nil
+				currentElement, currentCharacter, tempState
 			)
 
 			if not hasMatched then
@@ -144,9 +179,10 @@ local function quantifyElement(
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
+		tempState.tree = nil
+		tempState.treeIndex = nil
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state:getTargetCharacter(occurrenceStart), coreTreeMatcher,
-			tempState, nil, nil
+			currentElement, state:getTargetCharacter(occurrenceStart), tempState
 		)
 
 		state.metaData.quantifierMaxEnd = nil
@@ -201,9 +237,10 @@ local function quantifyElement(
 		state.metaData.quantifierMaxEnd = occurrenceEnd - 1
 
 		local tempState = state:branch(occurrenceStart, occurrenceStart)
+		tempState.tree = nil
+		tempState.treeIndex = nil
 		hasMatched, iniStr, endStr = singleElementMatcher(
-			currentElement, state:getTargetCharacter(occurrenceStart), coreTreeMatcher,
-			tempState, nil, nil
+			currentElement, state:getTargetCharacter(occurrenceStart), tempState
 		)
 
 		state.metaData.quantifierMaxEnd = nil
@@ -233,7 +270,7 @@ local function quantifyElement(
 
 		local tempState = state:branch(targetStringIndex, state.initialStringIndex)
 		hasMatched, iniStr, endStr = coreTreeMatcher(
-			tempState, tree, treeIndex
+			tempState
 		)
 
 		if hasMatched then
@@ -249,7 +286,7 @@ local function quantifyElement(
 
 				tempState = state:branch(targetStringIndex, state.initialStringIndex)
 				hasMatched, iniStr, endStr = coreTreeMatcher(
-					tempState, tree, treeIndex
+					tempState
 				)
 
 				if hasMatched then
@@ -260,12 +297,9 @@ local function quantifyElement(
 	end
 end
 
-coreTreeMatcher = function(
-		state, tree, treeIndex
-	)
-
-	debugCurrentStackFrame = debugCurrentStackFrame + 1
-	local debugCurrentStackFrameStr = "[Stack "..debugCurrentStackFrame.."]: "
+coreTreeMatcher = function(state)
+	local tree = state.tree
+	local treeIndex = state.treeIndex
 
 	local outerTreeReference = state.metaData.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
@@ -276,6 +310,7 @@ coreTreeMatcher = function(
 
 	while treeIndex < tree._index do
 		treeIndex = treeIndex + 1
+		state.treeIndex = treeIndex
 		currentElement = tree[treeIndex]
 
 		state.stringIndex = state.stringIndex + 1
@@ -285,8 +320,7 @@ coreTreeMatcher = function(
 
 		if not hasQuantifier then
 			hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
-				currentElement, currentCharacter, coreTreeMatcher,
-				state, tree, treeIndex
+				currentElement, currentCharacter, state
 			)
 
 			-- Groups continue the execution of the previous tree in another stack
@@ -299,8 +333,7 @@ coreTreeMatcher = function(
 			end
 		else
 			return quantifyElement(
-				currentElement, currentCharacter, singleElementMatcher,
-				state, tree, treeIndex
+				currentElement, currentCharacter, state
 			)
 		end
 	end
@@ -314,11 +347,11 @@ coreTreeMatcher = function(
 		end
 
 		state.initialStringIndex = outerTreeReference.initialStringIndex
+		
+		state.tree = outerTreeReference.tree
+		state.treeIndex = outerTreeReference.treeIndex
 
-		local hasMatched, oIni, oEnd, oMeta = coreTreeMatcher(
-			state,
-			outerTreeReference.tree, outerTreeReference.treeIndex
-		)
+		local hasMatched, oIni, oEnd, oMeta = coreTreeMatcher(state)
 
 		if not hasMatched and pushedCapture then
 			state:popCapture(groupIndex)
@@ -367,13 +400,11 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	local hasMatched, iniStr, endStr, matcherMetaData
 	while stringIndex <= state.targetStringLength do
-		debugCurrentStackFrame = 0
-		
 		state:reset(stringIndex)
+		state.tree = tree
+		state.treeIndex = 0
 		
-		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(
-			state, tree, 0
-		)
+		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(state)
 
 		if hasMatched then
 			return hasMatched, iniStr, endStr, matcherMetaData
@@ -382,5 +413,7 @@ local matcher = function(expr, str, flags, stringIndex)
 		stringIndex = stringIndex + 1
 	end
 end
+
+MatchState.matcher = coreTreeMatcher
 
 return matcher

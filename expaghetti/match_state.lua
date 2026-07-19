@@ -2,7 +2,9 @@ local config = require("./config")
 local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 
-local MatchState = {}
+local MatchState = {
+	matcher = nil
+}
 MatchState.__index = MatchState
 
 function MatchState.new(flags, targetString, rootTree)
@@ -69,6 +71,8 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	child.metaData = self.metaData
 	child.rootTree = self.rootTree
 	child.parsedMetaData = self.parsedMetaData
+	child.tree = self.tree
+	child.treeIndex = self.treeIndex
 	return child
 end
 

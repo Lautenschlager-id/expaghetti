@@ -142,7 +142,7 @@ Set.parse = function(state, tree)
 	return nil
 end
 
-Set.match = function(currentElement, currentCharacter)
+Set.match = function(currentElement, _, currentCharacter)
 	local hasMatched = not not currentElement.values[currentCharacter]
 
 	if not hasMatched then
@@ -160,7 +160,7 @@ Set.match = function(currentElement, currentCharacter)
 		if not hasMatched then
 			local classes = currentElement.classes
 			for classIndex = 1, currentElement.classIndex do
-				if Set.match(classes[classIndex], currentCharacter) then
+				if Set.match(classes[classIndex], _, currentCharacter) then
 					hasMatched = true
 					break
 				end

@@ -72,8 +72,11 @@ Alternate.parse = function(state, tree)
 	return tree, true, nil
 end
 
-Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
+Alternate.match = function(currentElement, state)
 	local trees = currentElement.trees
+	local tree = state.tree
+	local treeIndex = state.treeIndex
+	local matcher = state.matcher
 
 	local hasMatched, iniStr, endStr
 	for branchIndex = 1, trees._index do
@@ -95,8 +98,10 @@ Alternate.match = function(currentElement, treeMatcher, state, tree, treeIndex)
 		end
 
 		local tempState = state:branch(state.stringIndex - 1, state.initialStringIndex)
-		hasMatched, iniStr, endStr = treeMatcher(
-			tempState, branchTree, 0
+		tempState.tree = branchTree
+		tempState.treeIndex = 0
+		hasMatched, iniStr, endStr = matcher(
+			tempState
 		)
 
 		if hasMatched then

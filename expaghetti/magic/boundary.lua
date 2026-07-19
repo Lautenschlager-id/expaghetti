@@ -32,13 +32,12 @@ Boundary.parse = function(state, index, isNegated)
 	return nextStateIndex, AST.Boundary(isNegated, tempTree[1])
 end
 
-Boundary.match = function(currentElement, state)
+Boundary.match = function(currentElement, state, currentCharacter)
 	local stringIndex = state.stringIndex - 1
-	local prevChar = stringIndex > 0 and state:getTargetCharacter(stringIndex) or nil
-	local currChar = state:getTargetCharacter(stringIndex + 1)
+	local previousChararacter = stringIndex > 0 and state:getTargetCharacter(stringIndex) or nil
 
-	local isPrevInSet = prevChar and Set.match(currentElement.set, prevChar) or false
-	local isCurrInSet = currChar and Set.match(currentElement.set, currChar) or false
+	local isPrevInSet = previousChararacter and Set.match(currentElement.set, state, previousChararacter) or false
+	local isCurrInSet = currentCharacter and Set.match(currentElement.set, state, currentCharacter) or false
 
 	local hasBoundary = isPrevInSet ~= isCurrInSet
 	if hasBoundary ~= currentElement.isNegated then

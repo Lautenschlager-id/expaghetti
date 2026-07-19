@@ -29,17 +29,14 @@ Balanced.parse = function(state, currentCharacter, index, expression)
 	)
 end
 
-Balanced.match = function(currentElement, state)
-	local stringIndex = state.stringIndex - 1
-
+Balanced.match = function(currentElement, state, currentCharacter)
 	local lowerOpen, upperOpen, lowerClose, upperClose = 
 		currentElement.lowerOpen, currentElement.upperOpen,
 		currentElement.lowerClose, currentElement.upperClose
 
 	-- The first character MUST match the opener
-	local currentStrIndex = stringIndex + 1
-	local firstChar = state:getTargetCharacter(currentStrIndex)
-	if firstChar ~= lowerOpen and firstChar ~= upperOpen then
+	local currentStrIndex = state.stringIndex
+	if currentCharacter ~= lowerOpen and currentCharacter ~= upperOpen then
 		return false
 	end
 
