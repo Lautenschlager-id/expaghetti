@@ -201,39 +201,4 @@ function AST.Balanced(lowerOpen, upperOpen, lowerClose, upperClose)
 	}
 end
 
-AST.hasNestedQuantifier = function(tree)
-	if not tree then
-		return false
-	end
-	for elementIndex = 1, tree._index do
-		local child = tree[elementIndex]
-		if child.quantifier and child.quantifier.type == elementsEnum.quantifier then
-			return true
-		end
-	end
-	return false
-end
-
-AST.elementHasNestedQuantifier = function(element)
-	if element.type == elementsEnum.group then
-		return AST.hasNestedQuantifier(element.tree)
-	end
-	return false
-end
-
-AST.elementInnerQuantifierIsPossessive = function(element)
-	if element.type == elementsEnum.group and element.tree then
-		local quantifier
-		for elementIndex = 1, element.tree._index do
-			quantifier = element.tree[elementIndex].quantifier
-			if quantifier and quantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE then
-				return true
-			end
-		end
-	end
-
-	local quantifier = element.quantifier
-	return quantifier and quantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE or false
-end
-
 return AST

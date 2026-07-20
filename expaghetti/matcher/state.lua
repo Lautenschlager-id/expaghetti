@@ -7,6 +7,11 @@ local MatchState = {
 }
 MatchState.__index = MatchState
 
+--- Creates a new MatchState instance for a regex execution.
+---@param flags table Dictionary of active flags.
+---@param targetString string The string being searched.
+---@param rootTree table The AST root tree.
+---@return table MatchState The instantiated MatchState object.
 function MatchState.new(flags, targetString, rootTree)
 	local self = setmetatable({}, MatchState)
 	
@@ -47,6 +52,8 @@ function MatchState.new(flags, targetString, rootTree)
 	return self
 end
 
+--- Resets the execution state arrays for a new match attempt starting at stringIndex.
+---@param stringIndex number The starting string index for the new match attempt.
 function MatchState:reset(stringIndex)
 	self.stringIndex = stringIndex or 0
 	self.initialStringIndex = self.stringIndex
@@ -61,6 +68,10 @@ function MatchState:reset(stringIndex)
 	metaData.backtrackSteps = 0
 end
 
+--- Branches the current state into a new child state (e.g., for lookaheads).
+---@param stringIndex number|nil The string index for the branched state.
+---@param initialStringIndex number|nil The initial string index for the branched state.
+---@return table MatchState The newly branched state.
 function MatchState:branch(stringIndex, initialStringIndex)
 	local child = setmetatable({}, MatchState)
 	child.flags = self.flags
@@ -77,11 +88,15 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	return child
 end
 
+--- Increments the global backtrack counter and checks against the max backtrack limit.
+---@return boolean exceeded Limit exceeded (true if backtrack limit has been breached).
 function MatchState:incrementBacktrack()
 	self.metaData.backtrackSteps = self.metaData.backtrackSteps + 1
 	return self.metaData.backtrackSteps > self.metaData.maxBacktrackDepth
 end
 
+--- Increments the recursion depth and checks against the max recursion limit.
+---@return boolean exceeded Limit exceeded (true if recursion limit has been breached).
 function MatchState:enterRecursion()
 	self.metaData.recursionDepth = self.metaData.recursionDepth + 1
 	if self.metaData.recursionDepth > self.metaData.maxRecursionDepth then
@@ -91,10 +106,15 @@ function MatchState:enterRecursion()
 	return false
 end
 
+--- Decrements the recursion depth.
 function MatchState:leaveRecursion()
 	self.metaData.recursionDepth = self.metaData.recursionDepth - 1
 end
 
+--- Records a successful capture group match.
+---@param groupIndex number|string The identifier of the capture group.
+---@param startIndex number The initial string index of the capture.
+---@param endIndex number The ending string index of the capture.
 function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	if not groupIndex then return end
 	
@@ -120,6 +140,8 @@ function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	groupEnds[nextIndex] = endIndex
 end
 
+--- Pops the most recently recorded capture for a specific group.
+---@param groupIndex number|string The identifier of the capture group.
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
 	

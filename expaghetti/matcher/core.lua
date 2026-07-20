@@ -3,6 +3,12 @@ local quantifierMatcher = require("matcher.quantifier")
 local Quantifier = require("magic.Quantifier")
 
 local coreTreeMatcher
+--- Recursively processes an AST tree, matching its elements sequentially against the target string.
+---@param state table The MatchState object containing the matching context and AST tree.
+---@return boolean hasMatched True if the entire tree successfully matched.
+---@return number|nil iniStr The starting string index of the overall match.
+---@return number|nil endStr The ending string index of the overall match.
+---@return table|nil metaData Metadata including captures if the match succeeds.
 coreTreeMatcher = function(state)
 	local tree = state.tree
 	local treeIndex = state.treeIndex

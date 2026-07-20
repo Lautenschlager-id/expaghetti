@@ -65,6 +65,15 @@ local elementMatchers = {
 	},
 }
 
+--- Delegates the matching process to the specific class of a single AST element.
+---@param currentElement table The AST element to match.
+---@param currentCharacter string|number The target character at the current string index.
+---@param state table The MatchState object.
+---@return boolean hasMatched True if the single element successfully matched.
+---@return number|nil iniStr The starting string index of the match.
+---@return number|nil endStr The ending string index of the match.
+---@return table|nil metaData Metadata including captures, if any.
+---@return boolean|nil shouldEndThisExecution True if execution stack should finish.
 local singleElementMatcher = function(currentElement, currentCharacter, state)
 	local elementClass = elementMatchers[currentElement.type]
 	if not elementClass then
