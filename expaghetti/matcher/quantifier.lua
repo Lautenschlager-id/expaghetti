@@ -6,16 +6,14 @@ local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
 local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
 
-local QuantifierMatcher = {}
-
-function QuantifierMatcher.canBacktrackNestedQuantifier(quantifier, element)
+local canBacktrackNestedQuantifier = function(quantifier, element)
 	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
 	return mode ~= ENUM_QUANTIFIER_MODE_POSSESSIVE
 		and AST.elementHasNestedQuantifier(element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 
-local function executeElement(state, stringIndex, quantifierMaxEnd, currentElement, currentCharacter)
+local executeElement = function(state, stringIndex, quantifierMaxEnd, currentElement, currentCharacter)
 	local savedStringIndex = state.stringIndex
 	local savedTree = state.tree
 	local savedTreeIndex = state.treeIndex
@@ -24,9 +22,7 @@ local function executeElement(state, stringIndex, quantifierMaxEnd, currentEleme
 	state.stringIndex = stringIndex
 	state.tree = nil
 	state.treeIndex = nil
-	if quantifierMaxEnd ~= nil then
-		state.quantifierMaxEnd = quantifierMaxEnd
-	end
+	state.quantifierMaxEnd = quantifierMaxEnd
 
 	local hasMatched, iniStr, endStr = singleElementMatcher(currentElement, currentCharacter, state)
 
@@ -38,7 +34,7 @@ local function executeElement(state, stringIndex, quantifierMaxEnd, currentEleme
 	return hasMatched, iniStr, endStr
 end
 
-local function continueMatcher(state, targetStringIndex)
+local continueMatcher = function(state, targetStringIndex)
 	local savedStringIndex = state.stringIndex
 	local savedTree = state.tree
 	local savedTreeIndex = state.treeIndex
@@ -56,7 +52,7 @@ local function continueMatcher(state, targetStringIndex)
 	return hasMatched, iniStr, endStr, meta
 end
 
-function QuantifierMatcher.collectOccurrences(
+local collectOccurrences = function(
 	state,
 	currentElement,
 	stringIndex,
@@ -101,7 +97,7 @@ function QuantifierMatcher.collectOccurrences(
 	return totalOccurrences, stringIndex
 end
 
-function QuantifierMatcher.shortenOccurrenceAt(
+local shortenOccurrenceAt = function(
 	state,
 	currentElement,
 	elementCaptureId,
@@ -135,12 +131,12 @@ function QuantifierMatcher.shortenOccurrenceAt(
 	return true
 end
 
-function QuantifierMatcher.match(currentElement, currentCharacter, state)
+local matcher = function(currentElement, currentCharacter, state)
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
 	local minimumOccurrences = quantifier.min
 	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
-	local canBacktrackInner = QuantifierMatcher.canBacktrackNestedQuantifier(quantifier, currentElement)
+	local canBacktrackInner = canBacktrackNestedQuantifier(quantifier, currentElement)
 	local elementCaptureId = currentElement.index or currentElement.name
 
 	local totalOccurrences = 0
@@ -149,7 +145,7 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 
 	local stringIndex = state.stringIndex
 
-	totalOccurrences, stringIndex = QuantifierMatcher.collectOccurrences(
+	totalOccurrences, stringIndex = collectOccurrences(
 		state,
 		currentElement,
 		stringIndex,
@@ -160,13 +156,13 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 	)
 
 	while totalOccurrences < minimumOccurrences and canBacktrackInner and totalOccurrences > 0 do
-		if not QuantifierMatcher.shortenOccurrenceAt(state, currentElement, elementCaptureId, totalOccurrences, startStringPositions, endStringPositions) then
+		if not shortenOccurrenceAt(state, currentElement, elementCaptureId, totalOccurrences, startStringPositions, endStringPositions) then
 			break
 		end
 		
 		stringIndex = endStringPositions[totalOccurrences] + 1
 		
-		totalOccurrences, stringIndex = QuantifierMatcher.collectOccurrences(
+		totalOccurrences, stringIndex = collectOccurrences(
 			state,
 			currentElement,
 			stringIndex,
@@ -216,7 +212,7 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 			totalOccurrences = occurrence
 			local didShorten
 			repeat
-				didShorten = QuantifierMatcher.shortenOccurrenceAt(
+				didShorten = shortenOccurrenceAt(
 					state,
 					currentElement,
 					elementCaptureId,
@@ -238,4 +234,4 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 	end
 end
 
-return QuantifierMatcher
+return matcher
