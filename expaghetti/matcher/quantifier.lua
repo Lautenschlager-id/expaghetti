@@ -6,14 +6,13 @@ local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
 local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
 
-local canBacktrackNestedQuantifier = function(quantifier, element)
-	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
-	return mode ~= ENUM_QUANTIFIER_MODE_POSSESSIVE
+local canBacktrackNestedQuantifier = function(element, quantifier)
+	return quantifier.mode ~= ENUM_QUANTIFIER_MODE_POSSESSIVE
 		and AST.elementHasNestedQuantifier(element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 
-local executeElement = function(state, stringIndex, quantifierMaxEnd, currentElement, currentCharacter)
+local executeElement = function(state, currentElement, currentCharacter, stringIndex, quantifierMaxEnd)
 	local savedStringIndex = state.stringIndex
 	local savedTree = state.tree
 	local savedTreeIndex = state.treeIndex
@@ -55,11 +54,11 @@ end
 local collectOccurrences = function(
 	state,
 	currentElement,
-	stringIndex,
 	maximumOccurrences,
+	stringIndex,
+	totalOccurrences,
 	startStringPositions,
-	endStringPositions,
-	totalOccurrences
+	endStringPositions
 )
 	local hasMatched, iniStr, endStr
 	local lastIniStr, lastEndStr
@@ -68,7 +67,7 @@ local collectOccurrences = function(
 		startStringPositions[totalOccurrences + 1] = stringIndex
 
 		local currentCharacter = state:getTargetCharacter(stringIndex)
-		hasMatched, iniStr, endStr = executeElement(state, stringIndex, nil, currentElement, currentCharacter)
+		hasMatched, iniStr, endStr = executeElement(state, currentElement, currentCharacter, stringIndex, nil)
 
 		if not hasMatched then
 			return totalOccurrences, stringIndex
@@ -119,7 +118,7 @@ local shortenOccurrenceAt = function(
 	state:popCapture(elementCaptureId)
 	
 	local currentCharacter = state:getTargetCharacter(occurrenceStart)
-	local hasMatched, iniStr, endStr = executeElement(state, occurrenceStart, occurrenceEnd - 1, currentElement, currentCharacter)
+	local hasMatched, iniStr, endStr = executeElement(state, currentElement, currentCharacter, occurrenceStart, occurrenceEnd - 1)
 
 	if not hasMatched or (endStr and endStr >= occurrenceEnd) then
 		return false
@@ -131,12 +130,12 @@ local shortenOccurrenceAt = function(
 	return true
 end
 
-local matcher = function(currentElement, currentCharacter, state)
+local quantifierMatcher = function(currentElement, currentCharacter, state)
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
 	local minimumOccurrences = quantifier.min
 	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
-	local canBacktrackInner = canBacktrackNestedQuantifier(quantifier, currentElement)
+	local canBacktrackInner = canBacktrackNestedQuantifier(currentElement, quantifier)
 	local elementCaptureId = currentElement.index or currentElement.name
 
 	local totalOccurrences = 0
@@ -148,11 +147,11 @@ local matcher = function(currentElement, currentCharacter, state)
 	totalOccurrences, stringIndex = collectOccurrences(
 		state,
 		currentElement,
-		stringIndex,
 		maximumOccurrences,
+		stringIndex,
+		totalOccurrences,
 		startStringPositions,
-		endStringPositions,
-		totalOccurrences
+		endStringPositions
 	)
 
 	while totalOccurrences < minimumOccurrences and canBacktrackInner and totalOccurrences > 0 do
@@ -165,11 +164,11 @@ local matcher = function(currentElement, currentCharacter, state)
 		totalOccurrences, stringIndex = collectOccurrences(
 			state,
 			currentElement,
-			stringIndex,
 			maximumOccurrences,
+			stringIndex,
+			totalOccurrences,
 			startStringPositions,
-			endStringPositions,
-			totalOccurrences
+			endStringPositions
 		)
 	end
 
@@ -234,4 +233,4 @@ local matcher = function(currentElement, currentCharacter, state)
 	end
 end
 
-return matcher
+return quantifierMatcher
