@@ -15,37 +15,45 @@ function QuantifierMatcher.canBacktrackNestedQuantifier(quantifier, element)
 		and not AST.elementInnerQuantifierIsPossessive(element)
 end
 
-local function executeWithTemporaryState(state, stringIndex, quantifierMaxEnd, clearTree, func, arg1, arg2)
+local function executeElement(state, stringIndex, quantifierMaxEnd, currentElement, currentCharacter)
 	local savedStringIndex = state.stringIndex
 	local savedTree = state.tree
 	local savedTreeIndex = state.treeIndex
 	local savedQuantifierMaxEnd = state.quantifierMaxEnd
 
 	state.stringIndex = stringIndex
+	state.tree = nil
+	state.treeIndex = nil
 	if quantifierMaxEnd ~= nil then
 		state.quantifierMaxEnd = quantifierMaxEnd
 	end
-	if clearTree then
-		state.tree = nil
-		state.treeIndex = nil
-	end
 
-	local r1, r2, r3, r4 = func(arg1, arg2, state)
+	local hasMatched, iniStr, endStr = singleElementMatcher(currentElement, currentCharacter, state)
 
 	state.stringIndex = savedStringIndex
 	state.tree = savedTree
 	state.treeIndex = savedTreeIndex
 	state.quantifierMaxEnd = savedQuantifierMaxEnd
 
-	return r1, r2, r3, r4
+	return hasMatched, iniStr, endStr
 end
 
-local function callMatcher(_, _, state)
-	return state.matcher(state)
-end
+local function continueMatcher(state, targetStringIndex)
+	local savedStringIndex = state.stringIndex
+	local savedTree = state.tree
+	local savedTreeIndex = state.treeIndex
+	local savedQuantifierMaxEnd = state.quantifierMaxEnd
 
-function QuantifierMatcher.continueMatching(state, targetStringIndex)
-	return executeWithTemporaryState(state, targetStringIndex, nil, false, callMatcher)
+	state.stringIndex = targetStringIndex
+
+	local hasMatched, iniStr, endStr, meta = state.matcher(state)
+
+	state.stringIndex = savedStringIndex
+	state.tree = savedTree
+	state.treeIndex = savedTreeIndex
+	state.quantifierMaxEnd = savedQuantifierMaxEnd
+
+	return hasMatched, iniStr, endStr, meta
 end
 
 function QuantifierMatcher.collectOccurrences(
@@ -64,9 +72,7 @@ function QuantifierMatcher.collectOccurrences(
 		startStringPositions[totalOccurrences + 1] = stringIndex
 
 		local currentCharacter = state:getTargetCharacter(stringIndex)
-		hasMatched, iniStr, endStr = executeWithTemporaryState(
-			state, stringIndex, nil, true, singleElementMatcher, currentElement, currentCharacter
-		)
+		hasMatched, iniStr, endStr = executeElement(state, stringIndex, nil, currentElement, currentCharacter)
 
 		if not hasMatched then
 			return totalOccurrences, stringIndex
@@ -117,9 +123,7 @@ function QuantifierMatcher.shortenOccurrenceAt(
 	state:popCapture(elementCaptureId)
 	
 	local currentCharacter = state:getTargetCharacter(occurrenceStart)
-	local hasMatched, iniStr, endStr = executeWithTemporaryState(
-		state, occurrenceStart, occurrenceEnd - 1, true, singleElementMatcher, currentElement, currentCharacter
-	)
+	local hasMatched, iniStr, endStr = executeElement(state, occurrenceStart, occurrenceEnd - 1, currentElement, currentCharacter)
 
 	if not hasMatched or (endStr and endStr >= occurrenceEnd) then
 		return false
@@ -202,7 +206,7 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 		end
 
 		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
-		local hasMatched, iniStr, endStr, meta = QuantifierMatcher.continueMatching(state, targetStringIndex)
+		local hasMatched, iniStr, endStr, meta = continueMatcher(state, targetStringIndex)
 		
 		if hasMatched then
 			return hasMatched, iniStr, endStr, meta
@@ -223,7 +227,7 @@ function QuantifierMatcher.match(currentElement, currentCharacter, state)
 
 				if didShorten then
 					targetStringIndex = endStringPositions[totalOccurrences] or (state.stringIndex - 1)
-					hasMatched, iniStr, endStr, meta = QuantifierMatcher.continueMatching(state, targetStringIndex)
+					hasMatched, iniStr, endStr, meta = continueMatcher(state, targetStringIndex)
 
 					if hasMatched then
 						return hasMatched, iniStr, endStr, meta
