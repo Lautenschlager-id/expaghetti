@@ -7,7 +7,7 @@ local pcall = pcall
 local strformat = string.format
 local tostring = tostring
 ----------------------------------------------------------------------------------------------------
-local parser = require("../expaghetti/parser")
+local parser = require("parser.init")
 ----------------------------------------------------------------------------------------------------
 local compareTables = require("./assertion").compareTables
 local prettyPrint = require("../expaghetti/helpers/pretty-print")

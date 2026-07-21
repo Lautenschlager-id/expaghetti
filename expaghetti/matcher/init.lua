@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------
-local parser = require("parser")
+local parser = require("parser.init")
 local MatchState = require("matcher.state")
 ----------------------------------------------------------------------------------------------------
 local coreTreeMatcher = require("matcher.core")
