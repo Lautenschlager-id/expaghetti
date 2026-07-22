@@ -1,35 +1,49 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    Quantifier module. Parses quantifiers.
+]]
+
+--[[ Globals ]]--
 local tonumber = tonumber
-----------------------------------------------------------------------------------------------------
-local tblDeepCopy = require("./helpers/table").tblDeepCopy
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-local errorsEnum = require("./enums/errors")
-local nonQuantifiableTypes = require("./enums/nonQuantifiableTypes")
-local quantifiersEnum = require("./enums/quantifiers")
-local quantifierModesEnum = require("./enums/quantifierModes")
-local parserHelpers = require("./helpers/parser_helpers")
-----------------------------------------------------------------------------------------------------
+
+--[[ Dependencies ]]--
+local table_deepcopy = require("helpers.table").table_deepcopy
+local parserHelpers = require("helpers.parserHelpers")
 local consumeWhile = parserHelpers.consumeWhile
 local isPositiveOrZeroIntegerChar = parserHelpers.isPositiveOrZeroIntegerChar
-----------------------------------------------------------------------------------------------------
-local ENUM_OPEN_QUANTIFIER = magicEnum.OPEN_QUANTIFIER
-local ENUM_CLOSE_QUANTIFIER = magicEnum.CLOSE_QUANTIFIER
-local ENUM_QUANTIFIER_SEPARATOR_CHARACTER = magicEnum.QUANTIFIER_SEPARATOR_CHARACTER
-local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
-----------------------------------------------------------------------------------------------------
-local Quantifier = { }
-----------------------------------------------------------------------------------------------------
+
+local AST = require("ast")
+
+local magicEnum = require("enums.magic")
+local errorsEnum = require("enums.errors")
+local quantifiersEnum = require("enums.quantifiers")
+local quantifierModesEnum = require("enums.quantifierModes")
+local elementsEnum = require("enums.elements")
+
+--[[ Enum Aliases ]]--
+local MAGIC_QUANTIFIER_OPEN = magicEnum.QUANTIFIER_OPEN
+local MAGIC_QUANTIFIER_CLOSE = magicEnum.QUANTIFIER_CLOSE
+local MAGIC_QUANTIFIER_SEPARATOR = magicEnum.QUANTIFIER_SEPARATOR
+local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+
+local ERROR_UNORDERED_CUSTOM_QUANTIFIER = errorsEnum.unorderedQuantifierRange
+local ERROR_NOTHING_TO_REPEAT = errorsEnum.nothingToRepeat
+
+local ZERO_LENGTH_ELEMENTS = require("enums.elementLengths").ZERO_LENGTH
+
+
+--[[ Module ]]--
+local Quantifier = {}
+
+--[[ Private Functions ]]--
 local lookForCustomQuantifier = function(state, index)
 	local min, index, currentToken = consumeWhile(state, index, isPositiveOrZeroIntegerChar)
 	local max
 
-	if currentToken == ENUM_QUANTIFIER_SEPARATOR_CHARACTER then
+	if currentToken == MAGIC_QUANTIFIER_SEPARATOR then
 		max, index, currentToken = consumeWhile(state, index, isPositiveOrZeroIntegerChar)
 	end
 
-	if currentToken ~= ENUM_CLOSE_QUANTIFIER then
+	if currentToken ~= MAGIC_QUANTIFIER_CLOSE then
 		return false
 	end
 
@@ -43,7 +57,7 @@ local lookForCustomQuantifier = function(state, index)
 		max = tonumber(max)
 
 		if min and max and min > max then
-			return false, errorsEnum.unorderedCustomQuantifier
+			return false, ERROR_UNORDERED_CUSTOM_QUANTIFIER
 		end
 	end
 
@@ -62,7 +76,7 @@ local tryParseQuantifier = function(state, index)
 	
 	if not state:isElement(currentToken) and quantifiersEnum[currentToken] then
 		return nextIndex, quantifiersEnum[currentToken]
-	elseif currentToken == ENUM_OPEN_QUANTIFIER then
+	elseif currentToken == MAGIC_QUANTIFIER_OPEN then
 		local newIndex, customQuantifier = lookForCustomQuantifier(state, nextIndex)
 		if newIndex then
 			return newIndex, customQuantifier
@@ -81,14 +95,15 @@ local lookForModeToken = function(state, index, quantifier)
 		local quantifierMode = quantifierModesEnum[currentToken]
 
 		if quantifierMode then
-			quantifier = tblDeepCopy(quantifier)
+			quantifier = table_deepcopy(quantifier)
 			quantifier.mode = quantifierMode
 			index = nextIndex
 		end
 	end
 	return index, quantifier
 end
-----------------------------------------------------------------------------------------------------
+
+--[[ Public API ]]--
 Quantifier.isToken = function(state, parentElement)
 	local index, quantifier = tryParseQuantifier(state, state.index)
 	return index and quantifier
@@ -96,12 +111,12 @@ end
 
 Quantifier.isElement = function(currentElement)
 	return currentElement.quantifier
-		and currentElement.quantifier.type == ENUM_ELEMENT_TYPE_QUANTIFIER
+		and currentElement.quantifier.type == ELEMENT_QUANTIFIER
 end
 
 Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers
-	local shouldntHaveQuantifier = nonQuantifiableTypes[parentElement.type] == true
+	local shouldntHaveQuantifier = ZERO_LENGTH_ELEMENTS[parentElement.type] == true
 
 	local index, quantifier = tryParseQuantifier(state, state.index)
 
@@ -113,7 +128,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 		return nil
 	elseif shouldntHaveQuantifier then
 		-- has a quantifier but shouldn't
-		return errorsEnum.nothingToRepeat
+		return ERROR_NOTHING_TO_REPEAT
 	end
 
 	index, quantifier = lookForModeToken(state, index, quantifier)
@@ -123,4 +138,5 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	return nil
 end
 
+--[[ Return ]]--
 return Quantifier

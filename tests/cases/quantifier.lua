@@ -1787,11 +1787,11 @@ return {
 		regex = "%d+",
 	},
 	{
-		errorMessage = "Invalid regular expression: Numbers out of order in quantifier",
+		errorMessage = "Invalid regular expression: Quantifier range is out of order",
 		regex = "a{2,1}",
 	},
 	{
-		errorMessage = "Invalid regular expression: Numbers out of order in quantifier",
+		errorMessage = "Invalid regular expression: Quantifier range is out of order",
 		regex = "a{12,2}",
 	},
 	{

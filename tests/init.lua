@@ -10,15 +10,15 @@ local tostring = tostring
 local parser = require("parser.init")
 ----------------------------------------------------------------------------------------------------
 local compareTables = require("./assertion").compareTables
-local prettyPrint = require("../expaghetti/helpers/pretty-print")
+local prettyPrint = require("helpers.prettyPrint")
 ----------------------------------------------------------------------------------------------------
 local performance = require("performance")
 ----------------------------------------------------------------------------------------------------
 local cases = {
 	"literal",
 	"escaped",
-	"character_class",
-	"special_escaped",
+	"characterClass",
+	"specialEscaped",
 	"any",
 	"set",
 	"delimiter",
@@ -27,22 +27,22 @@ local cases = {
 	"alternate",
 	"quantifier",
 
-	"flag_case_insensitive",
-	"flag_unicode",
-	"flag_case_multiline",
-	"flag_case_dotall",
-	"flag_case_no_auto_capture",
-	"flag_combined",
+	"flagCaseInsensitive",
+	"flagUnicode",
+	"flagMultiline",
+	"flagDotall",
+	"flagNoAutoCapture",
+	"flagCombined",
 
 	"comment",
-	"position_capture",
+	"positionCapture",
 	"backreference",
 	"recursion",
 	"balanced",
 	"boundary",
 }
 
-local breakOnFirstError = false
+local breakOnFirstError = true
 
 performance.logPerformanceAtTheEnd(function()
 

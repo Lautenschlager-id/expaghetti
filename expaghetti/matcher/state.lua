@@ -1,5 +1,5 @@
 local config = require("./config")
-local ENUM_FLAG_UNICODE = require("./enums/flags").flags.UNICODE
+local ENUM_FLAG_UNICODE = require("./enums/flags").FLAGS.UNICODE
 local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
 
 local MatchState = {

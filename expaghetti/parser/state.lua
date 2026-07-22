@@ -1,15 +1,30 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    ParserState object tracking the current parsing context.
+]]
+
+--[[ Globals ]]--
+local type = type
+local pairs = pairs
+local setmetatable = setmetatable
+
+local string = string
+
+--[[ Dependencies ]]--
 local splitStringByEachChar = require("helpers.string").splitStringByEachChar
 local Escaped = require("magic.escaped")
-local flagsEnum = require("enums.flags").flags
-local ENUM_FLAG_UNICODE = flagsEnum.UNICODE
-local ENUM_FLAG_CASE_INSENSITIVE = flagsEnum.CASE_INSENSITIVE
-----------------------------------------------------------------------------------------------------
+local flagsEnum = require("enums.flags").FLAGS
+
+--[[ Enum Aliases ]]--
+local FLAG_UNICODE = flagsEnum.UNICODE
+local FLAG_CASE_INSENSITIVE = flagsEnum.CASE_INSENSITIVE
+
+--[[ Module ]]--
 local ParserState = {
 	parser = nil
 }
 ParserState.__index = ParserState
 
+--[[ Public API ]]--
 --- Creates a new ParserState instance for parsing a regex expression.
 ---@param expr string|table The regular expression string.
 ---@param flags string|table|nil A string of flag characters or a table of boolean flags.
@@ -47,7 +62,7 @@ function ParserState.new(expr, flags)
 	}
 
 	self.index = 1
-	self.patternChars, self.patternLength = splitStringByEachChar(expr, not not self.flags[ENUM_FLAG_UNICODE])
+	self.patternChars, self.patternLength = splitStringByEachChar(expr, not not self.flags[FLAG_UNICODE])
 
 	return self
 end
@@ -123,11 +138,11 @@ function ParserState:getExecutionValues(char, isInsideSet)
 	-- Determine whether we should work with Lua strings or numerical bytes.
 	-- If the UNICODE flag is present or we are inside a character set (where chars might represent byte classes),
 	-- we retain the string representation. Otherwise, we operate directly on numeric bytes for performance.
-	local hasFlagUnicode = self.flags[ENUM_FLAG_UNICODE]
+	local hasFlagUnicode = self.flags[FLAG_UNICODE]
 	local returnString = hasFlagUnicode or isInsideSet
 	local lowerChar, upperChar
 
-	if self.flags[ENUM_FLAG_CASE_INSENSITIVE] then
+	if self.flags[FLAG_CASE_INSENSITIVE] then
 		-- When case-insensitive, we must track both the upper and lower variants.
 		-- This essentially splits a single character match into a branching dual-match.
 		lowerChar = string.lower(char)
@@ -230,4 +245,5 @@ function ParserState:popScopedFlags(previousFlags)
 	self.flags = previousFlags
 end
 
+--[[ Return ]]--
 return ParserState

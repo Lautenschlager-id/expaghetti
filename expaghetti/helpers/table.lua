@@ -2,11 +2,12 @@
 local next = next
 local type = type
 ----------------------------------------------------------------------------------------------------
-local function tblDeepCopy(tbl)
+local table_deepcopy
+table_deepcopy = function(tbl)
 	local copy = { }
 	for key, value in next, tbl do
 		if type(value) == "table" then
-			copy[key] = tblDeepCopy(value)
+			copy[key] = table_deepcopy(value)
 		else
 			copy[key] = value
 		end
@@ -15,5 +16,5 @@ local function tblDeepCopy(tbl)
 end
 
 return {
-	tblDeepCopy = tblDeepCopy
+	table_deepcopy = table_deepcopy,
 }

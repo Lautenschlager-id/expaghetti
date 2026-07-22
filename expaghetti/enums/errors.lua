@@ -1,59 +1,67 @@
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-----------------------------------------------------------------------------------------------------
+--[[
+    Reusable error message templates shared by the parser and matcher.
+]]
+
+--[[ Globals ]]--
+local next = next
+local string_format = string.format
+
+--[[ Enums ]]--
+local Magic = require("enums.magic")
+
+--[[ Aliases ]]--
+local MAGIC_ESCAPE = Magic.ESCAPE
+local MAGIC_SET_CLOSE = Magic.SET_CLOSE
+local MAGIC_GROUP_NAME_OPEN = Magic.GROUP_NAME_OPEN
+local MAGIC_GROUP_NAME_CLOSE = Magic.GROUP_NAME_CLOSE
+
+--[[ Module ]]--
 local errors = {
-	invalidParamCtrlChar =
-		"Parameter passed to \"" .. magicEnum.ESCAPE_CHARACTER .. "c\" must be valid",
-
-	invalidParamUnicodeChar =
-		"A valid 4 characters hexadecimal value must be passed to \""
-		.. magicEnum.ESCAPE_CHARACTER .. "e\"",
-
-	incompleteEscape = "Attempt to escape null",
-
-	invalidEscape = "Invalid escape \"" .. magicEnum.ESCAPE_CHARACTER .. "%%s\"",
-
-	unclosedSet = "Missing '" .. magicEnum.CLOSE_SET .. "' to close set",
-
-	unorderedSetRange = "Range out of order in set",
-
-	unorderedCustomQuantifier = "Numbers out of order in quantifier",
-
-	nothingToRepeat = "Nothing to repeat",
-
-	unterminatedGroup = "Unterminated group",
-
-	noGroupToClose = "There is no group to close",
-
-	variableLengthLookbehind = "Lookbehinds can only be applied to fixed-length expressions",
-
-	invalidGroupBehavior = "Invalid group behavior",
-
-	invalidGroupName = "Invalid group name",
-
-	duplicatedGroupName = "Duplicated group name <%s>",
-
-	invalidBackreferenceSyntax =
-		"Invalid backreference call: Missing '" .. magicEnum.GROUP_NAME_OPEN .. "'",
-
-	unterminatedBackreference =
-		"Unterminated backreference: Missing '" .. magicEnum.GROUP_NAME_CLOSE .. "'",
-
+	duplicateGroupName = "Duplicate group name '%s'",
+	expectedFrontierSet = "Expected a character set after frontier pattern",
+	incompleteEscape = "Incomplete escape sequence",
 	invalidBackreferenceName = "Invalid backreference name",
-
-	missingFrontierSet = "Missing set after frontier pattern",
-
-	missingBalancedDelimiter = "Balanced pattern requires two delimiters",
-
+	invalidBackreferenceSyntax = string_format(
+		"Invalid backreference: expected '%s'",
+		MAGIC_GROUP_NAME_OPEN
+	),
+	invalidControlCharacterParameter = string_format(
+		"Expected a valid control character after '%sc'",
+		MAGIC_ESCAPE
+	),
+	invalidEscape = string_format(
+		"Invalid escape '%s%%%%s'",
+		MAGIC_ESCAPE
+	),
+	invalidGroupBehavior = "Invalid group behavior",
+	invalidGroupBehaviorIndex = "Invalid group behavior index",
+	invalidGroupName = "Invalid group name",
 	invalidGroupRecursionName = "Invalid group recursion name",
-
-	unknownElementLength = "Unknown element <%s>, cannot determine length safely",
+	invalidUnicodeParameter = string_format(
+		"Expected a 4-digit hexadecimal value after '%se'",
+		MAGIC_ESCAPE
+	),
+	missingBalancedDelimiters = "Balanced pattern requires two delimiters",
+	nothingToRepeat = "Nothing to repeat",
+	unexpectedGroupClose = "Unexpected group close",
+	unknownElementLength = "Cannot determine the fixed length of element '%%s'",
+	unterminatedBackreference = string_format(
+		"Unterminated backreference: expected '%s'",
+		MAGIC_GROUP_NAME_CLOSE
+	),
+	unterminatedGroup = "Unterminated group",
+	unterminatedSet = string_format(
+		"Expected '%s' to close character set",
+		MAGIC_SET_CLOSE
+	),
+	unorderedQuantifierRange = "Quantifier range is out of order",
+	unorderedSetRange = "Character range is out of order",
+	variableLengthLookbehind = "Lookbehinds can only be applied to fixed-length expressions",
 }
-----------------------------------------------------------------------------------------------------
-local base = "Invalid regular expression: "
 
-for k, v in next, errors do
-	errors[k] = base .. v
+local base = "Invalid regular expression: %s"
+for key, value in next, errors do
+	errors[key] = string_format(base, value)
 end
 
 return errors

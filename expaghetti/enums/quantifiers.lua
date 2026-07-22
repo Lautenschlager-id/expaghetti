@@ -1,29 +1,35 @@
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_QUANTIFIER = require("./enums/elements").quantifier
-local ENUM_ONE_OR_MORE_QUANTIFIER = magicEnum.ONE_OR_MORE_QUANTIFIER
-local ENUM_ZERO_OR_MORE_QUANTIFIER = magicEnum.ZERO_OR_MORE_QUANTIFIER
-local ENUM_ZERO_OR_ONE_QUANTIFIER = magicEnum.ZERO_OR_ONE_QUANTIFIER
-----------------------------------------------------------------------------------------------------
+--[[
+    Quantifier token definitions.
+]]
 
+--[[ Dependencies ]]--
+local magicEnum = require("enums.magic")
+local elementsEnum = require("enums.elements")
+
+--[[ Enum Aliases ]]--
+local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+local MAGIC_QUANTIFIER_ONE_OR_MORE = magicEnum.QUANTIFIER_ONE_OR_MORE
+local MAGIC_QUANTIFIER_ZERO_OR_MORE = magicEnum.QUANTIFIER_ZERO_OR_MORE
+local MAGIC_QUANTIFIER_ZERO_OR_ONE = magicEnum.QUANTIFIER_ZERO_OR_ONE
+
+--[[ Return ]]--
 return {
-	[ENUM_ONE_OR_MORE_QUANTIFIER] = {
-		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
+	[MAGIC_QUANTIFIER_ONE_OR_MORE] = {
+		type = ELEMENT_QUANTIFIER,
 		min = 1,
 		max = 0,
 		mode = nil
 	},
 
-	[ENUM_ZERO_OR_MORE_QUANTIFIER] = {
-		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
+	[MAGIC_QUANTIFIER_ZERO_OR_MORE] = {
+		type = ELEMENT_QUANTIFIER,
 		min = 0,
 		max = 0,
 		mode = nil
 	},
 
-	[ENUM_ZERO_OR_ONE_QUANTIFIER] = {
-		type = ENUM_ELEMENT_TYPE_QUANTIFIER,
+	[MAGIC_QUANTIFIER_ZERO_OR_ONE] = {
+		type = ELEMENT_QUANTIFIER,
 		min = 0,
 		max = 1,
 		mode = nil

@@ -1,26 +1,36 @@
-----------------------------------------------------------------------------------------------------
-local elementsEnum = require("./enums/elements")
-----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_ANCHOR = elementsEnum.anchor
-local ENUM_ELEMENT_TYPE_BOUNDARY = elementsEnum.boundary
-local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = elementsEnum.position_capture
-local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
-local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
-local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
-----------------------------------------------------------------------------------------------------
-local ZERO_LENGTH_ELEMENTS = {
-	[ENUM_ELEMENT_TYPE_ANCHOR] = true,
-	[ENUM_ELEMENT_TYPE_BOUNDARY] = true,
-	[ENUM_ELEMENT_TYPE_POSITION_CAPTURE] = true,
+--[[
+    Lookup tables classifying AST element types by the number of characters
+    they consume during matching.
+
+    Used to efficiently determine the fixed length of lookbehind expressions
+    and other fixed-length constructs.
+]]
+
+--[[ Enums ]]--
+local Elements = require("enums.elements")
+
+--[[ Aliases ]]--
+local ELEMENT_ANCHOR = Elements.anchor
+local ELEMENT_ANY = Elements.any
+local ELEMENT_BOUNDARY = Elements.boundary
+local ELEMENT_LITERAL = Elements.literal
+local ELEMENT_positionCapture = Elements.positionCapture
+local ELEMENT_SET = Elements.set
+
+--[[ Module ]]--
+local ZERO_LENGTH = {
+	[ELEMENT_ANCHOR] = true,
+	[ELEMENT_BOUNDARY] = true,
+	[ELEMENT_positionCapture] = true,
 }
 
-local SINGLE_LENGTH_ELEMENTS = {
-	[ENUM_ELEMENT_TYPE_LITERAL] = true,
-	[ENUM_ELEMENT_TYPE_ANY] = true,
-	[ENUM_ELEMENT_TYPE_SET] = true,
+local SINGLE_LENGTH = {
+	[ELEMENT_LITERAL] = true,
+	[ELEMENT_ANY] = true,
+	[ELEMENT_SET] = true,
 }
 
 return {
-    ZERO_LENGTH_ELEMENTS = ZERO_LENGTH_ELEMENTS,
-    SINGLE_LENGTH_ELEMENTS = SINGLE_LENGTH_ELEMENTS, 
+    ZERO_LENGTH = ZERO_LENGTH,
+    SINGLE_LENGTH = SINGLE_LENGTH, 
 }

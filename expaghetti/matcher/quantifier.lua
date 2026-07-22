@@ -1,4 +1,4 @@
-local singleElementMatcher = require("matcher.single_element")
+local elementMatcher = require("matcher.element")
 local AST = require("ast")
 
 local quantifierModesEnum = require("enums.quantifierModes")
@@ -59,7 +59,7 @@ local executeElement = function(state, currentElement, currentCharacter, stringI
 	state.treeIndex = nil
 	state.quantifierMaxEnd = quantifierMaxEnd
 
-	local hasMatched, iniStr, endStr = singleElementMatcher(currentElement, currentCharacter, state)
+	local hasMatched, iniStr, endStr = elementMatcher(currentElement, currentCharacter, state)
 
 	state.stringIndex = savedStringIndex
 	state.tree = savedTree

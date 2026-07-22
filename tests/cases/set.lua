@@ -518,27 +518,27 @@ return {
 		regex = "%c %[[%^%%w[-%]]%]",
 	},
 	{
-		errorMessage = "Invalid regular expression: Missing ']' to close set",
+		errorMessage = "Invalid regular expression: Expected ']' to close character set",
 		regex = "[",
 	},
 	{
-		errorMessage = "Invalid regular expression: Missing ']' to close set",
+		errorMessage = "Invalid regular expression: Expected ']' to close character set",
 		regex = "[^",
 	},
 	{
-		errorMessage = "Invalid regular expression: Missing ']' to close set",
+		errorMessage = "Invalid regular expression: Expected ']' to close character set",
 		regex = "[]",
 	},
 	{
-		errorMessage = "Invalid regular expression: Missing ']' to close set",
+		errorMessage = "Invalid regular expression: Expected ']' to close character set",
 		regex = "[^]",
 	},
 	{
-		errorMessage = "Invalid regular expression: Missing ']' to close set",
+		errorMessage = "Invalid regular expression: Expected ']' to close character set",
 		regex = "[%]",
 	},
 	{
-		errorMessage = "Invalid regular expression: Range out of order in set",
+		errorMessage = "Invalid regular expression: Character range is out of order",
 		regex = "[b-a]",
 	},
 }

@@ -1,4 +1,4 @@
-local singleElementMatcher = require("matcher.single_element")
+local elementMatcher = require("matcher.element")
 local quantifierMatcher = require("matcher.quantifier")
 local Quantifier = require("magic.Quantifier")
 
@@ -35,7 +35,7 @@ coreTreeMatcher = function(state)
 			)
 		end
 
-		hasMatched, iniStr, endStr, _, shouldEndThisExecution = singleElementMatcher(
+		hasMatched, iniStr, endStr, _, shouldEndThisExecution = elementMatcher(
 			currentElement, currentCharacter, state
 		)
 

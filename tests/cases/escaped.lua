@@ -111,15 +111,15 @@ return {
 		regex = "%^%$%|%.%%%(%)%?%:%>%=%!%<%{%}%,%+%*%[%]%-",
 	},
 	{
-		errorMessage = "Invalid regular expression: Invalid escape \"%@\"",
+		errorMessage = "Invalid regular expression: Invalid escape '%@'",
 		regex = "%a%b%c%!%@%#%$%%",
 	},
 	{
-		errorMessage = "Invalid regular expression: Attempt to escape null",
+		errorMessage = "Invalid regular expression: Incomplete escape sequence",
 		regex = "%.%",
 	},
 	{
-		errorMessage = "Invalid regular expression: Invalid escape \"%B\"",
+		errorMessage = "Invalid regular expression: Invalid escape '%B'",
 		regex = ".%B+",
 	},
 }

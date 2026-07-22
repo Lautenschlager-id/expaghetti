@@ -1,23 +1,38 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    CaptureReference module. Parses and matches backreferences.
+]]
+
+--[[ Globals ]]--
 local tonumber = tonumber
-----------------------------------------------------------------------------------------------------
-local parserHelpers = require("./helpers/parser_helpers")
+
+--[[ Dependencies ]]--
+local parserHelpers = require("helpers.parserHelpers")
 local consumeWhileArray = parserHelpers.consumeWhileArray
 local isAlphanumeric = parserHelpers.isAlphanumeric
-----------------------------------------------------------------------------------------------------
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-local errorsEnum = require("./enums/errors")
-----------------------------------------------------------------------------------------------------
-local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
-local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
-local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = require("./enums/elements").capture_reference
-----------------------------------------------------------------------------------------------------
-local CaptureReference = { }
-----------------------------------------------------------------------------------------------------
+
+local AST = require("ast")
+
+local magicEnum = require("enums.magic")
+local errorsEnum = require("enums.errors")
+local elementsEnum = require("enums.elements")
+
+--[[ Enum Aliases ]]--
+local MAGIC_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
+local MAGIC_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
+local ELEMENT_captureReference = elementsEnum.captureReference
+
+local ERROR_INVALID_BACKREFERENCE_SYNTAX = errorsEnum.invalidBackreferenceSyntax
+local ERROR_INVALID_BACKREFERENCE_NAME = errorsEnum.invalidBackreferenceName
+local ERROR_UNTERMINATED_BACKREFERENCE = errorsEnum.unterminatedBackreference
+
+--[[ Module ]]--
+local CaptureReference = {}
+
+--[[ Private Functions ]]--
+
+--[[ Public API ]]--
 CaptureReference.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE
+	return currentElement.type == ELEMENT_captureReference
 end
 
 -- %1 --> reference capture N
@@ -27,18 +42,18 @@ end
 
 -- %k<NN> --> reference capture NN
 CaptureReference.parseByName = function(state, currentCharacter, index, expression)
-	if expression[index] ~= ENUM_GROUP_NAME_OPEN then
-		return false, errorsEnum.invalidBackreferenceSyntax
+	if expression[index] ~= MAGIC_GROUP_NAME_OPEN then
+		return false, ERROR_INVALID_BACKREFERENCE_SYNTAX
 	end
 
 	local name, afterIndex, closeChar = consumeWhileArray(expression, index, isAlphanumeric)
 
 	if #name == 0 then
-		return false, errorsEnum.invalidBackreferenceName
+		return false, ERROR_INVALID_BACKREFERENCE_NAME
 	end
 
-	if closeChar ~= ENUM_GROUP_NAME_CLOSE then
-		return false, closeChar and errorsEnum.invalidBackreferenceName or errorsEnum.unterminatedBackreference
+	if closeChar ~= MAGIC_GROUP_NAME_CLOSE then
+		return false, closeChar and ERROR_INVALID_BACKREFERENCE_NAME or ERROR_UNTERMINATED_BACKREFERENCE
 	end
 
 	return afterIndex + 1, AST.CaptureReference(tonumber(name) or name)
@@ -74,4 +89,5 @@ CaptureReference.match = function(currentElement, state)
 	return true, nil, stringIndex
 end
 
+--[[ Return ]]--
 return CaptureReference

@@ -5,7 +5,7 @@ local AST = require("./ast")
 local ENUM_ANCHOR_START = magicEnum.ANCHOR_START
 local ENUM_ANCHOR_END = magicEnum.ANCHOR_END
 local ENUM_ELEMENT_TYPE_ANCHOR = require("./enums/elements").anchor
-local ENUM_LINE_BREAKS = require("./enums/constants").LINE_BREAKS
+local ENUM_LINE_BREAKS = require("./enums/lineBreaks")
 ----------------------------------------------------------------------------------------------------
 local Anchor = { }
 

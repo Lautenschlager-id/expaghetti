@@ -1,64 +1,61 @@
-local characters = {
+--[[
+    Definitions of all regex magic characters and group behavior tokens.
+]]
+
+local Magic = {
+	ALTERNATE_BRANCH_SEPARATOR = '|', -- a|b
+
 	ANCHOR_START = '^', -- ^a
 	ANCHOR_END = '$', -- a$
 
-	ALTERNATE_SEPARATOR = '|', -- a|b
+	ANY = '.', -- .
 
-	ANY_CHARACTER = '.', -- .
+	ESCAPE = '%', -- %%
 
-	ESCAPE_CHARACTER = '%', -- %%
-
-	OPEN_GROUP = '(', -- (abc)
-	CLOSE_GROUP = ')', -- (abc)
-	GROUP_BEHAVIOR_CHARACTER = '?', -- (?xabc)
-
-	GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
+	GROUP_OPEN = '(', -- (abc)
+	GROUP_CLOSE = ')', -- (abc)
+	GROUP_BEHAVIOR_PREFIX = '?', -- (?xabc)
 
 	GROUP_ATOMIC_BEHAVIOR = '>', -- (?>abc)
-
 	GROUP_BRANCH_RESET_BEHAVIOR = '|', -- (?|abc)
+	GROUP_COMMENT_BEHAVIOR = '#', -- (?# any message )
+	GROUP_NON_CAPTURING_BEHAVIOR = ':', -- (?:abc)
 
-	GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = '=', -- (?=abc)
-	GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = '!', -- (?!abc)
+	GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = '=', -- (?=abc)
+	GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = '!', -- (?!abc)
 	GROUP_LOOKBEHIND_BEHAVIOR = '<', -- (?<=abc) and (?<!abc)
 
 	GROUP_NAME_OPEN = '<', -- (?<name>abc)
 	GROUP_NAME_CLOSE = '>', -- (?<name>abc)
 
-	GROUP_COMMENT_BEHAVIOR = '#', -- (?# any message )
+	GROUP_RECURSION_ROOT_BEHAVIOR = 'R', -- (?R)
+	GROUP_RECURSION_ROOT_ALIAS = '0', -- (?0)
+	GROUP_RECURSION_NAMED_BEHAVIOR = '&', -- (?&name)
 	
 	GROUP_SCOPED_FLAGS_BEHAVIOR = ':', -- (?i:abc)
-	GROUP_FLAGS_DISABLE_BEHAVIOR = '-', -- (?-i:abc)
-	GROUP_FLAG_IGNORE_CASE = 'i',
-	GROUP_FLAG_MULTILINE = 'm',
-	GROUP_FLAG_DOTALL = 's',
-	GROUP_FLAG_NO_CAPTURE = 'n',
-	
-	GROUP_RECURSION_ROOT_BEHAVIOR = 'R', -- (?R)
-	GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = '0', -- (?0)
-	GROUP_RECURSION_NAMED_BEHAVIOR = '&', -- (?&name)
+	GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = '-', -- (?-i:abc)
 
-	OPEN_QUANTIFIER = '{', -- {1,2}
-	CLOSE_QUANTIFIER = '}', -- {1,2}
-	QUANTIFIER_SEPARATOR_CHARACTER = ',', -- {1,2}
+	QUANTIFIER_OPEN = '{', -- {1,2}
+	QUANTIFIER_CLOSE = '}', -- {1,2}
+	QUANTIFIER_SEPARATOR = ',', -- {1,2}
 
-	ONE_OR_MORE_QUANTIFIER = '+', -- a+
-	ZERO_OR_MORE_QUANTIFIER = '*', -- a*
-	ZERO_OR_ONE_QUANTIFIER = '?', -- a?
-	LAZY_QUANTIFIER = '?', -- a+?
-	POSSESSIVE_QUANTIFIER = '+', -- a++
+	QUANTIFIER_ONE_OR_MORE = '+', -- a+
+	QUANTIFIER_ZERO_OR_MORE = '*', -- a*
+	QUANTIFIER_ZERO_OR_ONE = '?', -- a?
+	QUANTIFIER_LAZY = '?', -- a+?
+	QUANTIFIER_POSSESSIVE = '+', -- a++
 
-	OPEN_SET = '[', -- [abc]
-	CLOSE_SET = ']', -- [abc]
-	NEGATE_SET = '^', -- [^abc]
+	SET_OPEN = '[', -- [abc]
+	SET_CLOSE = ']', -- [abc]
+	SET_NEGATE_PREFIX = '^', -- [^abc]
 	SET_RANGE_SEPARATOR = '-', -- [0-9]
 }
-----------------------------------------------------------------------------------------------------
-local _hasmap = { }
-for _, v in next, characters do
-	_hasmap[v] = true
+
+local _hashmap = { }
+for _, value in next, Magic do
+	_hashmap[value] = true
 end
 
-characters._hasmap = _hasmap
+Magic._hashmap = _hashmap
 
-return characters
+return Magic

@@ -1,12 +1,12 @@
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = require("./enums/elements").position_capture
+local ENUM_ELEMENT_TYPE_positionCapture = require("./enums/elements").positionCapture
 ----------------------------------------------------------------------------------------------------
 local PositionCapture = { }
 
 PositionCapture.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_POSITION_CAPTURE
+	return currentElement.type == ENUM_ELEMENT_TYPE_positionCapture
 end
 
 PositionCapture.parse = function(index, tree, parserMetaData)

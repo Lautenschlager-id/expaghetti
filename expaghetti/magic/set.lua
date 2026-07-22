@@ -1,42 +1,52 @@
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-local errorsEnum = require("./enums/errors")
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local ENUM_OPEN_SET = magicEnum.OPEN_SET
-local ENUM_CLOSE_SET = magicEnum.CLOSE_SET
-local ENUM_NEGATE_SET = magicEnum.NEGATE_SET
-local ENUM_SET_RANGE_SEPARATOR = magicEnum.SET_RANGE_SEPARATOR
-local ENUM_ELEMENT_TYPE_SET = require("./enums/elements").set
-----------------------------------------------------------------------------------------------------
-local Set = { }
-----------------------------------------------------------------------------------------------------
+--[[
+    Parses set elements.
+]]
+
+--[[ Dependencies ]]--
+local magicEnum = require("enums.magic")
+local errorsEnum = require("enums.errors")
+local elementsEnum = require("enums.elements")
+local AST = require("ast")
+
+--[[ Enum Aliases ]]--
+local MAGIC_SET_OPEN = magicEnum.SET_OPEN
+local MAGIC_SET_CLOSE = magicEnum.SET_CLOSE
+local MAGIC_SET_NEGATE_PREFIX = magicEnum.SET_NEGATE_PREFIX
+local MAGIC_SET_RANGE_SEPARATOR = magicEnum.SET_RANGE_SEPARATOR
+local ELEMENT_SET = elementsEnum.set
+local ERROR_UNCLOSED_SET = errorsEnum.unterminatedSet
+local ERROR_UNORDERED_SET_RANGE = errorsEnum.unorderedSetRange
+
+--[[ Module ]]--
+local Set = {}
+
+--[[ Private Functions ]]--
 local findSetClosingIndex = function(state, startIndex)
 	local currentIndex = startIndex
 
 	local nextIndex, element = state:readElement(currentIndex, true)
-	if element == ENUM_NEGATE_SET then
+	if element == MAGIC_SET_NEGATE_PREFIX then
 		currentIndex = nextIndex
 	end
 
 	-- Skip the mandatory first character of the set.
 	local nextIndex = state:readElement(currentIndex, true)
 	if not nextIndex then
-		return false, errorsEnum.unclosedSet
+		return false, ERROR_UNCLOSED_SET
 	end
 
 	currentIndex = nextIndex
 	while currentIndex <= state.patternLength do
 		local nextIndex, element = state:readElement(currentIndex, true)
 
-		if element == ENUM_CLOSE_SET then
+		if element == MAGIC_SET_CLOSE then
 			return currentIndex
 		end
 
 		currentIndex = nextIndex
 	end
 
-	return false, errorsEnum.unclosedSet
+	return false, ERROR_UNCLOSED_SET
 end
 
 local addRange = function(set, startChar, endChar)
@@ -46,13 +56,14 @@ local addRange = function(set, startChar, endChar)
 	set.rangeIndex = set.rangeIndex + 1
 	set.ranges[set.rangeIndex] = endChar
 end
-----------------------------------------------------------------------------------------------------
+
+--[[ Public API ]]--
 Set.isToken = function(currentCharacter)
-	return currentCharacter == ENUM_OPEN_SET
+	return currentCharacter == MAGIC_SET_OPEN
 end
 
 Set.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_SET
+	return currentElement.type == ELEMENT_SET
 end
 
 Set.parse = function(state, tree)
@@ -85,9 +96,9 @@ Set.parse = function(state, tree)
 		elementIndex = nextIndex
 
 		-- first character of the set
-		if originalElementIndex == state.index and element == ENUM_NEGATE_SET then
+		if originalElementIndex == state.index and element == MAGIC_SET_NEGATE_PREFIX then
 			set.hasToNegateMatch = true
-		elseif element.type == ENUM_ELEMENT_TYPE_SET then
+		elseif element.type == ELEMENT_SET then
 			set.classIndex = set.classIndex + 1
 			set.classes[set.classIndex] = element
 		else
@@ -99,9 +110,9 @@ Set.parse = function(state, tree)
 
 				if nextElement then
 					skipCount = peekIndex - elementIndex
-					nextTokenIsRangeSep = nextElement == ENUM_SET_RANGE_SEPARATOR
+					nextTokenIsRangeSep = nextElement == MAGIC_SET_RANGE_SEPARATOR
 
-					nextTokenValue = (nextElement.type ~= ENUM_ELEMENT_TYPE_SET) and (
+					nextTokenValue = (nextElement.type ~= ELEMENT_SET) and (
 						nextElement.value or state:getExecutionValues(nextElement, true)
 					) or nil
 				end
@@ -111,7 +122,7 @@ Set.parse = function(state, tree)
 				-- both the last and next characters must be literals
 				if nextTokenValue then
 					if rangeInitChar > nextTokenValue then
-						return errorsEnum.unorderedSetRange
+						return ERROR_UNORDERED_SET_RANGE
 					end
 
 					addRange(set, rangeInitChar, nextTokenValue)
@@ -171,4 +182,5 @@ Set.match = function(currentElement, _, currentCharacter)
 	return currentElement.hasToNegateMatch ~= hasMatched
 end
 
+--[[ Return ]]--
 return Set

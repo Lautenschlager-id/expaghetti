@@ -224,10 +224,10 @@ return {
 	},
 	{
 		regex = "%f",
-		errorMessage = "Invalid regular expression: Missing set after frontier pattern",
+		errorMessage = "Invalid regular expression: Expected a character set after frontier pattern",
 	},
 	{
 		regex = "%F",
-		errorMessage = "Invalid regular expression: Missing set after frontier pattern",
+		errorMessage = "Invalid regular expression: Expected a character set after frontier pattern",
 	},
 }

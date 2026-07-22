@@ -1,13 +1,13 @@
 ----------------------------------------------------------------------------------------------------
-local ENUM_ANY_CHARACTER = require("./enums/magic").ANY_CHARACTER
+local ENUM_ANY = require("./enums/magic").ANY
 local AST = require("./ast")
 local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").any
-local ENUM_LINE_BREAKS = require("./enums/constants").LINE_BREAKS
+local ENUM_LINE_BREAKS = require("./enums/lineBreaks")
 ----------------------------------------------------------------------------------------------------
 local Any = { }
 
 Any.isToken = function(currentCharacter)
-	return currentCharacter == ENUM_ANY_CHARACTER
+	return currentCharacter == ENUM_ANY
 end
 
 Any.isElement = function(currentElement)

@@ -1,9 +1,12 @@
-----------------------------------------------------------------------------------------------------
-local ParserState = require("parser.state")
-----------------------------------------------------------------------------------------------------
-local parserCore = require("parser.core")
-----------------------------------------------------------------------------------------------------
+--[[
+    The main parser entry point. Parses a regex expression string into an AST.
+]]
 
+--[[ Dependencies ]]--
+local ParserState = require("parser.state")
+local parserCore = require("parser.core")
+
+--[[ Return ]]--
 --- The main parser entry point. Parses a regex expression string into an AST.
 ---@param exprOrState string|table The regular expression string or an existing ParserState.
 ---@param flags string|table|nil A string of flag characters or a table of boolean flags.

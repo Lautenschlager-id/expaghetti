@@ -1,15 +1,15 @@
 local AST = require("./ast")
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
-local inlineFlagsEnum = require("./enums/flags").inlineFlags
+local inlineFlagsEnum = require("./enums/flags").INLINE_TOKENS
 
-local ENUM_CLOSE_GROUP = magicEnum.CLOSE_GROUP
+local ENUM_GROUP_CLOSE = magicEnum.GROUP_CLOSE
 local ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_BEHAVIOR
-local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
+local ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
 
 local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
 local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
-local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
+local ENUM_GROUP_FLAG_DOT_ALL = magicEnum.GROUP_FLAG_DOT_ALL
 local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
 
 return function(state, peekIndex, peekChar)
@@ -21,7 +21,7 @@ return function(state, peekIndex, peekChar)
 	
 	-- Parse all inline flags (e.g. `i`, `m`, `s`) and switch target if `-` is encountered
 	while inlineFlagsEnum[peekChar] do
-		if peekChar == ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR then
+		if peekChar == ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR then
 			currentTarget = disableFlags
 		else
 			currentTarget[peekChar] = true
@@ -45,7 +45,7 @@ return function(state, peekIndex, peekChar)
 		return peekIndex, node
 		
 	-- Handle standard inline flag toggles e.g. `(?i)`
-	elseif peekChar == ENUM_CLOSE_GROUP then
+	elseif peekChar == ENUM_GROUP_CLOSE then
 		local node = AST.GroupInlineFlags()
 		node.inlineFlags = {
 			enable = enableFlags,

@@ -1,86 +1,96 @@
-local elementsEnum = require("./enums/elements")
-local quantifierModesEnum = require("./enums/quantifierModes")
+--[[
+    Abstract Syntax Tree elements.
+]]
 
-local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
+--[[ Dependencies ]]--
+local elementsEnum = require("enums.elements")
+local quantifierModesEnum = require("enums.quantifierModes")
 
+--[[ Enum Aliases ]]--
+local ELEMENT_ANCHOR = elementsEnum.anchor
+local ELEMENT_ANY = elementsEnum.any
+local ELEMENT_LITERAL = elementsEnum.literal
+local ELEMENT_GROUP = elementsEnum.group
+local ELEMENT_SET = elementsEnum.set
+local ELEMENT_BOUNDARY = elementsEnum.boundary
+local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+local ELEMENT_ALTERNATE = elementsEnum.alternate
+local ELEMENT_positionCapture = elementsEnum.positionCapture
+local ELEMENT_captureReference = elementsEnum.captureReference
+local ELEMENT_BALANCED = elementsEnum.balanced
+
+local QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
+
+--[[ Module ]]--
 local AST = {}
 
-function AST.Anchor(isBeginning)
+--[[ Private Functions ]]--
+local baseGroup = function()
 	return {
-		type = elementsEnum.anchor,
+		type = ELEMENT_GROUP,
+		-- Common
+		tree = nil,
+		index = nil,
+		_skipFromTree = nil,
+		-- Specific
+		disableCapture = nil,
+		hasBehavior = nil,
+		name = nil,
+		isAtomic = nil,
+		isBranchReset = nil,
+		isLookahead = nil,
+		isLookbehind = nil,
+		isRecursion = nil,
+	}
+end
+
+--[[ Public API ]]--
+AST.Anchor = function(isBeginning)
+	return {
+		type = ELEMENT_ANCHOR,
 		isBeginning = isBeginning,
 	}
 end
 
-function AST.Any()
+AST.Any = function()
 	return {
-		type = elementsEnum.any,
+		type = ELEMENT_ANY,
 	}
 end
 
-function AST.Literal(value, lowerValue, upperValue)
+AST.Literal = function(value, lowerValue, upperValue)
 	return {
-		type = elementsEnum.literal,
+		type = ELEMENT_LITERAL,
 		value = value,
 		isCaseInsensitive = not not lowerValue,
 		lowerValue = lowerValue,
 		upperValue = upperValue,
 	}
 end
-local function baseGroup()
-	return {
-		type = elementsEnum.group,
-		-- Common
-		tree = nil,
-		index = nil,
-		name = nil,
-		hasBehavior = nil,
-		disableCapture = nil,
-		quantifier = nil,
-		-- Lookarounds
-		isLookahead = nil,
-		isLookbehind = nil,
-		isNegative = nil,
-		fixedLength = nil,
-		-- Special Behaviors
-		isAtomic = nil,
-		isBranchReset = nil,
-		-- Flags
-		inlineFlags = nil,
-		scopedFlags = nil,
-		-- Recursion
-		isRecursion = nil,
-		isRecursionRoot = nil,
-		targetIndex = nil,
-		targetName = nil,
-		-- Internal
-		_skipFromTree = nil,
-	}
-end
 
-function AST.Group()
+AST.Group = function()
 	return baseGroup()
 end
 
-function AST.GroupCapture()
+AST.GroupCapture = function()
 	return baseGroup()
 end
 
-function AST.GroupNonCapturing()
+AST.GroupNonCapturing = function()
 	local node = baseGroup()
 	node.disableCapture = true
 	node.hasBehavior = true
 	return node
 end
 
-function AST.GroupNamed(name)
+AST.GroupNamed = function(name)
 	local node = baseGroup()
 	node.hasBehavior = true
 	node.name = name
 	return node
 end
 
-function AST.GroupAtomic()
+AST.GroupAtomic = function()
 	local node = baseGroup()
 	node.disableCapture = true
 	node.isAtomic = true
@@ -88,7 +98,7 @@ function AST.GroupAtomic()
 	return node
 end
 
-function AST.GroupBranchReset()
+AST.GroupBranchReset = function()
 	local node = baseGroup()
 	node.disableCapture = true
 	node.isBranchReset = true
@@ -96,7 +106,7 @@ function AST.GroupBranchReset()
 	return node
 end
 
-function AST.GroupLookahead()
+AST.GroupLookahead = function()
 	local node = baseGroup()
 	node.isLookahead = true
 	node.disableCapture = true
@@ -104,7 +114,7 @@ function AST.GroupLookahead()
 	return node
 end
 
-function AST.GroupLookbehind()
+AST.GroupLookbehind = function()
 	local node = baseGroup()
 	node.isLookbehind = true
 	node.disableCapture = true
@@ -112,14 +122,14 @@ function AST.GroupLookbehind()
 	return node
 end
 
-function AST.GroupRecursion()
+AST.GroupRecursion = function()
 	local node = baseGroup()
 	node.isRecursion = true
 	node.hasBehavior = true
 	return node
 end
 
-function AST.GroupComment()
+AST.GroupComment = function()
 	local node = baseGroup()
 	node.disableCapture = true
 	node._skipFromTree = true
@@ -127,23 +137,23 @@ function AST.GroupComment()
 	return node
 end
 
-function AST.GroupInlineFlags()
+AST.GroupInlineFlags = function()
 	local node = baseGroup()
 	node._skipFromTree = true
 	node.hasBehavior = true
 	return node
 end
 
-function AST.GroupScopedFlags()
+AST.GroupScopedFlags = function()
 	local node = baseGroup()
 	node.disableCapture = true
 	node.hasBehavior = true
 	return node
 end
 
-function AST.Set()
+AST.Set = function()
 	return {
-		type = elementsEnum.set,
+		type = ELEMENT_SET,
 		hasToNegateMatch = false,
 		rangeIndex = 0,
 		ranges = {},
@@ -153,47 +163,47 @@ function AST.Set()
 	}
 end
 
-function AST.Boundary(isNegated, set)
+AST.Boundary = function(isNegated, set)
 	return {
-		type = elementsEnum.boundary,
+		type = ELEMENT_BOUNDARY,
 		isNegated = isNegated,
 		set = set,
 	}
 end
 
-function AST.Quantifier(min, max)
+AST.Quantifier = function(min, max)
 	return {
-		type = elementsEnum.quantifier,
+		type = ELEMENT_QUANTIFIER,
 		min = min or 0,
 		max = max or 0,
 		mode = nil,
 	}
 end
 
-function AST.Alternate(trees)
+AST.Alternate = function(trees)
 	return {
-		type = elementsEnum.alternate,
+		type = ELEMENT_ALTERNATE,
 		trees = trees,
 	}
 end
 
-function AST.PositionCapture(index)
+AST.PositionCapture = function(index)
 	return {
-		type = elementsEnum.position_capture,
+		type = ELEMENT_positionCapture,
 		index = index,
 	}
 end
 
-function AST.CaptureReference(index)
+AST.CaptureReference = function(index)
 	return {
-		type = elementsEnum.capture_reference,
+		type = ELEMENT_captureReference,
 		index = index,
 	}
 end
 
-function AST.Balanced(lowerOpen, upperOpen, lowerClose, upperClose)
+AST.Balanced = function(lowerOpen, upperOpen, lowerClose, upperClose)
 	return {
-		type = elementsEnum.balanced,
+		type = ELEMENT_BALANCED,
 		lowerOpen = lowerOpen,
 		upperOpen = upperOpen,
 		lowerClose = lowerClose,
@@ -201,4 +211,5 @@ function AST.Balanced(lowerOpen, upperOpen, lowerClose, upperClose)
 	}
 end
 
+--[[ Return ]]--
 return AST

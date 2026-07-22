@@ -1,17 +1,27 @@
-local AST = require("./ast")
-local Group = require("./magic/group/group")
-----------------------------------------------------------------------------------------------------
-local ENUM_ALTERNATE_SEPARATOR = require("./enums/magic").ALTERNATE_SEPARATOR
-local ENUM_ELEMENT_TYPE_ALTERNATE = require("./enums/elements").alternate
-----------------------------------------------------------------------------------------------------
-local Alternate = { }
+--[[
+    Parses alternate elements.
+]]
 
+--[[ Dependencies ]]--
+local AST = require("ast")
+local Group = require("magic.group.group")
+local magicEnum = require("enums.magic")
+local elementsEnum = require("enums.elements")
+
+--[[ Enum Aliases ]]--
+local MAGIC_ALTERNATE_BRANCH_SEPARATOR = magicEnum.ALTERNATE_BRANCH_SEPARATOR
+local ELEMENT_ALTERNATE = elementsEnum.alternate
+
+--[[ Module ]]--
+local Alternate = {}
+
+--[[ Public API ]]--
 Alternate.isToken = function(currentCharacter)
-	return currentCharacter == ENUM_ALTERNATE_SEPARATOR
+	return currentCharacter == MAGIC_ALTERNATE_BRANCH_SEPARATOR
 end
 
 Alternate.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_ALTERNATE
+	return currentElement.type == ELEMENT_ALTERNATE
 end
 
 Alternate.parse = function(state, tree)
@@ -112,4 +122,5 @@ Alternate.match = function(currentElement, state)
 	return false
 end
 
+--[[ Return ]]--
 return Alternate

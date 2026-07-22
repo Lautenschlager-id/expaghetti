@@ -1,20 +1,34 @@
-local config = require("config")
-local matcher = require("matcher.init")
+--[[
+    Main entry point for expaghetti.
+]]
 
-local function create(options)
+--[[ Globals ]]--
+local setmetatable = setmetatable
+
+--[[ Dependencies ]]--
+local Config = require("config")
+local Matcher = require("matcher.init")
+
+--[[ Module ]]--
+local Expaghetti = {}
+
+--[[ Private Functions ]]--
+local create = function(options)
 	if options then
-		config.set(options)
+		Config.set(options)
 	end
 
 	return {
-		match = matcher,
-		configure = config.set,
+		match = Matcher,
+		configure = Config.set,
 	}
 end
 
-return setmetatable({
-	create = create,
-}, {
+--[[ Public API ]]--
+Expaghetti.create = create
+
+--[[ Return ]]--
+return setmetatable(Expaghetti, {
 	__call = function(_, options)
 		return create(options)
 	end,

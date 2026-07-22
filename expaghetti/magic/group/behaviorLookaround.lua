@@ -3,8 +3,8 @@ local AST = require("./ast")
 local magicEnum = require("./enums/magic")
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
-local ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR
-local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR
+local ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
+local ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
 ----------------------------------------------------------------------------------------------------
 
@@ -13,8 +13,8 @@ local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
 -- The `=` and `!` tokens are reused for both lookahead and lookbehind polarity.
 return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 	-- Lookahead: (?=...), (?!...)
-	local isNegativeLookahead = (peekChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR) or nil
-	if peekChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or isNegativeLookahead then
+	local isNegativeLookahead = (peekChar == ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) or nil
+	if peekChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookahead then
 		local node = AST.GroupLookahead()
 		node.isLookahead = true
 		node.disableCapture = true
@@ -29,8 +29,8 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 			return false, nil, errorsEnum.invalidGroupBehavior
 		end
 
-		local isNegativeLookbehind = (lookbehindChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR) or nil
-		if lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or isNegativeLookbehind then
+		local isNegativeLookbehind = (lookbehindChar == ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) or nil
+		if lookbehindChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookbehind then
 			local node = AST.GroupLookbehind()
 			node.isLookbehind = true
 			node.disableCapture = true

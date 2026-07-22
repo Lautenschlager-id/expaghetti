@@ -1,21 +1,29 @@
-local isPositiveIntegerChar = function(char)
+--[[
+    Helper functions for parsing and string consumption.
+]]
+
+--[[ Module ]]--
+local ParserHelpers = {}
+
+--[[ Public API ]]--
+ParserHelpers.isPositiveIntegerChar = function(char)
 	return char >= '1' and char <= '9'
 end
 
-local isPositiveOrZeroIntegerChar = function(char)
+ParserHelpers.isPositiveOrZeroIntegerChar = function(char)
 	return char >= '0' and char <= '9'
 end
 
-local isLetter = function(char)
+ParserHelpers.isLetter = function(char)
 	return char >= 'A' and char <= 'z'
 end
 
-local isAlphanumeric = function(char)
+ParserHelpers.isAlphanumeric = function(char)
 	return (char >= 'A' and char <= 'z')
 		or (char >= '0' and char <= '9')
 end
 
-local isAlphanumericName = function(char, length)
+ParserHelpers.isAlphanumericName = function(char, length)
 	return (char >= 'A' and char <= 'z')
 		or (length > 0 and (char >= '0' and char <= '9'))
 end
@@ -24,7 +32,7 @@ end
 -- `loopIndex`, stopping when `conditionFn` returns false or an element / end
 -- of input is encountered. Returns the accumulated string, the next index, and
 -- the next character (which caused the stop).
-local function consumeWhile(state, loopIndex, conditionFn)
+ParserHelpers.consumeWhile = function(state, loopIndex, conditionFn)
 	local str, length = "", 0
 
 	while true do
@@ -44,7 +52,7 @@ end
 -- instead of going through a state object. Starts reading from `tbl[startIndex + 1]`.
 -- Returns the accumulated string, the index of the stopping character, and the
 -- stopping character itself (or nil if the end of the array was reached).
-local function consumeWhileArray(tbl, startIndex, conditionFn)
+ParserHelpers.consumeWhileArray = function(tbl, startIndex, conditionFn)
 	local str, length = "", 0
 	local loopIndex = startIndex
 
@@ -61,11 +69,5 @@ local function consumeWhileArray(tbl, startIndex, conditionFn)
 	end
 end
 
-return {
-	isPositiveIntegerChar = isPositiveIntegerChar,
-	isPositiveOrZeroIntegerChar = isPositiveOrZeroIntegerChar,
-	isAlphanumeric = isAlphanumeric,
-	isAlphanumericName = isAlphanumericName,
-	consumeWhile = consumeWhile,
-	consumeWhileArray = consumeWhileArray,
-}
+--[[ Return ]]--
+return ParserHelpers

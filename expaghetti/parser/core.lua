@@ -1,20 +1,27 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    Core parsing loop. Parses a regex pattern into an Abstract Syntax Tree (AST).
+]]
+
+--[[ Dependencies ]]--
 local Anchor = require("magic.anchor")
 local Alternate = require("magic.alternate")
 local Any = require("magic.any")
 local Group = require("magic.group.group")
 local Literal = require("magic.literal")
-local Quantifier = require("magic.Quantifier")
+local Quantifier = require("magic.quantifier")
 local Set = require("magic.set")
-----------------------------------------------------------------------------------------------------
-local errorsEnum = require("enums.errors")
-----------------------------------------------------------------------------------------------------
 
+local errorsEnum = require("enums.errors")
+
+--[[ Enum Aliases ]]--
+local ERROR_UNTERMINATED_GROUP = errorsEnum.unterminatedGroup
+
+--[[ Return ]]--
 --- Parses a regex pattern into an Abstract Syntax Tree (AST) sequentially.
 ---@param state table The ParserState object containing the parsing context and pattern characters.
 ---@return table|boolean tree The generated AST tree, or false if parsing failed.
 ---@return string|table|nil errorMessage An error message or error token if parsing failed.
-local parserCore = function(state)
+return function(state)
 	local tree = {
 		_index = 0
 	}
@@ -75,11 +82,9 @@ local parserCore = function(state)
 	if state.isGroup and not state.isAlternate then
 		local currentToken = state.patternChars[state.index]
 		if not Group.isClosingToken(currentToken) then
-			return false, errorsEnum.unterminatedGroup
+			return false, ERROR_UNTERMINATED_GROUP
 		end
 	end
 
 	return tree
 end
-
-return parserCore

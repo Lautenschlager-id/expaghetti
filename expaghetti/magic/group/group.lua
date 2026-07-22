@@ -1,54 +1,72 @@
-----------------------------------------------------------------------------------------------------
-local isPositiveIntegerChar = require("./helpers/parser_helpers").isPositiveIntegerChar
-----------------------------------------------------------------------------------------------------
-local PositionCapture = require("./magic/position_capture")
-----------------------------------------------------------------------------------------------------
-local behaviorCapture = require("./magic/group/behavior_capture")
-local behaviorAtomic = require("./magic/group/behavior_atomic")
-local behaviorBranchReset = require("./magic/group/behavior_branch_reset")
-local behaviorLookaround = require("./magic/group/behavior_lookaround")
-local behaviorRecursion = require("./magic/group/behavior_recursion")
-local behaviorComment = require("./magic/group/behavior_comment")
-local behaviorFlags = require("./magic/group/behavior_flags")
-local magicEnum = require("./enums/magic")
-local elementsEnum = require("./enums/elements")
-local elementLengths = require("./enums/elementLengths")
-local errorsEnum = require("./enums/errors")
-local inlineFlagsEnum = require("./enums/flags").inlineFlags
-----------------------------------------------------------------------------------------------------
-local ENUM_OPEN_GROUP = magicEnum.OPEN_GROUP
-local ENUM_CLOSE_GROUP = magicEnum.CLOSE_GROUP
-local ENUM_GROUP_BEHAVIOR_CHARACTER = magicEnum.GROUP_BEHAVIOR_CHARACTER
-local ENUM_GROUP_NON_CAPTURING_BEHAVIOR = magicEnum.GROUP_NON_CAPTURING_BEHAVIOR
-local ENUM_GROUP_ATOMIC_BEHAVIOR = magicEnum.GROUP_ATOMIC_BEHAVIOR
-local ENUM_GROUP_BRANCH_RESET_BEHAVIOR = magicEnum.GROUP_BRANCH_RESET_BEHAVIOR
-local ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR
-local ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR = magicEnum.GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR
-local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
-local ENUM_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
-local ENUM_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
-local ENUM_GROUP_COMMENT_BEHAVIOR = magicEnum.GROUP_COMMENT_BEHAVIOR
-local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
-local ENUM_ELEMENT_TYPE_LITERAL = elementsEnum.literal
-local ENUM_ELEMENT_TYPE_ANY = elementsEnum.any
-local ENUM_ELEMENT_TYPE_SET = elementsEnum.set
-local ENUM_ELEMENT_TYPE_ALTERNATE = elementsEnum.alternate
-local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
-local GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
-local GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS
-local ENUM_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
-local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
-local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
-local ENUM_GROUP_FLAG_DOTALL = magicEnum.GROUP_FLAG_DOTALL
-local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
-local ENUM_GROUP_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR
-local ZERO_LENGTH_ELEMENTS = elementLengths.ZERO_LENGTH_ELEMENTS
-local SINGLE_LENGTH_ELEMENTS = elementLengths.SINGLE_LENGTH_ELEMENTS
-----------------------------------------------------------------------------------------------------
-local Group = { }
-----------------------------------------------------------------------------------------------------
+--[[
+    Group module. Parses and matches groups.
+]]
+
+--[[ Globals ]]--
+local tostring = tostring
+local string = string
+
+--[[ Dependencies ]]--
+local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
+
+local PositionCapture = require("magic.positionCapture")
+local behaviorCapture = require("magic.group.behaviorCapture")
+local behaviorAtomic = require("magic.group.behaviorAtomic")
+local behaviorBranchReset = require("magic.group.behaviorBranchReset")
+local behaviorLookaround = require("magic.group.behaviorLookaround")
+local behaviorRecursion = require("magic.group.behaviorRecursion")
+local behaviorComment = require("magic.group.behaviorComment")
+local behaviorFlags = require("magic.group.behaviorFlags")
+
+local magicEnum = require("enums.magic")
+local elementsEnum = require("enums.elements")
+local elementLengths = require("enums.elementLengths")
+local errorsEnum = require("enums.errors")
+local inlineFlagsEnum = require("enums.flags").INLINE_TOKENS
+
+--[[ Enum Aliases ]]--
+local MAGIC_GROUP_OPEN = magicEnum.GROUP_OPEN
+local MAGIC_GROUP_CLOSE = magicEnum.GROUP_CLOSE
+local MAGIC_GROUP_BEHAVIOR_PREFIX = magicEnum.GROUP_BEHAVIOR_PREFIX
+local MAGIC_GROUP_NON_CAPTURING_BEHAVIOR = magicEnum.GROUP_NON_CAPTURING_BEHAVIOR
+local MAGIC_GROUP_ATOMIC_BEHAVIOR = magicEnum.GROUP_ATOMIC_BEHAVIOR
+local MAGIC_GROUP_BRANCH_RESET_BEHAVIOR = magicEnum.GROUP_BRANCH_RESET_BEHAVIOR
+local MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
+local MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
+local MAGIC_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
+local MAGIC_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
+local MAGIC_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
+local MAGIC_GROUP_COMMENT_BEHAVIOR = magicEnum.GROUP_COMMENT_BEHAVIOR
+local MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
+local MAGIC_GROUP_RECURSION_ROOT_ALIAS = magicEnum.GROUP_RECURSION_ROOT_ALIAS
+local MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
+local MAGIC_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
+local MAGIC_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
+local MAGIC_GROUP_FLAG_DOT_ALL = magicEnum.GROUP_FLAG_DOT_ALL
+local MAGIC_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
+local MAGIC_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
+
+local ELEMENT_GROUP = elementsEnum.group
+local ELEMENT_LITERAL = elementsEnum.literal
+local ELEMENT_ANY = elementsEnum.any
+local ELEMENT_SET = elementsEnum.set
+local ELEMENT_ALTERNATE = elementsEnum.alternate
+local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+
+local ZERO_LENGTH_ELEMENTS = elementLengths.ZERO_LENGTH
+local SINGLE_LENGTH_ELEMENTS = elementLengths.SINGLE_LENGTH
+
+local ERROR_UNKNOWN_ELEMENT_LENGTH = errorsEnum.unknownElementLength
+local ERROR_INVALID_GROUP_BEHAVIOR = errorsEnum.invalidGroupBehavior
+local ERROR_VARIABLE_LENGTH_LOOKBEHIND = errorsEnum.variableLengthLookbehind
+local ERROR_NO_GROUP_TO_CLOSE = errorsEnum.unexpectedGroupClose
+
+--[[ Module ]]--
+local Group = {}
+
+--[[ Private Functions ]]--
 local getLookbehindFixedLength
-function getLookbehindFixedLength(tree)
+getLookbehindFixedLength = function(tree)
 	local totalLen = 0
 	local elem, quantifier, groupLength, errorMessage, alternateLength, trees, expectedAlternateLength
 	for i = 1, tree._index do
@@ -63,13 +81,13 @@ function getLookbehindFixedLength(tree)
 		-- Elements that consume 1 character
 		elseif SINGLE_LENGTH_ELEMENTS[elem.type] then
 			totalLen = totalLen + (quantifier and quantifier.min or 1)
-		elseif elem.type == ENUM_ELEMENT_TYPE_GROUP then
+		elseif elem.type == ELEMENT_GROUP then
 			groupLength, errorMessage = getLookbehindFixedLength(elem.tree)
 			if not groupLength then
 				return nil, errorMessage
 			end
 			totalLen = totalLen + (groupLength * (quantifier and quantifier.min or 1))
-		elseif elem.type == ENUM_ELEMENT_TYPE_ALTERNATE then
+		elseif elem.type == ELEMENT_ALTERNATE then
 			trees = elem.trees
 			expectedAlternateLength = nil
 
@@ -89,7 +107,7 @@ function getLookbehindFixedLength(tree)
 			totalLen = totalLen + (alternateLength * (quantifier and quantifier.min or 1))
 		else
 			-- Unknown element, cannot determine length safely
-			return nil, string.format(errorsEnum.unknownElementLength, tostring(elem.type or elem))
+			return nil, string.format(ERROR_UNKNOWN_ELEMENT_LENGTH, tostring(elem.type or elem))
 		end
     end
 	return totalLen
@@ -100,35 +118,35 @@ local parseGroupBehavior = function(state)
 	local nextIndex, currentChar = state:readElement(index)
 
 	-- Standard capturing group (no `?` behavior prefix)
-	if not nextIndex or state:isElement(currentChar) or currentChar ~= ENUM_GROUP_BEHAVIOR_CHARACTER then
+	if not nextIndex or state:isElement(currentChar) or currentChar ~= MAGIC_GROUP_BEHAVIOR_PREFIX then
 		return behaviorCapture(state, index)
 	end
 
 	local peekIndex, peekChar = state:readElement(nextIndex)
 	if not peekIndex or state:isElement(peekChar) then 
-		return false, nil, errorsEnum.invalidGroupBehavior
+		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 	end
 
 	-- Branch reset groups: (?|...)
-	if peekChar == ENUM_GROUP_BRANCH_RESET_BEHAVIOR then
+	if peekChar == MAGIC_GROUP_BRANCH_RESET_BEHAVIOR then
 		return behaviorBranchReset(state, peekIndex)
 	
 	-- Non-capturing groups: (?:...)
-	elseif peekChar == ENUM_GROUP_NON_CAPTURING_BEHAVIOR then
+	elseif peekChar == MAGIC_GROUP_NON_CAPTURING_BEHAVIOR then
 		return behaviorCapture(state, index, peekIndex, peekChar)
 		
 	-- Atomic groups: (?>...)
-	elseif peekChar == ENUM_GROUP_ATOMIC_BEHAVIOR then
+	elseif peekChar == MAGIC_GROUP_ATOMIC_BEHAVIOR then
 		return behaviorAtomic(state, peekIndex)
 		
 	-- Positive / Negative Lookahead: (?=...), (?!...)
-	elseif peekChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or peekChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR then
+	elseif peekChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or peekChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR then
 		return behaviorLookaround(state, peekIndex, peekChar)
 		
 	-- Positive / Negative Lookbehind: (?<=...), (?<!...)
-	elseif peekChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
+	elseif peekChar == MAGIC_GROUP_LOOKBEHIND_BEHAVIOR then
 		local lookbehindIndex, lookbehindChar = state:readElement(peekIndex)
-		if lookbehindIndex and not state:isElement(lookbehindChar) and (lookbehindChar == ENUM_GROUP_POSITIVE_LOOKAHEAD_BEHAVIOR or lookbehindChar == ENUM_GROUP_NEGATIVE_LOOKAHEAD_BEHAVIOR) then
+		if lookbehindIndex and not state:isElement(lookbehindChar) and (lookbehindChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or lookbehindChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) then
 			return behaviorLookaround(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 		else
 			-- Fallback to Named Capture which also uses `<` i.e. `(?<name>...)`
@@ -136,11 +154,11 @@ local parseGroupBehavior = function(state)
 		end
 		
 	-- Comments: (?#...)
-	elseif peekChar == ENUM_GROUP_COMMENT_BEHAVIOR then
+	elseif peekChar == MAGIC_GROUP_COMMENT_BEHAVIOR then
 		return behaviorComment(state, peekIndex)
 		
 	-- Recursion: (?R), (?0), (?123), (?&name)
-	elseif peekChar == GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == GROUP_RECURSION_ROOT_BEHAVIOR_ALIAS or peekChar == ENUM_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar) then
+	elseif peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS or peekChar == MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar) then
 		return behaviorRecursion(state, peekIndex, peekChar)
 		
 	-- Inline and Scoped Flags: (?i), (?i:...)
@@ -149,20 +167,21 @@ local parseGroupBehavior = function(state)
 		
 	-- Unrecognized behavior token after `(?`
 	else
-		return false, nil, errorsEnum.invalidGroupBehavior
+		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 	end
 end
-----------------------------------------------------------------------------------------------------
+
+--[[ Public API ]]--
 Group.isOpeningToken = function(currentCharacter)
-	return currentCharacter == ENUM_OPEN_GROUP
+	return currentCharacter == MAGIC_GROUP_OPEN
 end
 
 Group.isClosingToken = function(currentCharacter)
-	return currentCharacter == ENUM_CLOSE_GROUP
+	return currentCharacter == MAGIC_GROUP_CLOSE
 end
 
 Group.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_GROUP
+	return currentElement.type == ELEMENT_GROUP
 end
 
 Group.parse = function(state, tree)
@@ -189,7 +208,7 @@ Group.parse = function(state, tree)
 	-- A group with any value
 	if value.isRecursion then
 		value.tree = { _index = 0 }
-	elseif not state.patternChars[state.index] or state.patternChars[state.index] ~= ENUM_CLOSE_GROUP then
+	elseif not state.patternChars[state.index] or state.patternChars[state.index] ~= MAGIC_GROUP_CLOSE then
 		if not (
 			value.disableCapture
 			or value.name
@@ -235,7 +254,7 @@ Group.parse = function(state, tree)
 	if value.isLookbehind then
 		local len, errorMessage = getLookbehindFixedLength(value.tree)
 		if not len then
-			return errorMessage or errorsEnum.variableLengthLookbehind
+			return errorMessage or ERROR_VARIABLE_LENGTH_LOOKBEHIND
 		end
 		value.fixedLength = len
 	end
@@ -258,7 +277,7 @@ Group.parseClosing = function(state)
 	if state.isGroup then
 		return true, nil
 	end
-	return false, errorsEnum.noGroupToClose
+	return false, ERROR_NO_GROUP_TO_CLOSE
 end
 
 Group.match = function(currentElement, state)
@@ -371,4 +390,5 @@ Group.match = function(currentElement, state)
 	return hasMatched, iniStr, endStr, state.metaData, true
 end
 
+--[[ Return ]]--
 return Group

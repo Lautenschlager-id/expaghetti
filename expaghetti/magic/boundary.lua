@@ -1,21 +1,29 @@
-----------------------------------------------------------------------------------------------------
-local AST = require("./ast")
-local Set = require("./magic/set")
-----------------------------------------------------------------------------------------------------
-local errorsEnum = require("./enums/errors")
-local elementsEnum = require("./enums/elements")
-local ENUM_ELEMENT_TYPE_BOUNDARY = elementsEnum.boundary
-----------------------------------------------------------------------------------------------------
-local Boundary = { }
+--[[
+    Parses boundary elements.
+]]
 
+--[[ Dependencies ]]--
+local AST = require("ast")
+local Set = require("magic.set")
+local errorsEnum = require("enums.errors")
+local elementsEnum = require("enums.elements")
+
+--[[ Enum Aliases ]]--
+local ELEMENT_BOUNDARY = elementsEnum.boundary
+local ERROR_MISSING_FRONTIER_SET = errorsEnum.expectedFrontierSet
+
+--[[ Module ]]--
+local Boundary = {}
+
+--[[ Public API ]]--
 Boundary.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_BOUNDARY
+	return currentElement.type == ELEMENT_BOUNDARY
 end
 
 Boundary.parse = function(state, index, isNegated)
 	local _, nextElement = state:readElement(index)
 	if not Set.isToken(nextElement) then
-		return false, errorsEnum.missingFrontierSet
+		return false, ERROR_MISSING_FRONTIER_SET
 	end
 
 	local oldIndex = state.index
@@ -46,4 +54,5 @@ Boundary.match = function(currentElement, state, currentCharacter)
 	return false
 end
 
+--[[ Return ]]--
 return Boundary

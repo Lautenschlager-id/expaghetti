@@ -1,9 +1,18 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    String helper utilities.
+]]
+
+--[[ Globals ]]--
 local strsub = string.sub
-----------------------------------------------------------------------------------------------------
-local utf8 = require("./helpers/utf8")
-----------------------------------------------------------------------------------------------------
-local splitStringByEachChar = function(str, encodeUTF8)
+
+--[[ Dependencies ]]--
+local utf8 = require("helpers.utf8")
+
+--[[ Module ]]--
+local StringHelpers = {}
+
+--[[ Public API ]]--
+StringHelpers.splitStringByEachChar = function(str, encodeUTF8)
 	if encodeUTF8 then
 		return utf8.transform(str)
 	end
@@ -18,7 +27,6 @@ local splitStringByEachChar = function(str, encodeUTF8)
 	return splitString, stringLength
 end
 
-local stringCharToCtrlChar
 do
 	local strbyte = string.byte
 	local strchar = string.char
@@ -32,7 +40,7 @@ do
 	}
 	local delimitersLength = #delimiters
 
-	stringCharToCtrlChar = function(char)
+	StringHelpers.stringCharToCtrlChar = function(char)
 		for index = 1, delimitersLength, 3 do
 			if char >= delimiters[index] and char <= delimiters[index + 1] then
 				return strchar(xor(strbyte(char), delimiters[index + 2]))
@@ -41,7 +49,5 @@ do
 	end
 end
 
-return {
-	splitStringByEachChar = splitStringByEachChar,
-	stringCharToCtrlChar = stringCharToCtrlChar,
-}
+--[[ Return ]]--
+return StringHelpers

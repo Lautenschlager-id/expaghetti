@@ -1,29 +1,42 @@
-----------------------------------------------------------------------------------------------------
+--[[
+    Escaped module. Parses escaped sequences and characters.
+]]
+
+--[[ Globals ]]--
 local pcall = pcall
+local tonumber = tonumber
+
 local strchar = string.char
 local strformat = string.format
-local tonumber = tonumber
-----------------------------------------------------------------------------------------------------
-local stringCharToCtrlChar = require("./helpers/string").stringCharToCtrlChar
-local tblDeepCopy = require("./helpers/table").tblDeepCopy
-local isPositiveIntegerChar = require("./helpers/parser_helpers").isPositiveIntegerChar
-----------------------------------------------------------------------------------------------------
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local CaptureReference = require("./magic/capture_reference")
-local Boundary = require("./magic/boundary")
-local Balanced = require("./magic/balanced")
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-local elementsEnum = require("./enums/elements")
-local errorsEnum = require("./enums/errors")
-local characterClasses = require("./enums/classes")
-----------------------------------------------------------------------------------------------------
-local ENUM_ESCAPE_CHARACTER = magicEnum.ESCAPE_CHARACTER
-local ENUM_MAGIC_HASHMAP = magicEnum._hasmap
-----------------------------------------------------------------------------------------------------
-local Escaped = { }
 
+--[[ Dependencies ]]--
+local stringCharToCtrlChar = require("helpers.string").stringCharToCtrlChar
+local table_deepcopy = require("helpers.table").table_deepcopy
+local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
+
+local AST = require("ast")
+
+local CaptureReference = require("magic.captureReference")
+local Boundary = require("magic.boundary")
+local Balanced = require("magic.balanced")
+
+local magicEnum = require("enums.magic")
+local elementsEnum = require("enums.elements")
+local errorsEnum = require("enums.errors")
+local characterClasses = require("enums.characterClasses")
+
+--[[ Enum Aliases ]]--
+local MAGIC_ESCAPE = magicEnum.ESCAPE
+local MAGIC_HASHMAP = magicEnum._hashmap
+local ERROR_INVALID_PARAM_CTRL_CHAR = errorsEnum.invalidControlCharacterParameter
+local ERROR_INVALID_PARAM_UNICODE_CHAR = errorsEnum.invalidUnicodeParameter
+local ERROR_INCOMPLETE_ESCAPE = errorsEnum.incompleteEscape
+local ERROR_INVALID_ESCAPE = errorsEnum.invalidEscape
+
+--[[ Module ]]--
+local Escaped = {}
+
+--[[ Private Functions ]]--
 local specialEscaped = {
 	-- %1 --> reference capture N
 	int = CaptureReference.parseByIndex,
@@ -37,7 +50,7 @@ local specialEscaped = {
 specialEscaped.c = function(state, currentCharacter, index, expression, isInsideSet)
 	local ctrlChar = currentCharacter and stringCharToCtrlChar(currentCharacter)
 	if not ctrlChar then
-		return false, errorsEnum.invalidParamCtrlChar
+		return false, ERROR_INVALID_PARAM_CTRL_CHAR
 	end
 
 	local value, lowerValue, upperValue = state:getExecutionValues(ctrlChar, isInsideSet)
@@ -60,7 +73,7 @@ specialEscaped.e = function(state, currentCharacter, index, expression, isInside
 	end
 
 	if not hex then
-		return false, errorsEnum.invalidParamUnicodeChar
+		return false, ERROR_INVALID_PARAM_UNICODE_CHAR
 	end
 
 	local value, lowerValue, upperValue = state:getExecutionValues(hex, isInsideSet)
@@ -74,9 +87,10 @@ end
 specialEscaped.F = function(state, currentCharacter, index, expression, isInsideSet)
 	return Boundary.parse(state, index, true)
 end
-----------------------------------------------------------------------------------------------------
+
+--[[ Public API ]]--
 Escaped.isToken = function(currentCharacter)
-	return currentCharacter == ENUM_ESCAPE_CHARACTER
+	return currentCharacter == MAGIC_ESCAPE
 end
 
 Escaped.parse = function(state, index, expression, isInsideSet)
@@ -85,17 +99,17 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 
 	local currentCharacter = expression[index]
 	if not currentCharacter then
-		return false, errorsEnum.incompleteEscape
+		return false, ERROR_INCOMPLETE_ESCAPE
 	end
 
 	-- Returns the index for the next character
 	index = index + 1
 
 	if characterClasses[currentCharacter] then
-		local set = tblDeepCopy(characterClasses[currentCharacter])
+		local set = table_deepcopy(characterClasses[currentCharacter])
 		state:compileSet(set)
 		return index, set
-	elseif ENUM_MAGIC_HASHMAP[currentCharacter] then
+	elseif MAGIC_HASHMAP[currentCharacter] then
 		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
 		return index, AST.Literal(value, lowerValue, upperValue)
 	elseif specialEscaped[currentCharacter] then
@@ -104,7 +118,8 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 		return specialEscaped.int(state, currentCharacter, index)
 	end
 
-	return false, strformat(errorsEnum.invalidEscape, currentCharacter)
+	return false, strformat(ERROR_INVALID_ESCAPE, currentCharacter)
 end
 
+--[[ Return ]]--
 return Escaped

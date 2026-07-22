@@ -2,9 +2,9 @@ local Alternate = require("magic.alternate")
 local Anchor = require("magic.anchor")
 local Balanced = require("magic.balanced")
 local Boundary = require("magic.boundary")
-local CaptureReference = require("magic.capture_reference")
+local CaptureReference = require("magic.captureReference")
 local Group = require("magic.group.group")
-local PositionCapture = require("magic.position_capture")
+local PositionCapture = require("magic.positionCapture")
 local Set = require("magic.set")
 
 local Any = require("magic.any")
@@ -16,10 +16,10 @@ local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.anchor
 local ENUM_ELEMENT_TYPE_ANY = enumElements.any
 local ENUM_ELEMENT_TYPE_BALANCED = enumElements.balanced
 local ENUM_ELEMENT_TYPE_BOUNDARY = enumElements.boundary
-local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = enumElements.capture_reference
+local ENUM_ELEMENT_TYPE_captureReference = enumElements.captureReference
 local ENUM_ELEMENT_TYPE_GROUP = enumElements.group
 local ENUM_ELEMENT_TYPE_LITERAL = enumElements.literal
-local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = enumElements.position_capture
+local ENUM_ELEMENT_TYPE_positionCapture = enumElements.positionCapture
 local ENUM_ELEMENT_TYPE_SET = enumElements.set
 
 local elementMatchers = {
@@ -43,7 +43,7 @@ local elementMatchers = {
 		matcher = Boundary.match,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE] = {
+	[ENUM_ELEMENT_TYPE_captureReference] = {
 		matcher = CaptureReference.match,
 		requiresCharacter = false,
 	},
@@ -55,7 +55,7 @@ local elementMatchers = {
 		matcher = Literal.match,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_POSITION_CAPTURE] = {
+	[ENUM_ELEMENT_TYPE_positionCapture] = {
 		matcher = PositionCapture.match,
 		requiresCharacter = false,
 	},
@@ -74,7 +74,7 @@ local elementMatchers = {
 ---@return number|nil endStr The ending string index of the match.
 ---@return table|nil metaData Metadata including captures, if any.
 ---@return boolean|nil shouldEndThisExecution True if execution stack should finish.
-local singleElementMatcher = function(currentElement, currentCharacter, state)
+local elementMatcher = function(currentElement, currentCharacter, state)
 	local elementClass = elementMatchers[currentElement.type]
 	if not elementClass then
 		return false
@@ -87,4 +87,4 @@ local singleElementMatcher = function(currentElement, currentCharacter, state)
 	return elementClass.matcher(currentElement, state, currentCharacter)
 end
 
-return singleElementMatcher
+return elementMatcher

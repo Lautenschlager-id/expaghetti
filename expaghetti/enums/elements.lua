@@ -1,13 +1,20 @@
+--[[
+    AST element type identifiers.
+
+    These values uniquely identify the different kinds of AST nodes produced
+    by the parser and consumed by the matcher.
+]]
+
 return {
-	anchor = "anchor",
 	alternate = "alternate",
+	anchor = "anchor",
 	any = "any",
 	balanced = "balanced",
 	boundary = "boundary",
-	capture_reference = "capture_reference",
+	captureReference = "captureReference",
 	group = "group",
 	literal = "literal",
-	position_capture = "position_capture",
+	positionCapture = "positionCapture",
 	quantifier = "quantifier",
 	set = "set",
 }

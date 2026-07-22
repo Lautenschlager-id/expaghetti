@@ -1,24 +1,31 @@
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-----------------------------------------------------------------------------------------------------
+--[[
+    Flag definitions used by the parser and matcher.
 
-local flags = {
+    Includes the complete set of supported regex flags and the subset
+    allowed within inline flag groups.
+]]
+
+--[[ Enums ]]--
+local Magic = require("enums.magic")
+
+--[[ Modules ]]--
+local FLAGS = {
 	CASE_INSENSITIVE = 'i',
+	DOT_ALL = 's',
 	MULTILINE = 'm',
-	DOTALL = 's',
 	NO_AUTO_CAPTURE = 'n',
 	UNICODE = 'u',
 }
 
-local inlineFlags = {
-	[flags.CASE_INSENSITIVE] = true,
-	[flags.MULTILINE] = true,
-	[flags.DOTALL] = true,
-	[flags.NO_AUTO_CAPTURE] = true,
-	[magicEnum.GROUP_FLAGS_DISABLE_BEHAVIOR] = true
+local INLINE_TOKENS = {
+	[FLAGS.CASE_INSENSITIVE] = true,
+	[FLAGS.DOT_ALL] = true,
+	[FLAGS.MULTILINE] = true,
+	[FLAGS.NO_AUTO_CAPTURE] = true,
+	[Magic.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR] = true
 }
 
 return {
-	flags = flags,
-	inlineFlags = inlineFlags
+	FLAGS = FLAGS,
+	INLINE_TOKENS = INLINE_TOKENS,
 }

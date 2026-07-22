@@ -53,34 +53,34 @@ return {
 		regex = "%c %c~%c1",
 	},
 	{
-		errorMessage = "Invalid regular expression: Parameter passed to \"%c\" must be valid",
+		errorMessage = "Invalid regular expression: Expected a valid control character after '%c'",
 		regex = "%c",
 	},
 	{
-		errorMessage = "Invalid regular expression: Parameter passed to \"%c\" must be valid",
-		regex = "%cÿ",
+		errorMessage = "Invalid regular expression: Expected a valid control character after '%c'",
+		regex = "%c\xFF",
 	},
 	{
 		parsed = {
 			{
 				isCaseInsensitive = false,
 				type = "literal",
-				value = string.byte("ÿ"),
+				value = string.byte("\xFF"),
 			},
 			_index = 1,
 		},
 		regex = "%e00FF",
 	},
 	{
-		errorMessage = "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"%e\"",
+		errorMessage = "Invalid regular expression: Expected a 4-digit hexadecimal value after '%e'",
 		regex = "%eFFF",
 	},
 	{
-		errorMessage = "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"%e\"",
+		errorMessage = "Invalid regular expression: Expected a 4-digit hexadecimal value after '%e'",
 		regex = "%eFFFF",
 	},
 	{
-		errorMessage = "Invalid regular expression: A valid 4 characters hexadecimal value must be passed to \"%e\"",
+		errorMessage = "Invalid regular expression: Expected a 4-digit hexadecimal value after '%e'",
 		regex = "%e",
 	},
 }

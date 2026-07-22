@@ -526,15 +526,15 @@ return {
 			},
 			{
 				index = 1,
-				type = "capture_reference",
+				type = "captureReference",
 			},
 			{
 				index = 2,
-				type = "capture_reference",
+				type = "captureReference",
 			},
 			{
 				index = 3,
-				type = "capture_reference",
+				type = "captureReference",
 			},
 			_index = 5,
 		},
@@ -564,7 +564,7 @@ return {
 			},
 			{
 				index = 3,
-				type = "capture_reference",
+				type = "captureReference",
 			},
 			{
 				isCaseInsensitive = false,
@@ -580,7 +580,7 @@ return {
 		regex = "a(",
 	},
 	{
-		errorMessage = "Invalid regular expression: There is no group to close",
+		errorMessage = "Invalid regular expression: Unexpected group close",
 		regex = "a)",
 	},
 	{
@@ -604,7 +604,7 @@ return {
 		regex = "(?<_ 007>)",
 	},
 	{
-		errorMessage = "Invalid regular expression: Duplicated group name <abc>",
+		errorMessage = "Invalid regular expression: Duplicate group name 'abc'",
 		regex = "(?<abc>)(?<abc>)",
 	},
 	{
@@ -620,7 +620,7 @@ return {
 		regex = "(?<%>>)",
 	},
 	{
-		errorMessage = "Invalid regular expression: Invalid backreference call: Missing '<'",
+		errorMessage = "Invalid regular expression: Invalid backreference: expected '<'",
 		regex = "%k",
 	},
 	{
