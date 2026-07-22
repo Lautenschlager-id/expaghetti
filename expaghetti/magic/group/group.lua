@@ -9,7 +9,7 @@ local string = string
 --[[ Dependencies ]]--
 local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
 
-local POSITION_CAPTURE = require("magic.positionCapture")
+local PositionCapture = require("magic.positionCapture")
 local behaviorCapture = require("magic.group.behaviorCapture")
 local behaviorAtomic = require("magic.group.behaviorAtomic")
 local behaviorBranchReset = require("magic.group.behaviorBranchReset")
@@ -241,7 +241,7 @@ Group.parse = function(state, tree)
 			state.metaData.groupTreesByName[value.name] = groupTree
 		end
 	elseif not value.hasBehavior then
-		state.index = POSITION_CAPTURE.parse(state.index, tree, state.metaData)
+		state.index = PositionCapture.parse(state.index, tree, state.metaData)
 		return nil
 	else
 		value.tree = { _index = 0 }

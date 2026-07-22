@@ -185,14 +185,14 @@ AST.Alternate = function(trees)
 	}
 end
 
-AST.POSITION_CAPTURE = function(index)
+AST.PositionCapture = function(index)
 	return {
 		type = ELEMENT_POSITION_CAPTURE,
 		index = index,
 	}
 end
 
-AST.CAPTURE_REFERENCE = function(index)
+AST.CaptureReference = function(index)
 	return {
 		type = ELEMENT_CAPTURE_REFERENCE,
 		index = index,

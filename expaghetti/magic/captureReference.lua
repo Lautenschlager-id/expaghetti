@@ -26,22 +26,22 @@ local ERROR_INVALID_BACKREFERENCE_NAME = errorsEnum.invalidBackreferenceName
 local ERROR_UNTERMINATED_BACKREFERENCE = errorsEnum.unterminatedBackreference
 
 --[[ Module ]]--
-local CAPTURE_REFERENCE = {}
+local CaptureReference = {}
 
 --[[ Private Functions ]]--
 
 --[[ Public API ]]--
-CAPTURE_REFERENCE.isElement = function(currentElement)
+CaptureReference.isElement = function(currentElement)
 	return currentElement.type == ELEMENT_CAPTURE_REFERENCE
 end
 
 -- %1 --> reference capture N
-CAPTURE_REFERENCE.parseByIndex = function(state, currentCharacter, index)
-	return index, AST.CAPTURE_REFERENCE(currentCharacter + 0)
+CaptureReference.parseByIndex = function(state, currentCharacter, index)
+	return index, AST.CaptureReference(currentCharacter + 0)
 end
 
 -- %k<NN> --> reference capture NN
-CAPTURE_REFERENCE.parseByName = function(state, currentCharacter, index, expression)
+CaptureReference.parseByName = function(state, currentCharacter, index, expression)
 	if expression[index] ~= MAGIC_GROUP_NAME_OPEN then
 		return false, ERROR_INVALID_BACKREFERENCE_SYNTAX
 	end
@@ -56,10 +56,10 @@ CAPTURE_REFERENCE.parseByName = function(state, currentCharacter, index, express
 		return false, closeChar and ERROR_INVALID_BACKREFERENCE_NAME or ERROR_UNTERMINATED_BACKREFERENCE
 	end
 
-	return afterIndex + 1, AST.CAPTURE_REFERENCE(tonumber(name) or name)
+	return afterIndex + 1, AST.CaptureReference(tonumber(name) or name)
 end
 
-CAPTURE_REFERENCE.match = function(currentElement, state)
+CaptureReference.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local initStringPositionList = state.metaData.captureStarts[currentElement.index]
 	local endStringPositionList = state.metaData.captureEnds[currentElement.index]
@@ -90,4 +90,4 @@ CAPTURE_REFERENCE.match = function(currentElement, state)
 end
 
 --[[ Return ]]--
-return CAPTURE_REFERENCE
+return CaptureReference
