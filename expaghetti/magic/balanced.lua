@@ -1,35 +1,45 @@
 --[[
-    Parses balanced elements.
+    Parser and matcher for balanced elements (`%bxy`).
+
+    Matches balanced pairs of delimiters while supporting nested
+    occurrences of the same delimiter pair.
 ]]
 
 --[[ Dependencies ]]--
-local AST = require("ast")
-local errorsEnum = require("enums.errors")
-local elementsEnum = require("enums.elements")
+local BalancedNode = require("ast").Balanced
 
---[[ Enum Aliases ]]--
-local ELEMENT_BALANCED = elementsEnum.BALANCED
-local ERROR_MISSING_BALANCED_DELIMITER = errorsEnum.missingBalancedDelimiters
+--[[ Aliases ]]--
+local ELEMENT_BALANCED = require("enums.elements").BALANCED
+local ERROR_MISSING_BALANCED_DELIMITERS = require("enums.errors").missingBalancedDelimiters
 
 --[[ Module ]]--
 local Balanced = {}
 
---[[ Public API ]]--
+--- Returns whether an AST element is a balanced node.
+---@param currentElement table The AST element to test.
+---@return boolean isBalanced Whether the element is a balanced node.
 Balanced.isElement = function(currentElement)
 	return currentElement.type == ELEMENT_BALANCED
 end
 
+--- Parses a balanced element.
+---@param state ParserState The current parser state.
+---@param currentCharacter string The current pattern character.
+---@param index number The current pattern index.
+---@param expression table The parsed pattern characters.
+---@return number|false nextIndex The parser index after the balanced element, or false on failure.
+---@return table|string nodeOrError The balanced AST node, or the parser error message on failure.
 Balanced.parse = function(state, currentCharacter, index, expression)
 	local opener = expression[index]
 	local closer = expression[index + 1]
 	if not opener or not closer then
-		return false, ERROR_MISSING_BALANCED_DELIMITER
+		return false, ERROR_MISSING_BALANCED_DELIMITERS
 	end
 
 	local opener, openerLower, openerUpper = state:getExecutionValues(opener)
 	local closer, closerLower, closerUpper = state:getExecutionValues(closer)
 
-	return index + 2, AST.Balanced(
+	return index + 2, BalancedNode(
 		openerLower or opener,
 		openerUpper or opener,
 		closerLower or closer,
@@ -37,6 +47,13 @@ Balanced.parse = function(state, currentCharacter, index, expression)
 	)
 end
 
+--- Matches a balanced element against the target string.
+---@param currentElement table The balanced AST node to match.
+---@param state MatchState The current matcher state.
+---@param currentCharacter string|nil The current target character.
+---@return boolean hasMatched Whether a balanced sequence was matched.
+---@return number|nil startIndex The match start index.
+---@return number|nil endIndex The match end index.
 Balanced.match = function(currentElement, state, currentCharacter)
 	local lowerOpen, upperOpen, lowerClose, upperClose = 
 		currentElement.lowerOpen, currentElement.upperOpen,
@@ -51,7 +68,8 @@ Balanced.match = function(currentElement, state, currentCharacter)
 	local depth = 1
 	currentStrIndex = currentStrIndex + 1
 
-	while currentStrIndex <= state.targetStringLength do
+	local targetStringLength = state.targetStringLength 
+	while currentStrIndex <= targetStringLength do
 		local char = state:getTargetCharacter(currentStrIndex)
 		if char == lowerClose or char == upperClose then
 			depth = depth - 1
@@ -69,5 +87,4 @@ Balanced.match = function(currentElement, state, currentCharacter)
 	return false
 end
 
---[[ Return ]]--
 return Balanced
