@@ -9,7 +9,7 @@ local string = string
 --[[ Dependencies ]]--
 local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
 
-local PositionCapture = require("magic.positionCapture")
+local POSITION_CAPTURE = require("magic.positionCapture")
 local behaviorCapture = require("magic.group.behaviorCapture")
 local behaviorAtomic = require("magic.group.behaviorAtomic")
 local behaviorBranchReset = require("magic.group.behaviorBranchReset")
@@ -46,12 +46,12 @@ local MAGIC_GROUP_FLAG_DOT_ALL = magicEnum.GROUP_FLAG_DOT_ALL
 local MAGIC_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
 local MAGIC_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
 
-local ELEMENT_GROUP = elementsEnum.group
-local ELEMENT_LITERAL = elementsEnum.literal
-local ELEMENT_ANY = elementsEnum.any
-local ELEMENT_SET = elementsEnum.set
-local ELEMENT_ALTERNATE = elementsEnum.alternate
-local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+local ELEMENT_GROUP = elementsEnum.GROUP
+local ELEMENT_LITERAL = elementsEnum.LITERAL
+local ELEMENT_ANY = elementsEnum.ANY
+local ELEMENT_SET = elementsEnum.SET
+local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
+local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
 
 local ZERO_LENGTH_ELEMENTS = elementLengths.ZERO_LENGTH
 local SINGLE_LENGTH_ELEMENTS = elementLengths.SINGLE_LENGTH
@@ -241,7 +241,7 @@ Group.parse = function(state, tree)
 			state.metaData.groupTreesByName[value.name] = groupTree
 		end
 	elseif not value.hasBehavior then
-		state.index = PositionCapture.parse(state.index, tree, state.metaData)
+		state.index = POSITION_CAPTURE.parse(state.index, tree, state.metaData)
 		return nil
 	else
 		value.tree = { _index = 0 }

@@ -8,7 +8,7 @@ local errorsEnum = require("enums.errors")
 local elementsEnum = require("enums.elements")
 
 --[[ Enum Aliases ]]--
-local ELEMENT_BALANCED = elementsEnum.balanced
+local ELEMENT_BALANCED = elementsEnum.BALANCED
 local ERROR_MISSING_BALANCED_DELIMITER = errorsEnum.missingBalancedDelimiters
 
 --[[ Module ]]--

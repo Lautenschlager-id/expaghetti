@@ -10,18 +10,18 @@
 local Elements = require("enums.elements")
 
 --[[ Aliases ]]--
-local ELEMENT_ANCHOR = Elements.anchor
-local ELEMENT_ANY = Elements.any
-local ELEMENT_BOUNDARY = Elements.boundary
-local ELEMENT_LITERAL = Elements.literal
-local ELEMENT_positionCapture = Elements.positionCapture
-local ELEMENT_SET = Elements.set
+local ELEMENT_ANCHOR = Elements.ANCHOR
+local ELEMENT_ANY = Elements.ANY
+local ELEMENT_BOUNDARY = Elements.BOUNDARY
+local ELEMENT_LITERAL = Elements.LITERAL
+local ELEMENT_POSITION_CAPTURE = Elements.POSITION_CAPTURE
+local ELEMENT_SET = Elements.SET
 
 --[[ Module ]]--
 local ZERO_LENGTH = {
 	[ELEMENT_ANCHOR] = true,
 	[ELEMENT_BOUNDARY] = true,
-	[ELEMENT_positionCapture] = true,
+	[ELEMENT_POSITION_CAPTURE] = true,
 }
 
 local SINGLE_LENGTH = {

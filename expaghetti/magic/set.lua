@@ -13,7 +13,7 @@ local MAGIC_SET_OPEN = magicEnum.SET_OPEN
 local MAGIC_SET_CLOSE = magicEnum.SET_CLOSE
 local MAGIC_SET_NEGATE_PREFIX = magicEnum.SET_NEGATE_PREFIX
 local MAGIC_SET_RANGE_SEPARATOR = magicEnum.SET_RANGE_SEPARATOR
-local ELEMENT_SET = elementsEnum.set
+local ELEMENT_SET = elementsEnum.SET
 local ERROR_UNCLOSED_SET = errorsEnum.unterminatedSet
 local ERROR_UNORDERED_SET_RANGE = errorsEnum.unorderedSetRange
 

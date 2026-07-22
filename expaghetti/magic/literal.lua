@@ -4,7 +4,7 @@ local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
 local errorsEnum = require("./enums/errors")
 ----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").literal
+local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").LITERAL
 local ENUM_FLAG_UNICODE = require("./enums/flags").FLAGS.UNICODE
 ----------------------------------------------------------------------------------------------------
 local Literal = { }

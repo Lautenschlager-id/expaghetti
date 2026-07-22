@@ -1,5 +1,5 @@
 --[[
-    CaptureReference module. Parses and matches backreferences.
+    CAPTURE_REFERENCE module. Parses and matches backreferences.
 ]]
 
 --[[ Globals ]]--
@@ -19,29 +19,29 @@ local elementsEnum = require("enums.elements")
 --[[ Enum Aliases ]]--
 local MAGIC_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
 local MAGIC_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
-local ELEMENT_captureReference = elementsEnum.captureReference
+local ELEMENT_CAPTURE_REFERENCE = elementsEnum.CAPTURE_REFERENCE
 
 local ERROR_INVALID_BACKREFERENCE_SYNTAX = errorsEnum.invalidBackreferenceSyntax
 local ERROR_INVALID_BACKREFERENCE_NAME = errorsEnum.invalidBackreferenceName
 local ERROR_UNTERMINATED_BACKREFERENCE = errorsEnum.unterminatedBackreference
 
 --[[ Module ]]--
-local CaptureReference = {}
+local CAPTURE_REFERENCE = {}
 
 --[[ Private Functions ]]--
 
 --[[ Public API ]]--
-CaptureReference.isElement = function(currentElement)
-	return currentElement.type == ELEMENT_captureReference
+CAPTURE_REFERENCE.isElement = function(currentElement)
+	return currentElement.type == ELEMENT_CAPTURE_REFERENCE
 end
 
 -- %1 --> reference capture N
-CaptureReference.parseByIndex = function(state, currentCharacter, index)
-	return index, AST.CaptureReference(currentCharacter + 0)
+CAPTURE_REFERENCE.parseByIndex = function(state, currentCharacter, index)
+	return index, AST.CAPTURE_REFERENCE(currentCharacter + 0)
 end
 
 -- %k<NN> --> reference capture NN
-CaptureReference.parseByName = function(state, currentCharacter, index, expression)
+CAPTURE_REFERENCE.parseByName = function(state, currentCharacter, index, expression)
 	if expression[index] ~= MAGIC_GROUP_NAME_OPEN then
 		return false, ERROR_INVALID_BACKREFERENCE_SYNTAX
 	end
@@ -56,10 +56,10 @@ CaptureReference.parseByName = function(state, currentCharacter, index, expressi
 		return false, closeChar and ERROR_INVALID_BACKREFERENCE_NAME or ERROR_UNTERMINATED_BACKREFERENCE
 	end
 
-	return afterIndex + 1, AST.CaptureReference(tonumber(name) or name)
+	return afterIndex + 1, AST.CAPTURE_REFERENCE(tonumber(name) or name)
 end
 
-CaptureReference.match = function(currentElement, state)
+CAPTURE_REFERENCE.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local initStringPositionList = state.metaData.captureStarts[currentElement.index]
 	local endStringPositionList = state.metaData.captureEnds[currentElement.index]
@@ -90,4 +90,4 @@ CaptureReference.match = function(currentElement, state)
 end
 
 --[[ Return ]]--
-return CaptureReference
+return CAPTURE_REFERENCE

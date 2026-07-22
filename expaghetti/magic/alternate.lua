@@ -10,7 +10,7 @@ local elementsEnum = require("enums.elements")
 
 --[[ Enum Aliases ]]--
 local MAGIC_ALTERNATE_BRANCH_SEPARATOR = magicEnum.ALTERNATE_BRANCH_SEPARATOR
-local ELEMENT_ALTERNATE = elementsEnum.alternate
+local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
 
 --[[ Module ]]--
 local Alternate = {}

@@ -6,15 +6,15 @@
 ]]
 
 return {
-	alternate = "alternate",
-	anchor = "anchor",
-	any = "any",
-	balanced = "balanced",
-	boundary = "boundary",
-	captureReference = "captureReference",
-	group = "group",
-	literal = "literal",
-	positionCapture = "positionCapture",
-	quantifier = "quantifier",
-	set = "set",
+	ALTERNATE = "alternate",
+	ANCHOR = "anchor",
+	ANY = "any",
+	BALANCED = "balanced",
+	BOUNDARY = "boundary",
+	CAPTURE_REFERENCE = "capture_reference",
+	GROUP = "group",
+	LITERAL = "literal",
+	POSITION_CAPTURE = "position_capture",
+	QUANTIFIER = "quantifier",
+	SET = "set",
 }

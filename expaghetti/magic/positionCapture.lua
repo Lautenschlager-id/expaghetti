@@ -1,26 +1,26 @@
 ----------------------------------------------------------------------------------------------------
 local AST = require("./ast")
 ----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_positionCapture = require("./enums/elements").positionCapture
+local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = require("./enums/elements").POSITION_CAPTURE
 ----------------------------------------------------------------------------------------------------
-local PositionCapture = { }
+local POSITION_CAPTURE = { }
 
-PositionCapture.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_positionCapture
+POSITION_CAPTURE.isElement = function(currentElement)
+	return currentElement.type == ENUM_ELEMENT_TYPE_POSITION_CAPTURE
 end
 
-PositionCapture.parse = function(index, tree, parserMetaData)
-	parserMetaData.positionCaptureIndex = parserMetaData.positionCaptureIndex + 1
+POSITION_CAPTURE.parse = function(index, tree, parserMetaData)
+	parserMetaData.POSITION_CAPTUREIndex = parserMetaData.POSITION_CAPTUREIndex + 1
 
 	tree._index = tree._index + 1
-	tree[tree._index] = AST.PositionCapture(parserMetaData.positionCaptureIndex)
+	tree[tree._index] = AST.POSITION_CAPTURE(parserMetaData.POSITION_CAPTUREIndex)
 
 	return index + 1
 end
 
-PositionCapture.match = function(currentElement, state)
-	state.metaData.positionCaptures[currentElement.index] = state.stringIndex
+POSITION_CAPTURE.match = function(currentElement, state)
+	state.metaData.POSITION_CAPTUREs[currentElement.index] = state.stringIndex
 	return true, nil, state.stringIndex - 1
 end
 
-return PositionCapture
+return POSITION_CAPTURE

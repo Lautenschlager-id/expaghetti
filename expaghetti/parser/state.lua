@@ -56,7 +56,7 @@ function ParserState.new(expr, flags)
 	self.metaData = {
 		groupNames = {},
 		groupIndex = 0,
-		positionCaptureIndex = 0,
+		POSITION_CAPTUREIndex = 0,
 		groupTreesByIndex = {},
 		groupTreesByName = {},
 	}

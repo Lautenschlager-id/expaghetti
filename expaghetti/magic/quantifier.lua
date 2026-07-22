@@ -23,7 +23,7 @@ local elementsEnum = require("enums.elements")
 local MAGIC_QUANTIFIER_OPEN = magicEnum.QUANTIFIER_OPEN
 local MAGIC_QUANTIFIER_CLOSE = magicEnum.QUANTIFIER_CLOSE
 local MAGIC_QUANTIFIER_SEPARATOR = magicEnum.QUANTIFIER_SEPARATOR
-local ELEMENT_QUANTIFIER = elementsEnum.quantifier
+local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
 
 local ERROR_UNORDERED_CUSTOM_QUANTIFIER = errorsEnum.unorderedQuantifierRange
 local ERROR_NOTHING_TO_REPEAT = errorsEnum.nothingToRepeat

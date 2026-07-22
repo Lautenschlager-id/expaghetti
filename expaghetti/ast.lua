@@ -6,17 +6,17 @@
 local elementsEnum = require("enums.elements")
 
 --[[ Enum Aliases ]]--
-local ELEMENT_ANCHOR = elementsEnum.anchor
-local ELEMENT_ANY = elementsEnum.any
-local ELEMENT_LITERAL = elementsEnum.literal
-local ELEMENT_GROUP = elementsEnum.group
-local ELEMENT_SET = elementsEnum.set
-local ELEMENT_BOUNDARY = elementsEnum.boundary
-local ELEMENT_QUANTIFIER = elementsEnum.quantifier
-local ELEMENT_ALTERNATE = elementsEnum.alternate
-local ELEMENT_positionCapture = elementsEnum.positionCapture
-local ELEMENT_captureReference = elementsEnum.captureReference
-local ELEMENT_BALANCED = elementsEnum.balanced
+local ELEMENT_ANCHOR = elementsEnum.ANCHOR
+local ELEMENT_ANY = elementsEnum.ANY
+local ELEMENT_LITERAL = elementsEnum.LITERAL
+local ELEMENT_GROUP = elementsEnum.GROUP
+local ELEMENT_SET = elementsEnum.SET
+local ELEMENT_BOUNDARY = elementsEnum.BOUNDARY
+local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
+local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
+local ELEMENT_POSITION_CAPTURE = elementsEnum.POSITION_CAPTURE
+local ELEMENT_CAPTURE_REFERENCE = elementsEnum.CAPTURE_REFERENCE
+local ELEMENT_BALANCED = elementsEnum.BALANCED
 
 
 --[[ Module ]]--
@@ -185,16 +185,16 @@ AST.Alternate = function(trees)
 	}
 end
 
-AST.PositionCapture = function(index)
+AST.POSITION_CAPTURE = function(index)
 	return {
-		type = ELEMENT_positionCapture,
+		type = ELEMENT_POSITION_CAPTURE,
 		index = index,
 	}
 end
 
-AST.CaptureReference = function(index)
+AST.CAPTURE_REFERENCE = function(index)
 	return {
-		type = ELEMENT_captureReference,
+		type = ELEMENT_CAPTURE_REFERENCE,
 		index = index,
 	}
 end

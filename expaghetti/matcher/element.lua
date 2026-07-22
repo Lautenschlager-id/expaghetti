@@ -2,25 +2,25 @@ local Alternate = require("magic.alternate")
 local Anchor = require("magic.anchor")
 local Balanced = require("magic.balanced")
 local Boundary = require("magic.boundary")
-local CaptureReference = require("magic.captureReference")
+local CAPTURE_REFERENCE = require("magic.captureReference")
 local Group = require("magic.group.group")
-local PositionCapture = require("magic.positionCapture")
+local POSITION_CAPTURE = require("magic.positionCapture")
 local Set = require("magic.set")
 
 local Any = require("magic.any")
 local Literal = require("magic.literal")
 
 local enumElements = require("enums.elements")
-local ENUM_ELEMENT_TYPE_ALTERNATE = enumElements.alternate
-local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.anchor
-local ENUM_ELEMENT_TYPE_ANY = enumElements.any
-local ENUM_ELEMENT_TYPE_BALANCED = enumElements.balanced
-local ENUM_ELEMENT_TYPE_BOUNDARY = enumElements.boundary
-local ENUM_ELEMENT_TYPE_captureReference = enumElements.captureReference
-local ENUM_ELEMENT_TYPE_GROUP = enumElements.group
-local ENUM_ELEMENT_TYPE_LITERAL = enumElements.literal
-local ENUM_ELEMENT_TYPE_positionCapture = enumElements.positionCapture
-local ENUM_ELEMENT_TYPE_SET = enumElements.set
+local ENUM_ELEMENT_TYPE_ALTERNATE = enumElements.ALTERNATE
+local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.ANCHOR
+local ENUM_ELEMENT_TYPE_ANY = enumElements.ANY
+local ENUM_ELEMENT_TYPE_BALANCED = enumElements.BALANCED
+local ENUM_ELEMENT_TYPE_BOUNDARY = enumElements.BOUNDARY
+local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = enumElements.CAPTURE_REFERENCE
+local ENUM_ELEMENT_TYPE_GROUP = enumElements.GROUP
+local ENUM_ELEMENT_TYPE_LITERAL = enumElements.LITERAL
+local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = enumElements.POSITION_CAPTURE
+local ENUM_ELEMENT_TYPE_SET = enumElements.SET
 
 local elementMatchers = {
 	[ENUM_ELEMENT_TYPE_ALTERNATE] = {
@@ -43,8 +43,8 @@ local elementMatchers = {
 		matcher = Boundary.match,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_captureReference] = {
-		matcher = CaptureReference.match,
+	[ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE] = {
+		matcher = CAPTURE_REFERENCE.match,
 		requiresCharacter = false,
 	},
 	[ENUM_ELEMENT_TYPE_GROUP] = {
@@ -55,8 +55,8 @@ local elementMatchers = {
 		matcher = Literal.match,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_positionCapture] = {
-		matcher = PositionCapture.match,
+	[ENUM_ELEMENT_TYPE_POSITION_CAPTURE] = {
+		matcher = POSITION_CAPTURE.match,
 		requiresCharacter = false,
 	},
 	[ENUM_ELEMENT_TYPE_SET] = {

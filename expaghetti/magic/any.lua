@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 local ENUM_ANY = require("./enums/magic").ANY
 local AST = require("./ast")
-local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").any
+local ENUM_ELEMENT_TYPE_ANY = require("./enums/elements").ANY
 local ENUM_LINE_BREAKS = require("./enums/lineBreaks")
 ----------------------------------------------------------------------------------------------------
 local Any = { }

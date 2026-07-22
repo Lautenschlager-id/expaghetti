@@ -9,7 +9,7 @@ local errorsEnum = require("enums.errors")
 local elementsEnum = require("enums.elements")
 
 --[[ Enum Aliases ]]--
-local ELEMENT_BOUNDARY = elementsEnum.boundary
+local ELEMENT_BOUNDARY = elementsEnum.BOUNDARY
 local ERROR_MISSING_FRONTIER_SET = errorsEnum.expectedFrontierSet
 
 --[[ Module ]]--

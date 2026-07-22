@@ -38,7 +38,7 @@ function MatchState.new(flags, targetString, rootTree)
 		captureStarts = {},
 		captureEnds = {},
 		captureCounts = {},
-		positionCaptures = {},
+		POSITION_CAPTUREs = {},
 		outerTreeReference = {},
 		rootTree = self.rootTree,
 		parsedMetaData = self.parsedMetaData,
@@ -62,7 +62,7 @@ function MatchState:reset(stringIndex)
 	metaData.captureStarts = {}
 	metaData.captureEnds = {}
 	metaData.captureCounts = {}
-	metaData.positionCaptures = {}
+	metaData.POSITION_CAPTUREs = {}
 	metaData.outerTreeReference = {}
 	metaData.recursionDepth = 0
 	metaData.backtrackSteps = 0

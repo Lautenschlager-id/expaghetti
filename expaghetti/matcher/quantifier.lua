@@ -7,8 +7,8 @@ local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
 
 local elementsEnum = require("enums.elements")
-local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.group
-local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.quantifier
+local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.GROUP
+local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.QUANTIFIER
 
 --- Determines if the internal element of a quantifier is allowed to be backtracked.
 ---@param element table The AST element containing the quantifier.

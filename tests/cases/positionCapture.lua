@@ -3,7 +3,7 @@ return {
 		parsed = {
 			{
 				index = 1,
-				type = "positionCapture"
+				type = "position_capture"
 			},
 			_index = 1
 		},
@@ -13,7 +13,7 @@ return {
 		parsed = {
 			{
 				index = 1,
-				type = "positionCapture"
+				type = "position_capture"
 			},
 			{
 				isCaseInsensitive = false,
@@ -22,7 +22,7 @@ return {
 			},
 			{
 				index = 2,
-				type = "positionCapture"
+				type = "position_capture"
 			},
 			{
 				isCaseInsensitive = false,
@@ -31,7 +31,7 @@ return {
 			},
 			{
 				index = 3,
-				type = "positionCapture"
+				type = "position_capture"
 			},
 			_index = 5
 		},
@@ -48,7 +48,7 @@ return {
 					},
 					{
 						index = 1,
-						type = "positionCapture"
+						type = "position_capture"
 					},
 					{
 						isCaseInsensitive = false,
@@ -73,7 +73,7 @@ return {
 							tree = {
 								{
 									index = 1,
-									type = "positionCapture"
+									type = "position_capture"
 								},
 								_index = 1
 							},
@@ -87,7 +87,7 @@ return {
 					{
 						{
 							index = 2,
-							type = "positionCapture"
+							type = "position_capture"
 						},
 						_index = 1
 					},

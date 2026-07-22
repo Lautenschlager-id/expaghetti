@@ -16,7 +16,7 @@ local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveInteger
 
 local AST = require("ast")
 
-local CaptureReference = require("magic.captureReference")
+local CAPTURE_REFERENCE = require("magic.captureReference")
 local Boundary = require("magic.boundary")
 local Balanced = require("magic.balanced")
 
@@ -39,9 +39,9 @@ local Escaped = {}
 --[[ Private Functions ]]--
 local specialEscaped = {
 	-- %1 --> reference capture N
-	int = CaptureReference.parseByIndex,
+	int = CAPTURE_REFERENCE.parseByIndex,
 	-- %k<NN> --> reference capture NN
-	k = CaptureReference.parseByName,
+	k = CAPTURE_REFERENCE.parseByName,
 	-- %bxy --> balanced match between x and y
 	b = Balanced.parse,
 }
