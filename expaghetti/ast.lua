@@ -4,7 +4,6 @@
 
 --[[ Dependencies ]]--
 local elementsEnum = require("enums.elements")
-local quantifierModesEnum = require("enums.quantifierModes")
 
 --[[ Enum Aliases ]]--
 local ELEMENT_ANCHOR = elementsEnum.anchor
@@ -19,7 +18,6 @@ local ELEMENT_positionCapture = elementsEnum.positionCapture
 local ELEMENT_captureReference = elementsEnum.captureReference
 local ELEMENT_BALANCED = elementsEnum.balanced
 
-local QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 
 --[[ Module ]]--
 local AST = {}

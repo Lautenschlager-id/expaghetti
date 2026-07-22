@@ -15,8 +15,8 @@ local AST = require("ast")
 
 local magicEnum = require("enums.magic")
 local errorsEnum = require("enums.errors")
-local quantifiersEnum = require("enums.quantifiers")
-local quantifierModesEnum = require("enums.quantifierModes")
+local quantifiersEnum = require("enums.quantifiers").TOKENS
+local quantifierModesEnum = require("enums.quantifiers").MODES
 local elementsEnum = require("enums.elements")
 
 --[[ Enum Aliases ]]--

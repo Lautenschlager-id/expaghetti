@@ -1,7 +1,7 @@
 local elementMatcher = require("matcher.element")
 local AST = require("ast")
 
-local quantifierModesEnum = require("enums.quantifierModes")
+local quantifierModesEnum = require("enums.quantifiers").MODES
 local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
 local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
 local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
