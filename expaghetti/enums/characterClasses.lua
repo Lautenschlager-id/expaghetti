@@ -8,7 +8,9 @@
 
 --[[ Dependencies ]]--
 local SetNode = require("ast").Set
-local table_deepcopy = require("helpers.table").table_deepcopy
+local deepCopy = require("helpers.table").deepCopy
+
+--[[ Module ]]--
 
 --[[ Private Functions ]]--
 local createSet = function(settings)
@@ -29,12 +31,12 @@ local createSet = function(settings)
 end
 
 local negateSet = function(set)
-	local tbl = table_deepcopy(set)
+	local tbl = deepCopy(set)
 	tbl.hasToNegateMatch = not tbl.hasToNegateMatch
 	return tbl
 end
 
---[[ Module ]]--
+--[[ Public API ]]--
 
 -- [a-zA-Z]
 local alpha = createSet({

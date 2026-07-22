@@ -11,7 +11,7 @@ local strformat = string.format
 
 --[[ Dependencies ]]--
 local toControlCharacter = require("helpers.string").toControlCharacter
-local table_deepcopy = require("helpers.table").table_deepcopy
+local deepCopy = require("helpers.table").deepCopy
 local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
 local AST = require("ast")
@@ -106,7 +106,7 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 	index = index + 1
 
 	if characterClasses[currentCharacter] then
-		local set = table_deepcopy(characterClasses[currentCharacter])
+		local set = deepCopy(characterClasses[currentCharacter])
 		state:compileSet(set)
 		return index, set
 	elseif MAGIC_HASHMAP[currentCharacter] then

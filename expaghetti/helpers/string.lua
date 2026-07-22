@@ -9,7 +9,7 @@ local string_char = string.char
 local string_sub = string.sub
 
 --[[ Dependencies ]]--
-local utf8 = require("helpers.utf8")
+local utf8ToCharArray = require("helpers.utf8").toCharArray
 
 --[[ Module ]]--
 
@@ -21,7 +21,7 @@ local utf8 = require("helpers.utf8")
 ---@return number length The number of characters.
 local toCharArray = function(str, encodeUTF8)
 	if encodeUTF8 then
-		return utf8.transform(str)
+		return utf8ToCharArray(str)
 	end
 
 	local splitString = { }

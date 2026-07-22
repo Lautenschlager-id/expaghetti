@@ -6,7 +6,7 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local table_deepcopy = require("helpers.table").table_deepcopy
+local deepCopy = require("helpers.table").deepCopy
 local parser = require("helpers.parser")
 local consumeWhile = parser.consumeWhile
 local isPositiveOrZeroIntegerChar = parser.isPositiveOrZeroIntegerChar
@@ -95,7 +95,7 @@ local lookForModeToken = function(state, index, quantifier)
 		local quantifierMode = quantifierModesEnum[currentToken]
 
 		if quantifierMode then
-			quantifier = table_deepcopy(quantifier)
+			quantifier = deepCopy(quantifier)
 			quantifier.mode = quantifierMode
 			index = nextIndex
 		end
