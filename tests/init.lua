@@ -39,7 +39,7 @@ local cases = {
 	"backreference",
 	"recursion",
 	"balanced",
-	"boundary",
+	"frontier",
 }
 
 local breakOnFirstError = true

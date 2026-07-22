@@ -1,7 +1,7 @@
 local Alternate = require("magic.alternate")
 local Anchor = require("magic.anchor")
 local Balanced = require("magic.balanced")
-local Boundary = require("magic.boundary")
+local Frontier = require("magic.frontier")
 local CaptureReference = require("magic.captureReference")
 local Group = require("magic.group.group")
 local PositionCapture = require("magic.positionCapture")
@@ -15,7 +15,7 @@ local ENUM_ELEMENT_TYPE_ALTERNATE = enumElements.ALTERNATE
 local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.ANCHOR
 local ENUM_ELEMENT_TYPE_ANY = enumElements.ANY
 local ENUM_ELEMENT_TYPE_BALANCED = enumElements.BALANCED
-local ENUM_ELEMENT_TYPE_BOUNDARY = enumElements.BOUNDARY
+local ENUM_ELEMENT_TYPE_FRONTIER = enumElements.FRONTIER
 local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = enumElements.CAPTURE_REFERENCE
 local ENUM_ELEMENT_TYPE_GROUP = enumElements.GROUP
 local ENUM_ELEMENT_TYPE_LITERAL = enumElements.LITERAL
@@ -39,8 +39,8 @@ local elementMatchers = {
 		matcher = Balanced.match,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_BOUNDARY] = {
-		matcher = Boundary.match,
+	[ENUM_ELEMENT_TYPE_FRONTIER] = {
+		matcher = Frontier.match,
 		requiresCharacter = true,
 	},
 	[ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE] = {

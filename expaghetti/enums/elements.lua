@@ -10,7 +10,7 @@ return {
 	ANCHOR = "anchor",
 	ANY = "any",
 	BALANCED = "balanced",
-	BOUNDARY = "boundary",
+	FRONTIER = "frontier",
 	CAPTURE_REFERENCE = "capture_reference",
 	GROUP = "group",
 	LITERAL = "literal",

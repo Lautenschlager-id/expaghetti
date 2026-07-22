@@ -28,7 +28,7 @@ return {
 					hasToNegateMatch = false
 				},
 				isNegated = false,
-				type = "boundary"
+				type = "frontier"
 			},
 			_index = 1
 		}
@@ -62,7 +62,7 @@ return {
 					hasToNegateMatch = false
 				},
 				isNegated = true,
-				type = "boundary"
+				type = "frontier"
 			},
 			_index = 1
 		}
@@ -105,7 +105,7 @@ return {
 					hasToNegateMatch = false
 				},
 				isNegated = false,
-				type = "boundary"
+				type = "frontier"
 			},
 			{
 				type = "literal",
@@ -142,7 +142,7 @@ return {
 					hasToNegateMatch = true
 				},
 				isNegated = false,
-				type = "boundary"
+				type = "frontier"
 			},
 			_index = 1
 		}
@@ -178,7 +178,7 @@ return {
 							hasToNegateMatch = false
 						},
 						isNegated = false,
-						type = "boundary"
+						type = "frontier"
 					},
 					_index = 1
 				},
@@ -211,7 +211,7 @@ return {
 							hasToNegateMatch = false
 						},
 						isNegated = true,
-						type = "boundary"
+						type = "frontier"
 					},
 					_index = 1
 				},

@@ -11,7 +11,7 @@ local ELEMENT_ANY = elementsEnum.ANY
 local ELEMENT_LITERAL = elementsEnum.LITERAL
 local ELEMENT_GROUP = elementsEnum.GROUP
 local ELEMENT_SET = elementsEnum.SET
-local ELEMENT_BOUNDARY = elementsEnum.BOUNDARY
+local ELEMENT_FRONTIER = elementsEnum.FRONTIER
 local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
 local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
 local ELEMENT_POSITION_CAPTURE = elementsEnum.POSITION_CAPTURE
@@ -161,9 +161,9 @@ AST.Set = function()
 	}
 end
 
-AST.Boundary = function(isNegated, set)
+AST.Frontier = function(isNegated, set)
 	return {
-		type = ELEMENT_BOUNDARY,
+		type = ELEMENT_FRONTIER,
 		isNegated = isNegated,
 		set = set,
 	}

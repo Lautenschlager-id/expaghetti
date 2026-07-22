@@ -17,7 +17,7 @@ local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 local AST = require("ast")
 
 local CaptureReference = require("magic.captureReference")
-local Boundary = require("magic.boundary")
+local Frontier = require("magic.frontier")
 local Balanced = require("magic.balanced")
 
 local magicEnum = require("enums.magic")
@@ -81,11 +81,11 @@ specialEscaped.e = function(state, currentCharacter, index, expression, isInside
 end
 -- %f --> frontier boundary
 specialEscaped.f = function(state, currentCharacter, index, expression, isInsideSet)
-	return Boundary.parse(state, index, false)
+	return Frontier.parse(state, index, false)
 end
 -- %F --> negated frontier boundary
 specialEscaped.F = function(state, currentCharacter, index, expression, isInsideSet)
-	return Boundary.parse(state, index, true)
+	return Frontier.parse(state, index, true)
 end
 
 --[[ Public API ]]--
