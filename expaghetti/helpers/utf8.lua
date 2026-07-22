@@ -60,8 +60,6 @@ local toCharArray = function(str)
 	local characters = { }
 
 	local index, remainingBytes = 1, 0
-	local charLen
-
 	local char
 	for i = 1, #str do
 		repeat
@@ -77,7 +75,7 @@ local toCharArray = function(str)
 			end
 			characters[index] = char
 
-			charLen = getByteLength(string_byte(char))
+			local charLen = getByteLength(string_byte(char))
 			if charLen == 1 then
 				index = index + 1
 			end

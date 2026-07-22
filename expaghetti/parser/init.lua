@@ -29,7 +29,7 @@ local parser = function(exprOrState, flags)
 	-- We prevent attaching metadata to sub-trees (groups and alternates) to avoid data duplication
 	-- and keep the tree lightweight.
 	if not state.isGroup and not state.isAlternate then
-		tree._metaData = state.metaData
+		tree._metadata = state.metadata
 	end
 
 	return tree

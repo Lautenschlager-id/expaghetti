@@ -60,7 +60,7 @@ return function(state, index, peekIndex, peekChar)
 			return false, nil, ERROR_INVALID_GROUP_NAME
 		end
 
-		local groupNames = state.metaData.groupNames
+		local groupNames = state.metadata.groupNames
 		if groupNames[name] then
 			return false, nil, string_format(ERROR_DUPLICATE_GROUP_NAME, name)
 		end

@@ -38,14 +38,14 @@ Alternate.parse = function(state, tree)
 
 	local isBranchReset = state.isBranchReset
 	local initialGroupIndex = state.initialGroupIndex
-	local maxGroupIndex = state.metaData.groupIndex
+	local maxGroupIndex = state.metadata.groupIndex
 
 	local alternativeTree, altErrorMessage
 	repeat
 		state.index = state.index + 1
 		
 		if isBranchReset then
-			state.metaData.groupIndex = initialGroupIndex
+			state.metadata.groupIndex = initialGroupIndex
 		end
 
 		local childState = state:fork()
@@ -56,8 +56,8 @@ Alternate.parse = function(state, tree)
 		end
 
 		if isBranchReset then
-			if state.metaData.groupIndex > maxGroupIndex then
-				maxGroupIndex = state.metaData.groupIndex
+			if state.metadata.groupIndex > maxGroupIndex then
+				maxGroupIndex = state.metadata.groupIndex
 			end
 		end
 
@@ -66,7 +66,7 @@ Alternate.parse = function(state, tree)
 	until state.index > state.patternLength or (state.isGroup and Group.isClosingToken(state.patternChars[state.index]))
 
 	if isBranchReset then
-		state.metaData.groupIndex = maxGroupIndex
+		state.metadata.groupIndex = maxGroupIndex
 	end
 
 	for elementIndex = totalAlternates + 1, tree._index do
@@ -98,8 +98,8 @@ Alternate.match = function(currentElement, state)
 
 		local branchTree = trees[branchIndex]
 
-		if tree and not state.metaData.outerTreeReference[branchTree] then
-			state.metaData.outerTreeReference[branchTree] = {
+		if tree and not state.metadata.outerTreeReference[branchTree] then
+			state.metadata.outerTreeReference[branchTree] = {
 				tree = tree,
 				treeLength = tree._index,
 				treeIndex = treeIndex,
@@ -115,7 +115,7 @@ Alternate.match = function(currentElement, state)
 		)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, state.metaData, true
+			return hasMatched, iniStr, endStr, state.metadata, true
 		end
 	end
 

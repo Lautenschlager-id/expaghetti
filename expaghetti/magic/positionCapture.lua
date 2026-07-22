@@ -19,7 +19,7 @@ PositionCapture.parse = function(index, tree, parserMetaData)
 end
 
 PositionCapture.match = function(currentElement, state)
-	state.metaData.positionCaptures[currentElement.index] = state.stringIndex
+	state.metadata.positionCaptures[currentElement.index] = state.stringIndex
 	return true, nil, state.stringIndex - 1
 end
 

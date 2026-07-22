@@ -8,12 +8,12 @@ local coreTreeMatcher
 ---@return boolean hasMatched True if the entire tree successfully matched.
 ---@return number|nil iniStr The starting string index of the overall match.
 ---@return number|nil endStr The ending string index of the overall match.
----@return table|nil metaData Metadata including captures if the match succeeds.
+---@return table|nil metadata Metadata including captures if the match succeeds.
 coreTreeMatcher = function(state)
 	local tree = state.tree
 	local treeIndex = state.treeIndex
 
-	local outerTreeReference = state.metaData.outerTreeReference[tree]
+	local outerTreeReference = state.metadata.outerTreeReference[tree]
 	local outerTree = outerTreeReference and outerTreeReference.tree
 
 	local currentElement, currentCharacter
@@ -41,7 +41,7 @@ coreTreeMatcher = function(state)
 
 		-- Groups continue the execution of the previous tree in another stack
 		if shouldEndThisExecution then
-			return hasMatched, iniStr, endStr, state.metaData
+			return hasMatched, iniStr, endStr, state.metadata
 		elseif not hasMatched then
 			return
 		elseif endStr then
@@ -76,7 +76,7 @@ coreTreeMatcher = function(state)
 		state:recordCapture(groupIndex, state.initialStringIndex + 1, state.stringIndex)
 	end
 
-	return true, state.initialStringIndex + 1, state.stringIndex, state.metaData
+	return true, state.initialStringIndex + 1, state.stringIndex, state.metadata
 end
 
 return coreTreeMatcher

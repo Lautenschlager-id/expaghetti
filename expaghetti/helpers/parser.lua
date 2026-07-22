@@ -53,10 +53,8 @@ end
 ---@return string|table|nil nextElement The element or character that caused consumption to stop.
 local consumeWhile = function(state, loopIndex, conditionFn)
 	local str, length = "", 0
-
-	local nextLoopIndex, nextChar
 	while true do
-		nextLoopIndex, nextChar = state:readElement(loopIndex)
+		local nextLoopIndex, nextChar = state:readElement(loopIndex)
 
 		if not nextLoopIndex or not nextChar or state:isElement(nextChar) or not conditionFn(nextChar, length) then
 			return str, nextLoopIndex, nextChar
@@ -71,19 +69,15 @@ end
 --- Consumes consecutive characters from an array while a predicate returns
 --- true.
 ---@param tbl table The array of characters to consume from.
----@param startIndex number The starting array index.
+---@param loopIndex number The starting array index.
 ---@param conditionFn fun(char:string, length:number):boolean Predicate evaluated for each consumed character.
 ---@return string consumed The accumulated consumed string.
 ---@return number nextIndex The index where consumption stopped.
 ---@return string|nil nextChar The character that caused consumption to stop, or nil at end of input.
-local consumeWhileArray = function(tbl, startIndex, conditionFn)
+local consumeWhileArray = function(tbl, loopIndex, conditionFn)
 	local str, length = "", 0
-
-	local loopIndex = startIndex
-	local char
-
 	while true do
-		char = tbl[loopIndex + 1]
+		local char = tbl[loopIndex + 1]
 
 		if not char or not conditionFn(char, length) then
 			return str, loopIndex + 1, char

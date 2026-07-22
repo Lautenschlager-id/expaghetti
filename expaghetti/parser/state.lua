@@ -53,7 +53,7 @@ function ParserState.new(expr, flags)
 
 	self.initialGroupIndex = 0
 
-	self.metaData = {
+	self.metadata = {
 		groupNames = {},
 		groupIndex = 0,
 		positionCaptureIndex = 0,
@@ -96,7 +96,7 @@ function ParserState:fork()
 
 	child.initialGroupIndex = self.initialGroupIndex
 
-	child.metaData = self.metaData
+	child.metadata = self.metadata
 
 	child.index = self.index
 	child.patternChars = self.patternChars

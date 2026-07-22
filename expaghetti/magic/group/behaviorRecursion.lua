@@ -34,7 +34,7 @@ local MAGIC_GROUP_RECURSION_NAMED = Magic.GROUP_RECURSION_NAMED_BEHAVIOR
 ---@param state ParserState The current parser state.
 ---@param peekIndex number The parser index after the behavior token.
 ---@param peekChar string The behavior token following `(?`.
----@param GroupIsClosingToken fun(char: string): boolean Function used to determine whether a character closes the current group.
+---@param GroupIsClosingToken fun(char: string): boolean Function from the Group module that returns whether a character closes the current group.
 ---@return number|false nextIndex The parser index after the parsed behavior, or false on failure.
 ---@return table|nil group The parsed AST group node.
 ---@return string|nil errorMessage The parser error message when parsing fails.

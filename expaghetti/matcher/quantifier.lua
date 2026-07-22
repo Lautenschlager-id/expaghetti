@@ -206,7 +206,7 @@ end
 ---@return boolean hasMatched True if the quantifier and its element matched successfully.
 ---@return number|nil iniStr The starting string index.
 ---@return number|nil endStr The ending string index.
----@return table|nil metaData Captured metadata if the execution finishes here.
+---@return table|nil metadata Captured metadata if the execution finishes here.
 ---@return boolean|nil shouldEndThisExecution True if the execution stack should end here.
 local quantifierMatcher = function(currentElement, currentCharacter, state)
 	local quantifier = currentElement.quantifier

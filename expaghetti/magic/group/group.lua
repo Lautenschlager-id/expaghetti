@@ -1,96 +1,107 @@
 --[[
-    Group module. Parses and matches groups.
+    Group parser and matcher.
+
+    Handles parsing and execution of all regex group constructs, including
+    its different behaviors.
 ]]
 
 --[[ Globals ]]--
+local string_format = string_format
 local tostring = tostring
-local string = string
 
 --[[ Dependencies ]]--
-local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
+local BehaviorAtomic = require("magic.group.behaviorAtomic")
+local BehaviorBranchReset = require("magic.group.behaviorBranchReset")
+local BehaviorCapturing = require("magic.group.behaviorCapturing")
+local BehaviorComment = require("magic.group.behaviorComment")
+local BehaviorFlags = require("magic.group.behaviorFlags")
+local BehaviorLookaround = require("magic.group.behaviorLookaround")
+local BehaviorRecursion = require("magic.group.behaviorRecursion")
+
+local Elements = require("enums.elements")
+
+local ElementLengths = require("enums.elementLengths")
+
+local Errors = require("enums.errors")
+
+local Magic = require("enums.magic")
 
 local PositionCapture = require("magic.positionCapture")
-local behaviorCapture = require("magic.group.behaviorCapturing")
-local behaviorAtomic = require("magic.group.behaviorAtomic")
-local behaviorBranchReset = require("magic.group.behaviorBranchReset")
-local behaviorLookaround = require("magic.group.behaviorLookaround")
-local behaviorRecursion = require("magic.group.behaviorRecursion")
-local behaviorComment = require("magic.group.behaviorComment")
-local behaviorFlags = require("magic.group.behaviorFlags")
 
-local magicEnum = require("enums.magic")
-local elementsEnum = require("enums.elements")
-local elementLengths = require("enums.elementLengths")
-local errorsEnum = require("enums.errors")
-local inlineFlagsEnum = require("enums.flags").INLINE_TOKENS
+--[[ Aliases ]]--
+local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
---[[ Enum Aliases ]]--
-local MAGIC_GROUP_OPEN = magicEnum.GROUP_OPEN
-local MAGIC_GROUP_CLOSE = magicEnum.GROUP_CLOSE
-local MAGIC_GROUP_BEHAVIOR_PREFIX = magicEnum.GROUP_BEHAVIOR_PREFIX
-local MAGIC_GROUP_NON_CAPTURING_BEHAVIOR = magicEnum.GROUP_NON_CAPTURING_BEHAVIOR
-local MAGIC_GROUP_ATOMIC_BEHAVIOR = magicEnum.GROUP_ATOMIC_BEHAVIOR
-local MAGIC_GROUP_BRANCH_RESET_BEHAVIOR = magicEnum.GROUP_BRANCH_RESET_BEHAVIOR
-local MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
-local MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
-local MAGIC_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
-local MAGIC_GROUP_NAME_OPEN = magicEnum.GROUP_NAME_OPEN
-local MAGIC_GROUP_NAME_CLOSE = magicEnum.GROUP_NAME_CLOSE
-local MAGIC_GROUP_COMMENT_BEHAVIOR = magicEnum.GROUP_COMMENT_BEHAVIOR
-local MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
-local MAGIC_GROUP_RECURSION_ROOT_ALIAS = magicEnum.GROUP_RECURSION_ROOT_ALIAS
-local MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
-local MAGIC_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
-local MAGIC_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
-local MAGIC_GROUP_FLAG_DOT_ALL = magicEnum.GROUP_FLAG_DOT_ALL
-local MAGIC_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
-local MAGIC_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
+local FLAGS_INLINE_TOKENS = require("enums.flags").INLINE_TOKENS
 
-local ELEMENT_GROUP = elementsEnum.GROUP
-local ELEMENT_LITERAL = elementsEnum.LITERAL
-local ELEMENT_ANY = elementsEnum.ANY
-local ELEMENT_SET = elementsEnum.SET
-local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
-local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
+local ELEMENT_GROUP = Elements.GROUP
+local ELEMENT_ALTERNATE = Elements.ALTERNATE
 
-local ZERO_LENGTH_ELEMENTS = elementLengths.ZERO_LENGTH
-local SINGLE_LENGTH_ELEMENTS = elementLengths.SINGLE_LENGTH
+local ERROR_UNKNOWN_ELEMENT_LENGTH = Errors.unknownElementLength
+local ERROR_INVALID_GROUP_BEHAVIOR = Errors.invalidGroupBehavior
+local ERROR_VARIABLE_LENGTH_LOOKBEHIND = Errors.variableLengthLookbehind
+local ERROR_NO_GROUP_TO_CLOSE = Errors.unexpectedGroupClose
 
-local ERROR_UNKNOWN_ELEMENT_LENGTH = errorsEnum.unknownElementLength
-local ERROR_INVALID_GROUP_BEHAVIOR = errorsEnum.invalidGroupBehavior
-local ERROR_VARIABLE_LENGTH_LOOKBEHIND = errorsEnum.variableLengthLookbehind
-local ERROR_NO_GROUP_TO_CLOSE = errorsEnum.unexpectedGroupClose
+local MAGIC_GROUP_CLOSE = Magic.GROUP_CLOSE
+local MAGIC_GROUP_OPEN = Magic.GROUP_OPEN
+
+local MAGIC_GROUP_BEHAVIOR_PREFIX = Magic.GROUP_BEHAVIOR_PREFIX
+
+local MAGIC_GROUP_ATOMIC_BEHAVIOR = Magic.GROUP_ATOMIC_BEHAVIOR
+local MAGIC_GROUP_BRANCH_RESET_BEHAVIOR = Magic.GROUP_BRANCH_RESET_BEHAVIOR
+local MAGIC_GROUP_COMMENT_BEHAVIOR = Magic.GROUP_COMMENT_BEHAVIOR
+local MAGIC_GROUP_NON_CAPTURING_BEHAVIOR = Magic.GROUP_NON_CAPTURING_BEHAVIOR
+
+local MAGIC_GROUP_LOOKBEHIND_BEHAVIOR = Magic.GROUP_LOOKBEHIND_BEHAVIOR
+local MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
+local MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
+
+local MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR = Magic.GROUP_RECURSION_NAMED_BEHAVIOR
+local MAGIC_GROUP_RECURSION_ROOT_ALIAS = Magic.GROUP_RECURSION_ROOT_ALIAS
+local MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR = Magic.GROUP_RECURSION_ROOT_BEHAVIOR
+
+local SINGLE_LENGTH_ELEMENTS = ElementLengths.SINGLE_LENGTH
+local ZERO_LENGTH_ELEMENTS = ElementLengths.ZERO_LENGTH
 
 --[[ Module ]]--
 local Group = {}
 
 --[[ Private Functions ]]--
+
+--- Computes the fixed character length of a lookbehind subtree.
+---@param tree ASTTree The AST subtree to evaluate.
+---@return number|nil fixedLength The subtree's fixed length, or nil if it is variable-length.
+---@return string|nil errorMessage The parser error message when evaluation fails.
 local getLookbehindFixedLength
 getLookbehindFixedLength = function(tree)
 	local totalLen = 0
-	local elem, quantifier, groupLength, errorMessage, alternateLength, trees, expectedAlternateLength
-	for i = 1, tree._index do
-		elem = tree[i]
-		quantifier = elem.quantifier
-		if quantifier and (quantifier.min ~= quantifier.max or quantifier.max == 0) then
+	for index = 1, tree._index do
+		local elem = tree[index]
+
+		local quantifier = elem.quantifier
+		local quantifierMin = quantifier and quantifier.min
+		if quantifier and (quantifierMin ~= quantifier.max or quantifier.max == 0) then
 			return nil
 		end
-		
+		quantifierMin = quantifierMin or 1
+
+		local errorMessage
+
+		local elemType = elem.type
+
 		-- Elements that don't consume characters
-		if ZERO_LENGTH_ELEMENTS[elem.type] or (elem.isLookahead or elem.isLookbehind) then
+		if ZERO_LENGTH_ELEMENTS[elemType] or (elem.isLookahead or elem.isLookbehind) then
 		-- Elements that consume 1 character
-		elseif SINGLE_LENGTH_ELEMENTS[elem.type] then
-			totalLen = totalLen + (quantifier and quantifier.min or 1)
-		elseif elem.type == ELEMENT_GROUP then
+		elseif SINGLE_LENGTH_ELEMENTS[elemType] then
+			totalLen = totalLen + quantifierMin
+		elseif elemType == ELEMENT_GROUP then
+			local groupLength
 			groupLength, errorMessage = getLookbehindFixedLength(elem.tree)
 			if not groupLength then
 				return nil, errorMessage
 			end
-			totalLen = totalLen + (groupLength * (quantifier and quantifier.min or 1))
-		elseif elem.type == ELEMENT_ALTERNATE then
-			trees = elem.trees
-			expectedAlternateLength = nil
-
+			totalLen = totalLen + (groupLength * quantifierMin)
+		elseif elemType == ELEMENT_ALTERNATE then
+			local trees, alternateLength, expectedAlternateLength = elem.trees
 			for branch = 1, trees._index do
 				alternateLength, errorMessage = getLookbehindFixedLength(trees[branch])
 				if not alternateLength then
@@ -104,22 +115,27 @@ getLookbehindFixedLength = function(tree)
 				end
 			end
 
-			totalLen = totalLen + (alternateLength * (quantifier and quantifier.min or 1))
+			totalLen = totalLen + (alternateLength * quantifierMin)
 		else
 			-- Unknown element, cannot determine length safely
-			return nil, string.format(ERROR_UNKNOWN_ELEMENT_LENGTH, tostring(elem.type or elem))
+			return nil, string_format(ERROR_UNKNOWN_ELEMENT_LENGTH, tostring(elemType or elem))
 		end
     end
 	return totalLen
 end
 
+--- Parses a group behavior declaration.
+---@param state ParserState The current parser state.
+---@return number|false nextIndex The parser index after the parsed behavior, or false on failure.
+---@return table|nil group The parsed AST group node.
+---@return string|nil errorMessage The parser error message when parsing fails.
 local parseGroupBehavior = function(state)
 	local index = state.index
 	local nextIndex, currentChar = state:readElement(index)
 
 	-- Standard capturing group (no `?` behavior prefix)
 	if not nextIndex or state:isElement(currentChar) or currentChar ~= MAGIC_GROUP_BEHAVIOR_PREFIX then
-		return behaviorCapture(state, index)
+		return BehaviorCapturing(state, index)
 	end
 
 	local peekIndex, peekChar = state:readElement(nextIndex)
@@ -129,41 +145,45 @@ local parseGroupBehavior = function(state)
 
 	-- Branch reset groups: (?|...)
 	if peekChar == MAGIC_GROUP_BRANCH_RESET_BEHAVIOR then
-		return behaviorBranchReset(state, peekIndex)
+		return BehaviorBranchReset(state, peekIndex)
 	
 	-- Non-capturing groups: (?:...)
 	elseif peekChar == MAGIC_GROUP_NON_CAPTURING_BEHAVIOR then
-		return behaviorCapture(state, index, peekIndex, peekChar)
+		return BehaviorCapturing(state, index, peekIndex, peekChar)
 		
 	-- Atomic groups: (?>...)
 	elseif peekChar == MAGIC_GROUP_ATOMIC_BEHAVIOR then
-		return behaviorAtomic(state, peekIndex)
+		return BehaviorAtomic(state, peekIndex)
 		
 	-- Positive / Negative Lookahead: (?=...), (?!...)
 	elseif peekChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or peekChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR then
-		return behaviorLookaround(state, peekIndex, peekChar)
+		return BehaviorLookaround(state, peekIndex, peekChar)
 		
 	-- Positive / Negative Lookbehind: (?<=...), (?<!...)
 	elseif peekChar == MAGIC_GROUP_LOOKBEHIND_BEHAVIOR then
 		local lookbehindIndex, lookbehindChar = state:readElement(peekIndex)
-		if lookbehindIndex and not state:isElement(lookbehindChar) and (lookbehindChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or lookbehindChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) then
-			return behaviorLookaround(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
+		if lookbehindIndex and not state:isElement(lookbehindChar) and (
+			lookbehindChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or lookbehindChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
+		) then
+			return BehaviorLookaround(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 		else
 			-- Fallback to Named Capture which also uses `<` i.e. `(?<name>...)`
-			return behaviorCapture(state, index, peekIndex, peekChar)
+			return BehaviorCapturing(state, index, peekIndex, peekChar)
 		end
 		
 	-- Comments: (?#...)
 	elseif peekChar == MAGIC_GROUP_COMMENT_BEHAVIOR then
-		return behaviorComment(state, peekIndex)
+		return BehaviorComment(state, peekIndex)
 		
 	-- Recursion: (?R), (?0), (?123), (?&name)
-	elseif peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS or peekChar == MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar) then
-		return behaviorRecursion(state, peekIndex, peekChar, Group.isClosingToken)
+	elseif peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS
+		or peekChar == MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar)
+	then
+		return BehaviorRecursion(state, peekIndex, peekChar, Group.isClosingToken)
 		
 	-- Inline and Scoped Flags: (?i), (?i:...)
-	elseif inlineFlagsEnum[peekChar] then
-		return behaviorFlags(state, peekIndex, peekChar)
+	elseif FLAGS_INLINE_TOKENS[peekChar] then
+		return BehaviorFlags(state, peekIndex, peekChar)
 		
 	-- Unrecognized behavior token after `(?`
 	else
@@ -172,100 +192,120 @@ local parseGroupBehavior = function(state)
 end
 
 --[[ Public API ]]--
+
+--- Returns whether a character is a group opening token.
+---@param currentCharacter string The character to test.
+---@return boolean isOpeningToken Whether the character opens a group.
 Group.isOpeningToken = function(currentCharacter)
 	return currentCharacter == MAGIC_GROUP_OPEN
 end
 
+--- Returns whether a character is a group closing token.
+---@param currentCharacter string The character to test.
+---@return boolean isClosingToken Whether the character closes a group.
 Group.isClosingToken = function(currentCharacter)
 	return currentCharacter == MAGIC_GROUP_CLOSE
 end
 
+--- Returns whether an AST element is a group node.
+---@param currentElement table The AST element to test.
+---@return boolean isGroup Whether the element is a group node.
 Group.isElement = function(currentElement)
 	return currentElement.type == ELEMENT_GROUP
 end
 
+--- Parses a group element.
+---@param state ParserState The current parser state.
+---@param tree ASTTree The AST tree being built.
+---@return string|nil errorMessage The parser error message on failure.
 Group.parse = function(state, tree)
 	-- skip magic opening
 	state.index = state.index + 1
 
-	local newIndex, value, errorMessage = parseGroupBehavior(state)
+	local newIndex, group, errorMessage = parseGroupBehavior(state)
 	if not newIndex then
 		return errorMessage
 	end
 	state.index = newIndex
 	
 	-- Apply inline toggle flags immediately to state
-	if value.inlineFlags then
-		state:applyInlineFlags(value.inlineFlags)
+	if group.inlineFlags then
+		state:applyInlineFlags(group.inlineFlags)
 		return nil
 	end
 	
 	local previousFlags
-	if value.scopedFlags then
-		previousFlags = state:pushScopedFlags(value.scopedFlags)
+	if group.scopedFlags then
+		previousFlags = state:pushScopedFlags(group.scopedFlags)
 	end
 
+	local stateMetadata, statePatternChars = state.metadata, state.patternChars
+	local groupIsRecursion = group.isRecursion
+
 	-- A group with any value
-	if value.isRecursion then
-		value.tree = { _index = 0 }
-	elseif not state.patternChars[state.index] or state.patternChars[state.index] ~= MAGIC_GROUP_CLOSE then
-		if not (
-			value.disableCapture
-			or value.name
-		) then
+	if groupIsRecursion then
+		group.tree = {
+			_index = 0
+		}
+	elseif not statePatternChars[state.index] or statePatternChars[state.index] ~= MAGIC_GROUP_CLOSE then
+		local groupName = group.name
+
+		if not (group.disableCapture or groupName) then
 			if not state.flags.n then
-				state.metaData.groupIndex = state.metaData.groupIndex + 1
-				value.index = state.metaData.groupIndex
+				local groupIndex = stateMetadata.groupIndex + 1
+				stateMetadata.groupIndex = groupIndex
+				group.index = groupIndex
 			else
-				value.disableCapture = true
+				group.disableCapture = true
 			end
 		end
 
 		local childState = state:fork()
 		childState.isGroup = true
 		childState.isAlternate = false
-		childState.isBranchReset = value.isBranchReset
-		local groupTree, groupErrorMessage = state:parseSubTree(childState)
+		childState.isBranchReset = group.isBranchReset
 
+		local groupTree, groupErrorMessage = state:parseSubTree(childState)
 		if not groupTree then
 			return groupErrorMessage
 		end
-
-		value.tree = groupTree
+		group.tree = groupTree
 		
 		-- Register groups for recursion target lookup
-		if value.index and state.metaData.groupTreesByIndex then
-			state.metaData.groupTreesByIndex[value.index] = groupTree
+		local groupIndex, groupTreesByIndex, groupTreesByName = group.index, stateMetadata.groupTreesByIndex, stateMetadata.groupTreesByName
+		if groupIndex and groupTreesByIndex then
+			groupTreesByIndex[groupIndex] = groupTree
+		elseif groupName and groupTreesByName then
+			groupTreesByName[groupName] = groupTree
 		end
-		if value.name and state.metaData.groupTreesByName then
-			state.metaData.groupTreesByName[value.name] = groupTree
-		end
-	elseif not value.hasBehavior then
-		state.index = PositionCapture.parse(state.index, tree, state.metaData)
+	elseif not group.hasBehavior then
+		state.index = PositionCapture.parse(state.index, tree, stateMetadata)
 		return nil
 	else
-		value.tree = { _index = 0 }
+		group.tree = { _index = 0 }
 	end
 	
 	if previousFlags then
 		state:popScopedFlags(previousFlags)
 	end
 
-	if value.isLookbehind then
-		local len, errorMessage = getLookbehindFixedLength(value.tree)
-		if not len then
+	if group.isLookbehind then
+		local fixedLength
+		fixedLength, errorMessage = getLookbehindFixedLength(group.tree)
+		if not fixedLength then
 			return errorMessage or ERROR_VARIABLE_LENGTH_LOOKBEHIND
 		end
-		value.fixedLength = len
+		group.fixedLength = fixedLength
 	end
 
-	if not value._skipFromTree then
-		tree._index = tree._index + 1
-		tree[tree._index] = value
+	if not group._skipFromTree then
+		local treeIndex = tree._index + 1
+		tree._index = treeIndex
+		tree[treeIndex] = group
 	end
 
-	-- For recursion, getGroupBehavior already consumed the `)`, so state.index is pointing at the NEXT character.
-	if value.isRecursion then
+	-- For recursion, parseGroupBehavior already consumed the `)`, so state.index is pointing at the NEXT character.
+	if groupIsRecursion then
 		return nil
 	end
 
@@ -273,6 +313,10 @@ Group.parse = function(state, tree)
 	return nil
 end
 
+--- Parses a group closing token.
+---@param state ParserState The current parser state.
+---@return boolean shouldClose Whether the current subtree should be closed.
+---@return string|nil errorMessage The parser error message on failure.
 Group.parseClosing = function(state)
 	if state.isGroup then
 		return true, nil
@@ -280,6 +324,14 @@ Group.parseClosing = function(state)
 	return false, ERROR_NO_GROUP_TO_CLOSE
 end
 
+--- Matches a group element against the target string.
+---@param currentElement table The group AST node to match.
+---@param state MatchState The current matcher state.
+---@return boolean hasMatched Whether the group matched.
+---@return number|nil startIndex The match start index.
+---@return number|nil endIndex The match end index.
+---@return table metadata The updated matcher metadata.
+---@return boolean allowCapture Whether captures should be recorded.
 Group.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
 	local groupTree = currentElement.tree
@@ -287,32 +339,35 @@ Group.match = function(currentElement, state)
 	local treeIndex = state.treeIndex
 	local matcher = state.matcher
 
-	if currentElement.isRecursion then
+	local stateMetadata = state.metadata
+	local isRecursion = currentElement.isRecursion
+
+	if isRecursion then
+		local elementTargetIndex, elementTargetName = currentElement.targetIndex, currentElement.targetName
 		if currentElement.isRecursionRoot then
-			groupTree = state.metaData.rootTree
-		elseif currentElement.targetIndex then
-			groupTree = state.metaData.parsedMetaData.groupTreesByIndex[currentElement.targetIndex]
-		elseif currentElement.targetName then
-			groupTree = state.metaData.parsedMetaData.groupTreesByName[currentElement.targetName]
+			groupTree = stateMetadata.rootTree
+		elseif elementTargetIndex then
+			groupTree = stateMetadata.parsedMetaData.groupTreesByIndex[elementTargetIndex]
+		elseif elementTargetName then
+			groupTree = stateMetadata.parsedMetaData.groupTreesByName[elementTargetName]
 		end
 
-		if not groupTree then
-			return false, nil, nil, state.metaData, false
-		end
-
-		if state:enterRecursion() then
-			return false, nil, nil, state.metaData, false
+		if not groupTree or state:enterRecursion() then
+			return false, nil, nil, stateMetadata, false
 		end
 	end
 
-	local isAssertion = currentElement.isLookahead or currentElement.isLookbehind
+	local isLookbehind = currentElement.isLookbehind
+	local isAssertion = currentElement.isLookahead or isLookbehind
 
-	local oldOuterTreeRef = state.metaData.outerTreeReference[groupTree]
+	local outerTreeReference = stateMetadata.outerTreeReference
+	local oldOuterTreeRef = outerTreeReference[groupTree]
+	local isAtomic = currentElement.isAtomic
 	
-	if currentElement.isRecursion then
-		state.metaData.outerTreeReference[groupTree] = nil
-	elseif not isAssertion and not currentElement.isAtomic and tree then
-		state.metaData.outerTreeReference[groupTree] = {
+	if isRecursion then
+		outerTreeReference[groupTree] = nil
+	elseif not isAssertion and not isAtomic and tree then
+		outerTreeReference[groupTree] = {
 			tree = tree,
 			treeLength = tree._index,
 			treeIndex = treeIndex,
@@ -321,74 +376,74 @@ Group.match = function(currentElement, state)
 	end
 
 	local oldGroupIndex = groupTree._groupIndex
+
 	local groupIndex = currentElement.index or currentElement.name
 	groupTree._groupIndex = groupIndex
 
+	local isNegative = currentElement.isNegative
+
 	local execStringIndex = stringIndex
-	if currentElement.isLookbehind then
+	if isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
 		if execStringIndex < 0 then
-			if currentElement.isRecursion then
+			if isRecursion then
 				state:leaveRecursion()
 			end
 
-			state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
+			outerTreeReference[groupTree] = oldOuterTreeRef
 			groupTree._groupIndex = oldGroupIndex
 
-			if currentElement.isNegative then
-				return true, nil, stringIndex, state.metaData, false
-			else
-				return false, nil, nil, state.metaData, false
+			if isNegative then
+				return true, nil, stringIndex, stateMetadata, false
 			end
+			return false, nil, nil, stateMetadata, false
 		end
 	end
 
 	local tempState = state:branch(execStringIndex, execStringIndex)
 	tempState.tree = groupTree
 	tempState.treeIndex = 0
-	local hasMatched, iniStr, endStr = matcher(
-		tempState
-	)
 
-	state.metaData.outerTreeReference[groupTree] = oldOuterTreeRef
+	local hasMatched, iniStr, endStr = matcher(tempState)
+
+	outerTreeReference[groupTree] = oldOuterTreeRef
 	groupTree._groupIndex = oldGroupIndex
 
 	if isAssertion then
 		local originalHasMatched = hasMatched
-		if currentElement.isLookbehind then
+		if isLookbehind then
 			if originalHasMatched and (endStr ~= stringIndex) then
 				originalHasMatched = false
 			end
 		end
-		hasMatched = originalHasMatched ~= currentElement.isNegative
+		hasMatched = originalHasMatched ~= isNegative
 
 		if not hasMatched then
-			return false, nil, nil, state.metaData, false
+			return false, nil, nil, stateMetadata, false
 		end
 
-		return true, nil, stringIndex, state.metaData, false
+		return true, nil, stringIndex, stateMetadata, false
 	end
 
-	if currentElement.isAtomic or currentElement.isRecursion then
-		if currentElement.isRecursion then
+	if isAtomic or isRecursion then
+		if isRecursion then
 			state:leaveRecursion()
 		end
 
 		if not hasMatched then
-			return false, nil, nil, state.metaData, false
+			return false, nil, nil, stateMetadata, false
 		end
-		return true, nil, endStr, state.metaData, false
+		return true, nil, endStr, stateMetadata, false
 	end
 
 	if not groupIndex then
-		hasMatched = hasMatched ~= currentElement.isNegative
+		hasMatched = hasMatched ~= isNegative
 		if not hasMatched then
 			return
 		end
 	end
 
-	return hasMatched, iniStr, endStr, state.metaData, true
+	return hasMatched, iniStr, endStr, stateMetadata, true
 end
 
---[[ Return ]]--
 return Group

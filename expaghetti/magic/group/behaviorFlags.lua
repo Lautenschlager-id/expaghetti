@@ -33,8 +33,6 @@ return function(state, peekIndex, peekChar)
 	local disableFlags = {}
 	local targetFlags = enableFlags
 	
-	local nextPeekIndex, nextChar
-
 	-- Parse all inline flags (e.g. `i`, `m`, `s`) and switch target if `-` is encountered
 	while FLAGS_INLINE_TOKENS[peekChar] do
 		if peekChar == ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR then
@@ -42,7 +40,8 @@ return function(state, peekIndex, peekChar)
 		else
 			targetFlags[peekChar] = true
 		end
-		nextPeekIndex, nextChar = state:readElement(peekIndex)
+		
+		local nextPeekIndex, nextChar = state:readElement(peekIndex)
 		if not nextPeekIndex or state:isElement(nextChar) then
 			peekChar = nextChar
 			break

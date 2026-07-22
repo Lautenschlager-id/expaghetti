@@ -31,10 +31,10 @@ function MatchState.new(flags, targetString, rootTree)
 	end
 
 	self.rootTree = rootTree
-	self.parsedMetaData = rootTree and rootTree._metaData or nil
+	self.parsedMetaData = rootTree and rootTree._metadata or nil
 	
 	local limits = config.get()
-	self.metaData = {
+	self.metadata = {
 		captureStarts = {},
 		captureEnds = {},
 		captureCounts = {},
@@ -58,14 +58,14 @@ function MatchState:reset(stringIndex)
 	self.stringIndex = stringIndex or 0
 	self.initialStringIndex = self.stringIndex
 
-	local metaData = self.metaData
-	metaData.captureStarts = {}
-	metaData.captureEnds = {}
-	metaData.captureCounts = {}
-	metaData.positionCaptures = {}
-	metaData.outerTreeReference = {}
-	metaData.recursionDepth = 0
-	metaData.backtrackSteps = 0
+	local metadata = self.metadata
+	metadata.captureStarts = {}
+	metadata.captureEnds = {}
+	metadata.captureCounts = {}
+	metadata.positionCaptures = {}
+	metadata.outerTreeReference = {}
+	metadata.recursionDepth = 0
+	metadata.backtrackSteps = 0
 end
 
 --- Branches the current state into a new child state (e.g., for lookaheads).
@@ -79,7 +79,7 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	child.targetStringLength = self.targetStringLength
 	child.stringIndex = stringIndex or self.stringIndex
 	child.initialStringIndex = initialStringIndex or self.initialStringIndex
-	child.metaData = self.metaData
+	child.metadata = self.metadata
 	child.rootTree = self.rootTree
 	child.parsedMetaData = self.parsedMetaData
 	child.tree = self.tree
@@ -91,16 +91,16 @@ end
 --- Increments the global backtrack counter and checks against the max backtrack limit.
 ---@return boolean exceeded Limit exceeded (true if backtrack limit has been breached).
 function MatchState:incrementBacktrack()
-	self.metaData.backtrackSteps = self.metaData.backtrackSteps + 1
-	return self.metaData.backtrackSteps > self.metaData.maxBacktrackDepth
+	self.metadata.backtrackSteps = self.metadata.backtrackSteps + 1
+	return self.metadata.backtrackSteps > self.metadata.maxBacktrackDepth
 end
 
 --- Increments the recursion depth and checks against the max recursion limit.
 ---@return boolean exceeded Limit exceeded (true if recursion limit has been breached).
 function MatchState:enterRecursion()
-	self.metaData.recursionDepth = self.metaData.recursionDepth + 1
-	if self.metaData.recursionDepth > self.metaData.maxRecursionDepth then
-		self.metaData.recursionDepth = self.metaData.recursionDepth - 1
+	self.metadata.recursionDepth = self.metadata.recursionDepth + 1
+	if self.metadata.recursionDepth > self.metadata.maxRecursionDepth then
+		self.metadata.recursionDepth = self.metadata.recursionDepth - 1
 		return true
 	end
 	return false
@@ -108,7 +108,7 @@ end
 
 --- Decrements the recursion depth.
 function MatchState:leaveRecursion()
-	self.metaData.recursionDepth = self.metaData.recursionDepth - 1
+	self.metadata.recursionDepth = self.metadata.recursionDepth - 1
 end
 
 --- Records a successful capture group match.
@@ -118,9 +118,9 @@ end
 function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	if not groupIndex then return end
 	
-	local inits = self.metaData.captureStarts
-	local ends = self.metaData.captureEnds
-	local counts = self.metaData.captureCounts
+	local inits = self.metadata.captureStarts
+	local ends = self.metadata.captureEnds
+	local counts = self.metadata.captureCounts
 	
 	local groupInits = inits[groupIndex]
 	local groupEnds = ends[groupIndex]
@@ -145,12 +145,12 @@ end
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
 	
-	local counts = self.metaData.captureCounts
+	local counts = self.metadata.captureCounts
 	local length = counts[groupIndex] or 0
 	
 	if length > 0 then
-		self.metaData.captureStarts[groupIndex][length] = nil
-		self.metaData.captureEnds[groupIndex][length] = nil
+		self.metadata.captureStarts[groupIndex][length] = nil
+		self.metadata.captureEnds[groupIndex][length] = nil
 		counts[groupIndex] = length - 1
 	end
 end

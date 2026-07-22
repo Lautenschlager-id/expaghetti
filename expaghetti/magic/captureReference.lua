@@ -61,9 +61,9 @@ end
 
 CaptureReference.match = function(currentElement, state)
 	local stringIndex = state.stringIndex - 1
-	local initStringPositionList = state.metaData.captureStarts[currentElement.index]
-	local endStringPositionList = state.metaData.captureEnds[currentElement.index]
-	local length = state.metaData.captureCounts[currentElement.index] or 0
+	local initStringPositionList = state.metadata.captureStarts[currentElement.index]
+	local endStringPositionList = state.metadata.captureEnds[currentElement.index]
+	local length = state.metadata.captureCounts[currentElement.index] or 0
 
 	if length == 0 then
 		return false

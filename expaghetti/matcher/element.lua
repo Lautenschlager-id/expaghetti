@@ -72,7 +72,7 @@ local elementMatchers = {
 ---@return boolean hasMatched True if the single element successfully matched.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
----@return table|nil metaData Metadata including captures, if any.
+---@return table|nil metadata Metadata including captures, if any.
 ---@return boolean|nil shouldEndThisExecution True if execution stack should finish.
 local elementMatcher = function(currentElement, currentCharacter, state)
 	local elementClass = elementMatchers[currentElement.type]
