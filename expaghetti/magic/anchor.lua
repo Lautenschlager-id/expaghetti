@@ -1,34 +1,67 @@
-----------------------------------------------------------------------------------------------------
-local magicEnum = require("./enums/magic")
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local ENUM_ANCHOR_START = magicEnum.ANCHOR_START
-local ENUM_ANCHOR_END = magicEnum.ANCHOR_END
-local ENUM_ELEMENT_TYPE_ANCHOR = require("./enums/elements").ANCHOR
-local ENUM_LINE_BREAKS = require("./enums/lineBreaks")
-----------------------------------------------------------------------------------------------------
-local Anchor = { }
+--[[
+    Parser and matcher for string anchors.
 
+    Supports the beginning (`^`) and end (`$`) anchors, including
+    multiline matching behavior.
+]]
+	
+--[[ Dependencies ]]--
+local AnchorNode = require("ast").Anchor
+
+--[[ Enums ]]--
+local Elements = require("enums.elements")
+local LINE_BREAKS = require("enums.lineBreaks")
+local Magic = require("enums.magic")
+
+--[[ Aliases ]]--
+local MAGIC_ANCHOR_END = Magic.ANCHOR_END
+local MAGIC_ANCHOR_START = Magic.ANCHOR_START
+local ELEMENT_ANCHOR = Elements.ANCHOR
+
+--[[ Module ]]--
+local Anchor = {}
+
+--- Returns whether a character is an anchor token.
+---@param currentCharacter string The character to test.
+---@return boolean isAnchorToken Whether the character is an anchor token.
 Anchor.isToken = function(currentCharacter)
-	return currentCharacter == ENUM_ANCHOR_START or currentCharacter == ENUM_ANCHOR_END
+	return currentCharacter == MAGIC_ANCHOR_START or currentCharacter == MAGIC_ANCHOR_END
 end
 
+--- Returns whether an AST element is an anchor node.
+---@param currentElement table The AST element to test.
+---@return boolean isAnchor Whether the element is an anchor node.
 Anchor.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_ANCHOR
+	return currentElement.type == ELEMENT_ANCHOR
 end
 
+--- Parses an anchor element.
+---@param state ParserState The current parser state.
+---@param currentCharacter string The current pattern character.
+---@param tree ASTTree The AST tree being built.
+---@return string|nil errorMessage The parser error message on failure.
 Anchor.parse = function(state, currentCharacter, tree)
-	tree._index = tree._index + 1
-	local node = AST.Anchor(currentCharacter == ENUM_ANCHOR_START)
+	local treeIndex = tree._index + 1
+	tree._index = treeIndex
+
+	local node = AnchorNode(currentCharacter == MAGIC_ANCHOR_START)
 	if state.flags.m then
 		node.isMultiline = true
 	end
-	tree[tree._index] = node
+
+	tree[treeIndex] = node
 
 	state.index = state.index + 1
 	return nil
 end
 
+--- Matches an anchor element against the target string.
+---@param currentElement table The anchor AST node to match.
+---@param state MatchState The current matcher state.
+---@param currentCharacter string|nil The current target character.
+---@return boolean hasMatched Whether the anchor matched.
+---@return number|nil startIndex The match start index.
+---@return number|nil endIndex The match end index.
 Anchor.match = function(currentElement, state, currentCharacter)
 	local stringIndex = state.stringIndex - 1
 	local isBeginning = currentElement.isBeginning
@@ -39,7 +72,7 @@ Anchor.match = function(currentElement, state, currentCharacter)
 		if isBeginning then
 			currentCharacter = state:getTargetCharacter(stringIndex)
 		end
-		if ENUM_LINE_BREAKS[currentCharacter] then
+		if LINE_BREAKS[currentCharacter] then
 			return true, nil, stringIndex
 		end
 	end
