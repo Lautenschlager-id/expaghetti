@@ -1,18 +1,25 @@
 --[[
-    String helper utilities.
+    Helper functions for string manipulation and character conversion.
 ]]
 
 --[[ Globals ]]--
-local strsub = string.sub
+local bit32_bxor = bit32.bxor
+local string_byte = string.byte
+local string_char = string.char
+local string_sub = string.sub
 
 --[[ Dependencies ]]--
 local utf8 = require("helpers.utf8")
 
 --[[ Module ]]--
-local StringHelpers = {}
 
---[[ Public API ]]--
-StringHelpers.splitStringByEachChar = function(str, encodeUTF8)
+--- Splits a string into an array of characters.
+--- When UTF-8 encoding is enabled, delegates to the UTF-8 helper.
+---@param str string The string to split.
+---@param encodeUTF8 boolean Whether to split using UTF-8 code points.
+---@return table characters The resulting character array.
+---@return number length The number of characters.
+local toCharArray = function(str, encodeUTF8)
 	if encodeUTF8 then
 		return utf8.transform(str)
 	end
@@ -21,17 +28,18 @@ StringHelpers.splitStringByEachChar = function(str, encodeUTF8)
 	local stringLength = #str
 
 	for index = 1, stringLength do
-		splitString[index] = strsub(str, index, index)
+		splitString[index] = string_sub(str, index, index)
 	end
 
 	return splitString, stringLength
 end
 
+--- Converts a printable ASCII character into its corresponding control
+--- character according to the Lua pattern `%c` rules.
+---@param char string The printable ASCII character.
+---@return string|nil controlCharacter The corresponding control character, or nil if unsupported.
+local toControlCharacter
 do
-	local strbyte = string.byte
-	local strchar = string.char
-	local xor = bit32.bxor
-
 	local delimiters = {
 		-- <init_lim>, <final_lim>, <xor_by>
 		'\x20', '_', 0x40,
@@ -40,14 +48,21 @@ do
 	}
 	local delimitersLength = #delimiters
 
-	StringHelpers.stringCharToCtrlChar = function(char)
+	toControlCharacter = function(char)
 		for index = 1, delimitersLength, 3 do
 			if char >= delimiters[index] and char <= delimiters[index + 1] then
-				return strchar(xor(strbyte(char), delimiters[index + 2]))
+				return string_char(
+					bit32_bxor(
+						string_byte(char),
+						delimiters[index + 2]
+					)
+				)
 			end
 		end
 	end
 end
 
---[[ Return ]]--
-return StringHelpers
+return {
+	toCharArray = toCharArray,
+	toControlCharacter = toControlCharacter
+}

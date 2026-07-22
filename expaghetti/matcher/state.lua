@@ -1,6 +1,6 @@
 local config = require("./config")
 local ENUM_FLAG_UNICODE = require("./enums/flags").FLAGS.UNICODE
-local splitStringByEachChar = require("./helpers/string").splitStringByEachChar
+local toCharArray = require("./helpers/string").toCharArray
 
 local MatchState = {
 	matcher = nil
@@ -18,7 +18,7 @@ function MatchState.new(flags, targetString, rootTree)
 	self.flags = flags or {}
 
 	if self.flags[ENUM_FLAG_UNICODE] then
-		local targetStringChars, targetStringLength = splitStringByEachChar(targetString, true)
+		local targetStringChars, targetStringLength = toCharArray(targetString, true)
 		self.getTargetCharacter = function(self, index)
 			return targetStringChars[index]
 		end

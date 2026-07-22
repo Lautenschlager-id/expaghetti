@@ -3,7 +3,7 @@ local matcher = require("matcher.init")
 
 local performance = require("performance")
 
-local splitStringByEachChar = require("helpers.string").splitStringByEachChar
+local toCharArray = require("helpers.string").toCharArray
 local ENUM_FLAG_UNICODE = require("enums.flags").UNICODE
 
 local function getSubstring(str, ini, en, flags)
@@ -15,7 +15,7 @@ local function getSubstring(str, ini, en, flags)
 	end
 
 	if isUnicode then
-		local chars = splitStringByEachChar(str, true)
+		local chars = toCharArray(str, true)
 		return table.concat(chars, "", ini, en)
 	end
 	return string.sub(str, ini, en)

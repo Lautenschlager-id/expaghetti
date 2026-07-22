@@ -10,7 +10,7 @@ local tostring = tostring
 local parser = require("parser.init")
 ----------------------------------------------------------------------------------------------------
 local compareTables = require("./assertion").compareTables
-local prettyPrint = require("helpers.prettyPrint")
+local prettyPrint = require("./prettyPrint")
 ----------------------------------------------------------------------------------------------------
 local performance = require("performance")
 ----------------------------------------------------------------------------------------------------

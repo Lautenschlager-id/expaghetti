@@ -10,7 +10,7 @@ local strchar = string.char
 local strformat = string.format
 
 --[[ Dependencies ]]--
-local stringCharToCtrlChar = require("helpers.string").stringCharToCtrlChar
+local toControlCharacter = require("helpers.string").toControlCharacter
 local table_deepcopy = require("helpers.table").table_deepcopy
 local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
@@ -48,7 +48,7 @@ local specialEscaped = {
 
 -- %cA --> ctrl char A
 specialEscaped.c = function(state, currentCharacter, index, expression, isInsideSet)
-	local ctrlChar = currentCharacter and stringCharToCtrlChar(currentCharacter)
+	local ctrlChar = currentCharacter and toControlCharacter(currentCharacter)
 	if not ctrlChar then
 		return false, ERROR_INVALID_PARAM_CTRL_CHAR
 	end

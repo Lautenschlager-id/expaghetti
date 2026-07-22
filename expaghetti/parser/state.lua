@@ -10,7 +10,7 @@ local setmetatable = setmetatable
 local string = string
 
 --[[ Dependencies ]]--
-local splitStringByEachChar = require("helpers.string").splitStringByEachChar
+local toCharArray = require("helpers.string").toCharArray
 local Escaped = require("magic.escaped")
 local flagsEnum = require("enums.flags").FLAGS
 
@@ -62,7 +62,7 @@ function ParserState.new(expr, flags)
 	}
 
 	self.index = 1
-	self.patternChars, self.patternLength = splitStringByEachChar(expr, not not self.flags[FLAG_UNICODE])
+	self.patternChars, self.patternLength = toCharArray(expr, not not self.flags[FLAG_UNICODE])
 
 	return self
 end
