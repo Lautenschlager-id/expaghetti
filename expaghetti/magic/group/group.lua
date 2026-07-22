@@ -6,7 +6,7 @@
 ]]
 
 --[[ Globals ]]--
-local string_format = string_format
+local string_format = string.format
 local tostring = tostring
 
 --[[ Dependencies ]]--
@@ -242,7 +242,7 @@ Group.parse = function(state, tree)
 	local stateMetadata, statePatternChars = state.metadata, state.patternChars
 	local groupIsRecursion = group.isRecursion
 
-	-- A group with any value
+	-- Parse the group's contents.
 	if groupIsRecursion then
 		group.tree = {
 			_index = 0
@@ -342,6 +342,7 @@ Group.match = function(currentElement, state)
 	local stateMetadata = state.metadata
 	local isRecursion = currentElement.isRecursion
 
+	-- Resolve the recursion target before executing the group.
 	if isRecursion then
 		local elementTargetIndex, elementTargetName = currentElement.targetIndex, currentElement.targetName
 		if currentElement.isRecursionRoot then
@@ -360,6 +361,7 @@ Group.match = function(currentElement, state)
 	local isLookbehind = currentElement.isLookbehind
 	local isAssertion = currentElement.isLookahead or isLookbehind
 
+	-- Preserve the caller's execution context while entering this group.
 	local outerTreeReference = stateMetadata.outerTreeReference
 	local oldOuterTreeRef = outerTreeReference[groupTree]
 	local isAtomic = currentElement.isAtomic
@@ -377,14 +379,17 @@ Group.match = function(currentElement, state)
 
 	local oldGroupIndex = groupTree._groupIndex
 
+	-- Temporarily associate this execution with the current capture group.
 	local groupIndex = currentElement.index or currentElement.name
 	groupTree._groupIndex = groupIndex
 
 	local isNegative = currentElement.isNegative
 
+	-- Determine the starting position for group execution.
 	local execStringIndex = stringIndex
 	if isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
+		-- Lookbehind cannot match before the beginning of the target string.
 		if execStringIndex < 0 then
 			if isRecursion then
 				state:leaveRecursion()
@@ -400,21 +405,22 @@ Group.match = function(currentElement, state)
 		end
 	end
 
+	-- Execute the group's subtree in an isolated matcher state.
 	local tempState = state:branch(execStringIndex, execStringIndex)
 	tempState.tree = groupTree
 	tempState.treeIndex = 0
 
 	local hasMatched, iniStr, endStr = matcher(tempState)
 
+	-- Restore the caller's execution context.
 	outerTreeReference[groupTree] = oldOuterTreeRef
 	groupTree._groupIndex = oldGroupIndex
 
+	-- Assertions do not consume characters.
 	if isAssertion then
 		local originalHasMatched = hasMatched
-		if isLookbehind then
-			if originalHasMatched and (endStr ~= stringIndex) then
-				originalHasMatched = false
-			end
+		if isLookbehind and originalHasMatched and (endStr ~= stringIndex) then
+			originalHasMatched = false
 		end
 		hasMatched = originalHasMatched ~= isNegative
 
@@ -425,8 +431,10 @@ Group.match = function(currentElement, state)
 		return true, nil, stringIndex, stateMetadata, false
 	end
 
+	-- Atomic groups and recursion never expose captures for backtracking.
 	if isAtomic or isRecursion then
 		if isRecursion then
+			-- Restore recursion depth before returning.
 			state:leaveRecursion()
 		end
 
@@ -436,6 +444,7 @@ Group.match = function(currentElement, state)
 		return true, nil, endStr, stateMetadata, false
 	end
 
+	-- Non-capturing groups only need their match result.
 	if not groupIndex then
 		hasMatched = hasMatched ~= isNegative
 		if not hasMatched then
