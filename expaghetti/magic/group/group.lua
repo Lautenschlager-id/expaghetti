@@ -10,7 +10,7 @@ local string = string
 local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
 local PositionCapture = require("magic.positionCapture")
-local behaviorCapture = require("magic.group.behaviorCapture")
+local behaviorCapture = require("magic.group.behaviorCapturing")
 local behaviorAtomic = require("magic.group.behaviorAtomic")
 local behaviorBranchReset = require("magic.group.behaviorBranchReset")
 local behaviorLookaround = require("magic.group.behaviorLookaround")
@@ -159,7 +159,7 @@ local parseGroupBehavior = function(state)
 		
 	-- Recursion: (?R), (?0), (?123), (?&name)
 	elseif peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS or peekChar == MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar) then
-		return behaviorRecursion(state, peekIndex, peekChar)
+		return behaviorRecursion(state, peekIndex, peekChar, Group.isClosingToken)
 		
 	-- Inline and Scoped Flags: (?i), (?i:...)
 	elseif inlineFlagsEnum[peekChar] then

@@ -1,21 +1,38 @@
-----------------------------------------------------------------------------------------------------
-local AST = require("./ast")
-local magicEnum = require("./enums/magic")
-local errorsEnum = require("./enums/errors")
-----------------------------------------------------------------------------------------------------
-local ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
-local ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = magicEnum.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
-local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = magicEnum.GROUP_LOOKBEHIND_BEHAVIOR
-----------------------------------------------------------------------------------------------------
+--[[
+    Parser for lookahead and lookbehind group behaviors.
+    Supports `(?=...)`, `(?!...)`, `(?<=...)`, and `(?<!...)`.
+]]
 
--- Parses lookahead and lookbehind group behaviors.
--- Lookaheads use `(?=...)` / `(?!...)`, lookbehinds use `(?<=...)` / `(?<!...)`.
--- The `=` and `!` tokens are reused for both lookahead and lookbehind polarity.
+--[[ Dependencies ]]--
+local AST = require("ast")
+local Magic = require("enums.magic")
+
+--[[ Aliases ]]--
+local ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
+local ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
+local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = Magic.GROUP_LOOKBEHIND_BEHAVIOR
+
+local ERROR_INVALID_GROUP_BEHAVIOR = require("enums.errors").invalidGroupBehavior
+
+local GroupLookaheadNode = AST.GroupLookahead
+local GroupLookbehindNode = AST.GroupLookbehind
+
+--[[ Module ]]--
+
+--- Parses a lookahead or lookbehind group behavior.
+---@param state ParserState The current parser state.
+---@param peekIndex number The parser index after the behavior token.
+---@param peekChar string The behavior token following `(?`.
+---@param lookbehindIndex number|nil The parser index after the lookbehind polarity token.
+---@param lookbehindChar string|nil The lookbehind polarity token.
+---@return number|false nextIndex The parser index after the parsed behavior, or false on failure.
+---@return table|nil group The parsed AST group node.
+---@return string|nil errorMessage The parser error message when parsing fails.
 return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 	-- Lookahead: (?=...), (?!...)
 	local isNegativeLookahead = (peekChar == ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) or nil
 	if peekChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookahead then
-		local node = AST.GroupLookahead()
+		local node = GroupLookaheadNode()
 		node.isLookahead = true
 		node.disableCapture = true
 		node.hasBehavior = true
@@ -26,12 +43,12 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 	-- Peek at the third character to determine polarity
 	elseif peekChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
 		if not lookbehindIndex then
-			return false, nil, errorsEnum.invalidGroupBehavior
+			return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 		end
 
 		local isNegativeLookbehind = (lookbehindChar == ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR) or nil
 		if lookbehindChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookbehind then
-			local node = AST.GroupLookbehind()
+			local node = GroupLookbehindNode()
 			node.isLookbehind = true
 			node.disableCapture = true
 			node.hasBehavior = true
@@ -40,5 +57,5 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 		end
 	end
 	
-	return false, nil, errorsEnum.invalidGroupBehavior
+	return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 end

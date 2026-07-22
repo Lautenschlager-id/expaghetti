@@ -1,9 +1,17 @@
-----------------------------------------------------------------------------------------------------
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
+--[[
+    Parser for the comment group behavior `(?#...)`.
+]]
 
--- Parses comment group behavior `(?#...)`.
--- Comment groups are ignored during matching and excluded from the tree.
+--[[ Dependencies ]]--
+local GroupCommentNode = require("ast").GroupComment
+
+--[[ Module ]]--
+
+--- Parses the comment group behavior `(?#...)`.
+---@param state ParserState The current parser state.
+---@param peekIndex number The parser index after the behavior token.
+---@return number nextIndex The parser index after the behavior.
+---@return table group The parsed AST group node.
 return function(state, peekIndex)
-	return peekIndex, AST.GroupComment()
+	return peekIndex, GroupCommentNode()
 end

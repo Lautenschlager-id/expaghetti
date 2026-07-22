@@ -1,5 +1,6 @@
 --[[
-    Parses recursion-oriented group behaviors.
+    Parser for recursion group behaviors.
+    Supports `(?R)`, `(?0)`, `(?123)`, and `(?&name)`.
 ]]
 
 --[[ Globals ]]--
@@ -7,32 +8,38 @@ local tonumber = tonumber
 
 --[[ Dependencies ]]--
 local AST = require("ast")
+local ParserHelper = require("helpers.parser")
 
-local parser = require("helpers.parser")
-local isPositiveOrZeroIntegerChar = parser.isPositiveOrZeroIntegerChar
-local isPositiveIntegerChar = parser.isPositiveIntegerChar
-local consumeWhile = parser.consumeWhile
+local Magic = require("enums.magic")
+local Errors = require("enums.errors")
 
-local magicEnum = require("enums.magic")
-local errorsEnum = require("enums.errors")
+--[[ Aliases ]]--
+local consumeWhile = ParserHelper.consumeWhile
+local isAlphanumericName = ParserHelper.isAlphanumericName
+local isPositiveIntegerChar = ParserHelper.isPositiveIntegerChar
+local isPositiveOrZeroIntegerChar = ParserHelper.isPositiveOrZeroIntegerChar
 
---[[ Enum Aliases ]]--
-local MAGIC_GROUP_CLOSE = magicEnum.GROUP_CLOSE
-local MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR = magicEnum.GROUP_RECURSION_ROOT_BEHAVIOR
-local MAGIC_GROUP_RECURSION_ROOT_ALIAS = magicEnum.GROUP_RECURSION_ROOT_ALIAS
-local MAGIC_GROUP_RECURSION_NAMED = magicEnum.GROUP_RECURSION_NAMED_BEHAVIOR
-local ERROR_INVALID_GROUP_BEHAVIOR = errorsEnum.invalidGroupBehavior
-local ERROR_INVALID_GROUP_RECURSION_NAME = errorsEnum.invalidGroupRecursionName
+local ERROR_INVALID_GROUP_BEHAVIOR = Errors.invalidGroupBehavior
+local ERROR_INVALID_GROUP_RECURSION_NAME = Errors.invalidGroupRecursionName
 
---[[ Private Functions ]]--
--- Helper to validate if a character is not a closing group parenthesis
-local isNotCloseGroup = function(char)
-	return char ~= MAGIC_GROUP_CLOSE
-end
+local GroupRecursionNode = AST.GroupRecursion
 
---[[ Return ]]--
-return function(state, peekIndex, peekChar)
-	local node = AST.GroupRecursion()
+local MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR = Magic.GROUP_RECURSION_ROOT_BEHAVIOR
+local MAGIC_GROUP_RECURSION_ROOT_ALIAS = Magic.GROUP_RECURSION_ROOT_ALIAS
+local MAGIC_GROUP_RECURSION_NAMED = Magic.GROUP_RECURSION_NAMED_BEHAVIOR
+
+--[[ Module ]]--
+
+--- Parses a recursion group behavior.
+---@param state ParserState The current parser state.
+---@param peekIndex number The parser index after the behavior token.
+---@param peekChar string The behavior token following `(?`.
+---@param GroupIsClosingToken fun(char: string): boolean Function used to determine whether a character closes the current group.
+---@return number|false nextIndex The parser index after the parsed behavior, or false on failure.
+---@return table|nil group The parsed AST group node.
+---@return string|nil errorMessage The parser error message when parsing fails.
+return function(state, peekIndex, peekChar, GroupIsClosingToken)
+	local node = GroupRecursionNode()
 	local finalIndex, nextChar, errorToThrow
 	
 	-- Handle root recursion e.g. `(?R)` or `(?0)`
@@ -50,7 +57,7 @@ return function(state, peekIndex, peekChar)
 		
 	-- Handle named target recursion e.g. `(?&name)`
 	elseif peekChar == MAGIC_GROUP_RECURSION_NAMED then
-		local nameStr, afterLoopIndex, afterLoopChar = consumeWhile(state, peekIndex, isNotCloseGroup)
+		local nameStr, afterLoopIndex, afterLoopChar = consumeWhile(state, peekIndex, isAlphanumericName)
 
 		errorToThrow = ERROR_INVALID_GROUP_RECURSION_NAME
 		if #nameStr == 0 then
@@ -64,7 +71,7 @@ return function(state, peekIndex, peekChar)
 	end
 	
 	-- Common validation: The recursion declaration must immediately close
-	if finalIndex and not state:isElement(nextChar) and nextChar == MAGIC_GROUP_CLOSE then
+	if finalIndex and not state:isElement(nextChar) and GroupIsClosingToken(nextChar) then
 		return finalIndex, node
 	else
 		return false, nil, errorToThrow

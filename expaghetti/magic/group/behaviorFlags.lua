@@ -1,30 +1,46 @@
-local AST = require("./ast")
-local magicEnum = require("./enums/magic")
-local errorsEnum = require("./enums/errors")
-local inlineFlagsEnum = require("./enums/flags").INLINE_TOKENS
+--[[
+    Parser for inline and scoped flag group behaviors:
+    `(?flags)`, `(?-flags)`, `(?flags:...)`, and `(?-flags:...)`.
+]]
 
-local ENUM_GROUP_CLOSE = magicEnum.GROUP_CLOSE
-local ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_BEHAVIOR
-local ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = magicEnum.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
+--[[ Dependencies ]]--
+local AST = require("ast")
+local Magic = require("enums.magic")
 
-local ENUM_GROUP_FLAG_IGNORE_CASE = magicEnum.GROUP_FLAG_IGNORE_CASE
-local ENUM_GROUP_FLAG_MULTILINE = magicEnum.GROUP_FLAG_MULTILINE
-local ENUM_GROUP_FLAG_DOT_ALL = magicEnum.GROUP_FLAG_DOT_ALL
-local ENUM_GROUP_FLAG_NO_CAPTURE = magicEnum.GROUP_FLAG_NO_CAPTURE
+--[[ Aliases ]]--
+local ENUM_GROUP_CLOSE = Magic.GROUP_CLOSE
+local ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR = Magic.GROUP_SCOPED_FLAGS_BEHAVIOR
+local ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = Magic.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
 
+local ERROR_INVALID_GROUP_BEHAVIOR = require("enums.errors").invalidGroupBehavior
+
+local FLAGS_INLINE_TOKENS = require("enums.flags").INLINE_TOKENS
+
+local GroupScopedFlagsNode = AST.GroupScopedFlags
+local GroupInlineFlagsNode = AST.GroupInlineFlags
+
+--[[ Module ]]--
+
+--- Parses an inline or scoped flag group behavior.
+---@param state ParserState The current parser state.
+---@param peekIndex number The parser index after the first flag token.
+---@param peekChar string The first flag token.
+---@return number|false nextIndex The parser index after the parsed behavior, or false on failure.
+---@return table|nil group The parsed AST group node.
+---@return string|nil errorMessage The parser error message when parsing fails.
 return function(state, peekIndex, peekChar)
 	local enableFlags = {}
 	local disableFlags = {}
-	local currentTarget = enableFlags
+	local targetFlags = enableFlags
 	
 	local nextPeekIndex, nextChar
-	
+
 	-- Parse all inline flags (e.g. `i`, `m`, `s`) and switch target if `-` is encountered
-	while inlineFlagsEnum[peekChar] do
+	while FLAGS_INLINE_TOKENS[peekChar] do
 		if peekChar == ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR then
-			currentTarget = disableFlags
+			targetFlags = disableFlags
 		else
-			currentTarget[peekChar] = true
+			targetFlags[peekChar] = true
 		end
 		nextPeekIndex, nextChar = state:readElement(peekIndex)
 		if not nextPeekIndex or state:isElement(nextChar) then
@@ -37,7 +53,7 @@ return function(state, peekIndex, peekChar)
 	
 	-- Handle scoped flags e.g. `(?i:abc)`
 	if peekChar == ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR then
-		local node = AST.GroupScopedFlags()
+		local node = GroupScopedFlagsNode()
 		node.scopedFlags = {
 			enable = enableFlags,
 			disable = disableFlags
@@ -46,13 +62,13 @@ return function(state, peekIndex, peekChar)
 		
 	-- Handle standard inline flag toggles e.g. `(?i)`
 	elseif peekChar == ENUM_GROUP_CLOSE then
-		local node = AST.GroupInlineFlags()
+		local node = GroupInlineFlagsNode()
 		node.inlineFlags = {
 			enable = enableFlags,
 			disable = disableFlags
 		}
 		return peekIndex, node
 	else
-		return false, nil, errorsEnum.invalidGroupBehavior
+		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 	end
 end
