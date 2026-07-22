@@ -6,9 +6,9 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local parserHelpers = require("helpers.parserHelpers")
-local consumeWhileArray = parserHelpers.consumeWhileArray
-local isAlphanumeric = parserHelpers.isAlphanumeric
+local parser = require("helpers.parser")
+local consumeWhileArray = parser.consumeWhileArray
+local isAlphanumeric = parser.isAlphanumeric
 
 local AST = require("ast")
 

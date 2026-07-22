@@ -8,10 +8,10 @@ local tonumber = tonumber
 --[[ Dependencies ]]--
 local AST = require("ast")
 
-local parserHelpers = require("helpers.parserHelpers")
-local isPositiveOrZeroIntegerChar = parserHelpers.isPositiveOrZeroIntegerChar
-local isPositiveIntegerChar = parserHelpers.isPositiveIntegerChar
-local consumeWhile = parserHelpers.consumeWhile
+local parser = require("helpers.parser")
+local isPositiveOrZeroIntegerChar = parser.isPositiveOrZeroIntegerChar
+local isPositiveIntegerChar = parser.isPositiveIntegerChar
+local consumeWhile = parser.consumeWhile
 
 local magicEnum = require("enums.magic")
 local errorsEnum = require("enums.errors")

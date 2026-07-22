@@ -7,9 +7,9 @@ local tonumber = tonumber
 
 --[[ Dependencies ]]--
 local table_deepcopy = require("helpers.table").table_deepcopy
-local parserHelpers = require("helpers.parserHelpers")
-local consumeWhile = parserHelpers.consumeWhile
-local isPositiveOrZeroIntegerChar = parserHelpers.isPositiveOrZeroIntegerChar
+local parser = require("helpers.parser")
+local consumeWhile = parser.consumeWhile
+local isPositiveOrZeroIntegerChar = parser.isPositiveOrZeroIntegerChar
 
 local AST = require("ast")
 

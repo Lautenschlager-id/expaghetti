@@ -7,7 +7,7 @@ local tostring = tostring
 local string = string
 
 --[[ Dependencies ]]--
-local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
+local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
 local PositionCapture = require("magic.positionCapture")
 local behaviorCapture = require("magic.group.behaviorCapture")

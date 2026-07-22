@@ -12,7 +12,7 @@ local strformat = string.format
 --[[ Dependencies ]]--
 local stringCharToCtrlChar = require("helpers.string").stringCharToCtrlChar
 local table_deepcopy = require("helpers.table").table_deepcopy
-local isPositiveIntegerChar = require("helpers.parserHelpers").isPositiveIntegerChar
+local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 
 local AST = require("ast")
 

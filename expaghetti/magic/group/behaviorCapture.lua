@@ -7,9 +7,9 @@ local string = string
 local strformat = string.format
 
 --[[ Dependencies ]]--
-local parserHelpers = require("helpers.parserHelpers")
-local consumeWhile = parserHelpers.consumeWhile
-local isAlphanumericName = parserHelpers.isAlphanumericName
+local parser = require("helpers.parser")
+local consumeWhile = parser.consumeWhile
+local isAlphanumericName = parser.isAlphanumericName
 
 local AST = require("ast")
 local magicEnum = require("enums.magic")
