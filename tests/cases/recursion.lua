@@ -229,7 +229,7 @@ return {
 				tree = {
 					{
 						type = "alternate",
-						trees = {
+						branches = {
 							{
 								{
 									tree = {

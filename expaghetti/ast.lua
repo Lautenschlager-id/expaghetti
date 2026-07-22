@@ -178,10 +178,10 @@ AST.Quantifier = function(min, max)
 	}
 end
 
-AST.Alternate = function(trees)
+AST.Alternate = function(branches)
 	return {
 		type = ELEMENT_ALTERNATE,
-		trees = trees,
+		branches = branches,
 	}
 end
 

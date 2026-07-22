@@ -10,6 +10,7 @@ local tonumber = tonumber
 local AST = require("ast")
 local ParserHelper = require("helpers.parser")
 
+--[[ Enums ]]--
 local Magic = require("enums.magic")
 local Errors = require("enums.errors")
 

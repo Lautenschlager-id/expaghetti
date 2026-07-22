@@ -17,16 +17,13 @@ local BehaviorComment = require("magic.group.behaviorComment")
 local BehaviorFlags = require("magic.group.behaviorFlags")
 local BehaviorLookaround = require("magic.group.behaviorLookaround")
 local BehaviorRecursion = require("magic.group.behaviorRecursion")
-
-local Elements = require("enums.elements")
-
-local ElementLengths = require("enums.elementLengths")
-
-local Errors = require("enums.errors")
-
-local Magic = require("enums.magic")
-
 local PositionCapture = require("magic.positionCapture")
+
+--[[ Enums ]]--
+local Elements = require("enums.elements")
+local ElementLengths = require("enums.elementLengths")
+local Errors = require("enums.errors")
+local Magic = require("enums.magic")
 
 --[[ Aliases ]]--
 local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
@@ -101,9 +98,9 @@ getLookbehindFixedLength = function(tree)
 			end
 			totalLen = totalLen + (groupLength * quantifierMin)
 		elseif elemType == ELEMENT_ALTERNATE then
-			local trees, alternateLength, expectedAlternateLength = elem.trees
-			for branch = 1, trees._index do
-				alternateLength, errorMessage = getLookbehindFixedLength(trees[branch])
+			local branches, alternateLength, expectedAlternateLength = elem.branches
+			for branch = 1, branches._index do
+				alternateLength, errorMessage = getLookbehindFixedLength(branches[branch])
 				if not alternateLength then
 					return nil, errorMessage
 				end
@@ -342,7 +339,7 @@ Group.match = function(currentElement, state)
 	local stateMetadata = state.metadata
 	local isRecursion = currentElement.isRecursion
 
-	-- Resolve the recursion target before executing the group.
+	-- Resolve the recursion target before executing the group
 	if isRecursion then
 		local elementTargetIndex, elementTargetName = currentElement.targetIndex, currentElement.targetName
 		if currentElement.isRecursionRoot then
@@ -361,7 +358,7 @@ Group.match = function(currentElement, state)
 	local isLookbehind = currentElement.isLookbehind
 	local isAssertion = currentElement.isLookahead or isLookbehind
 
-	-- Preserve the caller's execution context while entering this group.
+	-- Preserve the caller's execution context while entering this group
 	local outerTreeReference = stateMetadata.outerTreeReference
 	local oldOuterTreeRef = outerTreeReference[groupTree]
 	local isAtomic = currentElement.isAtomic
@@ -379,17 +376,17 @@ Group.match = function(currentElement, state)
 
 	local oldGroupIndex = groupTree._groupIndex
 
-	-- Temporarily associate this execution with the current capture group.
+	-- Temporarily associate this execution with the current capture group
 	local groupIndex = currentElement.index or currentElement.name
 	groupTree._groupIndex = groupIndex
 
 	local isNegative = currentElement.isNegative
 
-	-- Determine the starting position for group execution.
+	-- Determine the starting position for group execution
 	local execStringIndex = stringIndex
 	if isLookbehind then
 		execStringIndex = stringIndex - currentElement.fixedLength
-		-- Lookbehind cannot match before the beginning of the target string.
+		-- Lookbehind cannot match before the beginning of the target string
 		if execStringIndex < 0 then
 			if isRecursion then
 				state:leaveRecursion()
@@ -405,18 +402,18 @@ Group.match = function(currentElement, state)
 		end
 	end
 
-	-- Execute the group's subtree in an isolated matcher state.
+	-- Execute the group's subtree in an isolated matcher state
 	local tempState = state:branch(execStringIndex, execStringIndex)
 	tempState.tree = groupTree
 	tempState.treeIndex = 0
 
 	local hasMatched, iniStr, endStr = matcher(tempState)
 
-	-- Restore the caller's execution context.
+	-- Restore the caller's execution context
 	outerTreeReference[groupTree] = oldOuterTreeRef
 	groupTree._groupIndex = oldGroupIndex
 
-	-- Assertions do not consume characters.
+	-- Assertions do not consume characters
 	if isAssertion then
 		local originalHasMatched = hasMatched
 		if isLookbehind and originalHasMatched and (endStr ~= stringIndex) then
@@ -431,10 +428,10 @@ Group.match = function(currentElement, state)
 		return true, nil, stringIndex, stateMetadata, false
 	end
 
-	-- Atomic groups and recursion never expose captures for backtracking.
+	-- Atomic groups and recursion never expose captures for backtracking
 	if isAtomic or isRecursion then
 		if isRecursion then
-			-- Restore recursion depth before returning.
+			-- Restore recursion depth before returning
 			state:leaveRecursion()
 		end
 
@@ -444,7 +441,7 @@ Group.match = function(currentElement, state)
 		return true, nil, endStr, stateMetadata, false
 	end
 
-	-- Non-capturing groups only need their match result.
+	-- Non-capturing groups only need their match result
 	if not groupIndex then
 		hasMatched = hasMatched ~= isNegative
 		if not hasMatched then

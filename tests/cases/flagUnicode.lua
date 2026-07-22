@@ -275,7 +275,7 @@ return {
 		},
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						{
 							isCaseInsensitive = false,

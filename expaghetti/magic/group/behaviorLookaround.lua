@@ -5,6 +5,8 @@
 
 --[[ Dependencies ]]--
 local AST = require("ast")
+
+--[[ Enums ]]--
 local Magic = require("enums.magic")
 
 --[[ Aliases ]]--

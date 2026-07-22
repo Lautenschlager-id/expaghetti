@@ -7,9 +7,11 @@ local string_format = string.format
 
 --[[ Dependencies ]]--
 local AST = require("ast")
+local ParserHelpers = require("helpers.parser")
+
+--[[ Enums ]]--
 local Errors = require("enums.errors")
 local Magic = require("enums.magic")
-local ParserHelpers = require("helpers.parser")
 
 --[[ Aliases ]]--
 local consumeWhile = ParserHelpers.consumeWhile

@@ -1,105 +1,138 @@
 --[[
-    Parses alternate elements.
+    Parser and matcher for alternation (`|`) expressions.
+
+    Handles parsing alternate branches into a single AST node and
+    evaluates them sequentially during matching until one succeeds.
 ]]
 
 --[[ Dependencies ]]--
-local AST = require("ast")
-local Group = require("magic.group.group")
-local magicEnum = require("enums.magic")
-local elementsEnum = require("enums.elements")
+local AlternateNode = require("ast").Alternate
 
---[[ Enum Aliases ]]--
-local MAGIC_ALTERNATE_BRANCH_SEPARATOR = magicEnum.ALTERNATE_BRANCH_SEPARATOR
-local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
+--[[ Aliases ]]--
+local ELEMENT_ALTERNATE = require("enums.elements").ALTERNATE
+
+local GroupIsClosingToken = require("magic.group.group").isClosingToken
+
+local MAGIC_ALTERNATE_BRANCH_SEPARATOR = require("enums.magic").ALTERNATE_BRANCH_SEPARATOR
 
 --[[ Module ]]--
 local Alternate = {}
 
---[[ Public API ]]--
+--- Returns whether a character is an alternation token.
+---@param currentCharacter string The character to test.
+---@return boolean isAlternateToken Whether the character is an alternation token.
 Alternate.isToken = function(currentCharacter)
 	return currentCharacter == MAGIC_ALTERNATE_BRANCH_SEPARATOR
 end
 
+--- Returns whether an AST element is an alternation node.
+---@param currentElement table The AST element to test.
+---@return boolean isAlternate Whether the element is an alternation node.
 Alternate.isElement = function(currentElement)
 	return currentElement.type == ELEMENT_ALTERNATE
 end
 
+--- Parses an alternation expression.
+---@param state ParserState The current parser state.
+---@param tree ASTTree The AST tree built before the alternation token.
+---@return ASTTree|nil tree The parsed alternation tree.
+---@return boolean hasParsed Whether an alternation was parsed.
+---@return string|nil errorMessage The parser error message on failure.
 Alternate.parse = function(state, tree)
 	if state.isAlternate then
 		return tree, true, nil
 	end
 
-	local totalAlternates = 1
-	local firstBranch = { _index = tree._index }
-	for i = 1, tree._index do
-		firstBranch[i] = tree[i]
+	local branchCount, treeIndex = 1, tree._index
+	local firstBranch = {
+		_index = treeIndex
+	}
+
+	for index = 1, treeIndex do
+		firstBranch[index] = tree[index]
 	end
 	tree[1] = firstBranch
 
-	local isBranchReset = state.isBranchReset
-	local initialGroupIndex = state.initialGroupIndex
-	local maxGroupIndex = state.metadata.groupIndex
+	local isBranchReset, initialGroupIndex = state.isBranchReset, state.initialGroupIndex
+	local stateMetadata = state.metadata
+	local maxGroupIndex, stateIsGroup = stateMetadata.groupIndex, state.isGroup
+	local statePatternLength, statePatternChars = state.patternLength, state.patternChars
 
-	local alternativeTree, altErrorMessage
+	-- Parse each subsequent alternate branch
 	repeat
 		state.index = state.index + 1
 		
+		-- Branch reset groups reuse capture numbering for every branch
 		if isBranchReset then
-			state.metadata.groupIndex = initialGroupIndex
+			stateMetadata.groupIndex = initialGroupIndex
 		end
 
 		local childState = state:fork()
 		childState.isAlternate = true
-		alternativeTree, altErrorMessage = state:parseSubTree(childState)
-		if not alternativeTree then
-			return nil, false, altErrorMessage
+
+		local branchTree, errorMessage = state:parseSubTree(childState)
+		if not branchTree then
+			return nil, false, errorMessage
 		end
 
+		-- Preserve the highest capture index across all branches
 		if isBranchReset then
-			if state.metadata.groupIndex > maxGroupIndex then
-				maxGroupIndex = state.metadata.groupIndex
+			if stateMetadata.groupIndex > maxGroupIndex then
+				maxGroupIndex = stateMetadata.groupIndex
 			end
 		end
 
-		totalAlternates = totalAlternates + 1
-		tree[totalAlternates] = alternativeTree
-	until state.index > state.patternLength or (state.isGroup and Group.isClosingToken(state.patternChars[state.index]))
+		branchCount = branchCount + 1
+		tree[branchCount] = branchTree
+	until state.index > statePatternLength or (stateIsGroup and GroupIsClosingToken(statePatternChars[state.index]))
 
 	if isBranchReset then
-		state.metadata.groupIndex = maxGroupIndex
+		stateMetadata.groupIndex = maxGroupIndex
 	end
 
-	for elementIndex = totalAlternates + 1, tree._index do
+	-- Replace the original tree contents with a single alternation element
+	for elementIndex = branchCount + 1, treeIndex do
 		tree[elementIndex] = nil
 	end
-	tree._index = totalAlternates
+	tree._index = branchCount
 
 	tree = {
-		[1] = AST.Alternate(tree),
+		[1] = AlternateNode(tree),
 		_index = 1
 	}
 
 	return tree, true, nil
 end
 
+--- Matches an alternation element against the target string.
+---@param currentElement table The alternation AST node to match.
+---@param state MatchState The current matcher state.
+---@return boolean hasMatched Whether any alternate branch matched.
+---@return number|nil startIndex The match start index.
+---@return number|nil endIndex The match end index.
+---@return table|nil metadata The updated matcher metadata.
+---@return boolean|nil allowCapture Whether captures should be recorded.
 Alternate.match = function(currentElement, state)
-	local trees = currentElement.trees
+	local branches = currentElement.branches
 	local tree = state.tree
 	local treeIndex = state.treeIndex
 	local matcher = state.matcher
+	local stateMetadata = state.metadata
+	local outerTreeReference = state.metadata.outerTreeReference
 
 	local hasMatched, iniStr, endStr
-	for branchIndex = 1, trees._index do
+	for branchIndex = 1, branches._index do
 		if branchIndex > 1 then
 			if state:incrementBacktrack() then
 				return false
 			end
 		end
 
-		local branchTree = trees[branchIndex]
+		local branchTree = branches[branchIndex]
 
-		if tree and not state.metadata.outerTreeReference[branchTree] then
-			state.metadata.outerTreeReference[branchTree] = {
+		-- Preserve the caller's execution context for nested backtracking.
+		if tree and not outerTreeReference[branchTree] then
+			outerTreeReference[branchTree] = {
 				tree = tree,
 				treeLength = tree._index,
 				treeIndex = treeIndex,
@@ -110,17 +143,14 @@ Alternate.match = function(currentElement, state)
 		local tempState = state:branch(state.stringIndex - 1, state.initialStringIndex)
 		tempState.tree = branchTree
 		tempState.treeIndex = 0
-		hasMatched, iniStr, endStr = matcher(
-			tempState
-		)
+		hasMatched, iniStr, endStr = matcher(tempState)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, state.metadata, true
+			return hasMatched, iniStr, endStr, stateMetadata, true
 		end
 	end
 
 	return false
 end
 
---[[ Return ]]--
 return Alternate

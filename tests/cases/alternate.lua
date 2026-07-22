@@ -2,7 +2,7 @@ return {
 	{
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						{
 							isCaseInsensitive = false,
@@ -46,7 +46,7 @@ return {
 	{
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						{
 							isCaseInsensitive = false,
@@ -78,7 +78,7 @@ return {
 							index = 1,
 							tree = {
 								{
-									trees = {
+									branches = {
 										{
 											{
 												isCaseInsensitive = false,
@@ -119,7 +119,7 @@ return {
 	{
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						_index = 0,
 					},
@@ -133,13 +133,13 @@ return {
 							index = 1,
 							tree = {
 								{
-									trees = {
+									branches = {
 										{
 											{
 												index = 2,
 												tree = {
 													{
-														trees = {
+														branches = {
 															{
 																{
 																	isCaseInsensitive = false,
@@ -175,7 +175,7 @@ return {
 																	index = 3,
 																	tree = {
 																		{
-																			trees = {
+																			branches = {
 																				{
 																					{
 																						isCaseInsensitive = false,
@@ -263,7 +263,7 @@ return {
 				},
 				tree = {
 					{
-						trees = {
+						branches = {
 							{
 								{
 									isCaseInsensitive = false,
@@ -339,7 +339,7 @@ return {
 				index = 1,
 				tree = {
 					{
-						trees = {
+						branches = {
 							{
 								{
 									index = 2,
@@ -385,7 +385,7 @@ return {
 	{
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						_index = 0,
 					},
@@ -403,7 +403,7 @@ return {
 	{
 		parsed = {
 			{
-				trees = {
+				branches = {
 					{
 						_index = 0,
 					},
