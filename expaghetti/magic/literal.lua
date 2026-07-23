@@ -1,34 +1,59 @@
-----------------------------------------------------------------------------------------------------
-local Quantifier = require("./magic/Quantifier")
-local AST = require("./ast")
-----------------------------------------------------------------------------------------------------
-local errorsEnum = require("./enums/errors")
-----------------------------------------------------------------------------------------------------
-local ENUM_ELEMENT_TYPE_LITERAL = require("./enums/elements").LITERAL
-local ENUM_FLAG_UNICODE = require("./enums/flags").FLAGS.UNICODE
-----------------------------------------------------------------------------------------------------
+--[[
+    Parser and matcher for literal characters.
+
+    Matches a single character, optionally supporting case-insensitive
+    comparisons depending on the active flags.
+]]
+
+--[[ Dependencies ]]--
+local LiteralNode = require("ast").Literal
+local QuantifierIsToken = require("magic.Quantifier").isToken
+
+
+--[[ Enums ]]--
+
+--[[ Aliases ]]--
+local ELEMENT_LITERAL = require("enums.elements").LITERAL
+
+local ERROR_NOTHING_TO_REPEAT = require("enums.errors").nothingToRepeat
+
+--[[ Module ]]--
 local Literal = { }
 
+--- Returns whether an AST element is a literal node.
+---@param currentElement table The AST element to test.
+---@return boolean isLiteral Whether the element is a literal node.
 Literal.isElement = function(currentElement)
-	return currentElement.type == ENUM_ELEMENT_TYPE_LITERAL
+	return currentElement.type == ELEMENT_LITERAL
 end
 
+--- Parses a literal element.
+---@param state ParserState The current parser state.
+---@param currentCharacter string The current pattern character.
+---@param tree ASTTree The AST tree being built.
+---@return string|nil errorMessage The parser error message on failure.
 Literal.parse = function(state, currentCharacter, tree)
-	if Quantifier.isToken(state, tree) then
-		return errorsEnum.nothingToRepeat
+	if QuantifierIsToken(state, tree) then
+		return ERROR_NOTHING_TO_REPEAT
 	end
 
-	tree._index = tree._index + 1
+	local treeIndex = tree._index + 1
+	tree._index = treeIndex
 
 	local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter)
-	local node = AST.Literal(value, lowerValue, upperValue)
+	local node = LiteralNode(value, lowerValue, upperValue)
 
-	tree[tree._index] = node
+	tree[treeIndex] = node
 
 	state.index = state.index + 1
 	return nil
 end
 
+--- Matches a literal element against the target string.
+---@param currentElement table The literal AST node to match.
+---@param state MatchState Unused matcher state.
+---@param currentCharacter string|nil The current target character.
+---@return boolean hasMatched Whether the literal matched.
 Literal.match = function(currentElement, _, currentCharacter)
 	if currentElement.isCaseInsensitive then
 		return currentCharacter == currentElement.lowerValue
