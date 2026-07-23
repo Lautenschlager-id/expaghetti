@@ -200,19 +200,19 @@ Set.match = function(currentElement, _, currentCharacter)
 	local hasMatched = not not currentElement.values[currentCharacter]
 
 	if not hasMatched then
+		local SetMatch = Set.match
 		local ranges = currentElement.ranges
 		for rangeIndex = 1, #ranges, 2 do
-			local rStart = ranges[rangeIndex]
-			local rEnd = ranges[rangeIndex + 1]
+			local rangeStart = ranges[rangeIndex]
+			local rangeEnd = ranges[rangeIndex + 1]
 			
-			if currentCharacter >= rStart and currentCharacter <= rEnd then
+			if currentCharacter >= rangeStart and currentCharacter <= rangeEnd then
 				hasMatched = true
 				break
 			end
 		end
 
 		if not hasMatched then
-			local SetMatch = Set.match
 			local classes = currentElement.classes
 			for classIndex = 1, currentElement.classIndex do
 				if SetMatch(classes[classIndex], _, currentCharacter) then
