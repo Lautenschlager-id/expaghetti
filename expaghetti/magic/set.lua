@@ -113,11 +113,8 @@ Set.parse = function(state, tree)
 	endIndex = endIndex - 1
 
 	local set = SetNode()
-	local isCaseInsensitive = state.flags.i
 
-	local watchingForRangeSeparator
 	local rangeInitChar
-
 	local setValues = set.values
 
 	local elementIndex = state.index
