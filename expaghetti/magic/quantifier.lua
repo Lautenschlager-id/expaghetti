@@ -1,5 +1,8 @@
 --[[
-    Quantifier module. Parses quantifiers.
+    Parser for quantifiers.
+
+    Detects and parses standard, custom, and possessive/lazy quantifiers,
+    attaching them to the preceding AST element.
 ]]
 
 --[[ Globals ]]--
@@ -7,34 +10,43 @@ local tonumber = tonumber
 
 --[[ Dependencies ]]--
 local deepCopy = require("helpers.table").deepCopy
-local parser = require("helpers.parser")
-local consumeWhile = parser.consumeWhile
-local isPositiveOrZeroIntegerChar = parser.isPositiveOrZeroIntegerChar
+local ParserHelpers = require("helpers.parser")
 
-local AST = require("ast")
+local QuantifierNode = require("ast").Quantifier
 
-local magicEnum = require("enums.magic")
-local errorsEnum = require("enums.errors")
-local quantifiersEnum = require("enums.quantifiers").TOKENS
-local quantifierModesEnum = require("enums.quantifiers").MODES
-local elementsEnum = require("enums.elements")
+--[[ Enums ]]--
+local Magic = require("enums.magic")
+local Errors = require("enums.errors")
+local Quantifiers = require("enums.quantifiers")
 
---[[ Enum Aliases ]]--
-local MAGIC_QUANTIFIER_OPEN = magicEnum.QUANTIFIER_OPEN
-local MAGIC_QUANTIFIER_CLOSE = magicEnum.QUANTIFIER_CLOSE
-local MAGIC_QUANTIFIER_SEPARATOR = magicEnum.QUANTIFIER_SEPARATOR
-local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
+--[[ Aliases ]]--
+local consumeWhile = ParserHelpers.consumeWhile
+local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar
 
-local ERROR_UNORDERED_CUSTOM_QUANTIFIER = errorsEnum.unorderedQuantifierRange
-local ERROR_NOTHING_TO_REPEAT = errorsEnum.nothingToRepeat
+local ELEMENT_QUANTIFIER = require("enums.elements").QUANTIFIER
+
+local ERROR_UNORDERED_QUANTIFIER_RANGE = Errors.unorderedQuantifierRange
+local ERROR_NOTHING_TO_REPEAT = Errors.nothingToRepeat
+
+local MAGIC_QUANTIFIER_CLOSE = Magic.QUANTIFIER_CLOSE
+local MAGIC_QUANTIFIER_OPEN = Magic.QUANTIFIER_OPEN
+local MAGIC_QUANTIFIER_SEPARATOR = Magic.QUANTIFIER_SEPARATOR
+
+local QUANTIFIER_TOKENS = Quantifiers.TOKENS
+local QUANTIFIER_MODES = Quantifiers.MODES
 
 local ZERO_LENGTH_ELEMENTS = require("enums.elementLengths").ZERO_LENGTH
-
 
 --[[ Module ]]--
 local Quantifier = {}
 
 --[[ Private Functions ]]--
+
+--- Attempts to parse a custom quantifier (`{n}`, `{n,}`, `{,m}`, or `{n,m}`).
+---@param state ParserState The current parser state.
+---@param index number The current parser index.
+---@return number|false nextIndex The parser index after the quantifier, or false if no valid custom quantifier was found.
+---@return QuantifierNode|string quantifierOrError The parsed quantifier node, or the parser error message.
 local lookForCustomQuantifier = function(state, index)
 	local min, index, currentToken = consumeWhile(state, index, isPositiveOrZeroIntegerChar)
 	local max
@@ -57,7 +69,7 @@ local lookForCustomQuantifier = function(state, index)
 		max = tonumber(max)
 
 		if min and max and min > max then
-			return false, ERROR_UNORDERED_CUSTOM_QUANTIFIER
+			return false, ERROR_UNORDERED_QUANTIFIER_RANGE
 		end
 	end
 
@@ -65,34 +77,44 @@ local lookForCustomQuantifier = function(state, index)
 		return false
 	end
 
-	return index, AST.Quantifier(min, max)
+	return index, QuantifierNode(min, max)
 end
 
+--- Attempts to parse a quantifier at the specified parser position.
+---@param state ParserState The current parser state.
+---@param index number The current parser index.
+---@return number|false nextIndex The parser index after the quantifier, or false if none was found.
+---@return QuantifierNode|table|false|string quantifierOrError The parsed quantifier node, a predefined quantifier, false if none was found, or the parser error message.
 local tryParseQuantifier = function(state, index)
 	local nextIndex, currentToken = state:readElement(index)
 	if not nextIndex then
 		return index, false
 	end
 	
-	if not state:isElement(currentToken) and quantifiersEnum[currentToken] then
-		return nextIndex, quantifiersEnum[currentToken]
+	if not state:isElement(currentToken) and QUANTIFIER_TOKENS[currentToken] then
+		return nextIndex, QUANTIFIER_TOKENS[currentToken]
 	elseif currentToken == MAGIC_QUANTIFIER_OPEN then
-		local newIndex, customQuantifier = lookForCustomQuantifier(state, nextIndex)
+		local newIndex, quantifierOrError = lookForCustomQuantifier(state, nextIndex)
 		if newIndex then
-			return newIndex, customQuantifier
-		elseif customQuantifier then
-			-- customQuantifier = error message
-			return false, customQuantifier
+			return newIndex, quantifierOrError
+		elseif quantifierOrError then
+			return false, quantifierOrError
 		end
 	end
 
 	return index, false
 end
 
+--- Parses an optional quantifier mode modifier.
+---@param state ParserState The current parser state.
+---@param index number The current parser index.
+---@param quantifier QuantifierNode The quantifier to update.
+---@return number nextIndex The parser index after the optional mode modifier.
+---@return QuantifierNode quantifier The parsed quantifier.
 local lookForModeToken = function(state, index, quantifier)
 	local nextIndex, currentToken = state:readElement(index)
 	if nextIndex and not state:isElement(currentToken) then
-		local quantifierMode = quantifierModesEnum[currentToken]
+		local quantifierMode = QUANTIFIER_MODES[currentToken]
 
 		if quantifierMode then
 			quantifier = deepCopy(quantifier)
@@ -104,19 +126,30 @@ local lookForModeToken = function(state, index, quantifier)
 end
 
 --[[ Public API ]]--
-Quantifier.isToken = function(state, parentElement)
+
+--- Returns whether a quantifier starts at the current parser position.
+---@param state ParserState The current parser state.
+---@return boolean hasQuantifier Whether a quantifier was found.
+Quantifier.isToken = function(state)
 	local index, quantifier = tryParseQuantifier(state, state.index)
 	return index and quantifier
 end
 
+--- Returns whether an AST element has a quantifier.
+---@param currentElement table The AST element to test.
+---@return boolean hasQuantifier Whether the element has a quantifier.
 Quantifier.isElement = function(currentElement)
-	return currentElement.quantifier
-		and currentElement.quantifier.type == ELEMENT_QUANTIFIER
+	local quantifier = currentElement.quantifier
+	return quantifier and quantifier.type == ELEMENT_QUANTIFIER
 end
 
+--- Parses and attaches a quantifier to an AST element.
+---@param state ParserState The current parser state.
+---@param parentElement table The AST element to update.
+---@return string|nil errorMessage The parser error message on failure.
 Quantifier.lookForElementOperation = function(state, parentElement)
 	-- Verify if the element type supports quantifiers
-	local shouldntHaveQuantifier = ZERO_LENGTH_ELEMENTS[parentElement.type] == true
+	local isZeroLengthElement = ZERO_LENGTH_ELEMENTS[parentElement.type] == true
 
 	local index, quantifier = tryParseQuantifier(state, state.index)
 
@@ -126,7 +159,7 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	elseif not quantifier then
 		-- not a quantifier
 		return nil
-	elseif shouldntHaveQuantifier then
+	elseif isZeroLengthElement then
 		-- has a quantifier but shouldn't
 		return ERROR_NOTHING_TO_REPEAT
 	end
@@ -138,5 +171,4 @@ Quantifier.lookForElementOperation = function(state, parentElement)
 	return nil
 end
 
---[[ Return ]]--
 return Quantifier

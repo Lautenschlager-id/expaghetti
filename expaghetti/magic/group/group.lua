@@ -345,9 +345,9 @@ Group.match = function(currentElement, state)
 		if currentElement.isRecursionRoot then
 			groupTree = stateMetadata.rootTree
 		elseif elementTargetIndex then
-			groupTree = stateMetadata.parsedMetaData.groupTreesByIndex[elementTargetIndex]
+			groupTree = stateMetadata.parsedMetadata.groupTreesByIndex[elementTargetIndex]
 		elseif elementTargetName then
-			groupTree = stateMetadata.parsedMetaData.groupTreesByName[elementTargetName]
+			groupTree = stateMetadata.parsedMetadata.groupTreesByName[elementTargetName]
 		end
 
 		if not groupTree or state:enterRecursion() then

@@ -31,7 +31,7 @@ function MatchState.new(flags, targetString, rootTree)
 	end
 
 	self.rootTree = rootTree
-	self.parsedMetaData = rootTree and rootTree._metadata or nil
+	self.parsedMetadata = rootTree and rootTree._metadata or nil
 	
 	local limits = config.get()
 	self.metadata = {
@@ -41,8 +41,8 @@ function MatchState.new(flags, targetString, rootTree)
 		positionCaptures = {},
 		outerTreeReference = {},
 		rootTree = self.rootTree,
-		parsedMetaData = self.parsedMetaData,
-		groupNames = self.parsedMetaData and self.parsedMetaData.groupNames,
+		parsedMetadata = self.parsedMetadata,
+		groupNames = self.parsedMetadata and self.parsedMetadata.groupNames,
 		recursionDepth = 0,
 		backtrackSteps = 0,
 		maxRecursionDepth = limits.maxRecursionDepth,
@@ -81,7 +81,7 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	child.initialStringIndex = initialStringIndex or self.initialStringIndex
 	child.metadata = self.metadata
 	child.rootTree = self.rootTree
-	child.parsedMetaData = self.parsedMetaData
+	child.parsedMetadata = self.parsedMetadata
 	child.tree = self.tree
 	child.treeIndex = self.treeIndex
 	child.quantifierMaxEnd = self.quantifierMaxEnd

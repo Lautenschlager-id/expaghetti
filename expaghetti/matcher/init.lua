@@ -13,7 +13,7 @@ local coreTreeMatcher = require("matcher.core")
 ---@return boolean hasMatched True if the pattern successfully matched the target.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
----@return table|nil matcherMetaData Extracted metadata (e.g., capture groups).
+---@return table|nil matcherMetadata Extracted metadata (e.g., capture groups).
 local matcher = function(expr, str, flags, stringIndex)
 	if type(expr) ~= "string" then
 		return false, "Expression must be a string"
@@ -41,16 +41,16 @@ local matcher = function(expr, str, flags, stringIndex)
 
 	local state = MatchState.new(flags, str, tree)
 
-	local hasMatched, iniStr, endStr, matcherMetaData
+	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do
 		state:reset(stringIndex)
 		state.tree = tree
 		state.treeIndex = 0
 		
-		hasMatched, iniStr, endStr, matcherMetaData = coreTreeMatcher(state)
+		hasMatched, iniStr, endStr, matcherMetadata = coreTreeMatcher(state)
 
 		if hasMatched then
-			return hasMatched, iniStr, endStr, matcherMetaData
+			return hasMatched, iniStr, endStr, matcherMetadata
 		end
 
 		stringIndex = stringIndex + 1

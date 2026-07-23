@@ -9,9 +9,6 @@
 local LiteralNode = require("ast").Literal
 local QuantifierIsToken = require("magic.Quantifier").isToken
 
-
---[[ Enums ]]--
-
 --[[ Aliases ]]--
 local ELEMENT_LITERAL = require("enums.elements").LITERAL
 
