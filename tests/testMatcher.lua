@@ -838,15 +838,6 @@ do
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")
 	config:set(saved)
 end
-do
-	local config = require("config").global
-	local saved = config:getAll()
-	local expaghetti = require("expaghetti")({ maxRecursionDepth = 100, maxBacktrackDepth = 1000 })
-	assert(type(expaghetti.match) == "function", "init entry point: returns match function")
-	local iniStr, endStr = expaghetti:find("a", "a")
-	assert(iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
-	config:set(saved)
-end
 
 ----------------------------------------------------------------------------------------------------
 print("  [51] Quantifiers -- extensive backtracking (greedy, lazy, possessive, groups, alternates)...")

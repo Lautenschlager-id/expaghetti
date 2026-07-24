@@ -6,16 +6,15 @@
 local string_byte = string.byte
 local string_sub = string.sub
 local table_concat = table.concat
+local table_sort = table.sort
 local math_max = math.max
 local tostring = tostring
 local type = type
 local pairs = pairs
-local unpack = unpack
 
 --[[ Dependencies ]]--
 local matcher = require("matcher.init")
-
---[[ Aliases ]]--
+local parser = require("parser.init")
 local ESCAPE = require("enums.magic").ESCAPE
 
 --[[ Constants ]]--
@@ -26,12 +25,24 @@ local BYTE_ESCAPE = string_byte(ESCAPE)
 --[[ Module ]]--
 local Api = {}
 
+local function compilePattern(pattern, flags)
+	if type(pattern) == "string" then
+		flags = Api.normalizeFlags(flags)
+		local tree, err = parser(pattern, flags)
+		if not tree then
+			return nil, nil, "Expaghetti Error: " .. tostring(err)
+		end
+		return tree, flags, nil
+	end
+	return pattern, flags, nil
+end
+
 --[[ Flags Normalization ]]--
 
 --- Normalizes flags from string, array, or dictionary form into a lookup table.
 ---@param flags string|table|nil
 ---@return table normalizedFlags A table of { [flagChar] = true } entries.
-local function normalizeFlags(flags)
+function Api.normalizeFlags(flags)
 	if not flags then
 		return {}
 	end
@@ -41,16 +52,13 @@ local function normalizeFlags(flags)
 		local normalized = {}
 		for key, value in pairs(flags) do
 			if type(key) == "number" and type(value) == "string" then
-				-- Array of flag chars: { "i", "m" }
 				normalized[value] = true
 			elseif type(key) == "string" and value then
-				-- Dictionary of flag chars: { i = true, m = true }
 				normalized[key] = true
 			end
 		end
 		return normalized
 	elseif flagType == "string" then
-		-- String of flag chars: "imu"
 		local normalized = {}
 		local flagsLength = #flags
 		for charIndex = 1, flagsLength do
@@ -62,38 +70,69 @@ local function normalizeFlags(flags)
 	return {}
 end
 
-Api.normalizeFlags = normalizeFlags
+--[[ Helpers ]]--
 
---[[ Internal Helpers ]]--
+local function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
+	local matchObj = {
+		start = matchStart,
+		finish = matchEnd,
+		value = string_sub(targetString, matchStart, matchEnd),
+		captures = {},
+		groups = {},
+	}
 
---- Extracts captures from matcher metadata into a table keyed by group index/name.
----@param targetString string The original target string.
----@param matcherMetadata table|nil The metadata returned by the matcher.
----@return table captures The extracted captures.
-local function extractCaptures(targetString, matcherMetadata)
-	local captures = {}
 	if matcherMetadata and matcherMetadata.captureStarts then
 		local captureStarts = matcherMetadata.captureStarts
 		local captureEnds = matcherMetadata.captureEnds
 		local captureCounts = matcherMetadata.captureCounts
-		for group, count in pairs(captureCounts) do
+		local groupNames = matcherMetadata.groupNames or {}
+
+		local capCount = 0
+		for groupKey, count in pairs(captureCounts) do
 			if count > 0 then
-				local captureStart = captureStarts[group][count]
-				local captureEnd = captureEnds[group][count]
-				captures[group] = string_sub(targetString, captureStart, captureEnd)
+				-- Determine if this is a named group
+				-- Named groups use their string name as the key in captureCounts
+				local isNamed = type(groupKey) == "string"
+				local groupName = isNamed and groupKey or nil
+
+				local groupArr = {}
+				matchObj.groups[groupKey] = groupArr
+				-- Named groups also get an alias: groups["foo"] = groups[numericIndex]
+				-- But since the key IS the name, we don't need a numeric alias here
+
+				for i = 1, count do
+					local cStart = captureStarts[groupKey][i]
+					local cEnd = captureEnds[groupKey][i]
+
+					local capObj = {
+						groupIndex = groupKey,
+						start = cStart,
+						finish = cEnd,
+						value = string_sub(targetString, cStart, cEnd)
+					}
+					if groupName then
+						capObj.name = groupName
+					end
+
+					groupArr[i] = capObj
+					capCount = capCount + 1
+					matchObj.captures[capCount] = capObj
+				end
 			end
 		end
+
+		table_sort(matchObj.captures, function(a, b)
+			if a.finish ~= b.finish then
+				return a.finish < b.finish
+			end
+			return a.start > b.start
+		end)
 	end
-	return captures
+	
+	return matchObj
 end
 
---- Applies a replacement template string, substituting %N references with captures.
---- Does NOT use Lua's string.gsub — manually scans for ESCAPE + digit sequences.
----@param template string The replacement template (e.g. "X%1Y").
----@param matchedStr string The full matched substring.
----@param captures table The captured groups.
----@return string result The substituted replacement string.
-local function applyTemplate(template, matchedStr, captures)
+local function applyTemplate(template, matchObj)
 	local templateLength = #template
 	local segments = {}
 	local segmentCount = 0
@@ -106,19 +145,22 @@ local function applyTemplate(template, matchedStr, captures)
 		if currentByte == BYTE_ESCAPE and templateIndex < templateLength then
 			local nextByte = string_byte(template, templateIndex + 1)
 			if nextByte >= BYTE_0 and nextByte <= BYTE_9 then
-				-- Flush any preceding literal segment
 				if templateIndex > segmentStart then
 					segmentCount = segmentCount + 1
 					segments[segmentCount] = string_sub(template, segmentStart, templateIndex - 1)
 				end
 
 				local groupIndex = nextByte - BYTE_0
+				segmentCount = segmentCount + 1
 				if groupIndex == 0 then
-					segmentCount = segmentCount + 1
-					segments[segmentCount] = matchedStr
+					segments[segmentCount] = matchObj.value
 				else
-					segmentCount = segmentCount + 1
-					segments[segmentCount] = captures[groupIndex] or ""
+					local groupArr = matchObj.groups[groupIndex]
+					if groupArr and #groupArr > 0 then
+						segments[segmentCount] = groupArr[#groupArr].value
+					else
+						segments[segmentCount] = ""
+					end
 				end
 
 				templateIndex = templateIndex + 2
@@ -131,7 +173,6 @@ local function applyTemplate(template, matchedStr, captures)
 		end
 	end
 
-	-- Flush remaining literal segment
 	if segmentStart <= templateLength then
 		segmentCount = segmentCount + 1
 		segments[segmentCount] = string_sub(template, segmentStart, templateLength)
@@ -142,71 +183,63 @@ end
 
 --[[ API Implementation ]]--
 
-function Api.test(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
-	local hasMatched = matcher(pattern, targetString, options, 0, config)
+function Api.test(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
+	local currentIndex = (start or 1) - 1
+	local hasMatched, matchErr = matcher(pattern, targetString, flags, currentIndex, config)
+	if hasMatched == false and type(matchErr) == "string" then return nil, "Expaghetti Error: " .. matchErr end
 	return hasMatched == true
 end
 
-function Api.match(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
-	local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, options, 0, config)
-
+function Api.match(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
+	local currentIndex = (start or 1) - 1
+	local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
+	if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 	if hasMatched then
-		local captures = extractCaptures(targetString, matcherMetadata)
-		return string_sub(targetString, matchStart, matchEnd), captures
+		return buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 	end
 	return nil
 end
 
-function Api.matchAll(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
+function Api.matchAll(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
 	local results = {}
 	local resultCount = 0
-	local currentIndex = 0
+	local currentIndex = (start or 1) - 1
 	local targetLength = #targetString
 
 	while currentIndex <= targetLength do
-		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, options, currentIndex, config)
+		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
+		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 		if not hasMatched then
 			break
 		end
 
-		local captures = extractCaptures(targetString, matcherMetadata)
-
 		resultCount = resultCount + 1
-		results[resultCount] = {
-			match = string_sub(targetString, matchStart, matchEnd),
-			captures = captures,
-			index = matchStart,
-			lastIndex = matchEnd
-		}
+		results[resultCount] = buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 
 		if matchEnd < matchStart then
 			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
-			currentIndex = matchEnd + 1
+			currentIndex = matchEnd
 		end
 	end
 
 	return results
 end
 
-function Api.gmatch(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
-	local currentIndex = 0
+function Api.gmatch(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
+	local currentIndex = (start or 1) - 1
 	local targetLength = #targetString
 
 	return function()
@@ -214,106 +247,86 @@ function Api.gmatch(pattern, targetString, options, config)
 			return nil
 		end
 
-		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, options, currentIndex, config)
-
+		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
+		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 		if hasMatched then
 			if matchEnd < matchStart then
 				currentIndex = math_max(currentIndex + 1, matchStart)
 			else
-				currentIndex = matchEnd + 1
+				currentIndex = matchEnd
 			end
 
-			local captures = {}
-			local numCaptures = 0
-			if matcherMetadata and matcherMetadata.captureStarts then
-				local captureStarts = matcherMetadata.captureStarts
-				local captureEnds = matcherMetadata.captureEnds
-				local captureCounts = matcherMetadata.captureCounts
-
-				for group, count in pairs(captureCounts) do
-					if count > 0 then
-						local captureStart = captureStarts[group][count]
-						local captureEnd = captureEnds[group][count]
-						captures[group] = string_sub(targetString, captureStart, captureEnd)
-						if type(group) == "number" and group > numCaptures then
-							numCaptures = group
-						end
-					end
-				end
-			end
-
-			if numCaptures > 0 then
-				local unpacked = {}
-				for captureIndex = 1, numCaptures do
-					unpacked[captureIndex] = captures[captureIndex]
-				end
-				return unpack(unpacked)
-			else
-				return string_sub(targetString, matchStart, matchEnd)
-			end
+			return buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 		end
 
 		return nil
 	end
 end
 
-function Api.find(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
-	local hasMatched, matchStart, matchEnd = matcher(pattern, targetString, options, 0, config)
+function Api.find(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
+	local currentIndex = (start or 1) - 1
+	local hasMatched, matchStart, matchEnd = matcher(pattern, targetString, flags, currentIndex, config)
+	if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 	if hasMatched then
 		return matchStart, matchEnd
 	end
 	return nil
 end
 
-function Api.replace(pattern, targetString, replacement, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
+function Api.replace(pattern, targetString, replacement, flags, start, config, limit)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
 	local segments = {}
 	local segmentCount = 0
-	local currentIndex = 0
+	local currentIndex = (start or 1) - 1
 	local targetLength = #targetString
 	local lastCopied = 0
 	local replaceCount = 0
 	local replacementType = type(replacement)
 
 	while currentIndex <= targetLength do
-		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, options, currentIndex, config)
+		if limit and replaceCount >= limit then
+			break
+		end
+		
+		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
+		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 		if not hasMatched then
 			break
 		end
 
-		-- Copy the unmatched prefix
 		segmentCount = segmentCount + 1
 		segments[segmentCount] = string_sub(targetString, lastCopied + 1, matchStart - 1)
 
-		local captures = extractCaptures(targetString, matcherMetadata)
-		local matchedStr = string_sub(targetString, matchStart, matchEnd)
+		local matchObj = buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 
 		if replacementType == "string" then
 			segmentCount = segmentCount + 1
-			segments[segmentCount] = applyTemplate(replacement, matchedStr, captures)
+			segments[segmentCount] = applyTemplate(replacement, matchObj)
 		elseif replacementType == "function" then
-			local substitution = replacement(matchedStr, captures)
+			local substitution = replacement(matchObj)
 			segmentCount = segmentCount + 1
 			if substitution ~= nil then
 				segments[segmentCount] = tostring(substitution)
 			else
-				segments[segmentCount] = matchedStr
+				segments[segmentCount] = matchObj.value
 			end
 		elseif replacementType == "table" then
-			local lookupKey = captures[1] or matchedStr
+			local lookupKey = matchObj.value
+			if matchObj.groups[1] and #matchObj.groups[1] > 0 then
+				lookupKey = matchObj.groups[1][#matchObj.groups[1]].value
+			end
+			
 			local substitution = replacement[lookupKey]
 			segmentCount = segmentCount + 1
 			if substitution ~= nil then
 				segments[segmentCount] = tostring(substitution)
 			else
-				segments[segmentCount] = matchedStr
+				segments[segmentCount] = matchObj.value
 			end
 		end
 
@@ -323,29 +336,29 @@ function Api.replace(pattern, targetString, replacement, options, config)
 		if matchEnd < matchStart then
 			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
-			currentIndex = matchEnd + 1
+			currentIndex = matchEnd
 		end
 	end
 
-	-- Copy the remaining tail
 	segmentCount = segmentCount + 1
 	segments[segmentCount] = string_sub(targetString, lastCopied + 1)
+	
 	return table_concat(segments, "", 1, segmentCount), replaceCount
 end
 
-function Api.split(pattern, targetString, options, config)
-	if type(pattern) == "string" then
-		options = normalizeFlags(options)
-	end
-
+function Api.split(pattern, targetString, flags, start, config)
+	local err
+	pattern, flags, err = compilePattern(pattern, flags)
+	if err then return nil, err end
 	local parts = {}
 	local partCount = 0
-	local currentIndex = 0
+	local currentIndex = (start or 1) - 1
 	local targetLength = #targetString
 	local lastCopied = 0
 
 	while currentIndex <= targetLength do
-		local hasMatched, matchStart, matchEnd = matcher(pattern, targetString, options, currentIndex, config)
+		local hasMatched, matchStart, matchEnd = matcher(pattern, targetString, flags, currentIndex, config)
+		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
 		if not hasMatched then
 			break
 		end
@@ -357,11 +370,10 @@ function Api.split(pattern, targetString, options, config)
 		if matchEnd < matchStart then
 			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
-			currentIndex = matchEnd + 1
+			currentIndex = matchEnd
 		end
 	end
 
-	-- Append the remaining tail
 	partCount = partCount + 1
 	parts[partCount] = string_sub(targetString, lastCopied + 1)
 	return parts

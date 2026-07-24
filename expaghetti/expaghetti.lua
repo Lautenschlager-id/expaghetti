@@ -25,10 +25,6 @@ function Engine.new(options)
 	return self
 end
 
-function Engine:configure(options)
-	return self.config:set(options)
-end
-
 function Engine:compile(regex, options)
 	local opts = Api.normalizeFlags(options)
 	local tree, errorMessage = parser(regex, opts)
@@ -38,56 +34,87 @@ function Engine:compile(regex, options)
 	return Pattern.new(tree, opts, self.config)
 end
 
-function Engine:test(pattern, string, options) return Api.test(pattern, string, options, self.config) end
-function Engine:match(pattern, string, options) return Api.match(pattern, string, options, self.config) end
-function Engine:matchAll(pattern, string, options) return Api.matchAll(pattern, string, options, self.config) end
-function Engine:gmatch(pattern, string, options) return Api.gmatch(pattern, string, options, self.config) end
-function Engine:find(pattern, string, options) return Api.find(pattern, string, options, self.config) end
-function Engine:replace(pattern, string, replacement, options) return Api.replace(pattern, string, replacement, options, self.config) end
-function Engine:gsub(pattern, string, replacement, options) return Api.replace(pattern, string, replacement, options, self.config) end
-function Engine:split(pattern, string, options) return Api.split(pattern, string, options, self.config) end
+function Engine:test(pattern, string, flags, start) return Api.test(pattern, string, flags, start, self.config) end
+function Engine:match(pattern, string, flags, start) return Api.match(pattern, string, flags, start, self.config) end
+function Engine:matchAll(pattern, string, flags, start) return Api.matchAll(pattern, string, flags, start, self.config) end
+function Engine:gmatch(pattern, string, flags, start) return Api.gmatch(pattern, string, flags, start, self.config) end
+function Engine:find(pattern, string, flags, start) return Api.find(pattern, string, flags, start, self.config) end
+function Engine:replace(pattern, string, replacement, flags, start)
+	local result = Api.replace(pattern, string, replacement, flags, start, self.config)
+	return result
+end
+function Engine:gsub(pattern, string, replacement, flags, limit, start) return Api.replace(pattern, string, replacement, flags, start, self.config, limit) end
+function Engine:split(pattern, string, flags, start) return Api.split(pattern, string, flags, start, self.config) end
+
+function Engine:install()
+	if self._originalString then return end
+	self._originalString = {}
+	for k, v in pairs(string) do
+		self._originalString[k] = v
+	end
+	
+	string.test = function(str, pat, flags, start) return self:test(pat, str, flags, start) end
+	string.match = function(str, pat, flags, start) return self:match(pat, str, flags, start) end
+	string.matchAll = function(str, pat, flags, start) return self:matchAll(pat, str, flags, start) end
+	string.gmatch = function(str, pat, flags, start) return self:gmatch(pat, str, flags, start) end
+	string.find = function(str, pat, flags, start) return self:find(pat, str, flags, start) end
+	string.replace = function(str, pat, repl, flags, start) return self:replace(pat, str, repl, flags, start) end
+	string.gsub = function(str, pat, repl, flags, limit, start) return self:gsub(pat, str, repl, flags, limit, start) end
+	string.split = function(str, pat, flags, start) return self:split(pat, str, flags, start) end
+end
+
+function Engine:uninstall()
+	if not self._originalString then return end
+	for k, _ in pairs(string) do
+		if self._originalString[k] == nil then
+			string[k] = nil
+		end
+	end
+	for k, v in pairs(self._originalString) do
+		string[k] = v
+	end
+	self._originalString = nil
+end
+
+
+--[[ Default Global Engine ]]--
+local DefaultEngine = Engine.new()
 
 --[[ Module ]]--
-local Expaghetti = {}
+local Expaghetti = setmetatable({}, {
+	__call = function(_, options)
+		return Engine.new(options)
+	end
+})
 
 --[[ Public API ]]--
 Expaghetti.RegexFlag = flags.FLAGS
 
--- Engine Constructor
-Expaghetti.create = function(options)
+-- Custom Engine Constructor
+Expaghetti.custom = function(options)
 	return Engine.new(options)
 end
 
--- Global Configuration
-Expaghetti.configure = function(options)
-	return Config.global:set(options)
-end
-
 Expaghetti.compile = function(regex, options)
-	local opts = Api.normalizeFlags(options)
-	local tree, errorMessage = parser(regex, opts)
-	if not tree then
-		error("Failed to compile pattern: " .. tostring(errorMessage))
-	end
-	return Pattern.new(tree, opts, Config.global)
+	return DefaultEngine:compile(regex, options)
 end
 
--- Global One-Off Operations
-Expaghetti.test = function(pattern, string, options) return Api.test(pattern, string, options, Config.global) end
-Expaghetti.match = function(pattern, string, options) return Api.match(pattern, string, options, Config.global) end
-Expaghetti.matchAll = function(pattern, string, options) return Api.matchAll(pattern, string, options, Config.global) end
-Expaghetti.gmatch = function(pattern, string, options) return Api.gmatch(pattern, string, options, Config.global) end
-Expaghetti.find = function(pattern, string, options) return Api.find(pattern, string, options, Config.global) end
-Expaghetti.replace = function(pattern, string, replacement, options) return Api.replace(pattern, string, replacement, options, Config.global) end
-Expaghetti.gsub = function(pattern, string, replacement, options) return Api.replace(pattern, string, replacement, options, Config.global) end
-Expaghetti.split = function(pattern, string, options) return Api.split(pattern, string, options, Config.global) end
+-- Global One-Off Operations (uses DefaultEngine)
+Expaghetti.test = function(...) return DefaultEngine:test(...) end
+Expaghetti.match = function(...) return DefaultEngine:match(...) end
+Expaghetti.matchAll = function(...) return DefaultEngine:matchAll(...) end
+Expaghetti.gmatch = function(...) return DefaultEngine:gmatch(...) end
+Expaghetti.find = function(...) return DefaultEngine:find(...) end
+Expaghetti.replace = function(...) return DefaultEngine:replace(...) end
+Expaghetti.gsub = function(...) return DefaultEngine:gsub(...) end
+Expaghetti.split = function(...) return DefaultEngine:split(...) end
+
+Expaghetti.install = function() DefaultEngine:install() end
+Expaghetti.uninstall = function() DefaultEngine:uninstall() end
 
 -- Keep old match export for backwards compat in tests, but tests should be updated.
 Expaghetti._matcher = require("matcher.init")
 
 --[[ Return ]]--
-return setmetatable(Expaghetti, {
-	__call = function(_, options)
-		return Engine.new(options)
-	end,
-})
+return Expaghetti
+

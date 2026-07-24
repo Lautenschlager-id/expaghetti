@@ -15,36 +15,34 @@ function Pattern.new(tree, options, config)
 	return self
 end
 
-function Pattern:test(string)
-	return Api.test(self.tree, string, self.options, self.config)
+function Pattern:test(string, start)
+	return Api.test(self.tree, string, self.options, start, self.config)
 end
 
-function Pattern:match(string)
-	return Api.match(self.tree, string, self.options, self.config)
+function Pattern:match(string, start)
+	return Api.match(self.tree, string, self.options, start, self.config)
 end
 
-function Pattern:matchAll(string)
-	return Api.matchAll(self.tree, string, self.options, self.config)
+function Pattern:matchAll(string, start)
+	return Api.matchAll(self.tree, string, self.options, start, self.config)
 end
 
-function Pattern:gmatch(string)
-	return Api.gmatch(self.tree, string, self.options, self.config)
+function Pattern:gmatch(string, start)
+	return Api.gmatch(self.tree, string, self.options, start, self.config)
 end
 
-function Pattern:find(string)
-	return Api.find(self.tree, string, self.options, self.config)
+function Pattern:find(string, start)
+	return Api.find(self.tree, string, self.options, start, self.config)
 end
 
-function Pattern:replace(string, replacement)
-	return Api.replace(self.tree, string, replacement, self.options, self.config)
+function Pattern:replace(string, replacement, start)
+	local result = Api.replace(self.tree, string, replacement, self.options, start, self.config)
+	return result
 end
+function Pattern:gsub(string, replacement, limit, start) return Api.replace(self.tree, string, replacement, self.options, start, self.config, limit) end
 
-function Pattern:gsub(string, replacement)
-	return self:replace(string, replacement)
-end
-
-function Pattern:split(string)
-	return Api.split(self.tree, string, self.options, self.config)
+function Pattern:split(string, start)
+	return Api.split(self.tree, string, self.options, start, self.config)
 end
 
 return Pattern
