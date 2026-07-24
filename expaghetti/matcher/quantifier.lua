@@ -1,3 +1,10 @@
+--[[
+    Matcher for quantified AST elements.
+
+    Handles greedy, lazy, and possessive quantifiers, including
+    nested backtracking and continuation of the main matching engine.
+]]
+
 --[[ Dependencies ]]--
 local elementMatcher = require("matcher.element")
 
@@ -13,10 +20,10 @@ local QUANTIFIER_MODE_POSSESSIVE = QUANTIFIER_MODES.POSSESSIVE
 
 --[[ Module ]]--
 
---- Determines if the internal element of a quantifier is allowed to be backtracked.
----@param element table The AST element containing the quantifier.
----@param quantifier table The quantifier metadata for the element.
----@return boolean canBacktrack True if nested backtracking is allowed.
+--- Determines whether the quantified element supports nested backtracking.
+---@param element ASTElement The quantified AST element.
+---@param quantifier Quantifier The quantifier attached to the element.
+---@return boolean canBacktrack Whether nested backtracking is allowed.
 local canBacktrackNestedQuantifier = function(element, quantifier)
 	local tree = element.tree
 
@@ -38,13 +45,14 @@ local canBacktrackNestedQuantifier = function(element, quantifier)
 	return hasNested
 end
 
---- Executes a single match step for the element while preserving and restoring the current state.
----@param state table The MatchState object containing the matching context.
----@param currentElement table The AST element being matched.
----@param currentCharacter string|number The target character at the current stringIndex.
----@param stringIndex number The string index to start matching from.
----@param quantifierMaxEnd number|nil The maximum allowed string index for this element to match.
----@return boolean hasMatched True if the element successfully matched.
+--- Executes a single match attempt for an AST element.
+--- Preserves and restores the current matcher state before returning.
+---@param state MatchState The matcher state.
+---@param currentElement ASTElement The AST element to match.
+---@param currentCharacter string|number The target character at the current string index.
+---@param stringIndex number The string index to begin matching from.
+---@param quantifierMaxEnd number|nil The maximum string index the element may consume.
+---@return boolean hasMatched Whether the element matched successfully.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
 local executeElement = function(state, currentElement, currentCharacter, stringIndex, quantifierMaxEnd)
@@ -68,13 +76,13 @@ local executeElement = function(state, currentElement, currentCharacter, stringI
 	return hasMatched, iniStr, endStr
 end
 
---- Continues the main matching process from the target string index after a quantifier match.
----@param state table The MatchState object containing the execution context.
----@param targetStringIndex number The string index to resume the main engine at.
----@return boolean hasMatched True if the rest of the expression successfully matched.
+--- Continues matching after a quantified element.
+---@param state MatchState The matcher state.
+---@param targetStringIndex number The string index where matching should resume.
+---@return boolean hasMatched Whether the remaining expression matched successfully.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
----@return table|nil meta Captured metadata from the subsequent execution.
+---@return MatcherMetadata|nil metadata The match metadata.
 local continueMatcher = function(state, targetStringIndex)
 	local savedStringIndex = state.stringIndex
 	local savedTree = state.tree
@@ -83,26 +91,26 @@ local continueMatcher = function(state, targetStringIndex)
 
 	state.stringIndex = targetStringIndex
 
-	local hasMatched, iniStr, endStr, meta = state.matcher(state)
+	local hasMatched, iniStr, endStr, metadata = state.matcher(state)
 
 	state.stringIndex = savedStringIndex
 	state.tree = savedTree
 	state.treeIndex = savedTreeIndex
 	state.quantifierMaxEnd = savedQuantifierMaxEnd
 
-	return hasMatched, iniStr, endStr, meta
+	return hasMatched, iniStr, endStr, metadata
 end
 
---- Greedily collects all matching occurrences of the quantified element up to maximumOccurrences.
----@param state table The MatchState object containing the matching context.
----@param currentElement table The AST element being matched.
----@param maximumOccurrences number The maximum number of occurrences allowed.
----@param stringIndex number The current string index to start collecting from.
----@param totalOccurrences number The current total count of occurrences collected.
----@param startStringPositions table The output array to record start positions.
----@param endStringPositions table The output array to record end positions.
----@return number totalOccurrences The updated total number of occurrences collected.
----@return number stringIndex The updated string index after all collections.
+--- Greedily collects consecutive occurrences of a quantified element.
+---@param state MatchState The matcher state.
+---@param currentElement ASTElement The quantified AST element.
+---@param maximumOccurrences number The maximum allowed number of occurrences (0 for unlimited).
+---@param stringIndex number The string index to begin matching from.
+---@param totalOccurrences number The current number of collected occurrences.
+---@param startStringPositions number[] The array storing occurrence start positions.
+---@param endStringPositions number[] The array storing occurrence end positions.
+---@return number totalOccurrences The updated number of collected occurrences.
+---@return number stringIndex The string index after collection completes.
 local collectOccurrences = function(
 	state,
 	currentElement,
@@ -150,14 +158,14 @@ local collectOccurrences = function(
 	return totalOccurrences, stringIndex
 end
 
---- Attempts to shorten a previously collected occurrence by backtracking by one match length.
----@param state table The MatchState object containing the matching context.
----@param currentElement table The AST element being matched.
----@param elementCaptureId number|string The identifier for capturing groups or named groups.
----@param occurrenceIndex number The index of the occurrence to shorten.
----@param startStringPositions table The array containing start positions of occurrences.
----@param endStringPositions table The array containing end positions of occurrences.
----@return boolean didShorten True if the occurrence was successfully shortened.
+--- Attempts to shorten a previously matched occurrence by backtracking.
+---@param state MatchState The matcher state.
+---@param currentElement ASTElement The quantified AST element.
+---@param elementCaptureId number|string The capture group identifier.
+---@param occurrenceIndex number The occurrence to shorten.
+---@param startStringPositions number[] The occurrence start positions.
+---@param endStringPositions number[] The occurrence end positions.
+---@return boolean didShorten Whether the occurrence was successfully shortened.
 local shortenOccurrenceAt = function(
 	state,
 	currentElement,
@@ -195,15 +203,15 @@ local shortenOccurrenceAt = function(
 	return true
 end
 
---- The main entry point for matching elements with quantifiers (?, *, +, {m,n}).
----@param currentElement table The AST element representing the quantifier.
----@param currentCharacter string|number The character at the current match position.
----@param state table The MatchState object.
----@return boolean hasMatched True if the quantifier and its element matched successfully.
----@return number|nil iniStr The starting string index.
----@return number|nil endStr The ending string index.
----@return table|nil metadata Captured metadata if the execution finishes here.
----@return boolean|nil shouldEndThisExecution True if the execution stack should end here.
+--- Matches a quantified AST element.
+---@param currentElement ASTElement The quantified AST element.
+---@param currentCharacter string|number The target character at the current string index.
+---@param state MatchState The matcher state.
+---@return boolean hasMatched Whether the quantified element matched successfully.
+---@return number|nil iniStr The starting string index of the match.
+---@return number|nil endStr The ending string index of the match.
+---@return MatcherMetadata|nil metadata The match metadata.
+---@return boolean|nil shouldEndThisExecution Whether the current execution stack should terminate.
 local quantifierMatcher = function(currentElement, currentCharacter, state)
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
