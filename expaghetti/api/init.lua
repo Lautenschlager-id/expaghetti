@@ -2,7 +2,7 @@
     API Entry Point
 ]]
 
-local helpers = require("api.helpers")
+local helpers = require("helpers.api")
 
 local Api = {}
 
