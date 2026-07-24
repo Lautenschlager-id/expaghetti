@@ -36,7 +36,7 @@ coreTreeMatcher = function(state)
 		end
 
 		local hasMatched, iniStr, endStr, _, shouldEndThisExecution = elementMatcher(currentElement, currentCharacter, state)
-		-- Groups continue the execution of the previous tree in another stack
+		-- Group execution continues in a nested execution context.
 		if shouldEndThisExecution then
 			return hasMatched, iniStr, endStr, state.metadata
 		elseif not hasMatched then

@@ -22,7 +22,7 @@ local MatchStateNew = MatchState.new
 ---@return boolean hasMatched True if the pattern successfully matched the target.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
----@return MatcherMetadata|nil matcherMetadata Extracted match metadata (e.g., capture groups).
+---@return MatcherMetadata|nil matcherMetadata The match metadata.
 local matcher = function(expr, str, flags, stringIndex)
 	-- TO DO: Remove this later
 	if type(expr) ~= "string" then

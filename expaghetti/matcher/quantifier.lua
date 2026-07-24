@@ -1,14 +1,17 @@
+--[[ Dependencies ]]--
 local elementMatcher = require("matcher.element")
-local AST = require("ast")
 
-local quantifierModesEnum = require("enums.quantifiers").MODES
-local ENUM_QUANTIFIER_MODE_LAZY = quantifierModesEnum.LAZY
-local ENUM_QUANTIFIER_MODE_POSSESSIVE = quantifierModesEnum.POSSESSIVE
-local ENUM_QUANTIFIER_MODE_GREEDY = quantifierModesEnum.GREEDY
+--[[ Enums ]]--
+local QUANTIFIER_MODES = require("enums.quantifiers").MODES
 
-local elementsEnum = require("enums.elements")
-local ENUM_ELEMENT_TYPE_GROUP = elementsEnum.GROUP
-local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.QUANTIFIER
+--[[ Aliases ]]--
+local ELEMENT_GROUP = require("enums.elements").GROUP
+
+local QUANTIFIER_MODE_GREEDY = QUANTIFIER_MODES.GREEDY
+local QUANTIFIER_MODE_LAZY = QUANTIFIER_MODES.LAZY
+local QUANTIFIER_MODE_POSSESSIVE = QUANTIFIER_MODES.POSSESSIVE
+
+--[[ Module ]]--
 
 --- Determines if the internal element of a quantifier is allowed to be backtracked.
 ---@param element table The AST element containing the quantifier.
@@ -17,11 +20,7 @@ local ENUM_ELEMENT_TYPE_QUANTIFIER = elementsEnum.QUANTIFIER
 local canBacktrackNestedQuantifier = function(element, quantifier)
 	local tree = element.tree
 
-	if (
-		quantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE
-		or element.type ~= ENUM_ELEMENT_TYPE_GROUP
-		or not tree
- 	) then
+	if quantifier.mode == QUANTIFIER_MODE_POSSESSIVE or element.type ~= ELEMENT_GROUP or not tree then
 		return false
 	end
 
@@ -29,7 +28,7 @@ local canBacktrackNestedQuantifier = function(element, quantifier)
 	for index = 1, tree._index do
 		local childQuantifier = tree[index].quantifier
 		if childQuantifier then
-			if childQuantifier.mode == ENUM_QUANTIFIER_MODE_POSSESSIVE then
+			if childQuantifier.mode == QUANTIFIER_MODE_POSSESSIVE then
 				return false
 			end
 			hasNested = true
@@ -113,17 +112,13 @@ local collectOccurrences = function(
 	startStringPositions,
 	endStringPositions
 )
-	local hasMatched, iniStr, endStr
-	local lastIniStr, lastEndStr
-	local currentCharacter
-	
 	-- Greedily match the element repeatedly until we hit the maximum limit (0 means no limit).
 	while maximumOccurrences == 0 or totalOccurrences < maximumOccurrences do
 		-- Record the start position of the current occurrence for future backtracking.
 		startStringPositions[totalOccurrences + 1] = stringIndex
 
-		currentCharacter = state:getTargetCharacter(stringIndex)
-		hasMatched, iniStr, endStr = executeElement(state, currentElement, currentCharacter, stringIndex, nil)
+		local currentCharacter = state:getTargetCharacter(stringIndex)
+		local hasMatched, iniStr, endStr = executeElement(state, currentElement, currentCharacter, stringIndex, nil)
 
 		if not hasMatched then
 			return totalOccurrences, stringIndex
@@ -131,7 +126,8 @@ local collectOccurrences = function(
 
 		endStr = endStr or stringIndex
 
-		if state.quantifierMaxEnd and endStr > state.quantifierMaxEnd then
+		local quantifierMaxEnd = state.quantifierMaxEnd
+		if quantifierMaxEnd and endStr > quantifierMaxEnd then
 			return totalOccurrences, stringIndex
 		end
 
@@ -212,7 +208,7 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 	local quantifier = currentElement.quantifier
 	local maximumOccurrences = quantifier.max
 	local minimumOccurrences = quantifier.min
-	local mode = quantifier.mode or ENUM_QUANTIFIER_MODE_GREEDY
+	local mode = quantifier.mode or QUANTIFIER_MODE_GREEDY
 	local canBacktrackInner = canBacktrackNestedQuantifier(currentElement, quantifier)
 	local elementCaptureId = currentElement.index or currentElement.name
 
@@ -272,26 +268,22 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 	-- Step 3: Outer Engine Yield Order
 	-- Configure the loop that will yield the collected occurrences to the rest of the matching engine.
 	local startOccurrences, endOccurrences, step
-	if mode == ENUM_QUANTIFIER_MODE_GREEDY then
+	if mode == QUANTIFIER_MODE_GREEDY then
 		-- Greedy: Start from maximum occurrences and backtrack down to minimum.
 		startOccurrences = maximumOccurrencesOfElement
 		endOccurrences = minimumOccurrences
 		step = -1
-	elseif mode == ENUM_QUANTIFIER_MODE_LAZY then
+	elseif mode == QUANTIFIER_MODE_LAZY then
 		-- Lazy: Start from minimum occurrences and work up to maximum.
 		startOccurrences = minimumOccurrences
 		endOccurrences = maximumOccurrencesOfElement
 		step = 1
-	elseif mode == ENUM_QUANTIFIER_MODE_POSSESSIVE then
+	elseif mode == QUANTIFIER_MODE_POSSESSIVE then
 		-- Possessive: Yield the maximum occurrences exactly once. Never backtrack.
 		startOccurrences = maximumOccurrencesOfElement
 		endOccurrences = maximumOccurrencesOfElement
 		step = 1
 	end
-
-	local targetStringIndex
-	local hasMatched, iniStr, endStr, meta
-	local didShorten
 
 	for occurrence = startOccurrences, endOccurrences, step do
 		if occurrence ~= startOccurrences then
@@ -301,12 +293,12 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 		end
 
 		-- Yield the boundary of the current occurrence sequence to the rest of the regular expression engine.
-		targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
-		hasMatched, iniStr, endStr, meta = continueMatcher(state, targetStringIndex)
+		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
+		local hasMatched, iniStr, endStr, metadata = continueMatcher(state, targetStringIndex)
 		
 		-- If the rest of the engine matched successfully, the entire regular expression is satisfied!
 		if hasMatched then
-			return hasMatched, iniStr, endStr, meta
+			return hasMatched, iniStr, endStr, metadata
 		end
 
 		-- Step 4: Internal Backtracking during Outer Failure
@@ -314,6 +306,7 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 		-- check if we can shorten the currently active occurrence internally and retry the engine.
 		if canBacktrackInner and occurrence > 0 then
 			totalOccurrences = occurrence
+			local didShorten
 			repeat
 				-- Shrink the boundary of the last occurrence by one character.
 				didShorten = shortenOccurrenceAt(
@@ -327,10 +320,10 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 
 				if didShorten then
 					targetStringIndex = endStringPositions[totalOccurrences] or (state.stringIndex - 1)
-					hasMatched, iniStr, endStr, meta = continueMatcher(state, targetStringIndex)
+					hasMatched, iniStr, endStr, metadata = continueMatcher(state, targetStringIndex)
 
 					if hasMatched then
-						return hasMatched, iniStr, endStr, meta
+						return hasMatched, iniStr, endStr, metadata
 					end
 				end
 			until not didShorten
