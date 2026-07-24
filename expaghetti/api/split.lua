@@ -10,7 +10,7 @@ local type = type
 return function(utils)
 	return function(pattern, targetString, flags, start, config)
 		local err
-		pattern, flags, err = utils.compilePattern(pattern, flags)
+		pattern, flags, err = utils.compilePattern(pattern, flags, config)
 		if err then return nil, err end
 		local parts = {}
 		local partCount = 0

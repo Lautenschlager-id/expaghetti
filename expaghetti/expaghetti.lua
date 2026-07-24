@@ -30,7 +30,7 @@ function Engine.new(options)
 end
 
 function Engine:compile(regex, options)
-	local tree, flags, errorMessage = Api.compilePattern(regex, options)
+	local tree, flags, errorMessage = Api.compilePattern(regex, options, self.config)
 	if not tree then
 		error("Failed to compile pattern: " .. tostring(errorMessage))
 	end

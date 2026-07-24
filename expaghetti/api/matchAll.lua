@@ -9,7 +9,7 @@ local type = type
 return function(utils)
 	local function matchAll(pattern, targetString, flags, start, config)
 		local err
-		pattern, flags, err = utils.compilePattern(pattern, flags)
+		pattern, flags, err = utils.compilePattern(pattern, flags, config)
 		if err then return nil, err end
 		local results = {}
 		local resultCount = 0
@@ -38,7 +38,7 @@ return function(utils)
 
 	local function gmatch(pattern, targetString, flags, start, config)
 		local err
-		pattern, flags, err = utils.compilePattern(pattern, flags)
+		pattern, flags, err = utils.compilePattern(pattern, flags, config)
 		if err then return nil, err end
 		local currentIndex = (start or 1) - 1
 		local targetLength = #targetString

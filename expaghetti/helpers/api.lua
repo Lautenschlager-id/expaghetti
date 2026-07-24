@@ -56,10 +56,15 @@ local function getFlagsKey(normalizedFlags)
 	return table_concat(chars)
 end
 
-function ApiUtils.compilePattern(pattern, flags)
+local function getConfigKey(config)
+	if not config then return "" end
+	return tostring(config.maxRecursionDepth) .. "\0" .. tostring(config.maxBacktrackDepth)
+end
+
+function ApiUtils.compilePattern(pattern, flags, config)
 	if type(pattern) == "string" then
 		flags = ApiUtils.normalizeFlags(flags)
-		local cacheKey = pattern .. "\0" .. getFlagsKey(flags)
+		local cacheKey = pattern .. "\0" .. getFlagsKey(flags) .. "\0" .. getConfigKey(config)
 		
 		local cachedTree = astCache[cacheKey]
 		if cachedTree then

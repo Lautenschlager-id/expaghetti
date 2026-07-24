@@ -68,7 +68,7 @@ end
 return function(utils)
 	return function(pattern, targetString, replacement, flags, start, config, limit)
 		local err
-		pattern, flags, err = utils.compilePattern(pattern, flags)
+		pattern, flags, err = utils.compilePattern(pattern, flags, config)
 		if err then return nil, err end
 		local segments = {}
 		local segmentCount = 0
