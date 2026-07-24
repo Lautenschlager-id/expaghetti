@@ -20,34 +20,23 @@ Config.DEFAULT_MAX_BACKTRACK_DEPTH = DEFAULT_MAX_BACKTRACK_DEPTH
 --[[ Methods ]]--
 function Config.new(parent)
 	local self = setmetatable({}, Config)
-	self._parent = parent
-	self._settings = {}
-	if not parent then
-		-- Global defaults
-		self._settings.maxRecursionDepth = DEFAULT_MAX_RECURSION_DEPTH
-		self._settings.maxBacktrackDepth = DEFAULT_MAX_BACKTRACK_DEPTH
-	end
+	
+	-- Flatten settings for fast property access
+	self.maxRecursionDepth = parent and parent.maxRecursionDepth or DEFAULT_MAX_RECURSION_DEPTH
+	self.maxBacktrackDepth = parent and parent.maxBacktrackDepth or DEFAULT_MAX_BACKTRACK_DEPTH
+	
 	return self
 end
 
 function Config:get(key)
-	if self._settings[key] ~= nil then
-		return self._settings[key]
-	elseif self._parent then
-		return self._parent:get(key)
-	end
-	return nil
+	return self[key]
 end
 
 function Config:getAll()
-	local settings = {}
-	if self._parent then
-		settings = self._parent:getAll()
-	end
-	for k, v in pairs(self._settings) do
-		settings[k] = v
-	end
-	return settings
+	return {
+		maxRecursionDepth = self.maxRecursionDepth,
+		maxBacktrackDepth = self.maxBacktrackDepth
+	}
 end
 
 function Config:set(options)
@@ -55,10 +44,10 @@ function Config:set(options)
 		return self:getAll()
 	end
 	if options.maxRecursionDepth ~= nil then
-		self._settings.maxRecursionDepth = options.maxRecursionDepth
+		self.maxRecursionDepth = options.maxRecursionDepth
 	end
 	if options.maxBacktrackDepth ~= nil then
-		self._settings.maxBacktrackDepth = options.maxBacktrackDepth
+		self.maxBacktrackDepth = options.maxBacktrackDepth
 	end
 	return self:getAll()
 end

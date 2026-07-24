@@ -14,6 +14,7 @@ local toCharArray = require("helpers.string").toCharArray
 
 --[[ Aliases ]]--
 local FLAG_UNICODE = require("enums.flags").FLAGS.UNICODE
+local globalConfig = require("config").global
 
 --[[ Module ]]--
 local MatchState = {
@@ -49,7 +50,7 @@ function MatchState.new(flags, targetString, rootTree, config)
 	local parsedMetadata = rootTree and rootTree._metadata or nil 
 	self.parsedMetadata = parsedMetadata
 	
-	local limits = config or require("config").global
+	local limits = config or globalConfig
 	self.metadata = {
 		captureStarts = {},
 		captureEnds = {},
@@ -61,8 +62,8 @@ function MatchState.new(flags, targetString, rootTree, config)
 		groupNames = parsedMetadata and parsedMetadata.groupNames,
 		recursionDepth = 0,
 		backtrackSteps = 0,
-		maxRecursionDepth = type(limits.get) == "function" and limits:get("maxRecursionDepth") or limits.maxRecursionDepth,
-		maxBacktrackDepth = type(limits.get) == "function" and limits:get("maxBacktrackDepth") or limits.maxBacktrackDepth,
+		maxRecursionDepth = limits.maxRecursionDepth or globalConfig.maxRecursionDepth,
+		maxBacktrackDepth = limits.maxBacktrackDepth or globalConfig.maxBacktrackDepth,
 	}
 
 	return self
