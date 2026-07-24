@@ -112,6 +112,7 @@ local collectOccurrences = function(
 	startStringPositions,
 	endStringPositions
 )
+	local lastIniStr, lastEndStr
 	-- Greedily match the element repeatedly until we hit the maximum limit (0 means no limit).
 	while maximumOccurrences == 0 or totalOccurrences < maximumOccurrences do
 		-- Record the start position of the current occurrence for future backtracking.
@@ -126,8 +127,7 @@ local collectOccurrences = function(
 
 		endStr = endStr or stringIndex
 
-		local quantifierMaxEnd = state.quantifierMaxEnd
-		if quantifierMaxEnd and endStr > quantifierMaxEnd then
+		if state.quantifierMaxEnd and endStr > state.quantifierMaxEnd then
 			return totalOccurrences, stringIndex
 		end
 
