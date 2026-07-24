@@ -24,8 +24,8 @@ end
 local function normalizeFlagsTest(flags)
 	if type(flags) == "string" then
 		local t = {}
-		for char in flags:gmatch(".") do
-			t[char] = true
+		for charIndex = 1, #flags do
+			t[string.sub(flags, charIndex, charIndex)] = true
 		end
 		return t
 	end

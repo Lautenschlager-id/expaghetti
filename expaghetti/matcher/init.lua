@@ -42,7 +42,7 @@ local matcher = function(expr, str, flags, stringIndex, config)
 
 	stringIndex = stringIndex or 0
 
-	local state = MatchStateNew(flags, str, tree, config)
+	local state = MatchStateNew(flags or {}, str, tree, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do
