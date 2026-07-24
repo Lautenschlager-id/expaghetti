@@ -192,7 +192,7 @@ function Api.matchAll(pattern, targetString, options, config)
 		}
 
 		if matchEnd < matchStart then
-			currentIndex = math_max(currentIndex + 1, matchStart + 1)
+			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
 			currentIndex = matchEnd + 1
 		end
@@ -218,7 +218,7 @@ function Api.gmatch(pattern, targetString, options, config)
 
 		if hasMatched then
 			if matchEnd < matchStart then
-				currentIndex = math_max(currentIndex + 1, matchStart + 1)
+				currentIndex = math_max(currentIndex + 1, matchStart)
 			else
 				currentIndex = matchEnd + 1
 			end
@@ -321,7 +321,7 @@ function Api.replace(pattern, targetString, replacement, options, config)
 
 		lastCopied = math_max(lastCopied, matchEnd)
 		if matchEnd < matchStart then
-			currentIndex = math_max(currentIndex + 1, matchStart + 1)
+			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
 			currentIndex = matchEnd + 1
 		end
@@ -355,7 +355,7 @@ function Api.split(pattern, targetString, options, config)
 
 		lastCopied = math_max(lastCopied, matchEnd)
 		if matchEnd < matchStart then
-			currentIndex = math_max(currentIndex + 1, matchStart + 1)
+			currentIndex = math_max(currentIndex + 1, matchStart)
 		else
 			currentIndex = matchEnd + 1
 		end
