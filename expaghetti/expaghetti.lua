@@ -30,12 +30,11 @@ function Engine.new(options)
 end
 
 function Engine:compile(regex, options)
-	local opts = Api.normalizeFlags(options)
-	local tree, errorMessage = parser(regex, opts)
+	local tree, flags, errorMessage = Api.compilePattern(regex, options)
 	if not tree then
 		error("Failed to compile pattern: " .. tostring(errorMessage))
 	end
-	return Pattern.new(tree, opts, self.config)
+	return Pattern.new(tree, flags, self.config)
 end
 
 function Engine:test(pattern, string, flags, start) return Api.test(pattern, string, flags, start, self.config) end

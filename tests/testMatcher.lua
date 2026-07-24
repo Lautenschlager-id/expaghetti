@@ -826,17 +826,17 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 print("  [50] Depth Limits...")
 do
 	local config = require("config").global
-	local saved = config:getAll()
-	config:set({ maxRecursionDepth = 5 })
+	local savedRecursion = config.maxRecursionDepth
+	config.maxRecursionDepth = 5
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
-	config:set(saved)
+	config.maxRecursionDepth = savedRecursion
 end
 do
 	local config = require("config").global
-	local saved = config:getAll()
-	config:set({ maxBacktrackDepth = 10 })
+	local savedBacktrack = config.maxBacktrackDepth
+	config.maxBacktrackDepth = 10
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")
-	config:set(saved)
+	config.maxBacktrackDepth = savedBacktrack
 end
 
 ----------------------------------------------------------------------------------------------------

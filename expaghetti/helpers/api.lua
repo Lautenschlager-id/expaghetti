@@ -41,13 +41,46 @@ function ApiUtils.normalizeFlags(flags)
 	return {}
 end
 
+local table_concat = table.concat
+local MAX_CACHE_SIZE = 100
+local astCache = {}
+local astQueue = {}
+local astCacheSize = 0
+
+local function getFlagsKey(normalizedFlags)
+	local chars = {}
+	for k, v in pairs(normalizedFlags) do
+		if v then chars[#chars + 1] = k end
+	end
+	table_sort(chars)
+	return table_concat(chars)
+end
+
 function ApiUtils.compilePattern(pattern, flags)
 	if type(pattern) == "string" then
 		flags = ApiUtils.normalizeFlags(flags)
+		local cacheKey = pattern .. "\0" .. getFlagsKey(flags)
+		
+		local cachedTree = astCache[cacheKey]
+		if cachedTree then
+			return cachedTree, flags, nil
+		end
+
 		local tree, err = parser(pattern, flags)
 		if not tree then
 			return nil, nil, "Expaghetti Error: " .. tostring(err)
 		end
+		
+		if astCacheSize >= MAX_CACHE_SIZE then
+			local oldestKey = table.remove(astQueue, 1)
+			astCache[oldestKey] = nil
+			astCacheSize = astCacheSize - 1
+		end
+		
+		astCache[cacheKey] = tree
+		table.insert(astQueue, cacheKey)
+		astCacheSize = astCacheSize + 1
+		
 		return tree, flags, nil
 	end
 	return pattern, flags, nil
