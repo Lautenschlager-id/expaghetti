@@ -5,7 +5,7 @@ local MatchState = require("matcher.state")
 local coreTreeMatcher = require("matcher.core")
 ----------------------------------------------------------------------------------------------------
 
---- The main matching engine entry point. Evaluates a regex expression against a target string.
+--- The main matching engine entry point. Evaluates a regular expression against a target string.
 ---@param expr string The regular expression pattern.
 ---@param str string The target string to match against.
 ---@param flags string|table|nil A string of flag characters or a table of boolean flags.

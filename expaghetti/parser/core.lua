@@ -1,5 +1,7 @@
 --[[
-    Core parsing loop. Parses a regex pattern into an Abstract Syntax Tree (AST).
+    Core parsing loop.
+
+    Parses a regular expression into an Abstract Syntax Tree (AST).
 ]]
 
 --[[ Dependencies ]]--
@@ -11,26 +13,34 @@ local Literal = require("magic.literal")
 local Quantifier = require("magic.quantifier")
 local Set = require("magic.set")
 
-local errorsEnum = require("enums.errors")
+--[[ Aliases ]]--
 
---[[ Enum Aliases ]]--
-local ERROR_UNTERMINATED_GROUP = errorsEnum.unterminatedGroup
+local ERROR_UNTERMINATED_GROUP = require("enums.errors").unterminatedGroup
 
---[[ Return ]]--
---- Parses a regex pattern into an Abstract Syntax Tree (AST) sequentially.
----@param state table The ParserState object containing the parsing context and pattern characters.
----@return table|boolean tree The generated AST tree, or false if parsing failed.
----@return string|table|nil errorMessage An error message or error token if parsing failed.
+local SetIsToken, SetParse = Set.isToken, Set.parse
+local GroupIsOpeningToken, GroupParse = Group.isOpeningToken, Group.parse
+local GroupIsClosingToken, GroupParseClosing = Group.isClosingToken, Group.parseClosing
+local AnchorIsToken, AnchorParse = Anchor.isToken, Anchor.parse
+local AnyIsToken, AnyParse = Any.isToken, Any.parse
+local AlternateIsToken, AlternateParse = Alternate.isToken, Alternate.parse
+local LiteralParse = Literal.parse
+local QuantifierLookForElementOperation = Quantifier.lookForElementOperation
+
+--[[ Module ]]--
+
+--- Parses a regular expression pattern into an Abstract Syntax Tree (AST) sequentially.
+---@param state ParserState The parser state.
+---@return ASTTree|boolean tree The generated AST tree, or false if parsing failed.
+---@return string|nil errorMessage The parser error message on failure.
 return function(state)
 	local tree = {
 		_index = 0
 	}
 
-	local stopParsing, errorMessage
-
 	while state.index <= state.patternLength do
-		local currentIndex = state.index
-		local nextIndex, element = state:readElement(currentIndex)
+		local stopParsing, errorMessage
+
+		local nextIndex, element = state:readElement(state.index)
 		if not nextIndex then
 			return false, element
 		end
@@ -38,40 +48,43 @@ return function(state)
 		if state:isElement(element) then
 			-- If the element is already parsed (like an escaped literal), append it to the tree directly.
 			state.index = nextIndex
-			tree._index = tree._index + 1
-			tree[tree._index] = element
+
+			local treeIndex = tree._index + 1
+			tree._index = treeIndex
+			tree[treeIndex] = element
 		else
-			if Set.isToken(element) then
-				errorMessage = Set.parse(state, tree)
-			elseif Group.isOpeningToken(element) then
-				errorMessage = Group.parse(state, tree)
-			elseif Group.isClosingToken(element) then
+			if SetIsToken(element) then
+				errorMessage = SetParse(state, tree)
+			elseif GroupIsOpeningToken(element) then
+				errorMessage = GroupParse(state, tree)
+			elseif GroupIsClosingToken(element) then
 				-- Reached the end of a group. `stopParsing` signals the loop to break,
 				-- returning the subtree back up to the parent caller.
-				stopParsing, errorMessage = Group.parseClosing(state)
+				stopParsing, errorMessage = GroupParseClosing(state)
 				if not errorMessage and stopParsing then
 					break
 				end
-			elseif Anchor.isToken(element) then
-				errorMessage = Anchor.parse(state, element, tree)
-			elseif Any.isToken(element) then
-				errorMessage = Any.parse(state, tree)
-			elseif Alternate.isToken(element) then
+			elseif AnchorIsToken(element) then
+				errorMessage = AnchorParse(state, element, tree)
+			elseif AnyIsToken(element) then
+				errorMessage = AnyParse(state, tree)
+			elseif AlternateIsToken(element) then
 				-- Alternations (`|`) effectively split the current tree. The left side becomes 
 				-- a branch, and the parser continues for the right side branch.
-				tree, stopParsing, errorMessage = Alternate.parse(state, tree)
+				tree, stopParsing, errorMessage = AlternateParse(state, tree)
 				if not errorMessage and stopParsing then
 					break
 				end
 			else
-				errorMessage = Literal.parse(state, element, tree)
+				errorMessage = LiteralParse(state, element, tree)
 			end
 		end
 
-		-- Eagerly check if the newly added element is followed by a quantifier (*, +, ?, or {n,m}).
+		-- Attach a following quantifier to the newly parsed element.
 		-- This groups the element and its quantifier together in the AST immediately.
-		if not errorMessage and tree[tree._index] then
-			errorMessage = Quantifier.lookForElementOperation(state, tree[tree._index])
+		local treeElement = not errorMessage and tree[tree._index]
+		if treeElement and not treeElement.quantifier then
+			errorMessage = QuantifierLookForElementOperation(state, treeElement)
 		end
 
 		if errorMessage then
@@ -81,7 +94,7 @@ return function(state)
 
 	if state.isGroup and not state.isAlternate then
 		local currentToken = state.patternChars[state.index]
-		if not Group.isClosingToken(currentToken) then
+		if not GroupIsClosingToken(currentToken) then
 			return false, ERROR_UNTERMINATED_GROUP
 		end
 	end

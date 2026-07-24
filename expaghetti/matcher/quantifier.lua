@@ -300,11 +300,11 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 			end
 		end
 
-		-- Yield the boundary of the current occurrence sequence to the rest of the regex engine.
+		-- Yield the boundary of the current occurrence sequence to the rest of the regular expression engine.
 		targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
 		hasMatched, iniStr, endStr, meta = continueMatcher(state, targetStringIndex)
 		
-		-- If the rest of the engine matched successfully, the entire regex is satisfied!
+		-- If the rest of the engine matched successfully, the entire regular expression is satisfied!
 		if hasMatched then
 			return hasMatched, iniStr, endStr, meta
 		end

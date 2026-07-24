@@ -7,7 +7,7 @@ local MatchState = {
 }
 MatchState.__index = MatchState
 
---- Creates a new MatchState instance for a regex execution.
+--- Creates a new MatchState instance for a regular expression execution.
 ---@param flags table Dictionary of active flags.
 ---@param targetString string The string being searched.
 ---@param rootTree table The AST root tree.

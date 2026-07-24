@@ -1,23 +1,27 @@
 --[[
-    The main parser entry point. Parses a regex expression string into an AST.
+    Parses a regular expression into an Abstract Syntax Tree (AST).
 ]]
 
 --[[ Dependencies ]]--
 local ParserState = require("parser.state")
 local parserCore = require("parser.core")
 
---[[ Return ]]--
---- The main parser entry point. Parses a regex expression string into an AST.
----@param exprOrState string|table The regular expression string or an existing ParserState.
+--[[ Aliases ]]--
+local ParserStateNew = ParserState.new
+
+--[[ Module ]]--
+
+--- Parses a regular expression into an Abstract Syntax Tree (AST).
+---@param exprOrState string|ParserState The regular expression string or an existing parser state.
 ---@param flags string|table|nil A string of flag characters or a table of boolean flags.
----@return table|boolean tree The generated AST, or false if an error occurred.
----@return string|table|nil errorMessage An error message or error token if parsing failed.
+---@return ASTTree|boolean tree The generated AST, or false if parsing failed.
+---@return string|nil errorMessage The parser error message on failure.
 local parser = function(exprOrState, flags)
 	local state
 	if exprOrState.__index then
 		state = exprOrState
 	else
-		state = ParserState.new(exprOrState, flags)
+		state = ParserStateNew(exprOrState, flags)
 	end
 
 	local tree, errorMessage = parserCore(state)

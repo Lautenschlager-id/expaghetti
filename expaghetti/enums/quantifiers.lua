@@ -1,5 +1,5 @@
 --[[
-    Definitions and lookup tables for regex quantifiers.
+    Definitions and lookup tables for regular expression quantifiers.
 ]]
 
 --[[ Dependencies ]]--

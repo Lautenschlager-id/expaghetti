@@ -1,8 +1,8 @@
 --[[
     Flag definitions used by the parser and matcher.
 
-    Includes the complete set of supported regex flags and the subset
-    allowed within inline flag groups.
+    Includes the complete set of supported regular expression flags
+	and the subset allowed within inline flag groups.
 ]]
 
 --[[ Enums ]]--

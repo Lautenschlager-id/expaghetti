@@ -1,8 +1,8 @@
 --[[
     Group parser and matcher.
 
-    Handles parsing and execution of all regex group constructs, including
-    its different behaviors.
+    Handles parsing and execution of all regular expression group constructs,
+	including its different behaviors.
 ]]
 
 --[[ Globals ]]--

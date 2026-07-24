@@ -1,6 +1,6 @@
 --[[
     Lookup table containing all line break characters recognized by the
-    regex engine.
+    regular expression engine.
 
     Supports both string and byte representations to avoid conversions
     during matching.

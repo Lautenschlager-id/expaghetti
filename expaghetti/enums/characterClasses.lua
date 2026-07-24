@@ -1,6 +1,6 @@
 --[[
     Precompiled character class definitions used by the parser to expand
-    regex character classes (e.g. %a, %d, %w, %s) into set elements.
+    regular expression character classes (e.g. %a, %d, %w, %s) into set elements.
 
     Each entry is represented as a reusable AST set node that can be shared
     whenever the corresponding character class is encountered.

@@ -1,5 +1,5 @@
 --[[
-    Definitions of all regex magic characters and group behavior tokens.
+    Definitions of all regular expression magic characters and group behavior tokens.
 ]]
 
 local Magic = {
