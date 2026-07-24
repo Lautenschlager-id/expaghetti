@@ -31,7 +31,7 @@ function MatchState.new(flags, targetString, rootTree)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags or {}
-	if self.flags[ENUM_FLAG_UNICODE] then
+	if self.flags[FLAG_UNICODE] then
 		local targetStringChars, targetStringLength = toCharArray(targetString, true)
 		self.getTargetCharacter = function(self, index)
 			return targetStringChars[index]
@@ -119,18 +119,19 @@ end
 ---@return boolean exceeded Whether the configured recursion limit was exceeded.
 function MatchState:enterRecursion()
 	local metadata = self.metadata
+
 	local recursionDepth = metadata.recursionDepth + 1
-	metadata.recursionDepth = recursionDepth
 	if recursionDepth > metadata.maxRecursionDepth then
-		metadata.recursionDepth = recursionDepth - 1
 		return true
 	end
+	metadata.recursionDepth = recursionDepth
 	return false
 end
 
 --- Leaves the current recursive execution context.
 function MatchState:leaveRecursion()
-	self.metadata.recursionDepth = self.metadata.recursionDepth - 1
+	local metadata = self.metadata
+	metadata.recursionDepth = metadata.recursionDepth - 1
 end
 
 --- Records a completed capture.
@@ -140,9 +141,11 @@ end
 function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	if not groupIndex then return end
 	
-	local inits = self.metadata.captureStarts
-	local ends = self.metadata.captureEnds
-	local counts = self.metadata.captureCounts
+	local metadata = self.metadata
+
+	local inits = metadata.captureStarts
+	local ends = metadata.captureEnds
+	local counts = metadata.captureCounts
 	
 	local groupInits = inits[groupIndex]
 	local groupEnds = ends[groupIndex]
@@ -167,12 +170,14 @@ end
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
 	
-	local counts = self.metadata.captureCounts
+	local metadata = self.metadata
+
+	local counts = metadata.captureCounts
 	local length = counts[groupIndex] or 0
 	
 	if length > 0 then
-		self.metadata.captureStarts[groupIndex][length] = nil
-		self.metadata.captureEnds[groupIndex][length] = nil
+		metadata.captureStarts[groupIndex][length] = nil
+		metadata.captureEnds[groupIndex][length] = nil
 		counts[groupIndex] = length - 1
 	end
 end
