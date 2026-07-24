@@ -28,7 +28,7 @@ local QuantifierLookForElementOperation = Quantifier.lookForElementOperation
 
 --[[ Module ]]--
 
---- Parses a regular expression pattern into an Abstract Syntax Tree (AST) sequentially.
+--- Parses a regular expression into an Abstract Syntax Tree (AST) sequentially.
 ---@param state ParserState The parser state.
 ---@return ASTTree|boolean tree The generated AST tree, or false if parsing failed.
 ---@return string|nil errorMessage The parser error message on failure.

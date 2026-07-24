@@ -43,6 +43,7 @@ function ParserState.new(expr, flags)
 
 	self.flags = {}
 	if flags then
+		-- TO DO: Remove this later
 		if type(flags) == "string" then 
 			for char in flags:gmatch(".") do
 				self.flags[char] = true

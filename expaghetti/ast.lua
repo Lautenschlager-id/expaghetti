@@ -15,7 +15,7 @@ local ELEMENT_FRONTIER = elementsEnum.FRONTIER
 local ELEMENT_QUANTIFIER = elementsEnum.QUANTIFIER
 local ELEMENT_ALTERNATE = elementsEnum.ALTERNATE
 local ELEMENT_POSITION_CAPTURE = elementsEnum.POSITION_CAPTURE
-local ELEMENT_CAPTURE_REFERENCE = elementsEnum.CAPTURE_REFERENCE
+local ELEMENT_BACKREFERENCE = elementsEnum.BACKREFERENCE
 local ELEMENT_BALANCED = elementsEnum.BALANCED
 
 
@@ -192,9 +192,9 @@ AST.PositionCapture = function(index)
 	}
 end
 
-AST.CaptureReference = function(index)
+AST.Backreference = function(index)
 	return {
-		type = ELEMENT_CAPTURE_REFERENCE,
+		type = ELEMENT_BACKREFERENCE,
 		index = index,
 	}
 end

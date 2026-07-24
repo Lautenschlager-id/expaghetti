@@ -526,15 +526,15 @@ return {
 			},
 			{
 				index = 1,
-				type = "capture_reference",
+				type = "backreference",
 			},
 			{
 				index = 2,
-				type = "capture_reference",
+				type = "backreference",
 			},
 			{
 				index = 3,
-				type = "capture_reference",
+				type = "backreference",
 			},
 			_index = 5,
 		},
@@ -564,7 +564,7 @@ return {
 			},
 			{
 				index = 3,
-				type = "capture_reference",
+				type = "backreference",
 			},
 			{
 				isCaseInsensitive = false,

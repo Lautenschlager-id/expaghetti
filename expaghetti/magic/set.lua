@@ -223,5 +223,4 @@ Set.match = function(currentElement, _, currentCharacter)
 	return currentElement.hasToNegateMatch ~= hasMatched
 end
 
---[[ Return ]]--
 return Set

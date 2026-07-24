@@ -1,79 +1,87 @@
-local Alternate = require("magic.alternate")
-local Anchor = require("magic.anchor")
-local Balanced = require("magic.balanced")
-local Frontier = require("magic.frontier")
-local CaptureReference = require("magic.captureReference")
-local Group = require("magic.group.group")
-local PositionCapture = require("magic.positionCapture")
-local Set = require("magic.set")
+--[[
+    Delegates AST element matching to the appropriate matcher implementation.
+]]
 
-local Any = require("magic.any")
-local Literal = require("magic.literal")
+--[[ Dependencies ]]--
+local AlternateMatch = require("magic.alternate").match
+local AnchorMatch = require("magic.anchor").match
+local AnyMatch = require("magic.any").match
+local BackreferenceMatch = require("magic.backreference").match
+local BalancedMatch = require("magic.balanced").match
+local FrontierMatch = require("magic.frontier").match
+local GroupMatch = require("magic.group.group").match
+local LiteralMatch = require("magic.literal").match
+local PositionCaptureMatch = require("magic.positionCapture").match
+local SetMatch = require("magic.set").match
 
-local enumElements = require("enums.elements")
-local ENUM_ELEMENT_TYPE_ALTERNATE = enumElements.ALTERNATE
-local ENUM_ELEMENT_TYPE_ANCHOR = enumElements.ANCHOR
-local ENUM_ELEMENT_TYPE_ANY = enumElements.ANY
-local ENUM_ELEMENT_TYPE_BALANCED = enumElements.BALANCED
-local ENUM_ELEMENT_TYPE_FRONTIER = enumElements.FRONTIER
-local ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE = enumElements.CAPTURE_REFERENCE
-local ENUM_ELEMENT_TYPE_GROUP = enumElements.GROUP
-local ENUM_ELEMENT_TYPE_LITERAL = enumElements.LITERAL
-local ENUM_ELEMENT_TYPE_POSITION_CAPTURE = enumElements.POSITION_CAPTURE
-local ENUM_ELEMENT_TYPE_SET = enumElements.SET
+--[[ Enums ]]--
+local Elements = require("enums.elements")
 
+--[[ Aliases ]]--
+local ELEMENT_ALTERNATE = Elements.ALTERNATE
+local ELEMENT_ANCHOR = Elements.ANCHOR
+local ELEMENT_ANY = Elements.ANY
+local ELEMENT_BACKREFERENCE = Elements.BACKREFERENCE
+local ELEMENT_BALANCED = Elements.BALANCED
+local ELEMENT_FRONTIER = Elements.FRONTIER
+local ELEMENT_GROUP = Elements.GROUP
+local ELEMENT_LITERAL = Elements.LITERAL
+local ELEMENT_POSITION_CAPTURE = Elements.POSITION_CAPTURE
+local ELEMENT_SET = Elements.SET
+
+--[[ Module ]]--
 local elementMatchers = {
-	[ENUM_ELEMENT_TYPE_ALTERNATE] = {
-		matcher = Alternate.match,
+	[ELEMENT_ALTERNATE] = {
+		matcher = AlternateMatch,
 		requiresCharacter = false,
 	},
-	[ENUM_ELEMENT_TYPE_ANCHOR] = {
-		matcher = Anchor.match,
+	[ELEMENT_ANCHOR] = {
+		matcher = AnchorMatch,
 		requiresCharacter = false,
 	},
-	[ENUM_ELEMENT_TYPE_ANY] = {
-		matcher = Any.match,
+	[ELEMENT_ANY] = {
+		matcher = AnyMatch,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_BALANCED] = {
-		matcher = Balanced.match,
-		requiresCharacter = true,
-	},
-	[ENUM_ELEMENT_TYPE_FRONTIER] = {
-		matcher = Frontier.match,
-		requiresCharacter = true,
-	},
-	[ENUM_ELEMENT_TYPE_CAPTURE_REFERENCE] = {
-		matcher = CaptureReference.match,
+	[ELEMENT_BACKREFERENCE] = {
+		matcher = BackreferenceMatch,
 		requiresCharacter = false,
 	},
-	[ENUM_ELEMENT_TYPE_GROUP] = {
-		matcher = Group.match,
-		requiresCharacter = false,
-	},
-	[ENUM_ELEMENT_TYPE_LITERAL] = {
-		matcher = Literal.match,
+	[ELEMENT_BALANCED] = {
+		matcher = BalancedMatch,
 		requiresCharacter = true,
 	},
-	[ENUM_ELEMENT_TYPE_POSITION_CAPTURE] = {
-		matcher = PositionCapture.match,
+	[ELEMENT_FRONTIER] = {
+		matcher = FrontierMatch,
+		requiresCharacter = true,
+	},
+	[ELEMENT_GROUP] = {
+		matcher = GroupMatch,
 		requiresCharacter = false,
 	},
-	[ENUM_ELEMENT_TYPE_SET] = {
-		matcher = Set.match,
+	[ELEMENT_LITERAL] = {
+		matcher = LiteralMatch,
+		requiresCharacter = true,
+	},
+	[ELEMENT_POSITION_CAPTURE] = {
+		matcher = PositionCaptureMatch,
+		requiresCharacter = false,
+	},
+	[ELEMENT_SET] = {
+		matcher = SetMatch,
 		requiresCharacter = true,
 	},
 }
 
---- Delegates the matching process to the specific class of a single AST element.
----@param currentElement table The AST element to match.
+--- Matches a single AST element.
+---@param currentElement ASTElement The AST element to match.
 ---@param currentCharacter string|number The target character at the current string index.
----@param state table The MatchState object.
----@return boolean hasMatched True if the single element successfully matched.
+---@param state MatchState The matcher state.
+---@return boolean hasMatched Whether the element matched successfully.
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
----@return table|nil metadata Metadata including captures, if any.
----@return boolean|nil shouldEndThisExecution True if execution stack should finish.
+---@return MatcherMetadata|nil metadata The match metadata.
+---@return boolean|nil shouldEndThisExecution Whether the current execution stack should end.
 local elementMatcher = function(currentElement, currentCharacter, state)
 	local elementClass = elementMatchers[currentElement.type]
 	if not elementClass then

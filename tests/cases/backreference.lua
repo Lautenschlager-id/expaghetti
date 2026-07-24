@@ -27,11 +27,11 @@ return {
 			},
 			{
 				index = 2,
-				type = "capture_reference"
+				type = "backreference"
 			},
 			{
 				index = 1,
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 4
 		},
@@ -77,7 +77,7 @@ return {
 			},
 			{
 				index = 1,
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 2
 		},
@@ -111,7 +111,7 @@ return {
 			},
 			{
 				index = 2,
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 2
 		},
@@ -134,7 +134,7 @@ return {
 			},
 			{
 				index = "word",
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 2
 		},
@@ -170,11 +170,11 @@ return {
 			},
 			{
 				index = "a",
-				type = "capture_reference"
+				type = "backreference"
 			},
 			{
 				index = "b",
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 4
 		},
@@ -214,7 +214,7 @@ return {
 			},
 			{
 				index = "word",
-				type = "capture_reference"
+				type = "backreference"
 			},
 			_index = 2
 		},
@@ -345,7 +345,7 @@ return {
 			},
 			{
 				index = 12,
-				type = "capture_reference",
+				type = "backreference",
 			},
 			_index = 13,
 		},
@@ -367,7 +367,7 @@ return {
 								tree = {
 									{
 										index = "abc",
-										type = "capture_reference",
+										type = "backreference",
 									},
 									_index = 1,
 								},
@@ -383,11 +383,11 @@ return {
 			},
 			{
 				index = "ghi",
-				type = "capture_reference",
+				type = "backreference",
 			},
 			{
 				index = "def",
-				type = "capture_reference",
+				type = "backreference",
 			},
 			_index = 3,
 		},

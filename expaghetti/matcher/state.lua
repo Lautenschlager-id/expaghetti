@@ -1,22 +1,36 @@
-local config = require("./config")
-local ENUM_FLAG_UNICODE = require("./enums/flags").FLAGS.UNICODE
-local toCharArray = require("./helpers/string").toCharArray
+--[[
+    Match state used throughout the matching process.
 
+    Tracks the current execution position, shared metadata,
+    recursion state, backtracking state, and capture information.
+]]
+
+--[[ Globals ]]--
+local setmetatable = setmetatable
+local string_byte = string.byte
+
+--[[ Dependencies ]]--
+local ConfigGet = require("config").get
+local toCharArray = require("helpers.string").toCharArray
+
+--[[ Aliases ]]--
+local FLAG_UNICODE = require("enums.flags").FLAGS.UNICODE
+
+--[[ Module ]]--
 local MatchState = {
 	matcher = nil
 }
 MatchState.__index = MatchState
 
 --- Creates a new MatchState instance for a regular expression execution.
----@param flags table Dictionary of active flags.
----@param targetString string The string being searched.
----@param rootTree table The AST root tree.
----@return table MatchState The instantiated MatchState object.
+---@param flags FlagTable Active matching flags.
+---@param targetString string The target string.
+---@param rootTree ASTTree The root AST tree.
+---@return MatchState state The newly created match state.
 function MatchState.new(flags, targetString, rootTree)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags or {}
-
 	if self.flags[ENUM_FLAG_UNICODE] then
 		local targetStringChars, targetStringLength = toCharArray(targetString, true)
 		self.getTargetCharacter = function(self, index)
@@ -25,24 +39,26 @@ function MatchState.new(flags, targetString, rootTree)
 		self.targetStringLength = targetStringLength
 	else
 		self.getTargetCharacter = function(self, index)
-			return string.byte(targetString, index)
+			return string_byte(targetString, index)
 		end
 		self.targetStringLength = #targetString
 	end
 
 	self.rootTree = rootTree
-	self.parsedMetadata = rootTree and rootTree._metadata or nil
+
+	local parsedMetadata = rootTree and rootTree._metadata or nil 
+	self.parsedMetadata = parsedMetadata
 	
-	local limits = config.get()
+	local limits = ConfigGet()
 	self.metadata = {
 		captureStarts = {},
 		captureEnds = {},
 		captureCounts = {},
 		positionCaptures = {},
 		outerTreeReference = {},
-		rootTree = self.rootTree,
-		parsedMetadata = self.parsedMetadata,
-		groupNames = self.parsedMetadata and self.parsedMetadata.groupNames,
+		rootTree = rootTree,
+		parsedMetadata = parsedMetadata,
+		groupNames = parsedMetadata and parsedMetadata.groupNames,
 		recursionDepth = 0,
 		backtrackSteps = 0,
 		maxRecursionDepth = limits.maxRecursionDepth,
@@ -52,8 +68,8 @@ function MatchState.new(flags, targetString, rootTree)
 	return self
 end
 
---- Resets the execution state arrays for a new match attempt starting at stringIndex.
----@param stringIndex number The starting string index for the new match attempt.
+--- Resets the match state for a new matching attempt.
+---@param stringIndex number The starting string index.
 function MatchState:reset(stringIndex)
 	self.stringIndex = stringIndex or 0
 	self.initialStringIndex = self.stringIndex
@@ -68,10 +84,12 @@ function MatchState:reset(stringIndex)
 	metadata.backtrackSteps = 0
 end
 
---- Branches the current state into a new child state (e.g., for lookaheads).
----@param stringIndex number|nil The string index for the branched state.
----@param initialStringIndex number|nil The initial string index for the branched state.
----@return table MatchState The newly branched state.
+--- Creates a child state that shares the current execution context.
+--- Used by constructs that execute in an isolated context (e.g. lookarounds)
+--- while sharing captures and other execution metadata.
+---@param stringIndex number|nil The starting string index for the child state.
+---@param initialStringIndex number|nil The initial string index for the child state.
+---@return MatchState childState The branched match state.
 function MatchState:branch(stringIndex, initialStringIndex)
 	local child = setmetatable({}, MatchState)
 	child.flags = self.flags
@@ -88,33 +106,37 @@ function MatchState:branch(stringIndex, initialStringIndex)
 	return child
 end
 
---- Increments the global backtrack counter and checks against the max backtrack limit.
----@return boolean exceeded Limit exceeded (true if backtrack limit has been breached).
+--- Increments the global backtrack counter.
+---@return boolean exceeded Whether the configured backtrack limit was exceeded.
 function MatchState:incrementBacktrack()
-	self.metadata.backtrackSteps = self.metadata.backtrackSteps + 1
-	return self.metadata.backtrackSteps > self.metadata.maxBacktrackDepth
+	local metadata = self.metadata
+	local backtrackSteps = metadata.backtrackSteps + 1
+	metadata.backtrackSteps = backtrackSteps
+	return backtrackSteps > metadata.maxBacktrackDepth
 end
 
---- Increments the recursion depth and checks against the max recursion limit.
----@return boolean exceeded Limit exceeded (true if recursion limit has been breached).
+--- Enters a recursive execution context.
+---@return boolean exceeded Whether the configured recursion limit was exceeded.
 function MatchState:enterRecursion()
-	self.metadata.recursionDepth = self.metadata.recursionDepth + 1
-	if self.metadata.recursionDepth > self.metadata.maxRecursionDepth then
-		self.metadata.recursionDepth = self.metadata.recursionDepth - 1
+	local metadata = self.metadata
+	local recursionDepth = metadata.recursionDepth + 1
+	metadata.recursionDepth = recursionDepth
+	if recursionDepth > metadata.maxRecursionDepth then
+		metadata.recursionDepth = recursionDepth - 1
 		return true
 	end
 	return false
 end
 
---- Decrements the recursion depth.
+--- Leaves the current recursive execution context.
 function MatchState:leaveRecursion()
 	self.metadata.recursionDepth = self.metadata.recursionDepth - 1
 end
 
---- Records a successful capture group match.
----@param groupIndex number|string The identifier of the capture group.
----@param startIndex number The initial string index of the capture.
----@param endIndex number The ending string index of the capture.
+--- Records a completed capture.
+---@param groupIndex number|string The capture group identifier.
+---@param startIndex number The first captured string index.
+---@param endIndex number The last captured string index.
 function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	if not groupIndex then return end
 	
@@ -140,8 +162,8 @@ function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	groupEnds[nextIndex] = endIndex
 end
 
---- Pops the most recently recorded capture for a specific group.
----@param groupIndex number|string The identifier of the capture group.
+--- Removes the most recently recorded capture for a capture group.
+---@param groupIndex number|string The capture group identifier.
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
 	

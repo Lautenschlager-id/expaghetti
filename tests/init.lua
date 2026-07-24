@@ -18,7 +18,7 @@ local cases = {
 	"literal",
 	"escaped",
 	"characterClass",
-	"specialEscaped",
+	"escapeHandlers",
 	"any",
 	"set",
 	"delimiter",

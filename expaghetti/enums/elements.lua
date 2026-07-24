@@ -11,7 +11,7 @@ return {
 	ANY = "any",
 	BALANCED = "balanced",
 	FRONTIER = "frontier",
-	CAPTURE_REFERENCE = "capture_reference",
+	BACKREFERENCE = "backreference",
 	GROUP = "group",
 	LITERAL = "literal",
 	POSITION_CAPTURE = "position_capture",
