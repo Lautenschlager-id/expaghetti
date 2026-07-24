@@ -21,7 +21,19 @@ local function getSubstring(str, ini, en, flags)
 	return string.sub(str, ini, en)
 end
 
+local function normalizeFlagsTest(flags)
+	if type(flags) == "string" then
+		local t = {}
+		for char in flags:gmatch(".") do
+			t[char] = true
+		end
+		return t
+	end
+	return flags or {}
+end
+
 local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
+	flags = normalizeFlagsTest(flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	if (not hasMatched) ~= (not expectedHasMatched) then
 		error(string.format("Test '%s' failed: Expected hasMatched=%s for expr='%s', str='%s' but got %s", desc, tostring(expectedHasMatched), expr, str, tostring(hasMatched)))
@@ -41,6 +53,7 @@ local function assertError(expr, str, desc)
 end
 
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
+	flags = normalizeFlagsTest(flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local ini = metadata.captureStarts[captureIndex]
@@ -56,6 +69,7 @@ local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 end
 
 local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
+	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	assert(not metadata.captureStarts[captureIndex],
@@ -63,6 +77,7 @@ local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
 end
 
 local function assertNoCapture(expr, str, desc, flags)
+	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match", desc))
 	local hasAny = false
@@ -71,6 +86,7 @@ local function assertNoCapture(expr, str, desc, flags)
 end
 
 local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc, flags)
+	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local pos = metadata.positionCaptures[captureIndex]
@@ -809,27 +825,27 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 
 print("  [50] Depth Limits...")
 do
-	local config = require("config")
-	local saved = config.get()
-	config.set({ maxRecursionDepth = 5 })
+	local config = require("config").global
+	local saved = config:getAll()
+	config:set({ maxRecursionDepth = 5 })
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
-	config.set(saved)
+	config:set(saved)
 end
 do
-	local config = require("config")
-	local saved = config.get()
-	config.set({ maxBacktrackDepth = 10 })
+	local config = require("config").global
+	local saved = config:getAll()
+	config:set({ maxBacktrackDepth = 10 })
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")
-	config.set(saved)
+	config:set(saved)
 end
 do
-	local config = require("config")
-	local saved = config.get()
+	local config = require("config").global
+	local saved = config:getAll()
 	local expaghetti = require("expaghetti")({ maxRecursionDepth = 100, maxBacktrackDepth = 1000 })
 	assert(type(expaghetti.match) == "function", "init entry point: returns match function")
-	local hasMatched, iniStr, endStr = expaghetti.match("a", "a")
-	assert(hasMatched and iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
-	config.set(saved)
+	local iniStr, endStr = expaghetti:find("a", "a")
+	assert(iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
+	config:set(saved)
 end
 
 ----------------------------------------------------------------------------------------------------

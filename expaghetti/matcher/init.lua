@@ -23,32 +23,26 @@ local MatchStateNew = MatchState.new
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
 ---@return MatcherMetadata|nil matcherMetadata The match metadata.
-local matcher = function(expr, str, flags, stringIndex)
-	-- TO DO: Remove this later
-	if type(expr) ~= "string" then
-		return false, "Expression must be a string"
-	end
-	if type(str) ~= "string" then
-		return false, "Target must be a string"
-	end
-	if type(flags) == "string" then
-		local t = {}
-		for char in flags:gmatch(".") do
-			t[char] = true
+local matcher = function(expr, str, flags, stringIndex, config)
+	local tree, errorMessage
+	if type(expr) == "string" then
+		tree, errorMessage = parser(expr, flags)
+		if not tree then
+			return false, errorMessage
 		end
-		flags = t
+	elseif type(expr) == "table" then
+		tree = expr
 	else
-		flags = flags or {}
+		return false, "Expression must be a string or a compiled pattern"
 	end
 
-	local tree, errorMessage = parser(expr, flags)
-	if not tree then
-		return false, errorMessage
+	if type(str) ~= "string" then
+		return false, "Target must be a string"
 	end
 
 	stringIndex = stringIndex or 0
 
-	local state = MatchStateNew(flags, str, tree)
+	local state = MatchStateNew(flags, str, tree, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do

@@ -10,7 +10,6 @@ local setmetatable = setmetatable
 local string_byte = string.byte
 
 --[[ Dependencies ]]--
-local ConfigGet = require("config").get
 local toCharArray = require("helpers.string").toCharArray
 
 --[[ Aliases ]]--
@@ -26,8 +25,9 @@ MatchState.__index = MatchState
 ---@param flags FlagTable Active matching flags.
 ---@param targetString string The target string.
 ---@param rootTree ASTTree The root AST tree.
+---@param config Config|table|nil Optional configuration limits.
 ---@return MatchState state The newly created match state.
-function MatchState.new(flags, targetString, rootTree)
+function MatchState.new(flags, targetString, rootTree, config)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags or {}
@@ -49,7 +49,7 @@ function MatchState.new(flags, targetString, rootTree)
 	local parsedMetadata = rootTree and rootTree._metadata or nil 
 	self.parsedMetadata = parsedMetadata
 	
-	local limits = ConfigGet()
+	local limits = config or require("config").global
 	self.metadata = {
 		captureStarts = {},
 		captureEnds = {},
@@ -61,8 +61,8 @@ function MatchState.new(flags, targetString, rootTree)
 		groupNames = parsedMetadata and parsedMetadata.groupNames,
 		recursionDepth = 0,
 		backtrackSteps = 0,
-		maxRecursionDepth = limits.maxRecursionDepth,
-		maxBacktrackDepth = limits.maxBacktrackDepth,
+		maxRecursionDepth = type(limits.get) == "function" and limits:get("maxRecursionDepth") or limits.maxRecursionDepth,
+		maxBacktrackDepth = type(limits.get) == "function" and limits:get("maxBacktrackDepth") or limits.maxBacktrackDepth,
 	}
 
 	return self
