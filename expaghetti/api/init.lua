@@ -2,23 +2,23 @@
     API Entry Point
 ]]
 
-local utils = require("api.utils")
+local helpers = require("api.helpers")
 
 local Api = {}
 
-Api.normalizeFlags = utils.normalizeFlags
-Api.compilePattern = utils.compilePattern
+Api.normalizeFlags = helpers.normalizeFlags
+Api.compilePattern = helpers.compilePattern
 
-Api.test = require("api.test")(utils)
-Api.match = require("api.match")(utils)
+Api.test = require("api.test")(helpers)
+Api.match = require("api.match")(helpers)
 
-local matchAll, gmatch = require("api.matchAll")(utils)
+local matchAll, gmatch = require("api.matchAll")(helpers)
 Api.matchAll = matchAll
 Api.gmatch = gmatch
 
-Api.find = require("api.find")(utils)
-Api.replace = require("api.replace")(utils)
-Api.split = require("api.split")(utils)
+Api.find = require("api.find")(helpers)
+Api.replace = require("api.replace")(helpers)
+Api.split = require("api.split")(helpers)
 
 Api.installHooks = require("api.install")
 
