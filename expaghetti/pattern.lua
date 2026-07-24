@@ -2,7 +2,7 @@
     Compiled Pattern Object.
 ]]
 
-local Api = require("api")
+local Api = require("api.init")
 
 local Pattern = {}
 Pattern.__index = Pattern
