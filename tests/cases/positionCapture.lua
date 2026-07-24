@@ -77,10 +77,10 @@ return {
 								},
 								_index = 1
 							},
-							hasBehavior = true,
+							hasSpecialBehavior = true,
 							isLookahead = true,
 							type = "group",
-							disableCapture = true
+							isNonCapturing = true
 						},
 						_index = 1
 					},

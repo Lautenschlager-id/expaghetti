@@ -36,8 +36,8 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 	if peekChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookahead then
 		local node = GroupLookaheadNode()
 		node.isLookahead = true
-		node.disableCapture = true
-		node.hasBehavior = true
+		node.isNonCapturing = true
+		node.hasSpecialBehavior = true
 		node.isNegative = isNegativeLookahead
 		return peekIndex, node
 		
@@ -52,8 +52,8 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 		if lookbehindChar == ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or isNegativeLookbehind then
 			local node = GroupLookbehindNode()
 			node.isLookbehind = true
-			node.disableCapture = true
-			node.hasBehavior = true
+			node.isNonCapturing = true
+			node.hasSpecialBehavior = true
 			node.isNegative = isNegativeLookbehind
 			return lookbehindIndex, node
 		end

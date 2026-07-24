@@ -243,8 +243,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						isCaseInsensitive = false,

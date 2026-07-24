@@ -253,8 +253,8 @@ return {
 				value = string.byte("a"),
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				quantifier = {
 					max = 0,
 					min = 1,

@@ -121,7 +121,7 @@ return {
 		parsed = {
 			{
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "word",
 				tree = {
 					{
@@ -144,7 +144,7 @@ return {
 		parsed = {
 			{
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "a",
 				tree = {
 					{
@@ -157,7 +157,7 @@ return {
 			},
 			{
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "b",
 				tree = {
 					{
@@ -184,7 +184,7 @@ return {
 		parsed = {
 			{
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "word",
 				tree = {
 					{
@@ -354,15 +354,15 @@ return {
 		regex = "(?<abc>(?<def>(?<ghi>%k<abc>)))%k<ghi>%k<def>",
 		parsed = {
 			{
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "abc",
 				tree = {
 					{
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						name = "def",
 						tree = {
 							{
-								hasBehavior = true,
+								hasSpecialBehavior = true,
 								name = "ghi",
 								tree = {
 									{

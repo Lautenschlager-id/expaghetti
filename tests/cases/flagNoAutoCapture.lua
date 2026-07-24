@@ -24,7 +24,7 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group"
 			},
 			_index = 1
@@ -53,7 +53,7 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group"
 			},
 			_index = 1
@@ -70,9 +70,9 @@ return {
 					},
 					disable = {}
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						tree = {
@@ -93,7 +93,7 @@ return {
 							},
 							_index = 3
 						},
-						disableCapture = true,
+						isNonCapturing = true,
 						type = "group"
 					},
 					_index = 1
@@ -131,7 +131,7 @@ return {
 										},
 										_index = 3
 									},
-									disableCapture = true,
+									isNonCapturing = true,
 									type = "group"
 								},
 								_index = 1
@@ -156,7 +156,7 @@ return {
 										},
 										_index = 3
 									},
-									disableCapture = true,
+									isNonCapturing = true,
 									type = "group"
 								},
 								_index = 1
@@ -166,7 +166,7 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group"
 			},
 			_index = 1
@@ -197,7 +197,7 @@ return {
 				},
 				type = "group",
 				name = "left",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				tree = {
@@ -220,7 +220,7 @@ return {
 				},
 				type = "group",
 				name = "right",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			_index = 2
 		}
@@ -248,9 +248,9 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				index = 1,

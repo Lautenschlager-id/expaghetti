@@ -150,8 +150,8 @@ return {
 				value = string.byte("a"),
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						index = 1,
@@ -184,8 +184,8 @@ return {
 				type = "any",
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isAtomic = true,
 				tree = {
 					{
@@ -221,14 +221,14 @@ return {
 				type = "any",
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				isNegative = true,
 				tree = {
 					{
-						disableCapture = true,
-						hasBehavior = true,
+						isNonCapturing = true,
+						hasSpecialBehavior = true,
 						isLookahead = true,
 						tree = {
 							{
@@ -255,15 +255,15 @@ return {
 				type = "any",
 			},
 			{
-				disableCapture = true,
+				isNonCapturing = true,
 				fixedLength = 0,
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
 				tree = {
 					{
-						disableCapture = true,
-						hasBehavior = true,
+						isNonCapturing = true,
+						hasSpecialBehavior = true,
 						isLookahead = true,
 						tree = {
 							{
@@ -290,16 +290,16 @@ return {
 				type = "any",
 			},
 			{
-				disableCapture = true,
+				isNonCapturing = true,
 				fixedLength = 0,
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
 				tree = {
 					{
-						disableCapture = true,
+						isNonCapturing = true,
 						fixedLength = 1,
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						isLookbehind = true,
 						tree = {
 							{
@@ -323,8 +323,8 @@ return {
 	{
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					_index = 0,
 				},
@@ -347,8 +347,8 @@ return {
 				type = "group",
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						type = "any",
@@ -384,8 +384,8 @@ return {
 				type = "group",
 			},
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						type = "any",
@@ -437,7 +437,7 @@ return {
 				index = 1,
 				tree = {
 					{
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						name = "named",
 						tree = {
 							{
@@ -464,7 +464,7 @@ return {
 				index = 1,
 				tree = {
 					{
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						name = "n4m3d_",
 						tree = {
 							{
@@ -488,7 +488,7 @@ return {
 				type = "any",
 			},
 			{
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				name = "_007",
 				tree = {
 					{

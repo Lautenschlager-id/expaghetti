@@ -247,13 +247,13 @@ Group.parse = function(state, tree)
 	elseif not statePatternChars[state.index] or statePatternChars[state.index] ~= MAGIC_GROUP_CLOSE then
 		local groupName = group.name
 
-		if not (group.disableCapture or groupName) then
+		if not (group.isNonCapturing or groupName) then
 			if not state.flags.n then
 				local groupIndex = stateMetadata.groupIndex + 1
 				stateMetadata.groupIndex = groupIndex
 				group.index = groupIndex
 			else
-				group.disableCapture = true
+				group.isNonCapturing = true
 			end
 		end
 
@@ -275,7 +275,7 @@ Group.parse = function(state, tree)
 		elseif groupName and groupTreesByName then
 			groupTreesByName[groupName] = groupTree
 		end
-	elseif not group.hasBehavior then
+	elseif not group.hasSpecialBehavior then
 		state.index = PositionCapture.parse(state.index, tree, stateMetadata)
 		return nil
 	else

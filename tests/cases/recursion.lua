@@ -7,7 +7,7 @@ return {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				isRecursionRoot = true
 			},
@@ -22,7 +22,7 @@ return {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				isRecursionRoot = true
 			},
@@ -61,7 +61,7 @@ return {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				targetIndex = 1
 			},
@@ -70,7 +70,7 @@ return {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				targetIndex = 2
 			},
@@ -87,7 +87,7 @@ return {
 							_index = 0
 						},
 						type = "group",
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						isRecursion = true,
 						targetIndex = 1
 					},
@@ -109,7 +109,7 @@ return {
 							_index = 0
 						},
 						type = "group",
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						isRecursion = true,
 						isRecursionRoot = true
 					},
@@ -135,14 +135,14 @@ return {
 				},
 				name = "expr",
 				type = "group",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				tree = {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				targetName = "expr"
 			},
@@ -163,7 +163,7 @@ return {
 				},
 				name = "a",
 				type = "group",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				tree = {
@@ -176,14 +176,14 @@ return {
 				},
 				name = "b",
 				type = "group",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				tree = {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				targetName = "a"
 			},
@@ -192,7 +192,7 @@ return {
 					_index = 0
 				},
 				type = "group",
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isRecursion = true,
 				targetName = "b"
 			},
@@ -209,7 +209,7 @@ return {
 							_index = 0
 						},
 						type = "group",
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						isRecursion = true,
 						isRecursionRoot = true
 					},
@@ -217,7 +217,7 @@ return {
 				},
 				name = "expr",
 				type = "group",
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			_index = 1
 		}
@@ -236,7 +236,7 @@ return {
 										_index = 0
 									},
 									type = "group",
-									hasBehavior = true,
+									hasSpecialBehavior = true,
 									isRecursion = true,
 									isRecursionRoot = true
 								},
@@ -276,7 +276,7 @@ return {
 							_index = 0
 						},
 						type = "group",
-						hasBehavior = true,
+						hasSpecialBehavior = true,
 						isRecursion = true,
 						targetIndex = 1
 					},

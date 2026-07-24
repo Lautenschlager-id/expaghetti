@@ -33,7 +33,7 @@ return {
 					},
 					disable = {}
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group",
 				tree = {
 					{
@@ -42,7 +42,7 @@ return {
 					},
 					_index = 1
 				},
-				hasBehavior = true
+				hasSpecialBehavior = true
 			},
 			{
 				type = "any"
@@ -87,7 +87,7 @@ return {
 			},
 			{
 				isLookbehind = true,
-				disableCapture = true,
+				isNonCapturing = true,
 				type = "group",
 				tree = {
 					{
@@ -96,7 +96,7 @@ return {
 					},
 					_index = 1
 				},
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				fixedLength = 1
 			},
 			{

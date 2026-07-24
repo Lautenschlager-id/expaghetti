@@ -2,7 +2,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				isMultiline = true,
 				type = "anchor"
 			},
@@ -22,7 +22,7 @@ return {
 				type = "literal"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				isMultiline = true,
 				type = "anchor"
 			},
@@ -36,7 +36,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				isMultiline = true,
 				type = "anchor"
 			},
@@ -56,7 +56,7 @@ return {
 				type = "literal"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				isMultiline = true,
 				type = "anchor"
 			},
@@ -70,7 +70,7 @@ return {
 			{
 				tree = {
 					{
-						isBeginning = true,
+						isStart = true,
 						isMultiline = true,
 						type = "anchor"
 					},
@@ -90,15 +90,15 @@ return {
 						type = "literal"
 					},
 					{
-						isBeginning = false,
+						isStart = false,
 						isMultiline = true,
 						type = "anchor"
 					},
 					_index = 5
 				},
 				type = "group",
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				scopedFlags = {
 					enable = {
 						["m"] = true
@@ -114,7 +114,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor"
 			},
 			{
@@ -133,7 +133,7 @@ return {
 				type = "literal"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor"
 			},
 			_index = 5
@@ -148,7 +148,7 @@ return {
 			{
 				tree = {
 					{
-						isBeginning = true,
+						isStart = true,
 						type = "anchor"
 					},
 					{
@@ -167,14 +167,14 @@ return {
 						type = "literal"
 					},
 					{
-						isBeginning = false,
+						isStart = false,
 						type = "anchor"
 					},
 					_index = 5
 				},
 				type = "group",
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				scopedFlags = {
 					enable = {},
 					disable = {
@@ -192,7 +192,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor"
 			},
 			{
@@ -211,7 +211,7 @@ return {
 				type = "literal"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor"
 			},
 			_index = 5
@@ -222,7 +222,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				isMultiline = true,
 				type = "anchor"
 			},
@@ -242,7 +242,7 @@ return {
 				type = "literal"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor"
 			},
 			_index = 5

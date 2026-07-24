@@ -2,7 +2,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 			},
 			{
@@ -22,7 +22,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 			},
 			{
@@ -31,7 +31,7 @@ return {
 				value = string.byte("^"),
 			},
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 			},
 			{
@@ -61,7 +61,7 @@ return {
 				value = string.byte("b"),
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 			},
 			_index = 3,
@@ -71,7 +71,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 			},
 			{
@@ -85,7 +85,7 @@ return {
 				value = string.byte("b"),
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 			},
 			{
@@ -100,7 +100,7 @@ return {
 	{
 		parsed = {
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 			},
 			{
@@ -118,7 +118,7 @@ return {
 				},
 			},
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 			},
 			_index = 3,

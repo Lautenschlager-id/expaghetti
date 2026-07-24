@@ -699,8 +699,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						isCaseInsensitive = true,
@@ -737,8 +737,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				tree = {
 					{
@@ -776,8 +776,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				isNegative = true,
 				tree = {
@@ -816,9 +816,9 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
+				isNonCapturing = true,
 				fixedLength = 3,
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isLookbehind = true,
 				tree = {
 					{
@@ -856,9 +856,9 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
+				isNonCapturing = true,
 				fixedLength = 3,
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				isLookbehind = true,
 				isNegative = true,
 				tree = {
@@ -1122,8 +1122,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						classIndex = 0,
@@ -1176,8 +1176,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				tree = {
 					{
@@ -1291,8 +1291,8 @@ return {
 		parsed = {
 			{
 				type = "group",
-				hasBehavior = true,
-				disableCapture = true,
+				hasSpecialBehavior = true,
+				isNonCapturing = true,
 				scopedFlags = {
 					enable = { i = true },
 					disable = {}

@@ -344,8 +344,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				tree = {
 					{
 						isCaseInsensitive = true,
@@ -383,8 +383,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				tree = {
 					{
@@ -423,8 +423,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				isNegative = true,
 				tree = {
@@ -615,8 +615,8 @@ return {
 		},
 		parsed = {
 			{
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				isLookahead = true,
 				tree = {
 					{
@@ -749,7 +749,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -775,7 +775,7 @@ return {
 				lowerValue = 99
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -787,7 +787,7 @@ return {
 		flags = {},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -813,7 +813,7 @@ return {
 				lowerValue = 99
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -853,7 +853,7 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			_index = 1
 		}
@@ -888,7 +888,7 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			_index = 1
 		}
@@ -919,7 +919,7 @@ return {
 		},
 		parsed = {
 			{
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				type = "group",
 				tree = {
 					{
@@ -928,7 +928,7 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				scopedFlags = {
 					disable = {},
 					enable = {
@@ -947,7 +947,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -967,7 +967,7 @@ return {
 				isCaseInsensitive = false
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -981,11 +981,11 @@ return {
 		},
 		parsed = {
 			{
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				type = "group",
 				tree = {
 					{
-						isBeginning = true,
+						isStart = true,
 						type = "anchor",
 						isMultiline = true
 					},
@@ -1005,13 +1005,13 @@ return {
 						isCaseInsensitive = false
 					},
 					{
-						isBeginning = false,
+						isStart = false,
 						type = "anchor",
 						isMultiline = true
 					},
 					_index = 5
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				scopedFlags = {
 					disable = {},
 					enable = {
@@ -1049,7 +1049,7 @@ return {
 					},
 					_index = 3
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			_index = 1
 		}
@@ -1061,7 +1061,7 @@ return {
 		},
 		parsed = {
 			{
-				hasBehavior = true,
+				hasSpecialBehavior = true,
 				type = "group",
 				tree = {
 					{
@@ -1084,11 +1084,11 @@ return {
 							},
 							_index = 3
 						},
-						disableCapture = true
+						isNonCapturing = true
 					},
 					_index = 1
 				},
-				disableCapture = true,
+				isNonCapturing = true,
 				scopedFlags = {
 					disable = {},
 					enable = {
@@ -1107,7 +1107,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1121,7 +1121,7 @@ return {
 				type = "any"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1133,7 +1133,7 @@ return {
 		flags = {},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1147,7 +1147,7 @@ return {
 				type = "any"
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1175,7 +1175,7 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
 				type = "any",
@@ -1202,7 +1202,7 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
 				type = "any",
@@ -1219,7 +1219,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1236,10 +1236,10 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1251,7 +1251,7 @@ return {
 		flags = {},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1268,10 +1268,10 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1289,7 +1289,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1307,14 +1307,14 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
 				type = "any",
 				isDotAll = true
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1328,7 +1328,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1346,14 +1346,14 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
 				type = "any",
 				isDotAll = true
 			},
 			{
-				isBeginning = false,
+				isStart = false,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1367,7 +1367,7 @@ return {
 		},
 		parsed = {
 			{
-				isBeginning = true,
+				isStart = true,
 				type = "anchor",
 				isMultiline = true
 			},
@@ -1385,7 +1385,7 @@ return {
 			},
 			{
 				type = "anchor",
-				isBeginning = false
+				isStart = false
 			},
 			_index = 4
 		}
@@ -1408,7 +1408,7 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true
+				isNonCapturing = true
 			},
 			{
 				type = "group",

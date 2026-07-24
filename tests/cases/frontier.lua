@@ -215,8 +215,8 @@ return {
 					},
 					_index = 1
 				},
-				disableCapture = true,
-				hasBehavior = true,
+				isNonCapturing = true,
+				hasSpecialBehavior = true,
 				type = "group"
 			},
 			_index = 2
