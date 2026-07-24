@@ -42,16 +42,9 @@ function ParserState.new(expr, flags)
 	self.expr = expr
 
 	self.flags = {}
-	if flags then
-		-- TO DO: Remove this later
-		if type(flags) == "string" then 
-			for char in flags:gmatch(".") do
-				self.flags[char] = true
-			end
-		elseif type(flags) == "table" then
-			for k, v in pairs(flags) do
-				self.flags[k] = v
-			end
+	if flags and type(flags) == "table" then
+		for k, v in pairs(flags) do
+			self.flags[k] = v
 		end
 	end
 

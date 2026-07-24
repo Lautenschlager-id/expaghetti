@@ -114,8 +114,9 @@ function Api.matchAll(pattern, string, options, config)
 			lastIndex = endStr
 		})
 		
-		if iniStr == endStr then
-			currentIndex = currentIndex + 1
+		if endStr < iniStr then
+			-- Empty match
+			currentIndex = math.max(currentIndex + 1, iniStr + 1)
 		else
 			currentIndex = endStr + 1
 		end
@@ -140,8 +141,8 @@ function Api.gmatch(pattern, string, options, config)
 		local hasMatched, iniStr, endStr, matcherMetadata = matcher(pattern, string, options, currentIndex, config)
 		
 		if hasMatched then
-			if iniStr == endStr then
-				currentIndex = currentIndex + 1
+			if endStr < iniStr then
+				currentIndex = math.max(currentIndex + 1, iniStr + 1)
 			else
 				currentIndex = endStr + 1
 			end
@@ -209,8 +210,6 @@ function Api.replace(pattern, string, replacement, options, config)
 			break
 		end
 		
-		print("REPLACE match:", iniStr, endStr, "currentIndex:", currentIndex, "lastCopied:", lastCopied)
-		
 		table.insert(results, string.sub(string, lastCopied + 1, iniStr - 1))
 		
 		local captures = {}
@@ -254,11 +253,10 @@ function Api.replace(pattern, string, replacement, options, config)
 		
 		replaceCount = replaceCount + 1
 		
-		if iniStr == endStr then
-			lastCopied = endStr
-			currentIndex = currentIndex + 1
+		lastCopied = math.max(lastCopied, endStr)
+		if endStr < iniStr then
+			currentIndex = math.max(currentIndex + 1, iniStr + 1)
 		else
-			lastCopied = endStr
 			currentIndex = endStr + 1
 		end
 	end
@@ -283,15 +281,12 @@ function Api.split(pattern, string, options, config)
 			break
 		end
 		
-		print("SPLIT match:", iniStr, endStr, "currentIndex:", currentIndex, "lastCopied:", lastCopied)
-		
 		table.insert(results, string.sub(string, lastCopied + 1, iniStr - 1))
 		
-		if iniStr == endStr then
-			lastCopied = endStr
-			currentIndex = currentIndex + 1
+		lastCopied = math.max(lastCopied, endStr)
+		if endStr < iniStr then
+			currentIndex = math.max(currentIndex + 1, iniStr + 1)
 		else
-			lastCopied = endStr
 			currentIndex = endStr + 1
 		end
 	end
