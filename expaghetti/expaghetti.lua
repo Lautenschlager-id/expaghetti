@@ -18,9 +18,13 @@ Engine.__index = Engine
 
 function Engine.new(options)
 	local self = setmetatable({}, Engine)
-	self.config = Config.new(Config.global)
 	if type(options) == "table" then
-		self.config:set(options)
+		self.config = {
+			maxRecursionDepth = options.maxRecursionDepth or Config.global.maxRecursionDepth,
+			maxBacktrackDepth = options.maxBacktrackDepth or Config.global.maxBacktrackDepth,
+		}
+	else
+		self.config = Config.global
 	end
 	return self
 end
