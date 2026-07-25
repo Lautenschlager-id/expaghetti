@@ -71,7 +71,7 @@ end)
 check("Test with array/table flags", function()
 	assertDeepEqual(expaghetti.test("abc", "ABC", { "i" }), true)
 	assertDeepEqual(expaghetti.test("abc", "ABC", { i = true }), true)
-	assertDeepEqual(expaghetti.test("abc", "ABC", { [expaghetti.RegexFlag.CASE_INSENSITIVE] = true }), true)
+	assertDeepEqual(expaghetti.test("abc", "ABC", { [expaghetti.Flag.CASE_INSENSITIVE] = true }), true)
 end)
 
 --------------------------------------------------------------------------------

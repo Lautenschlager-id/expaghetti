@@ -1,18 +1,34 @@
-local internalFlags = require("enums.flags").FLAGS
+--[[
+    Public API enumerations.
 
-local RegexFlag = {}
+    Exposes the stable enumeration values supported by Expaghetti's
+    public API while keeping the engine's internal enumerations
+    implementation-private.
+]]
 
-for k, v in pairs(internalFlags) do
-	RegexFlag[k] = v
-	RegexFlag[v] = v
+--[[ Globals ]]--
+local error = error
+local next = next
+local setmetatable = setmetatable
+
+--[[ Enums ]]--
+local Flags = require("enums.flags").FLAGS
+
+--[[ Module ]]--
+local Flag = {}
+do
+	for key, value in next, Flags do
+		Flag[key] = value
+		Flag[value] = value
+	end
+
+	setmetatable(Flag, {
+		__newindex = function()
+			error("Expaghetti.Flag enum is read-only")
+		end
+	})
 end
 
-setmetatable(RegexFlag, {
-	__newindex = function()
-		error("Expaghetti.RegexFlag enum is read-only")
-	end
-})
-
 return {
-	RegexFlag = RegexFlag
+	Flag = Flag,
 }

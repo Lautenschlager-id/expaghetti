@@ -14,7 +14,7 @@ local Assertion = require("helpers.assertion")
 local parser = require("parser.init")
 
 --[[ Enums ]]--
-local Flags = require("api.enums").RegexFlag
+local Flag = require("api.enums").Flag
 
 --[[ Aliases ]]--
 local AssertionIsStringOrTable = Assertion.isStringOrTable
@@ -48,13 +48,13 @@ do
 		if flagType == "table" then
 			for key, value in next, flags do
 				if type(key) == "number" and type(value) == "string" then
-					if Flags[value] and not flagsLookup[key] then
+					if Flag[value] and not flagsLookup[key] then
 						flagsLookup[value] = true
 						flagCount = flagCount + 1
 						flagsArray[flagCount] = value
 					end
 				elseif type(key) == "string" and value then
-					if Flags[key] then
+					if Flag[key] then
 						flagsLookup[key] = true
 						flagCount = flagCount + 1
 						flagsArray[flagCount] = key
@@ -64,7 +64,7 @@ do
 		elseif flagType == "string" then
 			for charIndex = 1, #flags do
 				local flag = string_sub(flags, charIndex, charIndex)
-				if Flags[flag] and not flagsLookup[flag] then
+				if Flag[flag] and not flagsLookup[flag] then
 					flagsLookup[flag] = true
 					flagCount = flagCount + 1
 					flagsArray[flagCount] = flag

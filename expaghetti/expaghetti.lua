@@ -20,7 +20,7 @@ local Expaghetti = setmetatable({}, {
 	end
 })
 
-Expaghetti.RegexFlag = PublicEnums.RegexFlag
+Expaghetti.Flag = PublicEnums.Flag
 
 Expaghetti.custom = function(config)
 	return Engine.new(config)

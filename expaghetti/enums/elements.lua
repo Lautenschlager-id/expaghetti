@@ -5,6 +5,8 @@
     by the parser and consumed by the matcher.
 ]]
 
+--[[ Module ]]--
+
 return {
 	ALTERNATE = "alternate",
 	ANCHOR = "anchor",
