@@ -42,7 +42,8 @@ end
 function Engine:gsub(pattern, string, replacement, flags, limit, start) return Api.replace(pattern, string, replacement, flags, start, self.config, limit) end
 function Engine:split(pattern, string, flags, start) return Api.split(pattern, string, flags, start, self.config) end
 
-Api.installHooks(Engine)
+Engine.install = Api.installHooks.install
+Engine.uninstall = Api.installHooks.uninstall
 
 
 --[[ Default Global Engine ]]--

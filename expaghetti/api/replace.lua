@@ -65,74 +65,74 @@ local function applyTemplate(template, matchObj)
 	return table_concat(segments, "", 1, segmentCount)
 end
 
-return function(utils)
-	return function(pattern, targetString, replacement, flags, start, config, limit)
-		local err
-		pattern, flags, err = utils.compilePattern(pattern, flags, config)
-		if err then return nil, err end
-		local segments = {}
-		local segmentCount = 0
-		local currentIndex = (start or 1) - 1
-		local targetLength = #targetString
-		local lastCopied = 0
-		local replaceCount = 0
-		local replacementType = type(replacement)
+local utils = require("helpers.api")
 
-		while currentIndex <= targetLength do
-			if limit and replaceCount >= limit then
-				break
-			end
-			
-			local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
-			if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
-			if not hasMatched then
-				break
-			end
+return function(pattern, targetString, replacement, flags, start, config, limit)
+	local err
+	pattern, flags, err = utils.compilePattern(pattern, flags, config)
+	if err then return nil, err end
+	local segments = {}
+	local segmentCount = 0
+	local currentIndex = (start or 1) - 1
+	local targetLength = #targetString
+	local lastCopied = 0
+	local replaceCount = 0
+	local replacementType = type(replacement)
 
-			segmentCount = segmentCount + 1
-			segments[segmentCount] = string_sub(targetString, lastCopied + 1, matchStart - 1)
-
-			local matchObj = utils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
-
-			if replacementType == "string" then
-				segmentCount = segmentCount + 1
-				segments[segmentCount] = applyTemplate(replacement, matchObj)
-			elseif replacementType == "function" then
-				local substitution = replacement(matchObj)
-				segmentCount = segmentCount + 1
-				if substitution ~= nil then
-					segments[segmentCount] = tostring(substitution)
-				else
-					segments[segmentCount] = matchObj.value
-				end
-			elseif replacementType == "table" then
-				local lookupKey = matchObj.value
-				if matchObj.groups[1] and #matchObj.groups[1] > 0 then
-					lookupKey = matchObj.groups[1][#matchObj.groups[1]].value
-				end
-				
-				local substitution = replacement[lookupKey]
-				segmentCount = segmentCount + 1
-				if substitution ~= nil then
-					segments[segmentCount] = tostring(substitution)
-				else
-					segments[segmentCount] = matchObj.value
-				end
-			end
-
-			replaceCount = replaceCount + 1
-
-			lastCopied = math_max(lastCopied, matchEnd)
-			if matchEnd < matchStart then
-				currentIndex = math_max(currentIndex + 1, matchStart)
-			else
-				currentIndex = matchEnd
-			end
+	while currentIndex <= targetLength do
+		if limit and replaceCount >= limit then
+			break
+		end
+		
+		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
+		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
+		if not hasMatched then
+			break
 		end
 
 		segmentCount = segmentCount + 1
-		segments[segmentCount] = string_sub(targetString, lastCopied + 1)
-		
-		return table_concat(segments, "", 1, segmentCount), replaceCount
+		segments[segmentCount] = string_sub(targetString, lastCopied + 1, matchStart - 1)
+
+		local matchObj = utils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
+
+		if replacementType == "string" then
+			segmentCount = segmentCount + 1
+			segments[segmentCount] = applyTemplate(replacement, matchObj)
+		elseif replacementType == "function" then
+			local substitution = replacement(matchObj)
+			segmentCount = segmentCount + 1
+			if substitution ~= nil then
+				segments[segmentCount] = tostring(substitution)
+			else
+				segments[segmentCount] = matchObj.value
+			end
+		elseif replacementType == "table" then
+			local lookupKey = matchObj.value
+			if matchObj.groups[1] and #matchObj.groups[1] > 0 then
+				lookupKey = matchObj.groups[1][#matchObj.groups[1]].value
+			end
+			
+			local substitution = replacement[lookupKey]
+			segmentCount = segmentCount + 1
+			if substitution ~= nil then
+				segments[segmentCount] = tostring(substitution)
+			else
+				segments[segmentCount] = matchObj.value
+			end
+		end
+
+		replaceCount = replaceCount + 1
+
+		lastCopied = math_max(lastCopied, matchEnd)
+		if matchEnd < matchStart then
+			currentIndex = math_max(currentIndex + 1, matchStart)
+		else
+			currentIndex = matchEnd
+		end
 	end
+
+	segmentCount = segmentCount + 1
+	segments[segmentCount] = string_sub(targetString, lastCopied + 1)
+	
+	return table_concat(segments, "", 1, segmentCount), replaceCount
 end
