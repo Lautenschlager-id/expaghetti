@@ -85,7 +85,9 @@ return function(pattern, targetString, replacement, flags, start, config, limit)
 		end
 		
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
-		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
+		if hasMatched == false and type(matchStart) == "string" then
+			return nil, "Expaghetti Error: " .. matchStart
+		end
 		if not hasMatched then
 			break
 		end

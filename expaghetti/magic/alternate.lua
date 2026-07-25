@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local AlternateNode = require("ast").Alternate
+local AlternateNode = require("core.ast").Alternate
 
 --[[ Aliases ]]--
 local ELEMENT_ALTERNATE = require("enums.elements").ALTERNATE

@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local BalancedNode = require("ast").Balanced
+local BalancedNode = require("core.ast").Balanced
 
 --[[ Aliases ]]--
 local ELEMENT_BALANCED = require("enums.elements").BALANCED

@@ -25,7 +25,7 @@ local deepCopy = require("helpers.table").deepCopy
 local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
 local toControlCharacter = require("helpers.string").toControlCharacter
 
-local LiteralNode = require("ast").Literal
+local LiteralNode = require("core.ast").Literal
 
 --[[ Enum Aliases ]]--
 local ERROR_INVALID_CONTROL_CHARACTER_PARAMETER = Errors.invalidControlCharacterParameter

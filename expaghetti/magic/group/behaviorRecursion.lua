@@ -7,7 +7,7 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local AST = require("ast")
+local AST = require("core.ast")
 local ParserHelper = require("helpers.parser")
 
 --[[ Enums ]]--

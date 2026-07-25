@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local GroupCommentNode = require("ast").GroupComment
+local GroupCommentNode = require("core.ast").GroupComment
 
 --[[ Module ]]--
 

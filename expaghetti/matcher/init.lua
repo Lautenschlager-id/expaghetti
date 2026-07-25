@@ -24,25 +24,15 @@ local MatchStateNew = MatchState.new
 ---@return number|nil endStr The ending string index of the match.
 ---@return MatcherMetadata|nil matcherMetadata The match metadata.
 local matcher = function(expr, str, flags, stringIndex, config)
-	local tree, errorMessage
-	if type(expr) == "string" then
-		tree, errorMessage = parser(expr, flags)
-		if not tree then
-			return false, errorMessage
-		end
-	elseif type(expr) == "table" then
-		tree = expr
-	else
-		return false, "Expression must be a string or a compiled pattern"
-	end
-
 	if type(str) ~= "string" then
 		return false, "Target must be a string"
 	end
 
+	local tree, errorMessage = expr
+
 	stringIndex = stringIndex or 0
 
-	local state = MatchStateNew(flags or {}, str, tree, config)
+	local state = MatchStateNew(flags, str, tree, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do

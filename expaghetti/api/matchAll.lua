@@ -11,7 +11,9 @@ local utils = require("helpers.api")
 local function matchAll(pattern, targetString, flags, start, config)
 	local err
 	pattern, flags, err = utils.compilePattern(pattern, flags, config)
-	if err then return nil, err end
+	if err then
+		return nil, err
+	end
 	local results = {}
 	local resultCount = 0
 	local currentIndex = (start or 1) - 1
@@ -19,7 +21,9 @@ local function matchAll(pattern, targetString, flags, start, config)
 
 	while currentIndex <= targetLength do
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
-		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
+		if hasMatched == false and type(matchStart) == "string" then
+			return nil, "Expaghetti Error: " .. matchStart
+		end
 		if not hasMatched then
 			break
 		end
@@ -40,7 +44,9 @@ end
 local function gmatch(pattern, targetString, flags, start, config)
 	local err
 	pattern, flags, err = utils.compilePattern(pattern, flags, config)
-	if err then return nil, err end
+	if err then
+		return nil, err
+	end
 	local currentIndex = (start or 1) - 1
 	local targetLength = #targetString
 
@@ -50,7 +56,9 @@ local function gmatch(pattern, targetString, flags, start, config)
 		end
 
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(pattern, targetString, flags, currentIndex, config)
-		if hasMatched == false and type(matchStart) == "string" then return nil, "Expaghetti Error: " .. matchStart end
+		if hasMatched == false and type(matchStart) == "string" then
+			return nil, "Expaghetti Error: " .. matchStart
+		end
 		if hasMatched then
 			if matchEnd < matchStart then
 				currentIndex = math_max(currentIndex + 1, matchStart)

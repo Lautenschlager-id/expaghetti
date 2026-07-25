@@ -21,12 +21,12 @@ local function validateType(val, expectedType, defaultVal, key)
 	return defaultVal
 end
 
-local function buildConfig(options)
-	if type(options) ~= "table" then return globalConfig end
+local function buildConfig(config)
+	if type(config) ~= "table" then return globalConfig end
 	
 	return {
-		maxRecursionDepth = validateType(options.maxRecursionDepth, "number", globalConfig.maxRecursionDepth, "maxRecursionDepth"),
-		maxBacktrackDepth = validateType(options.maxBacktrackDepth, "number", globalConfig.maxBacktrackDepth, "maxBacktrackDepth")
+		maxRecursionDepth = validateType(config.maxRecursionDepth, "number", globalConfig.maxRecursionDepth, "maxRecursionDepth"),
+		maxBacktrackDepth = validateType(config.maxBacktrackDepth, "number", globalConfig.maxBacktrackDepth, "maxBacktrackDepth")
 	}
 end
 

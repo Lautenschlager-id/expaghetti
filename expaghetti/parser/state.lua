@@ -41,12 +41,7 @@ function ParserState.new(expr, flags)
 
 	self.expr = expr
 
-	self.flags = {}
-	if flags and type(flags) == "table" then
-		for k, v in pairs(flags) do
-			self.flags[k] = v
-		end
-	end
+	self.flags = flags
 
 	self.isGroup = false
 	self.isAlternate = false

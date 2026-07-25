@@ -1,5 +1,11 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
-local matcher = require("matcher.init")
+local _matcher = require("matcher.init")
+
+local api = require("helpers.api")
+function matcher(expr, str, flags)
+	expr = api.compilePattern(expr, flags, {})
+	return _matcher(expr, str, flags)
+end
 
 local performance = require("performance")
 
@@ -825,14 +831,14 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 
 print("  [50] Depth Limits...")
 do
-	local config = require("config").global
+	local config = require("core.config").global
 	local savedRecursion = config.maxRecursionDepth
 	config.maxRecursionDepth = 5
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
 	config.maxRecursionDepth = savedRecursion
 end
 do
-	local config = require("config").global
+	local config = require("core.config").global
 	local savedBacktrack = config.maxBacktrackDepth
 	config.maxBacktrackDepth = 10
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")

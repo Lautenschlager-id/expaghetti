@@ -7,7 +7,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local SetNode = require("ast").Set
+local SetNode = require("core.ast").Set
 local deepCopy = require("helpers.table").deepCopy
 
 --[[ Module ]]--

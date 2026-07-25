@@ -8,7 +8,7 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local BackreferenceNode = require("ast").Backreference
+local BackreferenceNode = require("core.ast").Backreference
 local ParserHelpers = require("helpers.parser")
 
 --[[ Enums ]]--

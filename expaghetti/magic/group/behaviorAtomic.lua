@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local GroupAtomicNode = require("ast").GroupAtomic
+local GroupAtomicNode = require("core.ast").GroupAtomic
 
 --[[ Module ]]--
 

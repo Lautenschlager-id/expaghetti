@@ -6,7 +6,7 @@
 local string_format = string.format
 
 --[[ Dependencies ]]--
-local AST = require("ast")
+local AST = require("core.ast")
 local ParserHelpers = require("helpers.parser")
 
 --[[ Enums ]]--

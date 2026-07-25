@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local LiteralNode = require("ast").Literal
+local LiteralNode = require("core.ast").Literal
 local QuantifierIsToken = require("magic.Quantifier").isToken
 
 --[[ Aliases ]]--
