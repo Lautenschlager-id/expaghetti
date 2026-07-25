@@ -263,8 +263,11 @@ function ParserState:popScopedFlags(previousFlags)
 	self.flags = previousFlags
 end
 
---- Resolves backreferences by name, replacing the name with the capture group index.
---- This avoids searching for the capture group every time the backreference is used.
+--- Resolves all deferred named references.
+--- Replaces the names stored by deferred reference nodes with their
+--- corresponding capture group identifiers. This is performed after
+--- parsing once all named capture groups have been discovered, allowing
+--- references to be resolved only once instead of during execution.
 function ParserState:resolveNamedReferences()
 	local stateMetadata = self.metadata
 	local namedReferences = stateMetadata.namedReferences

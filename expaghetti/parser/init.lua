@@ -29,12 +29,11 @@ local parser = function(exprOrState, flags)
 		return false, errorMessage
 	end
 	
-	-- Upon successful parsing, attach metadata (like capture group contexts) to the ROOT of the tree.
-	-- We prevent attaching metadata to sub-trees (groups and alternates) to avoid data duplication
-	-- and keep the tree lightweight.
+	-- Perform root-level post-processing.
+	-- Attach parser metadata to the root AST and resolve all deferred named
+	-- references once every named capture group has been discovered.
 	if not state.isGroup and not state.isAlternate then
 		tree._metadata = state.metadata
-		
 		state:resolveNamedReferences()
 	end
 

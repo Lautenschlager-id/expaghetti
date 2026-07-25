@@ -4,17 +4,7 @@
 
 --[[ Globals ]]--
 local next = next
-local string_byte = string.byte
 local string_sub = string.sub
-local table_concat = table.concat
-local table_sort = table.sort
-local tostring = tostring
-local type = type
-
-
-
-
---[[ Globals ]]--
 local table_concat = table.concat
 local table_sort = table.sort
 local type = type
@@ -165,7 +155,17 @@ do
 	end
 end
 
-function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
+--- Builds a public match object from the raw matcher result.
+--- Constructs a structured match object containing the matched substring,
+--- all captures in chronological order, and captures grouped by their
+--- corresponding capture group. Named capture groups are additionally
+--- exposed through their group names.
+---@param targetString string The original target string that was matched.
+---@param matchStart number The starting position of the match.
+---@param matchEnd number The ending position of the match.
+---@param matcherMetadata MatcherMetadata Metadata produced by the matcher, including capture information.
+---@return Match match The constructed public match object.
+local buildMatchObject = function(targetString, matchStart, matchEnd, matcherMetadata)
 	local matchGroups, matchCaptures = {}, {}
 	local match = {
 		start = matchStart,
@@ -179,14 +179,16 @@ function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 		return match
 	end
 
-	-- TO DO: Check if fine to keep
+	-- %0 represents the entire match
 	matchCaptures[0] = {
 		groupIndex = 0,
 		start = matchStart,
 		stop = matchEnd,
 		value = match.value,
 	}
-	matchGroups[0] = { matchCaptures[0] }
+	matchGroups[0] = {
+		matchCaptures[0]
+	}
 
 	local captureStarts = matcherMetadata.captureStarts
 	local captureEnds = matcherMetadata.captureEnds
@@ -201,33 +203,31 @@ function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 
 	local captureCount = 0
 	for groupKey, groupCaptureCount in next, captureCounts do
-		if groupCaptureCount > 0 then -- TO DO: Check if this can be false
-			local groupArray = {}
-			matchGroups[groupKey] = groupArray
+		local groupArray = {}
+		matchGroups[groupKey] = groupArray
 
-			local groupName = namesByIndex[groupKey]
-			if groupName then
-				matchGroups[groupName] = groupArray
-			end
+		local groupName = namesByIndex[groupKey]
+		if groupName then
+			matchGroups[groupName] = groupArray
+		end
 
-			local captureStartsGroup = captureStarts[groupKey]
-			local captureEndsGroup = captureEnds[groupKey]
-			for captureIndex = 1, groupCaptureCount do
-				local captureStart = captureStartsGroup[captureIndex]
-				local captureEnd = captureEndsGroup[captureIndex]
+		local captureStartsGroup = captureStarts[groupKey]
+		local captureEndsGroup = captureEnds[groupKey]
+		for captureIndex = 1, groupCaptureCount do
+			local captureStart = captureStartsGroup[captureIndex]
+			local captureEnd = captureEndsGroup[captureIndex]
 
-				local captureObject = {
-					groupIndex = groupKey,
-					name = groupName,
-					start = captureStart,
-					stop = captureEnd,
-					value = string_sub(targetString, captureStart, captureEnd),
-				}
+			local captureObject = {
+				groupIndex = groupKey,
+				name = groupName,
+				start = captureStart,
+				stop = captureEnd,
+				value = string_sub(targetString, captureStart, captureEnd),
+			}
 
-				groupArray[captureIndex] = captureObject
-				captureCount = captureCount + 1
-				matchCaptures[captureCount] = captureObject
-			end
+			groupArray[captureIndex] = captureObject
+			captureCount = captureCount + 1
+			matchCaptures[captureCount] = captureObject
 		end
 	end
 
