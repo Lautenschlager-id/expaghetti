@@ -2,46 +2,55 @@
     Shared API Utilities.
 ]]
 
+--[[ Globals ]]--
+local next = next
 local string_byte = string.byte
 local string_sub = string.sub
+local table_concat = table.concat
 local table_sort = table.sort
-local type = type
-local pairs = pairs
 local tostring = tostring
+local type = type
 
+--[[ Dependencies ]]--
 local parser = require("parser.init")
 
+--[[ Enums ]]--
+local Flags = require("api.enums").RegexFlag
+
+--[[ Module ]]--
 local ApiUtils = {}
 
 function ApiUtils.normalizeFlags(flags)
-	if not flags then
-		return {}
-	end
+	local normalized = {}
 
-	local flagType = type(flags)
+	local flagType, flagCount = type(flags), 0
 	if flagType == "table" then
-		local normalized = {}
-		for key, value in pairs(flags) do
+		for key, value in next, flags do
 			if type(key) == "number" and type(value) == "string" then
+				flagCount = flagCount + 1
 				normalized[value] = true
 			elseif type(key) == "string" and value then
+				flagCount = flagCount + 1
 				normalized[key] = true
 			end
 		end
-		return normalized
 	elseif flagType == "string" then
-		local normalized = {}
-		local flagsLength = #flags
-		for charIndex = 1, flagsLength do
+		flagCount = #flags
+		for charIndex = 1, flagCount do
 			normalized[string_sub(flags, charIndex, charIndex)] = true
 		end
-		return normalized
 	end
 
-	return {}
+	local flags = {}
+	for index = 1, flagCount do
+		local flag = normalized[index]
+		if Flags[flag] then
+			flags[flag] = true
+		end
+	end
+	return flags
 end
 
-local table_concat = table.concat
 local MAX_CACHE_SIZE = 100
 local astCache = {}
 local astQueue = {}
@@ -92,59 +101,63 @@ function ApiUtils.compilePattern(pattern, flags, config)
 end
 
 function ApiUtils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
-	local matchObj = {
+	local match = {
 		start = matchStart,
-		finish = matchEnd,
+		stop = matchEnd,
 		value = string_sub(targetString, matchStart, matchEnd),
 		captures = {},
 		groups = {},
 	}
 
-	if matcherMetadata and matcherMetadata.captureStarts then
-		local captureStarts = matcherMetadata.captureStarts
-		local captureEnds = matcherMetadata.captureEnds
-		local captureCounts = matcherMetadata.captureCounts
-		local groupNames = matcherMetadata.groupNames or {}
+	if not matcherMetadata.captureStarts then
+		return match
+	end
 
-		local capCount = 0
-		for groupKey, count in pairs(captureCounts) do
-			if count > 0 then
-				local isNamed = type(groupKey) == "string"
-				local groupName = isNamed and groupKey or nil
+	local captureStarts = matcherMetadata.captureStarts
+	local captureEnds = matcherMetadata.captureEnds
+	local captureCounts = matcherMetadata.captureCounts
+	local groupNames = matcherMetadata.groupNames
 
-				local groupArr = {}
-				matchObj.groups[groupKey] = groupArr
+	local matchGroups, matchCaptures = match.groups, match.captures
 
-				for i = 1, count do
-					local cStart = captureStarts[groupKey][i]
-					local cEnd = captureEnds[groupKey][i]
+	local captureCount = 0
+	for groupKey, groupCaptureCount in next, captureCounts do
+		if groupCaptureCount > 0 then -- TO DO: Check if this can be false
+			local isNamed = type(groupKey) == "string"
+			local groupName = isNamed and groupKey or nil
 
-					local capObj = {
-						groupIndex = groupKey,
-						start = cStart,
-						finish = cEnd,
-						value = string_sub(targetString, cStart, cEnd)
-					}
-					if groupName then
-						capObj.name = groupName
-					end
+			local groupArray = {}
+			matchGroups[groupKey] = groupArray
 
-					groupArr[i] = capObj
-					capCount = capCount + 1
-					matchObj.captures[capCount] = capObj
-				end
+			local captureStartsGroup = captureStarts[groupKey]
+			local captureEndsGroup = captureEnds[groupKey]
+			for captureIndex = 1, groupCaptureCount do
+				local captureStart = captureStartsGroup[captureIndex]
+				local captureEnd = captureEndsGroup[captureIndex]
+
+				local captureObject = {
+					groupIndex = groupKey,
+					start = captureStart,
+					stop = captureEnd,
+					value = string_sub(targetString, captureStart, captureEnd),
+					name = groupName,
+				}
+
+				groupArray[captureIndex] = captureObject
+				captureCount = captureCount + 1 -- TO DO: Check if named groups should be added to matchCaptures
+				matchCaptures[captureCount] = captureObject
 			end
 		end
-
-		table_sort(matchObj.captures, function(a, b)
-			if a.finish ~= b.finish then
-				return a.finish < b.finish
-			end
-			return a.start > b.start
-		end)
 	end
+
+	table_sort(matchCaptures, function(captureOne, captureTwo)
+		if captureOne.stop ~= captureTwo.stop then
+			return captureOne.stop < captureTwo.stop
+		end
+		return captureOne.start > captureTwo.start
+	end)
 	
-	return matchObj
+	return match
 end
 
 return ApiUtils

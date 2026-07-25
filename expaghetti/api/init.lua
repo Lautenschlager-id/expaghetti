@@ -3,20 +3,17 @@
 ]]
 
 local helpers = require("helpers.api")
-local matchAllAPI = require("api.matchAll")
 
-local Api = {
-	test = require("api.test"),
-	match = require("api.match"),
-	matchAll = matchAllAPI.matchAll,
-	gmatch = matchAllAPI.gmatch,
-	find = require("api.find"),
-	replace = require("api.replace"),
-	split = require("api.split"),
+return {
+	test = require("api.api.test"),
+	match = require("api.api.match"),
+	matchAll = require("api.api.matchAll"),
+	gmatch = require("api.api.gmatch"),
+	find = require("api.api.find"),
+	replace = require("api.api.replace"),
+	split = require("api.api.split"),
 	
-	installHooks = require("api.install"),
+	installHooks = require("api.api.install"),
 	normalizeFlags = helpers.normalizeFlags,
 	compilePattern = helpers.compilePattern
 }
-
-return Api

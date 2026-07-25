@@ -49,6 +49,13 @@ local escapeHandlers = {
 	b = Balanced.parse,
 }
 
+local replacementTemplateHandlers = {
+	-- %1 -> numeric backreference
+	int = Backreference.parseByIndex,
+	-- %k<name> -> named backreference
+	k = Backreference.parseByName,
+}
+
 -- %cA --> ctrl char A
 escapeHandlers.c = function(state, currentCharacter, index, expression, isInsideSet)
 	local ctrlChar = currentCharacter and toControlCharacter(currentCharacter)
@@ -131,6 +138,27 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 		return escapeHandlers[currentCharacter](state, expression[index], index, expression, isInsideSet)
 	elseif isPositiveIntegerChar(currentCharacter) then
 		return escapeHandlers.int(state, currentCharacter, index)
+	end
+
+	return false, string_format(ERROR_INVALID_ESCAPE, currentCharacter)
+end
+
+Escaped.parseReplacementTemplate = function(state, index, expression)
+	-- Skip escape
+	index = index + 1
+
+	local currentCharacter = expression[index]
+	if not currentCharacter then
+		return false, ERROR_INCOMPLETE_ESCAPE
+	end
+
+	-- Returns the index for the next character
+	index = index + 1
+
+	if replacementTemplateHandlers[currentCharacter] then
+		return replacementTemplateHandlers[currentCharacter](state, expression[index], index, expression)
+	elseif isPositiveIntegerChar(currentCharacter) then
+		return replacementTemplateHandlers.int(state, currentCharacter, index)
 	end
 
 	return false, string_format(ERROR_INVALID_ESCAPE, currentCharacter)

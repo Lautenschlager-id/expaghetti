@@ -24,10 +24,6 @@ local MatchStateNew = MatchState.new
 ---@return number|nil endStr The ending string index of the match.
 ---@return MatcherMetadata|nil matcherMetadata The match metadata.
 local matcher = function(expr, str, flags, stringIndex, config)
-	if type(str) ~= "string" then
-		return false, "Target must be a string"
-	end
-
 	local tree, errorMessage = expr
 
 	stringIndex = stringIndex or 0

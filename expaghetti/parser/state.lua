@@ -21,7 +21,7 @@ local toCharArray = require("helpers.string").toCharArray
 local Flags = require("enums.flags").FLAGS
 
 --[[ Aliases ]]--
-local EscapedIsToken, EscapedParse = Escaped.isToken, Escaped.parse
+local EscapedIsToken, EscapedParse, EscapedParseReplacementTemplate = Escaped.isToken, Escaped.parse, Escaped.parseReplacementTemplate
 
 local FLAG_UNICODE = Flags.UNICODE
 local FLAG_CASE_INSENSITIVE = Flags.CASE_INSENSITIVE
@@ -58,7 +58,7 @@ function ParserState.new(expr, flags)
 	}
 
 	self.index = 1
-	self.patternChars, self.patternLength = toCharArray(expr, not not self.flags[FLAG_UNICODE])
+	self.patternChars, self.patternLength = toCharArray(expr, not not flags[FLAG_UNICODE])
 
 	return self
 end
@@ -74,6 +74,17 @@ function ParserState:readElement(index, isInsideSet)
 	local char = patternChars[index]
 	if EscapedIsToken(char) then
 		return EscapedParse(self, index, patternChars, isInsideSet)
+	else
+		return index + 1, char
+	end
+end
+
+function ParserState:readReplacementTemplateElement(index)
+	local patternChars = self.patternChars
+
+	local char = patternChars[index]
+	if EscapedIsToken(char) then
+		return EscapedParseReplacementTemplate(self, index, patternChars)
 	else
 		return index + 1, char
 	end

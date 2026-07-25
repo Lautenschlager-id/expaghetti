@@ -74,7 +74,7 @@ print("\n--- exp.match ---")
 check("Basic match", function()
 	local match = expaghetti.match("b(c)d", "abcdef")
 	assertDeepEqual(match.start, 2)
-	assertDeepEqual(match.finish, 4)
+	assertDeepEqual(match.stop, 4)
 	assertDeepEqual(match.value, "bcd")
 	assertDeepEqual(#match.captures, 1)
 	assertDeepEqual(match.groups[1][1].value, "c")
@@ -83,16 +83,16 @@ end)
 check("Match with quantifiers and multiple captures", function()
 	local match = expaghetti.match("(a)+(?<foo>b)(c)", "aaabc")
 	assertDeepEqual(match.start, 1)
-	assertDeepEqual(match.finish, 5)
+	assertDeepEqual(match.stop, 5)
 	assertDeepEqual(match.value, "aaabc")
 	
 	-- Chronological Captures
 	assertDeepEqual(#match.captures, 5)
-	assertDeepEqual(match.captures[1], { groupIndex = 1, start = 1, finish = 1, value = "a" })
-	assertDeepEqual(match.captures[2], { groupIndex = 1, start = 2, finish = 2, value = "a" })
-	assertDeepEqual(match.captures[3], { groupIndex = 1, start = 3, finish = 3, value = "a" })
-	assertDeepEqual(match.captures[4], { groupIndex = "foo", name = "foo", start = 4, finish = 4, value = "b" })
-	assertDeepEqual(match.captures[5], { groupIndex = 2, start = 5, finish = 5, value = "c" })
+	assertDeepEqual(match.captures[1], { groupIndex = 1, start = 1, stop = 1, value = "a" })
+	assertDeepEqual(match.captures[2], { groupIndex = 1, start = 2, stop = 2, value = "a" })
+	assertDeepEqual(match.captures[3], { groupIndex = 1, start = 3, stop = 3, value = "a" })
+	assertDeepEqual(match.captures[4], { groupIndex = "foo", name = "foo", start = 4, stop = 4, value = "b" })
+	assertDeepEqual(match.captures[5], { groupIndex = 2, start = 5, stop = 5, value = "c" })
 	
 	-- Grouped Captures
 	assertDeepEqual(#match.groups[1], 3)
@@ -107,12 +107,12 @@ check("Match with nested captures (chronological sorting)", function()
 	-- (a(b(c))) -> group 1: abc, group 2: bc, group 3: c
 	local match = expaghetti.match("(a(b(c)))", "abc")
 	assertDeepEqual(#match.captures, 3)
-	-- Chronological completion order: innermost finishes first!
-	assertDeepEqual(match.captures[1].groupIndex, 3) -- (c) finishes at 3, starts at 3
+	-- Chronological completion order: innermost stopes first!
+	assertDeepEqual(match.captures[1].groupIndex, 3) -- (c) stopes at 3, starts at 3
 	assertDeepEqual(match.captures[1].value, "c")
-	assertDeepEqual(match.captures[2].groupIndex, 2) -- (b(c)) finishes at 3, starts at 2
+	assertDeepEqual(match.captures[2].groupIndex, 2) -- (b(c)) stopes at 3, starts at 2
 	assertDeepEqual(match.captures[2].value, "bc")
-	assertDeepEqual(match.captures[3].groupIndex, 1) -- (a(b(c))) finishes at 3, starts at 1
+	assertDeepEqual(match.captures[3].groupIndex, 1) -- (a(b(c))) stopes at 3, starts at 1
 	assertDeepEqual(match.captures[3].value, "abc")
 end)
 
@@ -120,7 +120,7 @@ check("Match with backreferences", function()
 	local match = expaghetti.match("(a)+(b)%2", "aabb")
 	assertDeepEqual(match.value, "aabb")
 	assertDeepEqual(match.start, 1)
-	assertDeepEqual(match.finish, 4)
+	assertDeepEqual(match.stop, 4)
 	assertDeepEqual(#match.captures, 3)
 	assertDeepEqual(match.captures[1].value, "a")
 	assertDeepEqual(match.captures[2].value, "a")
@@ -140,7 +140,7 @@ check("Match with zero-length matches", function()
 	local match = expaghetti.match("(?<=a)b?", "ac")
 	-- Should match zero-length at index 2 (between a and c)
 	assertDeepEqual(match.start, 2)
-	assertDeepEqual(match.finish, 1) -- length 0 means finish = start - 1
+	assertDeepEqual(match.stop, 1) -- length 0 means stop = start - 1
 	assertDeepEqual(match.value, "")
 end)
 
@@ -226,9 +226,9 @@ end)
 --------------------------------------------------------------------------------
 print("\n--- exp.find ---")
 check("Basic find", function()
-	local start, finish = expaghetti.find("b+", "abbbc")
+	local start, stop = expaghetti.find("b+", "abbbc")
 	assertDeepEqual(start, 2)
-	assertDeepEqual(finish, 4)
+	assertDeepEqual(stop, 4)
 	
 	local s2, f2 = expaghetti.find("b+", "ac")
 	assertDeepEqual(s2, nil)
@@ -360,9 +360,9 @@ check("Compiled pattern reuse", function()
 	assertDeepEqual(#all, 3)
 	assertDeepEqual(all[2].value, "B")
 	
-	local start, finish = pat:find("A B C", 3)
+	local start, stop = pat:find("A B C", 3)
 	assertDeepEqual(start, 3)
-	assertDeepEqual(finish, 3)
+	assertDeepEqual(stop, 3)
 	
 	local str, count = pat:gsub("A B C", "X", 2)
 	assertDeepEqual(str, "X X C")
