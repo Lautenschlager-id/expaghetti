@@ -1,4 +1,5 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
+local prettyPrint = require("./prettyPrint")
 
 local expaghetti = require("expaghetti")
 
@@ -29,6 +30,7 @@ local function check(name, fn)
 	if not status then
 		print("  [FAIL] " .. name)
 		print("    " .. tostring(err))
+		print("    " .. debug.traceback())
 		errorCount = errorCount + 1
 	else
 		print("  [PASS] " .. name)
@@ -446,9 +448,15 @@ check("Returns errors gracefully for malformed patterns", function()
 end)
 
 check("Returns errors gracefully for invalid targets", function()
-	local result, err = expaghetti.match("a", 123)
-	assertDeepEqual(result, nil)
-	assertDeepEqual(err, "Expaghetti Error: Target must be a string")
+	local success, err = pcall(expaghetti.match, 123, "abc")
+	assertDeepEqual(success, false)
+	local expectedMessage = "bad argument 'pattern' (string or table expected, got number)"
+	assertDeepEqual(err:sub(#err - #expectedMessage + 1), expectedMessage)
+
+	local success, err = pcall(expaghetti.match, "a", 123)
+	assertDeepEqual(success, false)
+	local expectedMessage = "bad argument 'targetString' (string expected, got number)"
+	assertDeepEqual(err:sub(#err - #expectedMessage + 1), expectedMessage)
 end)
 
 --------------------------------------------------------------------------------

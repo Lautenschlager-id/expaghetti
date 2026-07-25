@@ -16,18 +16,22 @@ local tonumber = tonumber
 local Balanced = require("magic.balanced")
 local Backreference = require("magic.backreference")
 local FrontierParse = require("magic.frontier").parse
+local LiteralNode = require("core.ast").Literal
 
+local deepCopy = require("helpers.table").deepCopy
+
+local ParserHelpers = require("helpers.parser")
+
+--[[ Enums ]]--
 local CharacterClasses = require("enums.characterClasses")
 local Errors = require("enums.errors")
 local Magic = require("enums.magic")
 
-local deepCopy = require("helpers.table").deepCopy
-local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
+local isPositiveIntegerChar = ParserHelpers.isPositiveIntegerChar
+local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar
 local toControlCharacter = require("helpers.string").toControlCharacter
 
-local LiteralNode = require("core.ast").Literal
-
---[[ Enum Aliases ]]--
+--[[ Aliases ]]--
 local ERROR_INVALID_CONTROL_CHARACTER_PARAMETER = Errors.invalidControlCharacterParameter
 local ERROR_INVALID_UNICODE_PARAMETER = Errors.invalidUnicodeParameter
 local ERROR_INCOMPLETE_ESCAPE = Errors.incompleteEscape
@@ -131,13 +135,13 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 		local set = deepCopy(CharacterClasses[currentCharacter])
 		state:compileSet(set)
 		return index, set
-	elseif MAGIC_HASHMAP[currentCharacter] then
-		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
-		return index, LiteralNode(value, lowerValue, upperValue)
 	elseif escapeHandlers[currentCharacter] then
 		return escapeHandlers[currentCharacter](state, expression[index], index, expression, isInsideSet)
 	elseif isPositiveIntegerChar(currentCharacter) then
 		return escapeHandlers.int(state, currentCharacter, index)
+	elseif MAGIC_HASHMAP[currentCharacter] then
+		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
+		return index, LiteralNode(value, lowerValue, upperValue)
 	end
 
 	return false, string_format(ERROR_INVALID_ESCAPE, currentCharacter)
@@ -155,15 +159,14 @@ Escaped.parseReplacementTemplate = function(state, index, expression)
 	-- Returns the index for the next character
 	index = index + 1
 
-	if MAGIC_HASHMAP[currentCharacter] then
+	if replacementTemplateHandlers[currentCharacter] then
+		return replacementTemplateHandlers[currentCharacter](state, expression[index], index, expression)
+	elseif isPositiveOrZeroIntegerChar(currentCharacter) then
+		return replacementTemplateHandlers.int(state, currentCharacter, index)
+	elseif MAGIC_HASHMAP[currentCharacter] then
 		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
 		return index, LiteralNode(value, lowerValue, upperValue)
-	elseif replacementTemplateHandlers[currentCharacter] then
-		return replacementTemplateHandlers[currentCharacter](state, expression[index], index, expression)
-	elseif isPositiveIntegerChar(currentCharacter) then
-		return replacementTemplateHandlers.int(state, currentCharacter, index)
 	end
-
 	return false, string_format(ERROR_INVALID_ESCAPE, currentCharacter)
 end
 

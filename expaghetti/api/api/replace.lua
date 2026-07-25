@@ -4,6 +4,7 @@
 
 --[[ Globals ]]--
 local string_byte = string.byte
+local string_char = string.char
 local string_sub = string.sub
 local table_concat = table.concat
 local math_huge = math.huge
@@ -30,8 +31,11 @@ local AssertionIsStringOrFunctionOrTable = Assertion.isStringOrFunctionOrTable
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsTable = Assertion.isTable
 
+local prettyPrint = require("prettyPrint")
+
 --[[ Module ]]--
 local applyReplacementTemplate = function(tree, match)
+	--print(prettyPrint(tree, 1))
 	local segments = {}
 	local segmentCount = 0
 
@@ -40,7 +44,7 @@ local applyReplacementTemplate = function(tree, match)
 
 		if element.type == ELEMENT_LITERAL then
 			segmentCount = segmentCount + 1
-			segments[segmentCount] = element.value
+			segments[segmentCount] = string_char(element.value)
 
 		-- ELEMENT_BACKREFERENCE
 		else
@@ -54,7 +58,7 @@ local applyReplacementTemplate = function(tree, match)
 end
 
 return function(pattern, targetString, replacement, flags, startPosition, config, maxOcurrences)
-	AssertionIsString(pattern, "pattern")
+	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
 	AssertionIsStringOrFunctionOrTable(replacement, "replacement")
 	AssertionIsStringOrTable(flags, "flags", true)
@@ -91,7 +95,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 			break
 		end
 		
-		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(tree, parsedFlags, targetString, currentIndex, config)
+		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(tree, targetString, parsedFlags, currentIndex, config)
 		if not hasMatched then
 			if matchStart then
 				return nil, "Expaghetti Error: " .. matchStart

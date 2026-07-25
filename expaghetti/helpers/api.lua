@@ -104,24 +104,32 @@ function ApiUtils.compilePattern(pattern, flags, config)
 end
 
 function ApiUtils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
+	local matchGroups, matchCaptures = {}, {}
 	local match = {
 		start = matchStart,
 		stop = matchEnd,
 		value = string_sub(targetString, matchStart, matchEnd),
-		captures = {},
-		groups = {},
+		captures = matchCaptures,
+		groups = matchGroups,
 	}
 
 	if not matcherMetadata.captureStarts then
 		return match
 	end
 
+	-- TO DO: Check if fine to keep
+	matchCaptures[0] = {
+		groupIndex = 0,
+		start = matchStart,
+		stop = matchEnd,
+		value = match.value,
+	}
+	matchGroups[0] = { matchCaptures[0] }
+
 	local captureStarts = matcherMetadata.captureStarts
 	local captureEnds = matcherMetadata.captureEnds
 	local captureCounts = matcherMetadata.captureCounts
 	local groupNames = matcherMetadata.groupNames
-
-	local matchGroups, matchCaptures = match.groups, match.captures
 
 	local captureCount = 0
 	for groupKey, groupCaptureCount in next, captureCounts do

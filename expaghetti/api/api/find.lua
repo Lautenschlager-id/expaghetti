@@ -15,7 +15,7 @@ local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
 return function(pattern, targetString, flags, startPosition, config)
-	AssertionIsString(pattern, "pattern")
+	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
 	AssertionIsStringOrTable(flags, "flags", true)
 	AssertionIsNumber(startPosition, "startPosition", true)

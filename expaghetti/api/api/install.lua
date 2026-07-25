@@ -2,37 +2,67 @@
     API: install and uninstall
 ]]
 
-local function install(self)
-	if type(self) ~= "table" or type(self.match) ~= "function" then
-		error("install() must be called on an Engine instance: engine:install()")
+--[[ Globals ]]--
+local next = next
+
+--[[ Module ]]--
+local install = function(self)
+	local originalString = self._originalString
+	if originalString then return end
+
+	originalString = {}
+	for method, fn in next, string do
+		originalString[method] = fn
+	end
+	self._originalString = originalString
+	
+	string.test = function(targetString, pattern, flags, startPosition)
+		return self:test(pattern, targetString, flags, startPosition)
+	end
+
+	string.match = function(targetString, pattern, flags, startPosition)
+		return self:match(pattern, targetString, flags, startPosition)
+	end
+
+	string.matchAll = function(targetString, pattern, flags, startPosition)
+		return self:matchAll(pattern, targetString, flags, startPosition)
 	end
 	
-	if self._originalString then return end
-	self._originalString = {}
-	for k, v in pairs(string) do
-		self._originalString[k] = v
+	string.gmatch = function(targetString, pattern, flags, startPosition)
+		return self:gmatch(pattern, targetString, flags, startPosition)
 	end
-	
-	string.test = function(str, pat, flags, start) return self:test(pat, str, flags, start) end
-	string.match = function(str, pat, flags, start) return self:match(pat, str, flags, start) end
-	string.matchAll = function(str, pat, flags, start) return self:matchAll(pat, str, flags, start) end
-	string.gmatch = function(str, pat, flags, start) return self:gmatch(pat, str, flags, start) end
-	string.find = function(str, pat, flags, start) return self:find(pat, str, flags, start) end
-	string.replace = function(str, pat, repl, flags, start) return self:replace(pat, str, repl, flags, start) end
-	string.gsub = function(str, pat, repl, flags, limit, start) return self:gsub(pat, str, repl, flags, limit, start) end
-	string.split = function(str, pat, flags, start) return self:split(pat, str, flags, start) end
+
+	string.find = function(targetString, pattern, flags, startPosition)
+		return self:find(pattern, targetString, flags, startPosition)
+	end
+
+	string.replace = function(targetString, pattern, replacement, flags, startPosition)
+		return self:replace(pattern, targetString, replacement, flags, startPosition)
+	end
+
+	string.gsub = function(targetString, pattern, replacement, flags, limit, startPosition)
+		return self:gsub(pattern, targetString, replacement, flags, limit, startPosition)
+	end
+
+	string.split = function(targetString, pattern, flags, startPosition)
+		return self:split(pattern, targetString, flags, startPosition)
+	end
 end
 
-local function uninstall(self)
-	if not self._originalString then return end
-	for k, _ in pairs(string) do
-		if self._originalString[k] == nil then
-			string[k] = nil
+local uninstall = function(self)
+	local originalString = self._originalString
+	if not originalString then return end
+
+	for method, _ in next, string do
+		if originalString[method] == nil then
+			string[method] = nil
 		end
 	end
-	for k, v in pairs(self._originalString) do
-		string[k] = v
+
+	for method, fn in next, originalString do
+		string[method] = fn
 	end
+
 	self._originalString = nil
 end
 
