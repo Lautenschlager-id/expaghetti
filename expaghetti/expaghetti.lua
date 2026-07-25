@@ -81,9 +81,6 @@ Expaghetti.split = function(...) return DefaultEngine:split(...) end
 Expaghetti.install = function() DefaultEngine:install() end
 Expaghetti.uninstall = function() DefaultEngine:uninstall() end
 
--- Keep old match export for backwards compat in tests, but tests should be updated.
-Expaghetti._matcher = require("matcher.init")
-
 --[[ Return ]]--
 return Expaghetti
 

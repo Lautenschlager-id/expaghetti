@@ -11,6 +11,16 @@ local globalConfig = {
 	maxBacktrackDepth = DEFAULT_MAX_BACKTRACK_DEPTH
 }
 
+local function enforceType(options, config, key, expectedType)
+	local val = options[key]
+	if val ~= nil then
+		if type(val) ~= expectedType then
+			error("Config Error: " .. key .. " must be a " .. expectedType)
+		end
+		config[key] = val
+	end
+end
+
 local function buildConfig(options)
 	if type(options) ~= "table" then return globalConfig end
 	
@@ -19,19 +29,8 @@ local function buildConfig(options)
 		maxBacktrackDepth = globalConfig.maxBacktrackDepth
 	}
 	
-	if options.maxRecursionDepth ~= nil then
-		if type(options.maxRecursionDepth) ~= "number" then
-			error("Config Error: maxRecursionDepth must be a number")
-		end
-		config.maxRecursionDepth = options.maxRecursionDepth
-	end
-	
-	if options.maxBacktrackDepth ~= nil then
-		if type(options.maxBacktrackDepth) ~= "number" then
-			error("Config Error: maxBacktrackDepth must be a number")
-		end
-		config.maxBacktrackDepth = options.maxBacktrackDepth
-	end
+	enforceType(options, config, "maxRecursionDepth", "number")
+	enforceType(options, config, "maxBacktrackDepth", "number")
 	
 	return config
 end
