@@ -23,12 +23,12 @@ local MatchState = {
 MatchState.__index = MatchState
 
 --- Creates a new MatchState instance for a regular expression execution.
----@param flags FlagTable Active matching flags.
----@param targetString string The target string.
 ---@param rootTree ASTTree The root AST tree.
+---@param targetString string The target string.
+---@param flags FlagTable Active matching flags.
 ---@param config Config|table|nil Optional configuration limits.
 ---@return MatchState state The newly created match state.
-function MatchState.new(flags, targetString, rootTree, config)
+function MatchState.new(rootTree, targetString, flags, config)
 	local self = setmetatable({}, MatchState)
 	
 	self.flags = flags

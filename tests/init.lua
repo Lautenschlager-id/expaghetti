@@ -52,8 +52,10 @@ for case = 1, #cases do
 
 	print(strformat("\n\n############### Testing cases of %q ###############", case))
 	for caseIndex, caseObj in next, require("./cases/" .. case) do
+		caseObj.flags = caseObj.flags or {} 
+
 		local flagKeys = {}
-		for flag in next, caseObj.flags or {} do
+		for flag in next, caseObj.flags do
 			flagKeys[#flagKeys + 1] = flag
 		end
 		print(strformat("Checking generated tree for the regex %q%s", caseObj.regex, not caseObj.flags and "" or string.format(" with flags %q", table.concat(flagKeys, ", "))))

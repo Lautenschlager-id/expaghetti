@@ -2,9 +2,20 @@ package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 local _matcher = require("matcher.init")
 
 local api = require("helpers.api")
-function matcher(expr, str, flags)
-	expr = api.compilePattern(expr, flags, {})
-	return _matcher(expr, str, flags)
+local Config = require("core.config")
+
+function matcher(expr, str, flags, startPosition, config)
+	local rawexpr = expr
+	if type(str) ~= "string" then
+		return nil, "Target string is not a string"
+	end
+	config = config or {}
+	config = Config.build(config)
+	local expr, flags, err = api.compilePattern(expr, flags, config)
+	if not expr and err then
+		return nil, err
+	end
+	return _matcher(expr, str, flags, startPosition or 0, config)
 end
 
 local performance = require("performance")
@@ -27,19 +38,7 @@ local function getSubstring(str, ini, en, flags)
 	return string.sub(str, ini, en)
 end
 
-local function normalizeFlagsTest(flags)
-	if type(flags) == "string" then
-		local t = {}
-		for charIndex = 1, #flags do
-			t[string.sub(flags, charIndex, charIndex)] = true
-		end
-		return t
-	end
-	return flags or {}
-end
-
 local function assertMatch(expr, str, expectedHasMatched, expectedIniStr, expectedEndStr, desc, flags)
-	flags = normalizeFlagsTest(flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	if (not hasMatched) ~= (not expectedHasMatched) then
 		error(string.format("Test '%s' failed: Expected hasMatched=%s for expr='%s', str='%s' but got %s", desc, tostring(expectedHasMatched), expr, str, tostring(hasMatched)))
@@ -53,13 +52,12 @@ end
 
 local function assertError(expr, str, desc)
 	local hasMatched, err = matcher(expr, str)
-	if hasMatched ~= false or type(err) ~= "string" then
+	if hasMatched ~= nil or type(err) ~= "string" then
 		error(string.format("Test '%s' failed: Expected parse error for expr='%s', but got hasMatched=%s", desc, expr, tostring(hasMatched)))
 	end
 end
 
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
-	flags = normalizeFlagsTest(flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local ini = metadata.captureStarts[captureIndex]
@@ -75,7 +73,6 @@ local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 end
 
 local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
-	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	assert(not metadata.captureStarts[captureIndex],
@@ -83,7 +80,6 @@ local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
 end
 
 local function assertNoCapture(expr, str, desc, flags)
-	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match", desc))
 	local hasAny = false
@@ -92,7 +88,6 @@ local function assertNoCapture(expr, str, desc, flags)
 end
 
 local function assertPositionCapture(expr, str, captureIndex, expectedPos, desc, flags)
-	flags = normalizeFlagsTest(flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
 	local pos = metadata.positionCaptures[captureIndex]
@@ -107,11 +102,12 @@ performance.logPerformanceAtTheEnd(function()
 -- 1. Malformed inputs
 do
 	local hasMatched, err = matcher(123, "abc")
-	assert(hasMatched == false, "Malformed input should return false")
+	assert(hasMatched == nil, "Malformed input should return nil")
 	assert(type(err) == "string", "Malformed input should return error message")
 
 	hasMatched, err = matcher("abc", 123)
-	assert(hasMatched == false, "Malformed target string should return false")
+	assert(hasMatched == nil, "Malformed target string should return nil")
+	assert(type(err) == "string", "Malformed target string should return error message")
 end
 
 ----------------------------------------------------------------------------------------------------

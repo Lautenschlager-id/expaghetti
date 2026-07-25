@@ -28,16 +28,16 @@ function ApiUtils.normalizeFlags(flags)
 		for key, value in next, flags do
 			if type(key) == "number" and type(value) == "string" then
 				flagCount = flagCount + 1
-				normalized[value] = true
+				normalized[flagCount] = value
 			elseif type(key) == "string" and value then
 				flagCount = flagCount + 1
-				normalized[key] = true
+				normalized[flagCount] = key
 			end
 		end
 	elseif flagType == "string" then
 		flagCount = #flags
 		for charIndex = 1, flagCount do
-			normalized[string_sub(flags, charIndex, charIndex)] = true
+			normalized[charIndex] = string_sub(flags, charIndex, charIndex)
 		end
 	end
 
@@ -71,7 +71,8 @@ local function getConfigKey(config)
 end
 
 function ApiUtils.compilePattern(pattern, flags, config)
-	if type(pattern) == "string" then
+	local patternType = type(pattern)
+	if patternType == "string" then
 		flags = ApiUtils.normalizeFlags(flags)
 		local cacheKey = pattern .. "\0" .. getFlagsKey(flags) .. "\0" .. getConfigKey(config)
 		
@@ -96,8 +97,10 @@ function ApiUtils.compilePattern(pattern, flags, config)
 		astCacheSize = astCacheSize + 1
 		
 		return tree, flags, nil
+	elseif patternType == "table" and pattern._index then
+		return pattern, flags, nil
 	end
-	return pattern, flags, nil
+	return nil, nil, "Expaghetti Error: Invalid pattern"
 end
 
 function ApiUtils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)

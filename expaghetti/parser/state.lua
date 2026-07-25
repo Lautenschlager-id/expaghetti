@@ -34,7 +34,7 @@ ParserState.__index = ParserState
 
 --- Creates a new ParserState instance for parsing a regular expression.
 ---@param expr string|table The regular expression string.
----@param flags string|table|nil A string of flag characters or a table of boolean flags.
+---@param flags table A table of flag keys.
 ---@return ParserState state The instantiated parser state.
 function ParserState.new(expr, flags)
 	local self = setmetatable({}, ParserState)

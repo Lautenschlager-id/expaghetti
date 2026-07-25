@@ -15,7 +15,7 @@ local MatchStateNew = MatchState.new
 --[[ Module ]]--
 
 --- Evaluates a regular expression against a target string.
----@param expr string The regular expression.
+---@param expr ASTTree The root AST tree.
 ---@param str string The target string to match against.
 ---@param flags string|FlagTable|nil A string of flag characters or a table of boolean flags.
 ---@param stringIndex number|nil The 0-based starting position in the target string (defaults to 0).
@@ -26,9 +26,9 @@ local MatchStateNew = MatchState.new
 local matcher = function(expr, str, flags, stringIndex, config)
 	local tree, errorMessage = expr
 
-	stringIndex = stringIndex or 0
+	stringIndex = stringIndex or 0 -- TO DO: Check can remove
 
-	local state = MatchStateNew(flags, str, tree, config)
+	local state = MatchStateNew(tree, str, flags, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do
