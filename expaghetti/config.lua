@@ -6,31 +6,37 @@
 local DEFAULT_MAX_RECURSION_DEPTH = 200
 local DEFAULT_MAX_BACKTRACK_DEPTH = 50000
 
-local function parseOptions(options)
-	if type(options) ~= "table" then return {} end
-	local parsed = {}
+local globalConfig = {
+	maxRecursionDepth = DEFAULT_MAX_RECURSION_DEPTH,
+	maxBacktrackDepth = DEFAULT_MAX_BACKTRACK_DEPTH
+}
+
+local function buildConfig(options)
+	if type(options) ~= "table" then return globalConfig end
+	
+	local config = {
+		maxRecursionDepth = globalConfig.maxRecursionDepth,
+		maxBacktrackDepth = globalConfig.maxBacktrackDepth
+	}
 	
 	if options.maxRecursionDepth ~= nil then
 		if type(options.maxRecursionDepth) ~= "number" then
 			error("Config Error: maxRecursionDepth must be a number")
 		end
-		parsed.maxRecursionDepth = options.maxRecursionDepth
+		config.maxRecursionDepth = options.maxRecursionDepth
 	end
 	
 	if options.maxBacktrackDepth ~= nil then
 		if type(options.maxBacktrackDepth) ~= "number" then
 			error("Config Error: maxBacktrackDepth must be a number")
 		end
-		parsed.maxBacktrackDepth = options.maxBacktrackDepth
+		config.maxBacktrackDepth = options.maxBacktrackDepth
 	end
 	
-	return parsed
+	return config
 end
 
 return {
-	global = {
-		maxRecursionDepth = DEFAULT_MAX_RECURSION_DEPTH,
-		maxBacktrackDepth = DEFAULT_MAX_BACKTRACK_DEPTH
-	},
-	parse = parseOptions
+	global = globalConfig,
+	build = buildConfig
 }
