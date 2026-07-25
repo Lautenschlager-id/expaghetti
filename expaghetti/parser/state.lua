@@ -1,8 +1,8 @@
 --[[
-    Parser state used throughout the parsing process.
+	Parser state shared by the pattern and replacement parsers.
 
-    Tracks the current parsing position, flags, shared metadata,
-    and parser context.
+	Tracks the current parsing position, flags, shared metadata,
+	and parser context.
 ]]
 
 --[[ Globals ]]--
@@ -32,32 +32,38 @@ local ParserState = {
 }
 ParserState.__index = ParserState
 
---- Creates a new ParserState instance for parsing a regular expression.
----@param expr string|table The regular expression string.
+--- Creates a new ParserState instance for parsing patterns or replacement templates.
+---@param expr string|table The pattern or replacement template.
 ---@param flags table A table of flag keys.
 ---@return ParserState state The instantiated parser state.
 function ParserState.new(expr, flags)
-	local self = setmetatable({}, ParserState)
+	local self = setmetatable({
+		expr = expr,
 
-	self.expr = expr
+		flags = flags,
 
-	self.flags = flags
+		isGroup = false,
+		isAlternate = false,
+		isBranchReset = false,
 
-	self.isGroup = false
-	self.isAlternate = false
-	self.isBranchReset = false
+		initialGroupIndex = 0,
 
-	self.initialGroupIndex = 0
+		metadata = {
+			groupNames = {},
+			groupIndex = 0,
 
-	self.metadata = {
-		groupNames = {},
-		groupIndex = 0,
-		positionCaptureIndex = 0,
-		groupTreesByIndex = {},
-		groupTreesByName = {},
-	}
+			positionCaptureIndex = 0,
 
-	self.index = 1
+			groupTreesByIndex = {},
+			groupTreesByName = {},
+		},
+
+		index = 1,
+
+		patternChars = nil,
+		patternLength = nil,
+	}, ParserState)
+
 	self.patternChars, self.patternLength = toCharArray(expr, not not flags[FLAG_UNICODE])
 
 	return self
@@ -79,6 +85,10 @@ function ParserState:readElement(index, isInsideSet)
 	end
 end
 
+--- Reads the next element or character from a replacement template.
+---@param index number The current index in the replacement template.
+---@return number|boolean nextIndex The next index after reading, or false if reading failed.
+---@return string|ASTElement element The parsed replacement element or raw character.
 function ParserState:readReplacementTemplateElement(index)
 	local patternChars = self.patternChars
 
@@ -93,25 +103,23 @@ end
 --- Branches the current parser state into a child state, inheriting current context.
 ---@return ParserState childState The forked parser state.
 function ParserState:fork()
-	local child = setmetatable({}, ParserState)
+	return setmetatable({
+		expr = self.expr,
 
-	child.expr = self.expr
+		flags = self.flags,
 
-	child.flags = self.flags
+		isGroup = self.isGroup,
+		isAlternate = self.isAlternate,
+		isBranchReset = self.isBranchReset,
 
-	child.isGroup = self.isGroup
-	child.isAlternate = self.isAlternate
-	child.isBranchReset = self.isBranchReset
+		initialGroupIndex = self.initialGroupIndex,
 
-	child.initialGroupIndex = self.initialGroupIndex
+		metadata = self.metadata,
 
-	child.metadata = self.metadata
-
-	child.index = self.index
-	child.patternChars = self.patternChars
-	child.patternLength = self.patternLength
-
-	return child
+		index = self.index,
+		patternChars = self.patternChars,
+		patternLength = self.patternLength,
+	}, ParserState)
 end
 
 --- Parses a sub-tree using a child state.

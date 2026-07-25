@@ -2,8 +2,6 @@
     API Entry Point
 ]]
 
-local helpers = require("helpers.api")
-
 return {
 	test = require("api.api.test"),
 	match = require("api.api.match"),
@@ -13,7 +11,5 @@ return {
 	replace = require("api.api.replace"),
 	split = require("api.api.split"),
 	
-	installHooks = require("api.api.install"),
-	normalizeFlags = helpers.normalizeFlags,
-	compilePattern = helpers.compilePattern
+	installHooks = require("api.api.install")
 }

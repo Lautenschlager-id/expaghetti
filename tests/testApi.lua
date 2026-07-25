@@ -436,15 +436,15 @@ print("\n--- Error Handling ---")
 check("Returns errors gracefully for malformed patterns", function()
 	local result, err = expaghetti.match("[a-", "abc")
 	assertDeepEqual(result, nil)
-	assertDeepEqual(err, "Expaghetti Error: Invalid regular expression: Expected ']' to close character set")
+	assertDeepEqual(err, "Invalid regular expression: Expected ']' to close character set")
 	
 	local result2, err2 = expaghetti.test("+", "abc")
 	assertDeepEqual(result2, nil)
-	assertDeepEqual(err2, "Expaghetti Error: Invalid regular expression: Nothing to repeat")
+	assertDeepEqual(err2, "Invalid regular expression: Nothing to repeat")
 	
 	local result3, err3 = expaghetti.split("%", "a%b")
 	assertDeepEqual(result3, nil)
-	assertDeepEqual(err3, "Expaghetti Error: Invalid regular expression: Incomplete escape sequence")
+	assertDeepEqual(err3, "Invalid regular expression: Incomplete escape sequence")
 end)
 
 check("Returns errors gracefully for invalid targets", function()

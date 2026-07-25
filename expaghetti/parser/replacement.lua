@@ -1,8 +1,21 @@
+--[[
+    Replacement template parser.
+
+    Parses a replacement template into an Abstract Syntax Tree (AST)
+    composed of literal and backreference elements.
+]]
+	
 --[[ Dependencies ]]--
 local LiteralParse = require("magic.literal").parse
 local ParserStateNew = require("parser.state").new
 
 --[[ Module ]]--
+
+--- Parses a replacement template into an Abstract Syntax Tree (AST).
+---@param expr string The replacement template to parse.
+---@param flags table A table of flag keys.
+---@return ASTTree|boolean tree The generated AST tree, or false if parsing failed.
+---@return string|nil errorMessage The parser error message on failure.
 return function(expr, flags)
 	local state = ParserStateNew(expr, flags)
 

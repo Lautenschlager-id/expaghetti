@@ -11,99 +11,162 @@ local table_sort = table.sort
 local tostring = tostring
 local type = type
 
+
+
+
+--[[ Globals ]]--
+local table_concat = table.concat
+local table_sort = table.sort
+local type = type
+
 --[[ Dependencies ]]--
+local Assertion = require("helpers.assertion")
 local parser = require("parser.init")
 
 --[[ Enums ]]--
 local Flags = require("api.enums").RegexFlag
 
+--[[ Aliases ]]--
+local AssertionIsStringOrTable = Assertion.isStringOrTable
+local AssertionIsTable = Assertion.isTable
+
 --[[ Module ]]--
-local ApiUtils = {}
 
-function ApiUtils.normalizeFlags(flags)
-	local normalized = {}
+--- Compiles or retrieves a compiled pattern.
+--- String patterns are normalized, looked up in the compilation cache,
+--- parsed if necessary, and cached for future use. Precompiled pattern
+--- objects are returned unchanged.
+---@param pattern string|Pattern The pattern to compile or a precompiled pattern.
+---@param flags string|table|nil Optional flags used when compiling string patterns.
+---@param config EngineConfig The engine configuration.
+---@return Pattern|nil pattern The compiled pattern, or nil if compilation failed.
+---@return FlagTable|nil flagsLookup The normalized flag lookup table, or nil if compilation failed.
+---@return string|nil errorMessage The compilation error message, or nil if compilation succeeded.
+local compilePattern
+do
+	--- Normalizes user-provided flags into the parser's internal representations.
+	--- Accepts either a flag string or a table of flags, ignoring unsupported
+	--- values while producing a lookup table for fast membership checks and
+	--- a canonical flag string suitable for cache key generation.
+	---@param flags string|table|nil The flags to normalize.
+	---@return FlagTable flagsLookup A lookup table keyed by enabled flag identifiers.
+	---@return string flagsKey A sorted, canonical string of enabled flag identifiers.
+	local normalizeFlags = function(flags)
+		local flagsLookup, flagsArray = {}, {}
 
-	local flagType, flagCount = type(flags), 0
-	if flagType == "table" then
-		for key, value in next, flags do
-			if type(key) == "number" and type(value) == "string" then
-				flagCount = flagCount + 1
-				normalized[flagCount] = value
-			elseif type(key) == "string" and value then
-				flagCount = flagCount + 1
-				normalized[flagCount] = key
+		local flagType, flagCount = type(flags), 0
+		if flagType == "table" then
+			for key, value in next, flags do
+				if type(key) == "number" and type(value) == "string" then
+					if Flags[value] and not flagsLookup[key] then
+						flagsLookup[value] = true
+						flagCount = flagCount + 1
+						flagsArray[flagCount] = value
+					end
+				elseif type(key) == "string" and value then
+					if Flags[key] then
+						flagsLookup[key] = true
+						flagCount = flagCount + 1
+						flagsArray[flagCount] = key
+					end
+				end
+			end
+		elseif flagType == "string" then
+			for charIndex = 1, #flags do
+				local flag = string_sub(flags, charIndex, charIndex)
+				if Flags[flag] and not flagsLookup[flag] then
+					flagsLookup[flag] = true
+					flagCount = flagCount + 1
+					flagsArray[flagCount] = flag
+				end
 			end
 		end
-	elseif flagType == "string" then
-		flagCount = #flags
-		for charIndex = 1, flagCount do
-			normalized[charIndex] = string_sub(flags, charIndex, charIndex)
-		end
+
+		table_sort(flagsArray)
+		return flagsLookup, table_concat(flagsArray)
 	end
 
-	local flags = {}
-	for index = 1, flagCount do
-		local flag = normalized[index]
-		if Flags[flag] then
-			flags[flag] = true
-		end
+	local treeCache, treeCacheCount = {}, 0
+	local parseErrorCache, parseErrorCacheCount = {}, 0
+
+	--- Builds a unique cache key for a compiled pattern.
+	--- Combines the pattern, normalized flags, and engine configuration into
+	--- a canonical string suitable for cache lookups.
+	---@param pattern string The pattern to compile.
+	---@param flagsKey string The normalized flag string.
+	---@param config EngineConfig The engine configuration.
+	---@return string cacheKey The generated cache key.
+	local buildCacheKey = function(pattern, flagsKey, config)
+		return table_concat({
+			pattern,
+			flagsKey,
+			config._cacheKey,
+		}, "\0")
 	end
-	return flags
-end
 
-local MAX_CACHE_SIZE = 100
-local astCache = {}
-local astQueue = {}
-local astCacheSize = 0
+	compilePattern = function(pattern, flags, config)
+		local patternType = type(pattern)
 
-local function getFlagsKey(normalizedFlags)
-	local chars = {}
-	for k, v in pairs(normalizedFlags) do
-		if v then chars[#chars + 1] = k end
+		-- User input (external)
+		if patternType == "string" then
+			local flagsKey
+			flags, flagsKey = normalizeFlags(flags)
+
+			local cacheKey = buildCacheKey(pattern, flagsKey, config)
+			
+			local cachedTree = treeCache[cacheKey]
+			if cachedTree then
+				return cachedTree, flags
+			end
+
+			local cachedParseError = parseErrorCache[cacheKey]
+			if cachedParseError then
+				return nil, nil, cachedParseError
+			end
+
+			local tree, errorMessage = parser(pattern, flags)
+			if not tree then
+				parseErrorCacheCount = parseErrorCacheCount + 1
+
+				if parseErrorCacheCount > config.patternCacheSize then
+					parseErrorCacheCount = 1
+					parseErrorCache = {
+						[cacheKey] = errorMessage
+					}
+				else
+					parseErrorCache[cacheKey] = errorMessage
+				end
+
+				return nil, nil, errorMessage
+			end
+
+			treeCacheCount = treeCacheCount + 1
+			if treeCacheCount > config.patternCacheSize then
+				treeCacheCount = 1
+				treeCache = {
+					[cacheKey] = tree
+				}
+			else
+				treeCache[cacheKey] = tree
+			end
+
+			return tree, flags
+		
+		-- Pattern input (internal)
+		elseif patternType == "table" and pattern._index then
+			return pattern, flags, nil
+		end
+
+		-- In theory, compilePattern will always receive validated input,
+		-- but as a failsafe we perform assertions here to understand what went wrong.
+		AssertionIsStringOrTable(pattern, "pattern")
+		AssertionIsStringOrTable(flags, "flags", true)
+		AssertionIsTable(config, "config")
 	end
-	table_sort(chars)
-	return table_concat(chars)
 end
 
-local function getConfigKey(config)
-	if not config then return "" end
-	return tostring(config.maxRecursionDepth) .. "\0" .. tostring(config.maxBacktrackDepth)
-end
 
-function ApiUtils.compilePattern(pattern, flags, config)
-	local patternType = type(pattern)
-	if patternType == "string" then
-		flags = ApiUtils.normalizeFlags(flags)
-		local cacheKey = pattern .. "\0" .. getFlagsKey(flags) .. "\0" .. getConfigKey(config)
-		
-		local cachedTree = astCache[cacheKey]
-		if cachedTree then
-			return cachedTree, flags, nil
-		end
-
-		local tree, err = parser(pattern, flags)
-		if not tree then
-			return nil, nil, "Expaghetti Error: " .. tostring(err)
-		end
-		
-		if astCacheSize >= MAX_CACHE_SIZE then
-			local oldestKey = table.remove(astQueue, 1)
-			astCache[oldestKey] = nil
-			astCacheSize = astCacheSize - 1
-		end
-		
-		astCache[cacheKey] = tree
-		table.insert(astQueue, cacheKey)
-		astCacheSize = astCacheSize + 1
-		
-		return tree, flags, nil
-	elseif patternType == "table" and pattern._index then
-		return pattern, flags, nil
-	end
-	return nil, nil, "Expaghetti Error: Invalid pattern"
-end
-
-function ApiUtils.buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
+function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 	local matchGroups, matchCaptures = {}, {}
 	local match = {
 		start = matchStart,
@@ -171,4 +234,7 @@ function ApiUtils.buildMatchObject(targetString, matchStart, matchEnd, matcherMe
 	return match
 end
 
-return ApiUtils
+return {
+	buildMatchObject = buildMatchObject,
+	compilePattern = compilePattern,
+}

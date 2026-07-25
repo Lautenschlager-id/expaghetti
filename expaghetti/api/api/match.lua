@@ -8,8 +8,8 @@ local ApiHelpers = require("helpers.api")
 local matcher = require("matcher.init")
 
 --[[ Aliases ]]--
-local compilePattern = ApiHelpers.compilePattern
 local buildMatchObject = ApiHelpers.buildMatchObject
+local compilePattern = ApiHelpers.compilePattern
 
 local AssertionIsNumber = Assertion.isNumber
 local AssertionIsString = Assertion.isString

@@ -90,11 +90,11 @@ local consumeWhileArray = function(tbl, loopIndex, conditionFn)
 end
 
 return {
-	isPositiveIntegerChar = isPositiveIntegerChar,
-	isPositiveOrZeroIntegerChar = isPositiveOrZeroIntegerChar,
-	isLetter = isLetter,
-	isAlphanumeric = isAlphanumeric,
-	isAlphanumericName = isAlphanumericName,
 	consumeWhile = consumeWhile,
 	consumeWhileArray = consumeWhileArray,
+	isAlphanumeric = isAlphanumeric,
+	isAlphanumericName = isAlphanumericName,
+	isLetter = isLetter,
+	isPositiveIntegerChar = isPositiveIntegerChar,
+	isPositiveOrZeroIntegerChar = isPositiveOrZeroIntegerChar,
 }

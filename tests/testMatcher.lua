@@ -1,20 +1,29 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
+
+local Assertion = require("helpers.assertion")
+local compilePattern = require("helpers.api").compilePattern
+local ConfigBuild = require("core.config").build
 local _matcher = require("matcher.init")
 
-local api = require("helpers.api")
-local Config = require("core.config")
+local AssertionIsStringOrTable = Assertion.isStringOrTable
+local AssertionIsString = Assertion.isString
+local AssertionIsNumber = Assertion.isNumber
+local AssertionIsTable = Assertion.isTable
 
 function matcher(expr, str, flags, startPosition, config)
-	local rawexpr = expr
-	if type(str) ~= "string" then
-		return nil, "Target string is not a string"
-	end
-	config = config or {}
-	config = Config.build(config)
-	local expr, flags, err = api.compilePattern(expr, flags, config)
+	AssertionIsStringOrTable(expr, "pattern")
+	AssertionIsString(str, "targetString")
+	AssertionIsStringOrTable(flags, "flags", true)
+	AssertionIsNumber(startPosition, "startPosition", true)
+	AssertionIsTable(config, "config", true)
+
+	config = ConfigBuild(config or {})
+
+	local expr, flags, err = compilePattern(expr, flags, config)
 	if not expr and err then
 		return nil, err
 	end
+
 	return _matcher(expr, str, flags, startPosition or 0, config)
 end
 
@@ -101,12 +110,12 @@ performance.logPerformanceAtTheEnd(function()
 
 -- 1. Malformed inputs
 do
-	local hasMatched, err = matcher(123, "abc")
-	assert(hasMatched == nil, "Malformed input should return nil")
+	local success, err = pcall(matcher, 123, "abc")
+	assert(success == false, "Malformed input should return error")
 	assert(type(err) == "string", "Malformed input should return error message")
 
-	hasMatched, err = matcher("abc", 123)
-	assert(hasMatched == nil, "Malformed target string should return nil")
+	success, err = pcall(matcher, "abc", 123)
+	assert(success == false, "Malformed target string should return error")
 	assert(type(err) == "string", "Malformed target string should return error message")
 end
 

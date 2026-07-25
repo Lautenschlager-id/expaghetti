@@ -29,10 +29,39 @@ MatchState.__index = MatchState
 ---@param config Config|table|nil Optional configuration limits.
 ---@return MatchState state The newly created match state.
 function MatchState.new(rootTree, targetString, flags, config)
-	local self = setmetatable({}, MatchState)
+	local metadata = {
+		captureStarts = {},
+		captureEnds = {},
+		captureCounts = {},
+		positionCaptures = {},
+
+		outerTreeReference = {},
+
+		rootTree = rootTree,
+
+		parsedMetadata = nil,
+
+		groupNames = nil,
+
+		recursionDepth = 0,
+		backtrackSteps = 0,
+		maxRecursionDepth = config.maxRecursionDepth,
+		maxBacktrackDepth = config.maxBacktrackDepth,
+	}
 	
-	self.flags = flags
-	if self.flags[FLAG_UNICODE] then
+	local self = setmetatable({
+		flags = flags,
+		
+		getTargetCharacter = nil,
+		targetStringLength = nil,
+		
+		rootTree = rootTree,
+
+		parsedMetadata = nil,
+		metadata = metadata,
+	}, MatchState)
+	
+	if flags[FLAG_UNICODE] then
 		local targetStringChars, targetStringLength = toCharArray(targetString, true)
 		self.getTargetCharacter = function(self, index)
 			return targetStringChars[index]
@@ -45,25 +74,10 @@ function MatchState.new(rootTree, targetString, flags, config)
 		self.targetStringLength = #targetString
 	end
 
-	self.rootTree = rootTree
-
 	local parsedMetadata = rootTree and rootTree._metadata or nil 
 	self.parsedMetadata = parsedMetadata
-	
-	self.metadata = {
-		captureStarts = {},
-		captureEnds = {},
-		captureCounts = {},
-		positionCaptures = {},
-		outerTreeReference = {},
-		rootTree = rootTree,
-		parsedMetadata = parsedMetadata,
-		groupNames = parsedMetadata and parsedMetadata.groupNames,
-		recursionDepth = 0,
-		backtrackSteps = 0,
-		maxRecursionDepth = config.maxRecursionDepth,
-		maxBacktrackDepth = config.maxBacktrackDepth,
-	}
+	metadata.parsedMetadata = parsedMetadata
+	metadata.groupNames = parsedMetadata and parsedMetadata.groupNames
 
 	return self
 end
@@ -91,19 +105,19 @@ end
 ---@param initialStringIndex number|nil The initial string index for the child state.
 ---@return MatchState childState The branched match state.
 function MatchState:branch(stringIndex, initialStringIndex)
-	local child = setmetatable({}, MatchState)
-	child.flags = self.flags
-	child.getTargetCharacter = self.getTargetCharacter
-	child.targetStringLength = self.targetStringLength
-	child.stringIndex = stringIndex or self.stringIndex
-	child.initialStringIndex = initialStringIndex or self.initialStringIndex
-	child.metadata = self.metadata
-	child.rootTree = self.rootTree
-	child.parsedMetadata = self.parsedMetadata
-	child.tree = self.tree
-	child.treeIndex = self.treeIndex
-	child.quantifierMaxEnd = self.quantifierMaxEnd
-	return child
+	return setmetatable({
+		flags = self.flags,
+		getTargetCharacter = self.getTargetCharacter,
+		targetStringLength = self.targetStringLength,
+		stringIndex = stringIndex or self.stringIndex,
+		initialStringIndex = initialStringIndex or self.initialStringIndex,
+		metadata = self.metadata,
+		rootTree = self.rootTree,
+		parsedMetadata = self.parsedMetadata,
+		tree = self.tree,
+		treeIndex = self.treeIndex,
+		quantifierMaxEnd = self.quantifierMaxEnd,
+	}, MatchState)
 end
 
 --- Increments the global backtrack counter.

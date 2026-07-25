@@ -8,6 +8,7 @@ local string_format = string.format
 
 --[[ Dependencies ]]--
 local Api = require("api.init")
+local compilePattern = require("helpers.api").compilePattern
 local Config = require("core.config")
 local Pattern = require("core.pattern")
 
@@ -22,7 +23,7 @@ function Engine.new(config)
 end
 
 function Engine:compile(regex, flags)
-	local tree, parsedFlags, errorMessage = Api.compilePattern(regex, flags, self.config)
+	local tree, parsedFlags, errorMessage = compilePattern(regex, flags, self.config)
 	if not tree then
 		error(string_format("Failed to compile pattern:\n\t%s", tostring(errorMessage)))
 	end

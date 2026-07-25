@@ -22,8 +22,8 @@ local parserReplacementTemplate = require("parser.replacement")
 local ELEMENT_LITERAL = require("enums.elements").LITERAL
 
 --[[ Aliases ]]--
-local compilePattern = ApiHelpers.compilePattern
 local buildMatchObject = ApiHelpers.buildMatchObject
+local compilePattern = ApiHelpers.compilePattern
 
 local AssertionIsNumber = Assertion.isNumber
 local AssertionIsString = Assertion.isString
@@ -35,7 +35,6 @@ local prettyPrint = require("prettyPrint")
 
 --[[ Module ]]--
 local applyReplacementTemplate = function(tree, match)
-	--print(prettyPrint(tree, 1))
 	local segments = {}
 	local segmentCount = 0
 
