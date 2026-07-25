@@ -56,8 +56,8 @@ local Expaghetti = setmetatable({}, {
 	end
 })
 
---[[ Public API ]]--
-Expaghetti.RegexFlag = flags.FLAGS
+local PublicEnums = require("api.enums")
+Expaghetti.RegexFlag = PublicEnums.RegexFlag
 
 -- Custom Engine Constructor
 Expaghetti.custom = function(options)
