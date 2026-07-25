@@ -155,7 +155,10 @@ Escaped.parseReplacementTemplate = function(state, index, expression)
 	-- Returns the index for the next character
 	index = index + 1
 
-	if replacementTemplateHandlers[currentCharacter] then
+	if MAGIC_HASHMAP[currentCharacter] then
+		local value, lowerValue, upperValue = state:getExecutionValues(currentCharacter, isInsideSet)
+		return index, LiteralNode(value, lowerValue, upperValue)
+	elseif replacementTemplateHandlers[currentCharacter] then
 		return replacementTemplateHandlers[currentCharacter](state, expression[index], index, expression)
 	elseif isPositiveIntegerChar(currentCharacter) then
 		return replacementTemplateHandlers.int(state, currentCharacter, index)
