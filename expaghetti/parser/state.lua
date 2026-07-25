@@ -50,12 +50,13 @@ function ParserState.new(expr, flags)
 
 		metadata = {
 			groupNames = {},
+			namedReferences = {},
+			namedReferenceIndex = 0,
 			groupIndex = 0,
 
 			positionCaptureIndex = 0,
 
-			groupTreesByIndex = {},
-			groupTreesByName = {},
+			groupTrees = {},
 		},
 
 		index = 1,
@@ -260,6 +261,27 @@ end
 ---@param previousFlags FlagTable The flags to restore.
 function ParserState:popScopedFlags(previousFlags)
 	self.flags = previousFlags
+end
+
+--- Resolves backreferences by name, replacing the name with the capture group index.
+--- This avoids searching for the capture group every time the backreference is used.
+function ParserState:resolveNamedReferences()
+	local stateMetadata = self.metadata
+	local namedReferences = stateMetadata.namedReferences
+	local groupNames = stateMetadata.groupNames
+
+	for index = 1, stateMetadata.namedReferenceIndex do
+		local node = namedReferences[index]
+		local nodeIndex, nodeTargetIndex = node.index, node.targetIndex
+		if nodeIndex then
+			node.index = groupNames[nodeIndex] or nodeIndex
+		elseif nodeTargetIndex then
+			node.targetIndex = groupNames[nodeTargetIndex] or nodeTargetIndex
+		end
+	end
+
+	stateMetadata.namedReferences = {}
+	stateMetadata.namedReferenceIndex = 0
 end
 
 return ParserState

@@ -122,6 +122,7 @@ return {
 			{
 				type = "group",
 				hasSpecialBehavior = true,
+				index = 1,
 				name = "word",
 				tree = {
 					{
@@ -133,7 +134,7 @@ return {
 				}
 			},
 			{
-				index = "word",
+				index = 1,
 				type = "backreference"
 			},
 			_index = 2
@@ -145,6 +146,7 @@ return {
 			{
 				type = "group",
 				hasSpecialBehavior = true,
+				index = 1,
 				name = "a",
 				tree = {
 					{
@@ -158,6 +160,7 @@ return {
 			{
 				type = "group",
 				hasSpecialBehavior = true,
+				index = 2,
 				name = "b",
 				tree = {
 					{
@@ -169,11 +172,11 @@ return {
 				}
 			},
 			{
-				index = "a",
+				index = 1,
 				type = "backreference"
 			},
 			{
-				index = "b",
+				index = 2,
 				type = "backreference"
 			},
 			_index = 4
@@ -185,11 +188,12 @@ return {
 			{
 				type = "group",
 				hasSpecialBehavior = true,
+				index = 1,
 				name = "word",
 				tree = {
 					{
 						type = "group",
-						index = 1,
+						index = 2,
 						tree = {
 							{
 								type = "literal",
@@ -213,7 +217,7 @@ return {
 				}
 			},
 			{
-				index = "word",
+				index = 1,
 				type = "backreference"
 			},
 			_index = 2
@@ -355,18 +359,21 @@ return {
 		parsed = {
 			{
 				hasSpecialBehavior = true,
+				index = 1,
 				name = "abc",
 				tree = {
 					{
 						hasSpecialBehavior = true,
+						index = 2,
 						name = "def",
 						tree = {
 							{
 								hasSpecialBehavior = true,
+								index = 3,
 								name = "ghi",
 								tree = {
 									{
-										index = "abc",
+										index = 1,
 										type = "backreference",
 									},
 									_index = 1,
@@ -382,11 +389,11 @@ return {
 				type = "group",
 			},
 			{
-				index = "ghi",
+				index = 3,
 				type = "backreference",
 			},
 			{
-				index = "def",
+				index = 2,
 				type = "backreference",
 			},
 			_index = 3,

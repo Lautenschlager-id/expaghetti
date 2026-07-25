@@ -1,5 +1,6 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
-local prettyPrint = require("./prettyPrint")
+
+local prettyPrint = require("prettyPrint")
 
 local expaghetti = require("expaghetti")
 
@@ -24,6 +25,8 @@ local function assertDeepEqual(a, b, path)
 	end
 end
 
+local performance = require("performance")
+
 local errorCount = 0
 local function check(name, fn)
 	local status, err = pcall(fn)
@@ -36,6 +39,8 @@ local function check(name, fn)
 		print("  [PASS] " .. name)
 	end
 end
+
+performance.logPerformanceAtTheEnd(function()
 
 print("Running Comprehensive API tests...")
 
@@ -93,8 +98,8 @@ check("Match with quantifiers and multiple captures", function()
 	assertDeepEqual(match.captures[1], { groupIndex = 1, start = 1, stop = 1, value = "a" })
 	assertDeepEqual(match.captures[2], { groupIndex = 1, start = 2, stop = 2, value = "a" })
 	assertDeepEqual(match.captures[3], { groupIndex = 1, start = 3, stop = 3, value = "a" })
-	assertDeepEqual(match.captures[4], { groupIndex = "foo", name = "foo", start = 4, stop = 4, value = "b" })
-	assertDeepEqual(match.captures[5], { groupIndex = 2, start = 5, stop = 5, value = "c" })
+	assertDeepEqual(match.captures[4], { groupIndex = 2, name = "foo", start = 4, stop = 4, value = "b" })
+	assertDeepEqual(match.captures[5], { groupIndex = 3, start = 5, stop = 5, value = "c" })
 	
 	-- Grouped Captures
 	assertDeepEqual(#match.groups[1], 3)
@@ -102,7 +107,9 @@ check("Match with quantifiers and multiple captures", function()
 	assertDeepEqual(#match.groups.foo, 1)
 	assertDeepEqual(match.groups.foo[1].value, "b")
 	assertDeepEqual(#match.groups[2], 1)
-	assertDeepEqual(match.groups[2][1].value, "c")
+	assertDeepEqual(match.groups[2][1].value, "b")
+	assertDeepEqual(#match.groups[3], 1)
+	assertDeepEqual(match.groups[3][1].value, "c")
 end)
 
 check("Match with nested captures (chronological sorting)", function()
@@ -466,5 +473,8 @@ if errorCount == 0 then
 	print("\nAll Comprehensive API tests passed successfully!")
 else
 	print("\nAPI tests failed with " .. errorCount .. " errors.")
-	os.exit(1)
 end
+
+end, {
+	runs = 1
+})

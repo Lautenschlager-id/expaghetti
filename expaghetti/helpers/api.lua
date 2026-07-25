@@ -165,7 +165,6 @@ do
 	end
 end
 
-
 function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 	local matchGroups, matchCaptures = {}, {}
 	local match = {
@@ -194,14 +193,22 @@ function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 	local captureCounts = matcherMetadata.captureCounts
 	local groupNames = matcherMetadata.groupNames
 
+	-- Build reverse lookup: groupIndex -> groupName
+	local namesByIndex = {}
+	for groupName, groupIndex in next, groupNames do
+		namesByIndex[groupIndex] = groupName
+	end
+
 	local captureCount = 0
 	for groupKey, groupCaptureCount in next, captureCounts do
 		if groupCaptureCount > 0 then -- TO DO: Check if this can be false
-			local isNamed = type(groupKey) == "string"
-			local groupName = isNamed and groupKey or nil
-
 			local groupArray = {}
 			matchGroups[groupKey] = groupArray
+
+			local groupName = namesByIndex[groupKey]
+			if groupName then
+				matchGroups[groupName] = groupArray
+			end
 
 			local captureStartsGroup = captureStarts[groupKey]
 			local captureEndsGroup = captureEnds[groupKey]
@@ -211,14 +218,14 @@ function buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 
 				local captureObject = {
 					groupIndex = groupKey,
+					name = groupName,
 					start = captureStart,
 					stop = captureEnd,
 					value = string_sub(targetString, captureStart, captureEnd),
-					name = groupName,
 				}
 
 				groupArray[captureIndex] = captureObject
-				captureCount = captureCount + 1 -- TO DO: Check if named groups should be added to matchCaptures
+				captureCount = captureCount + 1
 				matchCaptures[captureCount] = captureObject
 			end
 		end

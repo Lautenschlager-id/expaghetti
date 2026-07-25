@@ -134,6 +134,7 @@ return {
 					_index = 1
 				},
 				name = "expr",
+				index = 1,
 				type = "group",
 				hasSpecialBehavior = true
 			},
@@ -144,7 +145,7 @@ return {
 				type = "group",
 				hasSpecialBehavior = true,
 				isRecursion = true,
-				targetName = "expr"
+				targetIndex = 1
 			},
 			_index = 2
 		}
@@ -162,6 +163,7 @@ return {
 					_index = 1
 				},
 				name = "a",
+				index = 1,
 				type = "group",
 				hasSpecialBehavior = true
 			},
@@ -175,6 +177,7 @@ return {
 					_index = 1
 				},
 				name = "b",
+				index = 2,
 				type = "group",
 				hasSpecialBehavior = true
 			},
@@ -185,7 +188,7 @@ return {
 				type = "group",
 				hasSpecialBehavior = true,
 				isRecursion = true,
-				targetName = "a"
+				targetIndex = 1
 			},
 			{
 				tree = {
@@ -194,7 +197,7 @@ return {
 				type = "group",
 				hasSpecialBehavior = true,
 				isRecursion = true,
-				targetName = "b"
+				targetIndex = 2
 			},
 			_index = 4
 		}
@@ -216,6 +219,7 @@ return {
 					_index = 1
 				},
 				name = "expr",
+				index = 1,
 				type = "group",
 				hasSpecialBehavior = true
 			},

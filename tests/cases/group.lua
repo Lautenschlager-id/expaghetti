@@ -438,6 +438,7 @@ return {
 				tree = {
 					{
 						hasSpecialBehavior = true,
+						index = 2,
 						name = "named",
 						tree = {
 							{
@@ -465,6 +466,7 @@ return {
 				tree = {
 					{
 						hasSpecialBehavior = true,
+						index = 2,
 						name = "n4m3d_",
 						tree = {
 							{
@@ -489,6 +491,7 @@ return {
 			},
 			{
 				hasSpecialBehavior = true,
+				index = 1,
 				name = "_007",
 				tree = {
 					{

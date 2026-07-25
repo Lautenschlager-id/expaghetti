@@ -196,6 +196,7 @@ return {
 					_index = 3
 				},
 				type = "group",
+				index = 1,
 				name = "left",
 				hasSpecialBehavior = true
 			},
@@ -219,6 +220,7 @@ return {
 					_index = 3
 				},
 				type = "group",
+				index = 2,
 				name = "right",
 				hasSpecialBehavior = true
 			},

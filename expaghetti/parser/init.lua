@@ -34,6 +34,8 @@ local parser = function(exprOrState, flags)
 	-- and keep the tree lightweight.
 	if not state.isGroup and not state.isAlternate then
 		tree._metadata = state.metadata
+		
+		state:resolveNamedReferences()
 	end
 
 	return tree

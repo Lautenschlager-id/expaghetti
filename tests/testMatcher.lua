@@ -5,6 +5,8 @@ local compilePattern = require("helpers.api").compilePattern
 local ConfigBuild = require("core.config").build
 local _matcher = require("matcher.init")
 
+local prettyPrint = require("prettyPrint")
+
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsString = Assertion.isString
 local AssertionIsNumber = Assertion.isNumber
@@ -69,6 +71,9 @@ end
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	if type(captureIndex) == "string" then
+		captureIndex = metadata.groupNames[captureIndex] or captureIndex
+	end
 	local ini = metadata.captureStarts[captureIndex]
 	local en  = metadata.captureEnds[captureIndex]
 	if type(ini) == "table" then
@@ -84,6 +89,9 @@ end
 local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	if type(captureIndex) == "string" then
+		captureIndex = metadata.groupNames[captureIndex] or captureIndex
+	end
 	assert(not metadata.captureStarts[captureIndex],
 		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
 end
@@ -416,10 +424,12 @@ assertCapture("(?<foo>ab)c", "abc", "foo", "ab", "Named group captures correctly
 do
 	local hasMatched, _, _, metadata = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
 	assert(hasMatched, "Named groups: expected match")
-	local fi = metadata.captureStarts["first"]
-	local fe = metadata.captureEnds["first"]
-	local si = metadata.captureStarts["second"]
-	local se = metadata.captureEnds["second"]
+	local firstIdx = metadata.groupNames["first"]
+	local secondIdx = metadata.groupNames["second"]
+	local fi = metadata.captureStarts[firstIdx]
+	local fe = metadata.captureEnds[firstIdx]
+	local si = metadata.captureStarts[secondIdx]
+	local se = metadata.captureEnds[secondIdx]
 	if type(fi) == "table" then
 		fi = fi[#fi] fe = fe[#fe]
 		si = si[#si] se = se[#se]

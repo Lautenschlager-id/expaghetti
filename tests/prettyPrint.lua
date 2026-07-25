@@ -54,5 +54,6 @@ end
 
 --[[ Return ]]--
 return function(t, ...)
-	return "<" .. tostring(t) .. ">" .. tableToString(t, ...)
+	return --"<" .. tostring(t) .. ">" ..
+		tableToString(t, ...)
 end
