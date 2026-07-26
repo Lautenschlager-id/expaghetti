@@ -906,7 +906,7 @@ return {
 			},
 			_index = 2,
 		},
-		regex = "%cC{4,}+%cC",
+		regex = "\003{4,}+\003",
 	},
 	{
 		parsed = {

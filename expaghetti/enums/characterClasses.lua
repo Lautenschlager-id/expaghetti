@@ -45,6 +45,15 @@ local alpha = createSet({
 		'A', 'Z'
 	},
 })
+-- [\0-\31\127]
+local control = createSet({
+	ranges = {
+		'\0', '\31'
+	},
+	values = {
+		['\127'] = true
+	},
+})
 -- [0-9]
 local digit = createSet({
 	ranges = {
@@ -104,6 +113,7 @@ local word = createSet({
 
 return {
 	a = alpha,
+	c = control,
 	d = digit,
 	h = hex,
 	x = hex,
@@ -114,6 +124,7 @@ return {
 	w = word,
 
 	A = negateSet(alpha),
+	C = negateSet(control),
 	D = negateSet(digit),
 	H = negateSet(hex),
 	X = negateSet(hex),

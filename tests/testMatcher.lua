@@ -244,15 +244,16 @@ assertMatch("%P", "a",          true, 1, 1, "%P matches non-punctuation")
 assertMatch("%P", "!",          nil,  nil, nil, "%P does not match punctuation")
 
 ----------------------------------------------------------------------------------------------------
-print("  [13] %cX -- control characters...")
-assertMatch("%cA", "\001",      true, 1, 1, "%cA matches ctrl-A (\\001)")
-assertMatch("%cZ", "\026",      true, 1, 1, "%cZ matches ctrl-Z (\\026)")
-assertMatch("%cA", "a",         nil,  nil, nil, "%cA does not match 'a'")
+print("  [13] %c -- control characters...")
+assertMatch("%c", "\001",      true, 1, 1, "%c matches ctrl-A (\\001)")
+assertMatch("%c", "\026",      true, 1, 1, "%c matches ctrl-Z (\\026)")
+assertMatch("%c", "a",         nil,  nil, nil, "%c does not match 'a'")
+assertMatch("%C", "a",         true, 1, 1, "%C matches 'a'")
 
 ----------------------------------------------------------------------------------------------------
-print("  [14] %eFFFF -- unicode codepoint escape...")
-assertMatch("%e0041", "A",      true, 1, 1, "%e0041 matches 'A' (U+0041)")
-assertMatch("%e0041", "B",      nil,  nil, nil, "%e0041 does not match 'B'")
+print("  [14] \xFF -- codepoint escape...")
+assertMatch("\x41", "A",      true, 1, 1, "\\x41 matches 'A' (U+0041)")
+assertMatch("\x41", "B",      nil,  nil, nil, "\\x41 does not match 'B'")
 
 ----------------------------------------------------------------------------------------------------
 print("  [15] Sets -- basic...")

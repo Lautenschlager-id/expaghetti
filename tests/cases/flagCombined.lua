@@ -93,7 +93,7 @@ return {
 		},
 	},
 	{
-		regex = "%cA%cb",
+		regex = "\001\002",
 		flags = {
 			['i'] = true,
 			['u'] = true,
