@@ -9,6 +9,8 @@
 --[[ Globals ]]--
 local string_byte = string.byte
 
+--[[ Module ]]--
+
 return {
 	["\n"] = true,
 	["\r"] = true,

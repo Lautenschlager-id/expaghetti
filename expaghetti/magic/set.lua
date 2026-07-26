@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local SetNode = require("ast").Set
+local SetNode = require("core.ast").Set
 
 --[[ Enums ]]--
 local Elements = require("enums.elements")

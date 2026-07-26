@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local PositionCaptureNode = require("ast").PositionCapture
+local PositionCaptureNode = require("core.ast").PositionCapture
 
 --[[ Aliases ]]--
 local ELEMENT_POSITION_CAPTURE = require("enums.elements").POSITION_CAPTURE

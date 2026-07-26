@@ -7,7 +7,7 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local AST = require("ast")
+local AST = require("core.ast")
 local ParserHelper = require("helpers.parser")
 
 --[[ Enums ]]--
@@ -65,7 +65,13 @@ return function(state, peekIndex, peekChar, GroupIsClosingToken)
 			return false, nil, errorToThrow
 		end
 
-		node.targetName = nameStr
+		node.targetIndex = nameStr
+		
+		local stateMetadata = state.metadata
+		local refIndex = stateMetadata.namedReferenceIndex + 1
+		stateMetadata.namedReferenceIndex = refIndex
+		stateMetadata.namedReferences[refIndex] = node
+		
 		finalIndex, nextChar = afterLoopIndex, afterLoopChar
 	else
 		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR

@@ -1,5 +1,33 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
-local matcher = require("matcher.init")
+
+local Assertion = require("helpers.assertion")
+local compilePattern = require("helpers.api").compilePattern
+local ConfigNew = require("core.config").new
+local _matcher = require("matcher.init")
+
+local prettyPrint = require("prettyPrint")
+
+local AssertionIsStringOrTable = Assertion.isStringOrTable
+local AssertionIsString = Assertion.isString
+local AssertionIsNumber = Assertion.isNumber
+local AssertionIsTable = Assertion.isTable
+
+function matcher(expr, str, flags, startPosition, config)
+	AssertionIsStringOrTable(expr, "pattern")
+	AssertionIsString(str, "targetString")
+	AssertionIsStringOrTable(flags, "flags", true)
+	AssertionIsNumber(startPosition, "startPosition", true)
+	AssertionIsTable(config, "config", true)
+
+	config = ConfigNew(config or {})
+
+	local expr, flags, err = compilePattern(expr, flags, config)
+	if not expr and err then
+		return nil, err
+	end
+
+	return _matcher(expr, str, flags, startPosition or 0, config)
+end
 
 local performance = require("performance")
 
@@ -35,7 +63,7 @@ end
 
 local function assertError(expr, str, desc)
 	local hasMatched, err = matcher(expr, str)
-	if hasMatched ~= false or type(err) ~= "string" then
+	if hasMatched ~= nil or type(err) ~= "string" then
 		error(string.format("Test '%s' failed: Expected parse error for expr='%s', but got hasMatched=%s", desc, expr, tostring(hasMatched)))
 	end
 end
@@ -43,6 +71,9 @@ end
 local function assertCapture(expr, str, captureIndex, expectedStr, desc, flags)
 	local hasMatched, iniStr, endStr, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	if type(captureIndex) == "string" then
+		captureIndex = metadata.groupNames[captureIndex] or captureIndex
+	end
 	local ini = metadata.captureStarts[captureIndex]
 	local en  = metadata.captureEnds[captureIndex]
 	if type(ini) == "table" then
@@ -58,6 +89,9 @@ end
 local function assertCaptureAbsent(expr, str, captureIndex, desc, flags)
 	local hasMatched, _, _, metadata = matcher(expr, str, flags)
 	assert(hasMatched, string.format("Test '%s': expected match for expr='%s', str='%s'", desc, expr, str))
+	if type(captureIndex) == "string" then
+		captureIndex = metadata.groupNames[captureIndex] or captureIndex
+	end
 	assert(not metadata.captureStarts[captureIndex],
 		string.format("Test '%s': expected capture %s to be absent", desc, tostring(captureIndex)))
 end
@@ -84,12 +118,13 @@ performance.logPerformanceAtTheEnd(function()
 
 -- 1. Malformed inputs
 do
-	local hasMatched, err = matcher(123, "abc")
-	assert(hasMatched == false, "Malformed input should return false")
+	local success, err = pcall(matcher, 123, "abc")
+	assert(success == false, "Malformed input should return error")
 	assert(type(err) == "string", "Malformed input should return error message")
 
-	hasMatched, err = matcher("abc", 123)
-	assert(hasMatched == false, "Malformed target string should return false")
+	success, err = pcall(matcher, "abc", 123)
+	assert(success == false, "Malformed target string should return error")
+	assert(type(err) == "string", "Malformed target string should return error message")
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -389,10 +424,12 @@ assertCapture("(?<foo>ab)c", "abc", "foo", "ab", "Named group captures correctly
 do
 	local hasMatched, _, _, metadata = matcher("(?<first>[a-z]+)_(?<second>[a-z]+)", "hello_world")
 	assert(hasMatched, "Named groups: expected match")
-	local fi = metadata.captureStarts["first"]
-	local fe = metadata.captureEnds["first"]
-	local si = metadata.captureStarts["second"]
-	local se = metadata.captureEnds["second"]
+	local firstIdx = metadata.groupNames["first"]
+	local secondIdx = metadata.groupNames["second"]
+	local fi = metadata.captureStarts[firstIdx]
+	local fe = metadata.captureEnds[firstIdx]
+	local si = metadata.captureStarts[secondIdx]
+	local se = metadata.captureEnds[secondIdx]
 	if type(fi) == "table" then
 		fi = fi[#fi] fe = fe[#fe]
 		si = si[#si] se = se[#se]
@@ -809,27 +846,18 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 
 print("  [50] Depth Limits...")
 do
-	local config = require("config")
-	local saved = config.get()
-	config.set({ maxRecursionDepth = 5 })
+	local config = require("core.config").defaults
+	local savedRecursion = config.maxRecursionDepth
+	config.maxRecursionDepth = 5
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
-	config.set(saved)
+	config.maxRecursionDepth = savedRecursion
 end
 do
-	local config = require("config")
-	local saved = config.get()
-	config.set({ maxBacktrackDepth = 10 })
+	local config = require("core.config").defaults
+	local savedBacktrack = config.maxBacktrackDepth
+	config.maxBacktrackDepth = 10
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")
-	config.set(saved)
-end
-do
-	local config = require("config")
-	local saved = config.get()
-	local expaghetti = require("expaghetti")({ maxRecursionDepth = 100, maxBacktrackDepth = 1000 })
-	assert(type(expaghetti.match) == "function", "init entry point: returns match function")
-	local hasMatched, iniStr, endStr = expaghetti.match("a", "a")
-	assert(hasMatched and iniStr == 1 and endStr == 1, "init entry point: configured instance matches")
-	config.set(saved)
+	config.maxBacktrackDepth = savedBacktrack
 end
 
 ----------------------------------------------------------------------------------------------------

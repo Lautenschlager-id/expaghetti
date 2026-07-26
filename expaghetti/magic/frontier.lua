@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local FrontierNode = require("ast").Frontier
+local FrontierNode = require("core.ast").Frontier
 local Set = require("magic.set")
 
 --[[ Aliases ]]--

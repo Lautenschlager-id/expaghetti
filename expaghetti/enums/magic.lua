@@ -2,6 +2,8 @@
     Definitions of all regular expression magic characters and group behavior tokens.
 ]]
 
+--[[ Module ]]--
+
 local Magic = {
 	ALTERNATE_BRANCH_SEPARATOR = '|', -- a|b
 

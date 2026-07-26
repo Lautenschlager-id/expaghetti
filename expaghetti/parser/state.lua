@@ -1,8 +1,8 @@
 --[[
-    Parser state used throughout the parsing process.
+	Parser state shared by the pattern and replacement parsers.
 
-    Tracks the current parsing position, flags, shared metadata,
-    and parser context.
+	Tracks the current parsing position, flags, shared metadata,
+	and parser context.
 ]]
 
 --[[ Globals ]]--
@@ -21,7 +21,7 @@ local toCharArray = require("helpers.string").toCharArray
 local Flags = require("enums.flags").FLAGS
 
 --[[ Aliases ]]--
-local EscapedIsToken, EscapedParse = Escaped.isToken, Escaped.parse
+local EscapedIsToken, EscapedParse, EscapedParseReplacementTemplate = Escaped.isToken, Escaped.parse, Escaped.parseReplacementTemplate
 
 local FLAG_UNICODE = Flags.UNICODE
 local FLAG_CASE_INSENSITIVE = Flags.CASE_INSENSITIVE
@@ -32,45 +32,40 @@ local ParserState = {
 }
 ParserState.__index = ParserState
 
---- Creates a new ParserState instance for parsing a regular expression.
----@param expr string|table The regular expression string.
----@param flags string|table|nil A string of flag characters or a table of boolean flags.
+--- Creates a new ParserState instance for parsing patterns or replacement templates.
+---@param expr string|table The pattern or replacement template.
+---@param flags table A table of flag keys.
 ---@return ParserState state The instantiated parser state.
 function ParserState.new(expr, flags)
-	local self = setmetatable({}, ParserState)
+	local self = setmetatable({
+		expr = expr,
 
-	self.expr = expr
+		flags = flags,
 
-	self.flags = {}
-	if flags then
-		-- TO DO: Remove this later
-		if type(flags) == "string" then 
-			for char in flags:gmatch(".") do
-				self.flags[char] = true
-			end
-		elseif type(flags) == "table" then
-			for k, v in pairs(flags) do
-				self.flags[k] = v
-			end
-		end
-	end
+		isGroup = false,
+		isAlternate = false,
+		isBranchReset = false,
 
-	self.isGroup = false
-	self.isAlternate = false
-	self.isBranchReset = false
+		initialGroupIndex = 0,
 
-	self.initialGroupIndex = 0
+		metadata = {
+			groupNames = {},
+			namedReferences = {},
+			namedReferenceIndex = 0,
+			groupIndex = 0,
 
-	self.metadata = {
-		groupNames = {},
-		groupIndex = 0,
-		positionCaptureIndex = 0,
-		groupTreesByIndex = {},
-		groupTreesByName = {},
-	}
+			positionCaptureIndex = 0,
 
-	self.index = 1
-	self.patternChars, self.patternLength = toCharArray(expr, not not self.flags[FLAG_UNICODE])
+			groupTrees = {},
+		},
+
+		index = 1,
+
+		patternChars = nil,
+		patternLength = nil,
+	}, ParserState)
+
+	self.patternChars, self.patternLength = toCharArray(expr, not not flags[FLAG_UNICODE])
 
 	return self
 end
@@ -91,28 +86,41 @@ function ParserState:readElement(index, isInsideSet)
 	end
 end
 
+--- Reads the next element or character from a replacement template.
+---@param index number The current index in the replacement template.
+---@return number|boolean nextIndex The next index after reading, or false if reading failed.
+---@return string|ASTElement element The parsed replacement element or raw character.
+function ParserState:readReplacementTemplateElement(index)
+	local patternChars = self.patternChars
+
+	local char = patternChars[index]
+	if EscapedIsToken(char) then
+		return EscapedParseReplacementTemplate(self, index, patternChars)
+	else
+		return index + 1, char
+	end
+end
+
 --- Branches the current parser state into a child state, inheriting current context.
 ---@return ParserState childState The forked parser state.
 function ParserState:fork()
-	local child = setmetatable({}, ParserState)
+	return setmetatable({
+		expr = self.expr,
 
-	child.expr = self.expr
+		flags = self.flags,
 
-	child.flags = self.flags
+		isGroup = self.isGroup,
+		isAlternate = self.isAlternate,
+		isBranchReset = self.isBranchReset,
 
-	child.isGroup = self.isGroup
-	child.isAlternate = self.isAlternate
-	child.isBranchReset = self.isBranchReset
+		initialGroupIndex = self.initialGroupIndex,
 
-	child.initialGroupIndex = self.initialGroupIndex
+		metadata = self.metadata,
 
-	child.metadata = self.metadata
-
-	child.index = self.index
-	child.patternChars = self.patternChars
-	child.patternLength = self.patternLength
-
-	return child
+		index = self.index,
+		patternChars = self.patternChars,
+		patternLength = self.patternLength,
+	}, ParserState)
 end
 
 --- Parses a sub-tree using a child state.
@@ -253,6 +261,30 @@ end
 ---@param previousFlags FlagTable The flags to restore.
 function ParserState:popScopedFlags(previousFlags)
 	self.flags = previousFlags
+end
+
+--- Resolves all deferred named references.
+--- Replaces the names stored by deferred reference nodes with their
+--- corresponding capture group identifiers. This is performed after
+--- parsing once all named capture groups have been discovered, allowing
+--- references to be resolved only once instead of during execution.
+function ParserState:resolveNamedReferences()
+	local stateMetadata = self.metadata
+	local namedReferences = stateMetadata.namedReferences
+	local groupNames = stateMetadata.groupNames
+
+	for index = 1, stateMetadata.namedReferenceIndex do
+		local node = namedReferences[index]
+		local nodeIndex, nodeTargetIndex = node.index, node.targetIndex
+		if nodeIndex then
+			node.index = groupNames[nodeIndex] or nodeIndex
+		elseif nodeTargetIndex then
+			node.targetIndex = groupNames[nodeTargetIndex] or nodeTargetIndex
+		end
+	end
+
+	stateMetadata.namedReferences = {}
+	stateMetadata.namedReferenceIndex = 0
 end
 
 return ParserState

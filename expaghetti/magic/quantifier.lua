@@ -12,7 +12,7 @@ local tonumber = tonumber
 local deepCopy = require("helpers.table").deepCopy
 local ParserHelpers = require("helpers.parser")
 
-local QuantifierNode = require("ast").Quantifier
+local QuantifierNode = require("core.ast").Quantifier
 
 --[[ Enums ]]--
 local Magic = require("enums.magic")

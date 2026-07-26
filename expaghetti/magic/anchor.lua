@@ -6,7 +6,7 @@
 ]]
 	
 --[[ Dependencies ]]--
-local AnchorNode = require("ast").Anchor
+local AnchorNode = require("core.ast").Anchor
 
 --[[ Enums ]]--
 local Elements = require("enums.elements")

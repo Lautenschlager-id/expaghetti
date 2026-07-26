@@ -5,26 +5,24 @@
 ]]
 
 --[[ Dependencies ]]--
-local Anchor = require("magic.anchor")
 local Alternate = require("magic.alternate")
+local Anchor = require("magic.anchor")
 local Any = require("magic.any")
 local Group = require("magic.group.group")
-local Literal = require("magic.literal")
 local Quantifier = require("magic.quantifier")
 local Set = require("magic.set")
 
 --[[ Aliases ]]--
-
-local ERROR_UNTERMINATED_GROUP = require("enums.errors").unterminatedGroup
-
-local SetIsToken, SetParse = Set.isToken, Set.parse
-local GroupIsOpeningToken, GroupParse = Group.isOpeningToken, Group.parse
-local GroupIsClosingToken, GroupParseClosing = Group.isClosingToken, Group.parseClosing
+local AlternateIsToken, AlternateParse = Alternate.isToken, Alternate.parse
 local AnchorIsToken, AnchorParse = Anchor.isToken, Anchor.parse
 local AnyIsToken, AnyParse = Any.isToken, Any.parse
-local AlternateIsToken, AlternateParse = Alternate.isToken, Alternate.parse
-local LiteralParse = Literal.parse
+local GroupIsClosingToken, GroupParseClosing = Group.isClosingToken, Group.parseClosing
+local GroupIsOpeningToken, GroupParse = Group.isOpeningToken, Group.parse
+local LiteralParse = require("magic.literal").parse
 local QuantifierLookForElementOperation = Quantifier.lookForElementOperation
+local SetIsToken, SetParse = Set.isToken, Set.parse
+
+local ERROR_UNTERMINATED_GROUP = require("enums.errors").unterminatedGroup
 
 --[[ Module ]]--
 

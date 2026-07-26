@@ -247,11 +247,14 @@ Group.parse = function(state, tree)
 	elseif not statePatternChars[state.index] or statePatternChars[state.index] ~= MAGIC_GROUP_CLOSE then
 		local groupName = group.name
 
-		if not (group.isNonCapturing or groupName) then
-			if not state.flags.n then
+		if not group.isNonCapturing then
+			if groupName or not state.flags.n then
 				local groupIndex = stateMetadata.groupIndex + 1
 				stateMetadata.groupIndex = groupIndex
 				group.index = groupIndex
+				if groupName then
+					stateMetadata.groupNames[groupName] = groupIndex
+				end
 			else
 				group.isNonCapturing = true
 			end
@@ -269,11 +272,9 @@ Group.parse = function(state, tree)
 		group.tree = groupTree
 		
 		-- Register groups for recursion target lookup
-		local groupIndex, groupTreesByIndex, groupTreesByName = group.index, stateMetadata.groupTreesByIndex, stateMetadata.groupTreesByName
-		if groupIndex and groupTreesByIndex then
-			groupTreesByIndex[groupIndex] = groupTree
-		elseif groupName and groupTreesByName then
-			groupTreesByName[groupName] = groupTree
+		local groupIndex, groupTrees = group.index, stateMetadata.groupTrees
+		if groupIndex and groupTrees then
+			groupTrees[groupIndex] = groupTree
 		end
 	elseif not group.hasSpecialBehavior then
 		state.index = PositionCapture.parse(state.index, tree, stateMetadata)
@@ -341,15 +342,13 @@ Group.match = function(currentElement, state)
 
 	-- Resolve the recursion target before executing the group
 	if isRecursion then
-		local elementTargetIndex, elementTargetName = currentElement.targetIndex, currentElement.targetName
+		local elementTargetIndex = currentElement.targetIndex
 		if currentElement.isRecursionRoot then
 			groupTree = stateMetadata.rootTree
 		elseif elementTargetIndex then
-			groupTree = stateMetadata.parsedMetadata.groupTreesByIndex[elementTargetIndex]
-		elseif elementTargetName then
-			groupTree = stateMetadata.parsedMetadata.groupTreesByName[elementTargetName]
+			groupTree = stateMetadata.parsedMetadata.groupTrees[elementTargetIndex]
 		end
-
+		
 		if not groupTree or state:enterRecursion() then
 			return false, nil, nil, stateMetadata, false
 		end

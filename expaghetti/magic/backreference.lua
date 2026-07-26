@@ -8,7 +8,7 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local BackreferenceNode = require("ast").Backreference
+local BackreferenceNode = require("core.ast").Backreference
 local ParserHelpers = require("helpers.parser")
 
 --[[ Enums ]]--
@@ -71,7 +71,15 @@ Backreference.parseByName = function(state, currentCharacter, index, expression)
 		return false, closeChar and ERROR_INVALID_BACKREFERENCE_NAME or ERROR_UNTERMINATED_BACKREFERENCE
 	end
 
-	return afterIndex + 1, BackreferenceNode(tonumber(name) or name)
+	local numericName = tonumber(name)
+	local node = BackreferenceNode(numericName or name)
+	if not numericName then
+		local stateMetadata = state.metadata
+		local refIndex = stateMetadata.namedReferenceIndex + 1
+		stateMetadata.namedReferenceIndex = refIndex
+		stateMetadata.namedReferences[refIndex] = node
+	end
+	return afterIndex + 1, node
 end
 
 --- Matches a previously captured value against the target string.

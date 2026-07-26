@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local AnyNode = require("ast").Any
+local AnyNode = require("core.ast").Any
 
 --[[ Enums ]]--
 local LINE_BREAKS = require("enums.lineBreaks")

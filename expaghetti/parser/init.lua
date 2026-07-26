@@ -13,7 +13,7 @@ local ParserStateNew = ParserState.new
 
 --- Parses a regular expression into an Abstract Syntax Tree (AST).
 ---@param exprOrState string|ParserState The regular expression string or an existing parser state.
----@param flags string|table|nil A string of flag characters or a table of boolean flags.
+---@param flags table A table of flag keys.
 ---@return ASTTree|boolean tree The generated AST, or false if parsing failed.
 ---@return string|nil errorMessage The parser error message on failure.
 local parser = function(exprOrState, flags)
@@ -29,11 +29,12 @@ local parser = function(exprOrState, flags)
 		return false, errorMessage
 	end
 	
-	-- Upon successful parsing, attach metadata (like capture group contexts) to the ROOT of the tree.
-	-- We prevent attaching metadata to sub-trees (groups and alternates) to avoid data duplication
-	-- and keep the tree lightweight.
+	-- Perform root-level post-processing.
+	-- Attach parser metadata to the root AST and resolve all deferred named
+	-- references once every named capture group has been discovered.
 	if not state.isGroup and not state.isAlternate then
 		tree._metadata = state.metadata
+		state:resolveNamedReferences()
 	end
 
 	return tree

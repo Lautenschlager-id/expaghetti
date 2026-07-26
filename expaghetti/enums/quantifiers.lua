@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local QuantifierNode = require("ast").Quantifier
+local QuantifierNode = require("core.ast").Quantifier
 
 --[[ Enums ]]--
 local Magic = require("enums.magic")

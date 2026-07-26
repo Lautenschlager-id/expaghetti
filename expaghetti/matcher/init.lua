@@ -15,7 +15,7 @@ local MatchStateNew = MatchState.new
 --[[ Module ]]--
 
 --- Evaluates a regular expression against a target string.
----@param expr string The regular expression.
+---@param expr ASTTree The root AST tree.
 ---@param str string The target string to match against.
 ---@param flags string|FlagTable|nil A string of flag characters or a table of boolean flags.
 ---@param stringIndex number|nil The 0-based starting position in the target string (defaults to 0).
@@ -23,32 +23,9 @@ local MatchStateNew = MatchState.new
 ---@return number|nil iniStr The starting string index of the match.
 ---@return number|nil endStr The ending string index of the match.
 ---@return MatcherMetadata|nil matcherMetadata The match metadata.
-local matcher = function(expr, str, flags, stringIndex)
-	-- TO DO: Remove this later
-	if type(expr) ~= "string" then
-		return false, "Expression must be a string"
-	end
-	if type(str) ~= "string" then
-		return false, "Target must be a string"
-	end
-	if type(flags) == "string" then
-		local t = {}
-		for char in flags:gmatch(".") do
-			t[char] = true
-		end
-		flags = t
-	else
-		flags = flags or {}
-	end
-
-	local tree, errorMessage = parser(expr, flags)
-	if not tree then
-		return false, errorMessage
-	end
-
-	stringIndex = stringIndex or 0
-
-	local state = MatchStateNew(flags, str, tree)
+local matcher = function(expr, str, flags, stringIndex, config)
+	local tree, errorMessage = expr
+	local state = MatchStateNew(tree, str, flags, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
 	while stringIndex <= state.targetStringLength do

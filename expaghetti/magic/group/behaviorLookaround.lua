@@ -4,7 +4,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local AST = require("ast")
+local AST = require("core.ast")
 
 --[[ Enums ]]--
 local Magic = require("enums.magic")
