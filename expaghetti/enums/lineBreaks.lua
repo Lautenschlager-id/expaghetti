@@ -1,9 +1,9 @@
 --[[
-    Lookup table containing all line break characters recognized by the
-    regular expression engine.
+	Lookup table containing all line break characters recognized by the
+	regular expression engine.
 
-    Supports both string and byte representations to avoid conversions
-    during matching.
+	Supports both string and byte representations to avoid conversions
+	during matching.
 ]]
 
 --[[ Globals ]]--

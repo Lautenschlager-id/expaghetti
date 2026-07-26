@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for balanced elements (`%bxy`).
+	Parser and matcher for balanced elements (`%bxy`).
 
-    Matches balanced pairs of delimiters while supporting nested
-    occurrences of the same delimiter pair.
+	Matches balanced pairs of delimiters while supporting nested
+	occurrences of the same delimiter pair.
 ]]
 
 --[[ Dependencies ]]--

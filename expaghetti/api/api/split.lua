@@ -1,8 +1,8 @@
 --[[
-    Splits a target string using a pattern as the delimiter.
+	Splits a target string using a pattern as the delimiter.
 
-    Returns the unmatched portions of the string separated by
-    each pattern match.
+	Returns the unmatched portions of the string separated by
+	each pattern match.
 ]]
 
 --[[ Globals ]]--

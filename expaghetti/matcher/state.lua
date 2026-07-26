@@ -1,8 +1,8 @@
 --[[
-    Match state used throughout the matching process.
+	Match state used throughout the matching process.
 
-    Tracks the current execution position, shared metadata,
-    recursion state, backtracking state, and capture information.
+	Tracks the current execution position, shared metadata,
+	recursion state, backtracking state, and capture information.
 ]]
 
 --[[ Globals ]]--

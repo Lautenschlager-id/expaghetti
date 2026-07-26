@@ -1,9 +1,9 @@
 --[[
-    Public API enumerations.
+	Public API enumerations.
 
-    Exposes the stable enumeration values supported by Expaghetti's
-    public API while keeping the engine's internal enumerations
-    implementation-private.
+	Exposes the stable enumeration values supported by Expaghetti's
+	public API while keeping the engine's internal enumerations
+	implementation-private.
 ]]
 
 --[[ Globals ]]--

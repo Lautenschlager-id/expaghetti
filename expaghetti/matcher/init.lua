@@ -1,7 +1,7 @@
 --[[
-    Matcher entry point.
+	Matcher entry point.
 
-    Evaluates a regular expression against a target string.
+	Evaluates a regular expression against a target string.
 ]]
 
 --[[ Dependencies ]]--

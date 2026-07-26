@@ -1,5 +1,5 @@
 --[[
-    Helper functions for UTF-8 string processing.
+	Helper functions for UTF-8 string processing.
 	
 	Based on luvit/ustring.lua
 ]]

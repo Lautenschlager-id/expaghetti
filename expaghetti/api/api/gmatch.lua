@@ -1,8 +1,8 @@
 --[[
-    Iterates over every occurrence of a pattern in a target string.
+	Iterates over every occurrence of a pattern in a target string.
 
-    Provides a lazy matching API that yields match objects one
-    at a time.
+	Provides a lazy matching API that yields match objects one
+	at a time.
 ]]
 
 --[[ Globals ]]--

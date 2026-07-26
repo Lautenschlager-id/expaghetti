@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for string anchors.
+	Parser and matcher for string anchors.
 
-    Supports the beginning (`^`) and end (`$`) anchors, including
-    multiline matching behavior.
+	Supports the beginning (`^`) and end (`$`) anchors, including
+	multiline matching behavior.
 ]]
 	
 --[[ Dependencies ]]--

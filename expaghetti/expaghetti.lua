@@ -1,9 +1,9 @@
 --[[
-    Expaghetti public API.
+	Expaghetti public API.
 
-    Provides a default regular expression engine for convenient
-    one-off operations, while also exposing the constructors and
-    enumerations required to create and configure custom engines.
+	Provides a default regular expression engine for convenient
+	one-off operations, while also exposing the constructors and
+	enumerations required to create and configure custom engines.
 ]]
 
 --[[ Globals ]]--

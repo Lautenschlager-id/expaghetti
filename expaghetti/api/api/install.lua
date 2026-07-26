@@ -1,8 +1,8 @@
 --[[
-    Installs and removes Expaghetti's optional string library extensions.
+	Installs and removes Expaghetti's optional string library extensions.
 
-    Allows Lua's string library to transparently use Expaghetti's
-    regular expression implementation.
+	Allows Lua's string library to transparently use Expaghetti's
+	regular expression implementation.
 ]]
 
 --[[ Globals ]]--

@@ -1,9 +1,9 @@
 --[[
-    Engine configuration.
+	Engine configuration.
 
-    Defines the default engine configuration and provides utilities
-    for resolving user-supplied configuration with the library's
-    default values.
+	Defines the default engine configuration and provides utilities
+	for resolving user-supplied configuration with the library's
+	default values.
 ]]
 
 --[[ Globals ]]--

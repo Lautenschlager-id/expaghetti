@@ -1,6 +1,6 @@
 --[[
-    Parser for inline and scoped flag group behaviors:
-    `(?flags)`, `(?-flags)`, `(?flags:...)`, and `(?-flags:...)`.
+	Parser for inline and scoped flag group behaviors:
+	`(?flags)`, `(?-flags)`, `(?flags:...)`, and `(?-flags:...)`.
 ]]
 
 --[[ Dependencies ]]--

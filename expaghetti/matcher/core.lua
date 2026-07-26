@@ -1,7 +1,7 @@
 --[[
-    Core matching loop.
+	Core matching loop.
 
-    Matches an AST tree against the target string.
+	Matches an AST tree against the target string.
 ]]
 
 --[[ Dependencies ]]--

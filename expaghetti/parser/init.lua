@@ -1,5 +1,5 @@
 --[[
-    Parses a regular expression into an Abstract Syntax Tree (AST).
+	Parses a regular expression into an Abstract Syntax Tree (AST).
 ]]
 
 --[[ Dependencies ]]--

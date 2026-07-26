@@ -1,5 +1,5 @@
 --[[
-    Reusable error message templates shared by the parser and matcher.
+	Reusable error message templates shared by the parser and matcher.
 ]]
 
 --[[ Globals ]]--

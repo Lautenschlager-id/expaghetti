@@ -1,8 +1,8 @@
 --[[
-    Parser for quantifiers.
+	Parser for quantifiers.
 
-    Detects and parses standard, custom, and possessive/lazy quantifiers,
-    attaching them to the preceding AST element.
+	Detects and parses standard, custom, and possessive/lazy quantifiers,
+	attaching them to the preceding AST element.
 ]]
 
 --[[ Globals ]]--

@@ -1,5 +1,5 @@
 --[[
-    Helper functions for parsing and string consumption.
+	Helper functions for parsing and string consumption.
 ]]
 
 --[[ Module ]]--

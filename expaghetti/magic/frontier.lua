@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for frontier boundary elements (`%f[...]`).
+	Parser and matcher for frontier boundary elements (`%f[...]`).
 
-    Matches positions where the transition between characters crosses
-    the specified character set.
+	Matches positions where the transition between characters crosses
+	the specified character set.
 ]]
 
 --[[ Dependencies ]]--

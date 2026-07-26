@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for position captures (`()`).
+	Parser and matcher for position captures (`()`).
 
-    Captures the current position in the target string without consuming
-    any characters.
+	Captures the current position in the target string without consuming
+	any characters.
 ]]
 
 --[[ Dependencies ]]--

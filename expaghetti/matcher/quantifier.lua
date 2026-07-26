@@ -1,8 +1,8 @@
 --[[
-    Matcher for quantified AST elements.
+	Matcher for quantified AST elements.
 
-    Handles greedy, lazy, and possessive quantifiers, including
-    nested backtracking and continuation of the main matching engine.
+	Handles greedy, lazy, and possessive quantifiers, including
+	nested backtracking and continuation of the main matching engine.
 ]]
 
 --[[ Dependencies ]]--

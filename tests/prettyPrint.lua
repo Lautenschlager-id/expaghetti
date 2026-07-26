@@ -1,5 +1,5 @@
 --[[
-    Helper function for pretty printing tables.
+	Helper function for pretty printing tables.
 ]]
 
 --[[ Globals ]]--

@@ -1,5 +1,5 @@
 --[[
-    Parser for capturing group behaviors: `(...)`, `(?:...)`, `(?<name>...)`.
+	Parser for capturing group behaviors: `(...)`, `(?:...)`, `(?<name>...)`.
 ]]
 
 --[[ Globals ]]--

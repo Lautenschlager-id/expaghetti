@@ -1,8 +1,8 @@
 --[[
-    Finds the first occurrence of a pattern in a target string.
+	Finds the first occurrence of a pattern in a target string.
 
-    Implements a lightweight search API that returns only the
-    boundaries of the first match.
+	Implements a lightweight search API that returns only the
+	boundaries of the first match.
 ]]
 
 --[[ Dependencies ]]--

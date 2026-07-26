@@ -1,9 +1,9 @@
 --[[
-    Lookup tables classifying AST element types by the number of characters
-    they consume during matching.
+	Lookup tables classifying AST element types by the number of characters
+	they consume during matching.
 
-    Used to efficiently determine the fixed length of lookbehind expressions
-    and other fixed-length constructs.
+	Used to efficiently determine the fixed length of lookbehind expressions
+	and other fixed-length constructs.
 ]]
 
 --[[ Enums ]]--
@@ -31,6 +31,6 @@ local SINGLE_LENGTH = {
 }
 
 return {
-    ZERO_LENGTH = ZERO_LENGTH,
-    SINGLE_LENGTH = SINGLE_LENGTH, 
+	ZERO_LENGTH = ZERO_LENGTH,
+	SINGLE_LENGTH = SINGLE_LENGTH, 
 }

@@ -1,6 +1,6 @@
 --[[
-    Parser for lookahead and lookbehind group behaviors.
-    Supports `(?=...)`, `(?!...)`, `(?<=...)`, and `(?<!...)`.
+	Parser for lookahead and lookbehind group behaviors.
+	Supports `(?=...)`, `(?!...)`, `(?<=...)`, and `(?<!...)`.
 ]]
 
 --[[ Dependencies ]]--

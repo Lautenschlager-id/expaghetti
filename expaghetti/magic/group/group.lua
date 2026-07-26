@@ -1,7 +1,7 @@
 --[[
-    Group parser and matcher.
+	Group parser and matcher.
 
-    Handles parsing and execution of all regular expression group constructs,
+	Handles parsing and execution of all regular expression group constructs,
 	including its different behaviors.
 ]]
 
@@ -117,7 +117,7 @@ getLookbehindFixedLength = function(tree)
 			-- Unknown element, cannot determine length safely
 			return nil, string_format(ERROR_UNKNOWN_ELEMENT_LENGTH, tostring(elemType or elem))
 		end
-    end
+	end
 	return totalLen
 end
 

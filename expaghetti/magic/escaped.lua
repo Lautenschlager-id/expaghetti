@@ -1,9 +1,9 @@
 --[[
-    Parser and matcher for escaped sequences.
+	Parser and matcher for escaped sequences.
 
-    Supports escaped literals, character classes, backreferences,
-    balanced elements, frontier assertions, control characters,
-    and Unicode escape sequences.
+	Supports escaped literals, character classes, backreferences,
+	balanced elements, frontier assertions, control characters,
+	and Unicode escape sequences.
 ]]
 
 --[[ Globals ]]--

@@ -1,5 +1,5 @@
 --[[
-    Parser for the branch reset group behavior `(?|...)`.
+	Parser for the branch reset group behavior `(?|...)`.
 ]]
 
 --[[ Dependencies ]]--

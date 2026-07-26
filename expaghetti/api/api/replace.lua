@@ -1,8 +1,8 @@
 --[[
-    Replaces pattern matches within a target string.
+	Replaces pattern matches within a target string.
 
-    Supports replacement strings, callback functions, and lookup
-    tables for flexible substitution.
+	Supports replacement strings, callback functions, and lookup
+	tables for flexible substitution.
 ]]
 
 --[[ Globals ]]--

@@ -1,9 +1,9 @@
 --[[
-    Precompiled character class definitions used by the parser to expand
-    regular expression character classes (e.g. %a, %d, %w, %s) into set elements.
+	Precompiled character class definitions used by the parser to expand
+	regular expression character classes (e.g. %a, %d, %w, %s) into set elements.
 
-    Each entry is represented as a reusable AST set node that can be shared
-    whenever the corresponding character class is encountered.
+	Each entry is represented as a reusable AST set node that can be shared
+	whenever the corresponding character class is encountered.
 ]]
 
 --[[ Dependencies ]]--

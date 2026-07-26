@@ -1,6 +1,6 @@
 --[[
-    Parser for recursion group behaviors.
-    Supports `(?R)`, `(?0)`, `(?123)`, and `(?&name)`.
+	Parser for recursion group behaviors.
+	Supports `(?R)`, `(?0)`, `(?123)`, and `(?&name)`.
 ]]
 
 --[[ Globals ]]--

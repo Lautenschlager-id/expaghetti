@@ -1,9 +1,9 @@
 --[[
-    Expaghetti regular expression engine.
+	Expaghetti regular expression engine.
 
-    Stores the engine configuration and exposes the primary API for
-    compiling patterns, searching, matching, replacing, and splitting
-    strings using regular expressions.
+	Stores the engine configuration and exposes the primary API for
+	compiling patterns, searching, matching, replacing, and splitting
+	strings using regular expressions.
 ]]
 
 --[[ Globals ]]--

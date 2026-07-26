@@ -1,7 +1,7 @@
 --[[
-    Flag definitions used by the parser and matcher.
+	Flag definitions used by the parser and matcher.
 
-    Includes the complete set of supported regular expression flags
+	Includes the complete set of supported regular expression flags
 	and the subset allowed within inline flag groups.
 ]]
 

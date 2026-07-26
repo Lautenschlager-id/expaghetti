@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for character sets (`[...]`).
+	Parser and matcher for character sets (`[...]`).
 
-    Supports literal characters, ranges, nested character classes,
-    and negated sets.
+	Supports literal characters, ranges, nested character classes,
+	and negated sets.
 ]]
 
 --[[ Dependencies ]]--

@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for the wildcard (`.`) element.
+	Parser and matcher for the wildcard (`.`) element.
 
-    Matches any character except line breaks by default, or every
-    character when the dot-all (`s`) flag is enabled.
+	Matches any character except line breaks by default, or every
+	character when the dot-all (`s`) flag is enabled.
 ]]
 
 --[[ Dependencies ]]--

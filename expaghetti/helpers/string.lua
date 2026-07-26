@@ -1,5 +1,5 @@
 --[[
-    Helper functions for string manipulation and character conversion.
+	Helper functions for string manipulation and character conversion.
 ]]
 
 --[[ Globals ]]--

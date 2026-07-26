@@ -1,5 +1,5 @@
 --[[
-    Delegates AST element matching to the appropriate matcher implementation.
+	Delegates AST element matching to the appropriate matcher implementation.
 ]]
 
 --[[ Dependencies ]]--
