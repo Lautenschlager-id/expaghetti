@@ -1,15 +1,17 @@
 --[[
-    API Entry Point
+    Shared API function registry.
+
+    Centralizes Expaghetti's API implementations so they can be shared among module APIs.
 ]]
 
+--[[ Module ]]--
 return {
-	test = require("api.api.test"),
+	find = require("api.api.find"),
+	gmatch = require("api.api.gmatch"),
+	installHooks = require("api.api.install"),
 	match = require("api.api.match"),
 	matchAll = require("api.api.matchAll"),
-	gmatch = require("api.api.gmatch"),
-	find = require("api.api.find"),
 	replace = require("api.api.replace"),
 	split = require("api.api.split"),
-	
-	installHooks = require("api.api.install")
+	test = require("api.api.test"),
 }

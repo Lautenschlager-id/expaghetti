@@ -2,7 +2,7 @@ package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
 local Assertion = require("helpers.assertion")
 local compilePattern = require("helpers.api").compilePattern
-local ConfigBuild = require("core.config").build
+local ConfigNew = require("core.config").new
 local _matcher = require("matcher.init")
 
 local prettyPrint = require("prettyPrint")
@@ -19,7 +19,7 @@ function matcher(expr, str, flags, startPosition, config)
 	AssertionIsNumber(startPosition, "startPosition", true)
 	AssertionIsTable(config, "config", true)
 
-	config = ConfigBuild(config or {})
+	config = ConfigNew(config or {})
 
 	local expr, flags, err = compilePattern(expr, flags, config)
 	if not expr and err then
@@ -846,14 +846,14 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 
 print("  [50] Depth Limits...")
 do
-	local config = require("core.config").global
+	local config = require("core.config").defaults
 	local savedRecursion = config.maxRecursionDepth
 	config.maxRecursionDepth = 5
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
 	config.maxRecursionDepth = savedRecursion
 end
 do
-	local config = require("core.config").global
+	local config = require("core.config").defaults
 	local savedBacktrack = config.maxBacktrackDepth
 	config.maxBacktrackDepth = 10
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")

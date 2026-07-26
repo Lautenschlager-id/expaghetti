@@ -1,5 +1,8 @@
 --[[
-    API: matchAll and gmatch
+    Iterates over every occurrence of a pattern in a target string.
+
+    Provides a lazy matching API that yields match objects one
+    at a time.
 ]]
 
 --[[ Globals ]]--
@@ -20,6 +23,16 @@ local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
+
+--- Iterates over every occurrence of a pattern in a target string.
+--- Returns an iterator that yields one match object per successful
+--- match until no further matches are found.
+---@param pattern string|Pattern The pattern to search for.
+---@param targetString string The string to search.
+---@param flags string|table|nil Optional regular expression flags.
+---@param startPosition integer|nil The position at which to begin searching.
+---@param config EngineConfig The engine configuration.
+---@return fun(): Match|nil, string|nil iterator The match iterator.
 return function(pattern, targetString, flags, startPosition, config)
 	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
@@ -50,7 +63,7 @@ return function(pattern, targetString, flags, startPosition, config)
 
 			return buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 		elseif matchStart then
-			return nil, "Expaghetti Error: " .. matchStart
+			return nil, matchStart
 		end
 		return nil
 	end

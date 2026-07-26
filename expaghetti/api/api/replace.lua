@@ -1,5 +1,8 @@
 --[[
-    API: replace and gsub
+    Replaces pattern matches within a target string.
+
+    Supports replacement strings, callback functions, and lookup
+    tables for flexible substitution.
 ]]
 
 --[[ Globals ]]--
@@ -31,9 +34,14 @@ local AssertionIsStringOrFunctionOrTable = Assertion.isStringOrFunctionOrTable
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsTable = Assertion.isTable
 
-local prettyPrint = require("prettyPrint")
-
 --[[ Module ]]--
+
+--- Evaluates a parsed replacement template for a match.
+--- Produces the replacement string by resolving literals and
+--- backreferences against the provided match.
+---@param tree AST The parsed replacement template.
+---@param match Match The match used to evaluate the template.
+---@return string replacement The evaluated replacement string.
 local applyReplacementTemplate = function(tree, match)
 	local segments = {}
 	local segmentCount = 0
@@ -56,6 +64,18 @@ local applyReplacementTemplate = function(tree, match)
 	return table_concat(segments)
 end
 
+--- Replaces pattern matches within a target string.
+--- Returns the resulting string together with the number of
+--- replacements performed.
+---@param pattern string|Pattern The pattern to search for.
+---@param targetString string The string to search.
+---@param replacement string|function|table The replacement specification.
+---@param flags string|table|nil Optional regular expression flags.
+---@param startPosition integer|nil The position at which to begin searching.
+---@param config EngineConfig The engine configuration.
+---@param maxOccurrences integer|nil The maximum number of replacements to perform.
+---@return string|nil result The resulting string.
+---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
 return function(pattern, targetString, replacement, flags, startPosition, config, maxOcurrences)
 	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
@@ -84,7 +104,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 	if isStringReplacement then
 		replacementTree, errorMessage = parserReplacementTemplate(replacement, parsedFlags)
 		if errorMessage then
-			return nil, "Expaghetti Error: " .. errorMessage
+			return nil, errorMessage
 		end
 	end
 
@@ -97,7 +117,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(tree, targetString, parsedFlags, currentIndex, config)
 		if not hasMatched then
 			if matchStart then
-				return nil, "Expaghetti Error: " .. matchStart
+				return nil, matchStart
 			end
 			break
 		end
@@ -107,13 +127,13 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 
 		local match = buildMatchObject(targetString, matchStart, matchEnd, matcherMetadata)
 		local matchValue = match.value
+
+		local substitution
 		if isStringReplacement then
-			segmentCount = segmentCount + 1
-			segments[segmentCount] = applyReplacementTemplate(replacementTree, match)
+			substitution = applyReplacementTemplate(replacementTree, match)
 		elseif replacementType == "function" then
-			local substitution = replacement(match)
-			segmentCount = segmentCount + 1
-			segments[segmentCount] = substitution ~= nil and tostring(substitution) or matchValue
+			substitution = replacement(match)
+			substitution = substitution and tostring(substitution)
 		elseif replacementType == "table" then
 			local lookupKey = matchValue
 			local matchGroups = match.groups
@@ -121,14 +141,20 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 			if firstGroup then -- TO DO: Check if #firstGroup > 0 is necessary
 				lookupKey = firstGroup[#firstGroup].value
 			end
-			
-			local substitution = replacement[lookupKey]
-			segmentCount = segmentCount + 1
-			segments[segmentCount] = substitution ~= nil and tostring(substitution) or matchValue
+
+			substitution = replacement[lookupKey]
+			substitution = substitution and tostring(substitution)
 		end
-
-		replaceCount = replaceCount + 1
-
+		
+		if substitution then
+			segmentCount = segmentCount + 1
+			segments[segmentCount] = substitution
+			replaceCount = replaceCount + 1
+		else
+			segmentCount = segmentCount + 1
+			segments[segmentCount] = matchValue
+		end
+		
 		lastCopied = math_max(lastCopied, matchEnd)
 		if matchEnd < matchStart then
 			currentIndex = math_max(currentIndex + 1, matchStart)

@@ -1,5 +1,8 @@
 --[[
-    API: matchAll and gmatch
+    Finds every occurrence of a pattern in a target string.
+
+    Executes repeated searches and returns every match as a
+    structured match object.
 ]]
 
 --[[ Globals ]]--
@@ -20,6 +23,16 @@ local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
+
+--- Finds every occurrence of a pattern in a target string.
+--- Returns an array containing every match found in search order.
+---@param pattern string|Pattern The pattern to search for.
+---@param targetString string The string to search.
+---@param flags string|table|nil Optional regular expression flags.
+---@param startPosition integer|nil The position at which to begin searching.
+---@param config EngineConfig The engine configuration.
+---@return Match[]|nil matches All matches found.
+---@return string|nil errorMessage The compilation or matching error message.
 return function(pattern, targetString, flags, startPosition, config)
 	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
@@ -42,7 +55,7 @@ return function(pattern, targetString, flags, startPosition, config)
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(tree, targetString, parsedFlags, currentIndex, config)
 		if not hasMatched then
 			if matchStart then
-				return nil, "Expaghetti Error: " .. matchStart
+				return nil, matchStart
 			end
 			break
 		end

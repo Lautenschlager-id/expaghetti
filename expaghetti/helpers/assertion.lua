@@ -19,7 +19,8 @@ local type = type
 local isString = function(value, parameterName, acceptNil)
     if type(value) == "string" or (acceptNil and value == nil) then return end
     error(
-        string_format("bad argument '%s' (string expected, got %s)", parameterName, type(value))
+        string_format("bad argument '%s' (string expected, got %s)", parameterName, type(value)),
+        2
     )
 end
 
@@ -31,7 +32,8 @@ end
 local isNumber = function(value, parameterName, acceptNil)
     if type(value) == "number" or (acceptNil and value == nil) then return end
     error(
-        string_format("bad argument '%s' (number expected, got %s)", parameterName, type(value))
+        string_format("bad argument '%s' (number expected, got %s)", parameterName, type(value)),
+        2
     )
 end
 
@@ -43,7 +45,8 @@ end
 local isTable = function(value, parameterName, acceptNil)
     if type(value) == "table" or (acceptNil and value == nil) then return end
     error(
-        string_format("bad argument '%s' (table expected, got %s)", parameterName, type(value))
+        string_format("bad argument '%s' (table expected, got %s)", parameterName, type(value)),
+        2
     )
 end
 
@@ -55,7 +58,8 @@ end
 local isStringOrTable = function(value, parameterName, acceptNil)
     if type(value) == "string" or type(value) == "table" or (acceptNil and value == nil) then return end
     error(
-        string_format("bad argument '%s' (string or table expected, got %s)", parameterName, type(value))
+        string_format("bad argument '%s' (string or table expected, got %s)", parameterName, type(value)),
+        2
     )
 end
 
@@ -67,7 +71,8 @@ end
 local isStringOrFunctionOrTable = function(value, parameterName, acceptNil)
     if type(value) == "string" or type(value) == "function" or type(value) == "table" or (acceptNil and value == nil) then return end
     error(
-        string_format("bad argument '%s' (string or function or table expected, got %s)", parameterName, type(value))
+        string_format("bad argument '%s' (string or function or table expected, got %s)", parameterName, type(value)),
+        2
     )
 end
 

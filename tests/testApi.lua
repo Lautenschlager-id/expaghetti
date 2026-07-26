@@ -7,7 +7,7 @@ local expaghetti = require("expaghetti")
 local function assertDeepEqual(a, b, path)
 	path = path or "root"
 	if type(a) ~= type(b) then
-		error("Type mismatch at " .. path .. ": expected " .. type(b) .. " but got " .. type(a))
+		error("Type mismatch at " .. path .. ": expected " .. type(b) .. " but got " .. type(a), 2)
 	end
 	if type(a) == "table" then
 		for k, v in pairs(a) do
@@ -15,12 +15,12 @@ local function assertDeepEqual(a, b, path)
 		end
 		for k, v in pairs(b) do
 			if a[k] == nil then
-				error("Missing key at " .. path .. ": " .. tostring(k))
+				error("Missing key at " .. path .. ": " .. tostring(k), 2)
 			end
 		end
 	else
 		if a ~= b then
-			error("Mismatch at " .. path .. ": expected " .. tostring(b) .. " but got " .. tostring(a))
+			error("Mismatch at " .. path .. ": expected " .. tostring(b) .. " but got " .. tostring(a), 2)
 		end
 	end
 end
@@ -264,48 +264,117 @@ end)
 --------------------------------------------------------------------------------
 print("\n--- exp.replace and exp.gsub ---")
 check("String replacement with templates", function()
-	local rep = expaghetti.replace("([a-z]+)=(%d+)", "a=1 b=2 c=3", "%2=%1")
-	assertDeepEqual(rep, "1=a 2=b 3=c")
-	
-	local rep2 = expaghetti.replace("([a-z]+)=(%d+)", "a=1", "val: %0")
+	local rep, count = expaghetti.replace("([a-z]+)=(%d+)", "a=1 b=2 c=3", "%2=%1")
+	assertDeepEqual(rep, "1=a b=2 c=3")
+	assertDeepEqual(count, 1)
+
+	local rep2, count2 = expaghetti.replace("([a-z]+)=(%d+)", "a=1", "val: %0")
 	assertDeepEqual(rep2, "val: a=1")
-	
+	assertDeepEqual(count2, 1)
+
 	-- Template with multiple captures of the same group uses the LAST capture
-	local rep3 = expaghetti.replace("(a)+", "aaa", "group1=%1")
-	assertDeepEqual(rep3, "group1=a") -- The last captured 'a'
+	local rep3, count3 = expaghetti.replace("(.)+", "abc", "group1=%1")
+	assertDeepEqual(rep3, "group1=c")
+	assertDeepEqual(count3, 1)
 end)
 
 check("String replacement with function", function()
-	local rep = expaghetti.replace("([a-z]+)=(%d+)", "a=10 b=20", function(match)
+	local rep, count = expaghetti.replace("([a-z]+)=(%d+)", "a=10 b=20", function(match)
 		local num = tonumber(match.groups[2][1].value)
 		return match.groups[1][1].value .. "=" .. tostring(num * 2)
 	end)
-	assertDeepEqual(rep, "a=20 b=40")
-	
+	assertDeepEqual(rep, "a=20 b=20")
+	assertDeepEqual(count, 1)
+
 	-- Function returning nil means no replacement
-	local rep2 = expaghetti.replace("%d+", "1 2 3", function(match)
-		if match.value == "2" then return nil end
+	local rep2, count2 = expaghetti.replace("%d+", "1 2 3", function(match)
+		if match.value == "1" then return nil end
 		return "X"
 	end)
-	assertDeepEqual(rep2, "X 2 X")
+	assertDeepEqual(rep2, "1 X 3")
+	assertDeepEqual(count2, 1)
 end)
 
 check("String replacement with table", function()
 	local tbl = { ["1"] = "ONE", ["3"] = "THREE" }
-	local res = expaghetti.replace("(%d+)", "1 2 3", tbl)
-	assertDeepEqual(res, "ONE 2 THREE") -- '2' not in table, stays '2'
+	local res, count = expaghetti.replace("(%d+)", "1 2 3", tbl)
+	assertDeepEqual(res, "ONE 2 3")
+	assertDeepEqual(count, 1)
+
+	local tbl2 = { ["a"] = "A" }
+	local res2, count2 = expaghetti.replace("([a-z])=", "a= b=", tbl2)
+	assertDeepEqual(res2, "A b=")
+	assertDeepEqual(count2, 1)
+
+	local tbl3 = { ["b"] = "B" }
+	local res3, count3 = expaghetti.replace("([a-z])=", "a= b=", tbl3)
+	assertDeepEqual(res3, "a= B")
+	assertDeepEqual(count3, 1)
+end)
+
+check("String replacement with templates", function()
+	local rep, count = expaghetti.gsub("([a-z]+)=(%d+)", "a=1 b=2 c=3", "%2=%1")
+	assertDeepEqual(rep, "1=a 2=b 3=c")
+	assertDeepEqual(count, 3)
+
+	local rep2, count2 = expaghetti.gsub("([a-z]+)=(%d+)", "a=1", "val: %0")
+	assertDeepEqual(rep2, "val: a=1")
+	assertDeepEqual(count2, 1)
+
+	-- Template with multiple captures of the same group uses the LAST capture
+	local rep3, count3 = expaghetti.gsub("(.)+", "abc", "group1=%1")
+	assertDeepEqual(rep3, "group1=c")
+	assertDeepEqual(count3, 1)
+end)
+
+check("String replacement with function", function()
+	local rep, count = expaghetti.gsub("([a-z]+)=(%d+)", "a=10 b=20", function(match)
+		local num = tonumber(match.groups[2][1].value)
+		return match.groups[1][1].value .. "=" .. tostring(num * 2)
+	end)
+	assertDeepEqual(rep, "a=20 b=40")
+	assertDeepEqual(count, 2)
+
+	-- Function returning nil means no replacement and does NOT count towards the limit
+	local rep2, count2 = expaghetti.gsub("%d+", "1 2 3", function(match)
+		if match.value == "2" then return nil end
+		return "X"
+	end)
+	assertDeepEqual(rep2, "X 2 X")
+	assertDeepEqual(count2, 2)
 	
+	-- Verify that skipped replacements do not consume the limit
+	local rep3, count3 = expaghetti.gsub("%d+", "1 2 3 4", function(match)
+		if match.value == "1" then return nil end
+		return "X"
+	end, nil, 2)
+	assertDeepEqual(rep3, "1 X X 4")
+	assertDeepEqual(count3, 2)
+end)
+
+check("String replacement with table", function()
+	local tbl = { ["1"] = "ONE", ["3"] = "THREE" }
+	local res, count = expaghetti.gsub("(%d+)", "1 2 3", tbl)
+	assertDeepEqual(res, "ONE 2 THREE")
+	assertDeepEqual(count, 2)
+
 	local tbl2 = { ["a"] = "A" }
 	-- Uses group 1 if present, otherwise whole match
-	local res2 = expaghetti.replace("([a-z])=", "a= b=", tbl2)
+	local res2, count2 = expaghetti.gsub("([a-z])=", "a= b=", tbl2)
 	assertDeepEqual(res2, "A b=")
+	assertDeepEqual(count2, 1)
+
+	local tbl3 = { ["b"] = "B" }
+	local res3, count3 = expaghetti.gsub("([a-z])=", "a= b=", tbl3)
+	assertDeepEqual(res3, "a= B")
+	assertDeepEqual(count3, 1)
 end)
 
 check("gsub with limit (n) parameter", function()
 	local res, count = expaghetti.gsub("a", "aaaaa", "X", nil, 3)
 	assertDeepEqual(res, "XXXaa")
 	assertDeepEqual(count, 3)
-	
+
 	local res2, count2 = expaghetti.gsub("a", "aaaaa", "X", nil, 0)
 	assertDeepEqual(res2, "aaaaa")
 	assertDeepEqual(count2, 0)
@@ -313,7 +382,6 @@ end)
 
 check("gsub with zero-length matches (progression)", function()
 	local res, count = expaghetti.gsub("x?", "y", "Z")
-	-- y -> Z + y + Z
 	assertDeepEqual(res, "ZyZ")
 	assertDeepEqual(count, 2)
 end)

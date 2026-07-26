@@ -1,15 +1,30 @@
 --[[
-    Configuration module.
+    Engine configuration.
+
+    Defines the default engine configuration and provides utilities
+    for resolving user-supplied configuration with the library's
+    default values.
 ]]
 
 --[[ Globals ]]--
 local math_huge = math.huge
+local next = next
 local table_concat = table.concat
 
---[[ Constants ]]--
-local DEFAULT_MAX_RECURSION_DEPTH = 200
-local DEFAULT_MAX_BACKTRACK_DEPTH = 50000
+--[[ Dependencies ]]--
+local AssertionIsNumber = require("helpers.assertion").isNumber
 
+--[[ Module ]]--
+local defaults = {
+	maxRecursionDepth = 200,
+	maxBacktrackDepth = 50000,
+	patternCacheSize = math_huge,
+	_cacheKey = nil
+}
+
+--- Builds a cache key for a resolved engine configuration.
+---@param config ResolvedEngineConfig The resolved engine configuration.
+---@return string cacheKey The generated cache key.
 local buildCacheKey = function(config)
 	return table_concat({
 		config.maxRecursionDepth,
@@ -17,37 +32,47 @@ local buildCacheKey = function(config)
 	}, "\0")
 end
 
-local globalConfig = {
-	maxRecursionDepth = DEFAULT_MAX_RECURSION_DEPTH,
-	maxBacktrackDepth = DEFAULT_MAX_BACKTRACK_DEPTH,
-	patternCacheSize = math_huge,
-}
-globalConfig._cacheKey = buildCacheKey(globalConfig)
-
-local function validateType(val, expectedType, defaultVal, key)
-	if val ~= nil then
-		if type(val) ~= expectedType then
-			error("Config Error: " .. key .. " must be a " .. expectedType)
-		end
-		return val
-	end
-	return defaultVal
+--- Determines whether a configuration overrides compiler settings.
+---@param config EngineConfig The engine configuration.
+---@return boolean usesCustomSettings Whether custom compiler settings are present.
+local usesCustomCompilerSettings = function(config)
+	return config.maxRecursionDepth
+		or config.maxBacktrackDepth
 end
 
-local function buildConfig(config)
-	if type(config) ~= "table" then return globalConfig end
+--- Builds an engine configuration.
+--- Resolves a user-supplied configuration with the library's default
+--- values. If no configuration is provided, the default configuration
+--- is returned.
+---@param config EngineConfig|nil The user-supplied engine configuration.
+---@return ResolvedEngineConfig config The resolved engine configuration.
+local new = function(config)
+	if not config or not next(config) then
+		return defaults
+	end
+
+	local maxRecursionDepth = config.maxRecursionDepth
+	AssertionIsNumber(maxRecursionDepth, "maxRecursionDepth", true)
+
+	local maxBacktrackDepth = config.maxBacktrackDepth
+	AssertionIsNumber(maxBacktrackDepth, "maxBacktrackDepth", true)
 	
+	local patternCacheSize = config.patternCacheSize
+	AssertionIsNumber(patternCacheSize, "patternCacheSize", true)
+
 	local self = {
-		maxRecursionDepth = validateType(config.maxRecursionDepth, "number", globalConfig.maxRecursionDepth, "maxRecursionDepth"),
-		maxBacktrackDepth = validateType(config.maxBacktrackDepth, "number", globalConfig.maxBacktrackDepth, "maxBacktrackDepth"),
-		patternCacheSize = validateType(config.patternCacheSize, "number", globalConfig.patternCacheSize, "patternCacheSize"),
+		maxRecursionDepth = maxRecursionDepth or defaults.maxRecursionDepth,
+		maxBacktrackDepth = maxBacktrackDepth or defaults.maxBacktrackDepth,
+		patternCacheSize = patternCacheSize or defaults.patternCacheSize,
 	}
-	self._cacheKey = buildCacheKey(self)
+	self._cacheKey = usesCustomCompilerSettings(config) and buildCacheKey(self) or defaults._cacheKey
 
 	return self
 end
 
+defaults._cacheKey = buildCacheKey(defaults)
+
 return {
-	global = globalConfig,
-	build = buildConfig,
+	defaults = defaults,
+	new = new,
 }

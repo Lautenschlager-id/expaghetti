@@ -24,7 +24,7 @@ do
 
 	setmetatable(Flag, {
 		__newindex = function()
-			error("Expaghetti.Flag enum is read-only")
+			error("Expaghetti.Flag enum is read-only", 2)
 		end
 	})
 end

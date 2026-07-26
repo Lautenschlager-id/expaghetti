@@ -1,5 +1,8 @@
 --[[
-    API: split
+    Splits a target string using a pattern as the delimiter.
+
+    Returns the unmatched portions of the string separated by
+    each pattern match.
 ]]
 
 --[[ Globals ]]--
@@ -18,6 +21,16 @@ local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
+
+--- Splits a target string using a pattern as the delimiter.
+--- Returns an array containing the resulting substrings.
+---@param pattern string|Pattern The delimiter pattern.
+---@param targetString string The string to split.
+---@param flags string|table|nil Optional regular expression flags.
+---@param startPosition integer|nil The position at which to begin searching.
+---@param config EngineConfig The engine configuration.
+---@return string[]|nil slices The resulting substrings.
+---@return string|nil errorMessage The compilation or matching error message.
 return function(pattern, targetString, flags, startPosition, config)
 	AssertionIsStringOrTable(pattern, "pattern")
 	AssertionIsString(targetString, "targetString")
@@ -42,7 +55,7 @@ return function(pattern, targetString, flags, startPosition, config)
 		local hasMatched, matchStart, matchEnd = matcher(tree, targetString, parsedFlags, currentIndex, config)
 		if not hasMatched then
 			if matchStart then
-				return nil, "Expaghetti Error: " .. matchStart
+				return nil, matchStart
 			end
 			break
 		end
