@@ -2,6 +2,9 @@
 	Helper functions for parsing and string consumption.
 ]]
 
+--[[ Globals ]]--
+local table_concat = table.concat
+
 --[[ Module ]]--
 
 --- Returns whether a character is a decimal digit from '1' to '9'.
@@ -52,17 +55,17 @@ end
 ---@return number|nil nextLoopIndex The index where consumption stopped.
 ---@return string|table|nil nextElement The element or character that caused consumption to stop.
 local consumeWhile = function(state, loopIndex, conditionFn)
-	local str, length = "", 0
+	local str, length = {}, 0
 	while true do
 		local nextLoopIndex, nextChar = state:readElement(loopIndex)
 
 		if not nextLoopIndex or not nextChar or state:isElement(nextChar) or not conditionFn(nextChar, length) then
-			return str, nextLoopIndex, nextChar
+			return table_concat(str), nextLoopIndex, nextChar
 		end
 
-		str = str .. nextChar
-		loopIndex = nextLoopIndex
 		length = length + 1
+		str[length] = nextChar
+		loopIndex = nextLoopIndex
 	end
 end
 
@@ -75,17 +78,17 @@ end
 ---@return number nextIndex The index where consumption stopped.
 ---@return string|nil nextChar The character that caused consumption to stop, or nil at end of input.
 local consumeWhileArray = function(tbl, loopIndex, conditionFn)
-	local str, length = "", 0
+	local str, length = {}, 0
 	while true do
 		local char = tbl[loopIndex + 1]
 
 		if not char or not conditionFn(char, length) then
-			return str, loopIndex + 1, char
+			return table_concat(str), loopIndex + 1, char
 		end
 
-		str = str .. char
-		loopIndex = loopIndex + 1
 		length = length + 1
+		str[length] = char
+		loopIndex = loopIndex + 1
 	end
 end
 

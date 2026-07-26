@@ -3,9 +3,6 @@
 ]]
 
 --[[ Globals ]]--
-local bit32_bxor = bit32.bxor
-local string_byte = string.byte
-local string_char = string.char
 local string_sub = string.sub
 
 --[[ Dependencies ]]--

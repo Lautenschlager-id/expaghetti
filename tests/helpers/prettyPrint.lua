@@ -15,7 +15,6 @@ local tblconcat = table.concat
 --[[ Module ]]--
 local PrettyPrint = {}
 
---[[ Private Functions ]]--
 local tableToString
 tableToString = function(tbl, indent, numIndex, stop, _depth, _ref)
 	if type(tbl) ~= "table" then
@@ -52,7 +51,6 @@ tableToString = function(tbl, indent, numIndex, stop, _depth, _ref)
 	return "{" .. (indent and ("\n" .. tblconcat(out, ",\n") .. "\n") or tblconcat(out, ',')) .. (indent and strrep("\t", _depth - 1) or '') .. "}"
 end
 
---[[ Return ]]--
 return function(t, ...)
 	return --"<" .. tostring(t) .. ">" ..
 		tableToString(t, ...)

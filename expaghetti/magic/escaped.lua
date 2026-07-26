@@ -104,6 +104,12 @@ Escaped.parse = function(state, index, expression, isInsideSet)
 	return false, string_format(ERROR_INVALID_ESCAPE, currentCharacter)
 end
 
+--- Parses an escaped sequence in a replacement template.
+---@param state ParserState The parser state.
+---@param index number The current template index.
+---@param expression CharacterArray The replacement template characters.
+---@return number|boolean nextIndex The next template index, or false if parsing failed.
+---@return ASTElement|string element The parsed AST element or parser error message.
 Escaped.parseReplacementTemplate = function(state, index, expression)
 	-- Skip escape
 	index = index + 1

@@ -12,7 +12,9 @@ local deepCopy = require("helpers.table").deepCopy
 
 --[[ Module ]]--
 
---[[ Private Functions ]]--
+--- Creates a character class set from a string of characters.
+---@param characters string The characters to include in the set.
+---@return CharacterSet set The generated character class set.
 local createSet = function(settings)
 	local set = SetNode()
 
@@ -30,13 +32,14 @@ local createSet = function(settings)
 	return set
 end
 
+--- Negates a character class set.
+---@param set CharacterSet The set to negate.
+---@return CharacterSet negatedSet The negated character class set.
 local negateSet = function(set)
 	local tbl = deepCopy(set)
 	tbl.hasToNegateMatch = not tbl.hasToNegateMatch
 	return tbl
 end
-
---[[ Public API ]]--
 
 -- [a-zA-Z]
 local alpha = createSet({

@@ -10,15 +10,12 @@ local table_sort = table.sort
 local type = type
 
 --[[ Dependencies ]]--
-local Assertion = require("helpers.assertion")
+local AssertionIsStringOrTable = require("helpers.assertion").isStringOrTable
+
 local parser = require("parser.init")
 
 --[[ Enums ]]--
 local Flag = require("api.enums").Flag
-
---[[ Aliases ]]--
-local AssertionIsStringOrTable = Assertion.isStringOrTable
-local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
 
@@ -76,6 +73,7 @@ end
 local compilePattern = function(config)
 	local treeCache, treeCacheCount = {}, 0
 	local parseErrorCache, parseErrorCacheCount = {}, 0
+	local ConfigCacheKey = config._cacheKey
 
 	--- Builds a unique cache key for a compiled pattern.
 	--- Combines the pattern, normalized flags, and API configuration into
@@ -88,7 +86,7 @@ local compilePattern = function(config)
 		return table_concat({
 			pattern,
 			flagsKey,
-			config._cacheKey,
+			ConfigCacheKey,
 		}, "\0")
 	end
 
@@ -100,7 +98,7 @@ local compilePattern = function(config)
 			local flagsKey
 			flags, flagsKey = normalizeFlags(flags)
 
-			local cacheKey = buildCacheKey(pattern, flagsKey, config)
+			local cacheKey = buildCacheKey(pattern, flagsKey)
 
 			local cachedTree = treeCache[cacheKey]
 			if cachedTree then
@@ -149,7 +147,6 @@ local compilePattern = function(config)
 		-- but as a failsafe we perform assertions here to understand what went wrong.
 		AssertionIsStringOrTable(pattern, "pattern")
 		AssertionIsStringOrTable(flags, "flags", true)
-		AssertionIsTable(config, "config")
 	end
 end
 

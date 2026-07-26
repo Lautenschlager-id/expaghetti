@@ -62,8 +62,6 @@ local ZERO_LENGTH_ELEMENTS = ElementLengths.ZERO_LENGTH
 --[[ Module ]]--
 local Group = {}
 
---[[ Private Functions ]]--
-
 --- Computes the fixed character length of a lookbehind subtree.
 ---@param tree ASTTree The AST subtree to evaluate.
 ---@return number|nil fixedLength The subtree's fixed length, or nil if it is variable-length.
@@ -187,8 +185,6 @@ local parseGroupBehavior = function(state)
 		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 	end
 end
-
---[[ Public API ]]--
 
 --- Returns whether a character is a group opening token.
 ---@param currentCharacter string The character to test.

@@ -32,8 +32,6 @@ if utf8 then
 	return utf8
 end
 
---[[ Private Functions ]]--
-
 --- Returns the number of bytes in a UTF-8 character based on its leading byte.
 ---@param byte number The first byte of a UTF-8 character.
 ---@return number length The number of bytes in the character, or 0 if invalid.
@@ -49,8 +47,6 @@ local getByteLength = function(byte)
 	end
 	return 0
 end
-
---[[ Public API ]]--
 
 --- Splits a UTF-8 string into an array of characters.
 ---@param str string The UTF-8 string to split.

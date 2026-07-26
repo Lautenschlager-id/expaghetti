@@ -40,8 +40,6 @@ local ZERO_LENGTH_ELEMENTS = require("enums.elementLengths").ZERO_LENGTH
 --[[ Module ]]--
 local Quantifier = {}
 
---[[ Private Functions ]]--
-
 --- Attempts to parse a custom quantifier (`{n}`, `{n,}`, `{,m}`, or `{n,m}`).
 ---@param state ParserState The current parser state.
 ---@param index number The current parser index.
@@ -124,8 +122,6 @@ local lookForModeToken = function(state, index, quantifier)
 	end
 	return index, quantifier
 end
-
---[[ Public API ]]--
 
 --- Returns whether a quantifier starts at the current parser position.
 ---@param state ParserState The current parser state.

@@ -4,6 +4,9 @@
 	Centralizes Expaghetti's API implementations so they can be shared among module APIs.
 ]]
 
+--[[ Globals ]]--
+local require = require
+
 --[[ Dependencies ]]--
 local createCompilePattern = require("helpers.api").compilePattern
 

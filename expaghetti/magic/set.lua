@@ -28,8 +28,6 @@ local MAGIC_SET_RANGE_SEPARATOR = Magic.SET_RANGE_SEPARATOR
 --[[ Module ]]--
 local Set = {}
 
---[[ Private Functions ]]--
-
 --- Finds the closing delimiter of a character set.
 ---@param state ParserState The current parser state.
 ---@param startIndex number The parser index immediately after the opening delimiter.
@@ -79,8 +77,6 @@ local addRange = function(set, startChar, endChar)
 
 	set.rangeIndex = rangeIndex
 end
-
---[[ Public API ]]--
 
 --- Returns whether a character starts a character set.
 ---@param currentCharacter string The current pattern character.

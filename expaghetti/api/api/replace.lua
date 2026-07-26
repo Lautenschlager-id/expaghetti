@@ -6,7 +6,6 @@
 ]]
 
 --[[ Globals ]]--
-local string_byte = string.byte
 local string_char = string.char
 local string_sub = string.sub
 local table_concat = table.concat
