@@ -1,7 +1,5 @@
-package.path = package.path
-	.. ";../?.lua"
-	.. ";../expaghetti/?.lua"
-----------------------------------------------------------------------------------------------------
+package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
+
 local next = next
 local pcall = pcall
 local strformat = string.format
@@ -9,10 +7,10 @@ local tostring = tostring
 ----------------------------------------------------------------------------------------------------
 local parser = require("parser.init")
 ----------------------------------------------------------------------------------------------------
-local compareTables = require("./assertion").compareTables
-local prettyPrint = require("./prettyPrint")
+local compareTables = require("helpers.tableAssertion").compareTables
+local prettyPrint = require("helpers.prettyPrint")
 ----------------------------------------------------------------------------------------------------
-local performance = require("performance")
+local performance = require("helpers.performance")
 ----------------------------------------------------------------------------------------------------
 local cases = {
 	"literal",
@@ -51,7 +49,7 @@ for case = 1, #cases do
 	case = cases[case]
 
 	print(strformat("\n\n############### Testing cases of %q ###############", case))
-	for caseIndex, caseObj in next, require("./cases/" .. case) do
+	for caseIndex, caseObj in next, require("parserCases." .. case) do
 		caseObj.flags = caseObj.flags or {} 
 
 		local flagKeys = {}

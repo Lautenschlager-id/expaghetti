@@ -20,7 +20,7 @@ return function(config)
 	local test = require("api.api.test")(config, compilePattern)
 
 	local replace = function(pattern, targetString, replacement, flags, startPosition)
-		return gsub(pattern, targetString, replacement, flags, startPosition, 1)
+		return gsub(pattern, targetString, replacement, flags, 1, startPosition)
 	end
 
 	local api = {

@@ -68,11 +68,11 @@ return function(config, compilePattern)
 	---@param targetString string The string to search.
 	---@param replacement string|function|table The replacement specification.
 	---@param flags string|table|nil Optional regular expression flags.
-	---@param startPosition integer|nil The position at which to begin searching.
 	---@param maxOccurrences integer|nil The maximum number of replacements to perform.
+	---@param startPosition integer|nil The position at which to begin searching.
 	---@return string|nil result The resulting string.
 	---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
-	return function(pattern, targetString, replacement, flags, startPosition, maxOccurrences)
+	return function(pattern, targetString, replacement, flags, maxOccurrences, startPosition)
 		AssertionIsStringOrTable(pattern, "pattern")
 		AssertionIsString(targetString, "targetString")
 		AssertionIsStringOrFunctionOrTable(replacement, "replacement")

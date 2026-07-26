@@ -5,7 +5,7 @@ local ConfigNew = require("core.config").new
 local compilePattern = require("helpers.api").compilePattern(ConfigNew())
 local _matcher = require("matcher.init")
 
-local prettyPrint = require("prettyPrint")
+local prettyPrint = require("helpers.prettyPrint")
 
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsString = Assertion.isString
@@ -29,7 +29,7 @@ function matcher(expr, str, flags, startPosition, config)
 	return _matcher(expr, str, flags, startPosition or 0, config)
 end
 
-local performance = require("performance")
+local performance = require("helpers.performance")
 
 local toCharArray = require("helpers.string").toCharArray
 local ENUM_FLAG_UNICODE = require("enums.flags").UNICODE

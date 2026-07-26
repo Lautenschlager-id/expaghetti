@@ -143,8 +143,10 @@ local uninstall = function()
 		return
 	end
 
-	for method, fn in next, originalStringModule do
-		string[method] = fn
+	-- Roll back all installed hooks and remove methods that did not
+	-- originally exist in Lua's string library.
+	for method in next, installApi do
+		string[method] = originalStringModule[method]
 	end
 
 	installApi = nil

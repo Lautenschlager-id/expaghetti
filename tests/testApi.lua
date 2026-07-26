@@ -1,6 +1,6 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
-local prettyPrint = require("prettyPrint")
+local prettyPrint = require("helpers.prettyPrint")
 
 local expaghetti = require("expaghetti")
 
@@ -25,7 +25,7 @@ local function assertDeepEqual(a, b, path)
 	end
 end
 
-local performance = require("performance")
+local performance = require("helpers.performance")
 
 local errorCount = 0
 local function check(name, fn)
@@ -456,7 +456,7 @@ print("\n--- Custom Engine ---")
 check("Immutable isolated config", function()
 	local engine = expaghetti.custom({ maxRecursionDepth = 5, maxBacktrackDepth = 100 })
 
-	local result = engine:test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
+	local result = engine.test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
 	-- Should hit backtrack limit and fail gracefully returning false
 	assertDeepEqual(result, false)
 
@@ -468,9 +468,9 @@ end)
 
 check("Module is callable to create custom engines", function()
 	local custom = expaghetti({ maxBacktrackDepth = 10 })
-	assertDeepEqual(custom:test("abc", "abc"), true)
+	assertDeepEqual(custom.test("abc", "abc"), true)
 
-	local result = custom:test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
+	local result = custom.test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
 	assertDeepEqual(result, false)
 end)
 
@@ -479,7 +479,7 @@ end)
 --------------------------------------------------------------------------------
 print("\n--- exp.install and uninstall ---")
 check("Monkey-patching Lua's string library", function()
-	expaghetti.install()
+	expaghetti:install()
 
 	-- Test native string function override (remember argument swap is handled automatically)
 	local match = string.match("hello", "e(l+)")

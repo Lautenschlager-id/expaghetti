@@ -104,7 +104,7 @@ end
 ---@return string|nil result The resulting string.
 ---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
 function Pattern:gsub(targetString, replacement, limit, startPosition)
-	return self.api.gsub(self.tree, targetString, replacement, self.flags, startPosition, limit)
+	return self.api.gsub(self.tree, targetString, replacement, self.flags, limit, startPosition)
 end
 
 --- Splits a target string using this pattern as the delimiter.
