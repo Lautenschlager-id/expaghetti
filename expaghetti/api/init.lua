@@ -1,7 +1,7 @@
 --[[
-    Shared API function registry.
+	Shared API function registry.
 
-    Centralizes Expaghetti's API implementations so they can be shared among module APIs.
+	Centralizes Expaghetti's API implementations so they can be shared among module APIs.
 ]]
 
 --[[ Module ]]--

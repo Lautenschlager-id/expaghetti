@@ -150,7 +150,7 @@ return {
 		},
 	},
 	{
-		regex = "%cA%cb",
+		regex = "\001\002",
 		flags = {
 			['i'] = true,
 		},
@@ -173,7 +173,7 @@ return {
 		},
 	},
 	{
-		regex = "%cZ",
+		regex = "\026",
 		flags = {
 			['i'] = true,
 		},
@@ -376,7 +376,7 @@ return {
 		},
 	},
 	{
-		regex = "[%cA-%cb]",
+		regex = "[\001-\002]",
 		flags = {
 			['i'] = true,
 		},

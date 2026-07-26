@@ -1,5 +1,5 @@
 --[[
-    Parser for the atomic group behavior `(?>...)`.
+	Parser for the atomic group behavior `(?>...)`.
 ]]
 
 --[[ Dependencies ]]--

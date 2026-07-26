@@ -92,7 +92,7 @@ check("Match with quantifiers and multiple captures", function()
 	assertDeepEqual(match.start, 1)
 	assertDeepEqual(match.stop, 5)
 	assertDeepEqual(match.value, "aaabc")
-	
+
 	-- Chronological Captures
 	assertDeepEqual(#match.captures, 5)
 	assertDeepEqual(match.captures[1], { groupIndex = 1, start = 1, stop = 1, value = "a" })
@@ -100,7 +100,7 @@ check("Match with quantifiers and multiple captures", function()
 	assertDeepEqual(match.captures[3], { groupIndex = 1, start = 3, stop = 3, value = "a" })
 	assertDeepEqual(match.captures[4], { groupIndex = 2, name = "foo", start = 4, stop = 4, value = "b" })
 	assertDeepEqual(match.captures[5], { groupIndex = 3, start = 5, stop = 5, value = "c" })
-	
+
 	-- Grouped Captures
 	assertDeepEqual(#match.groups[1], 3)
 	assertDeepEqual(match.groups[1][1].value, "a")
@@ -160,10 +160,10 @@ print("\n--- exp.matchAll ---")
 check("Basic matchAll", function()
 	local all = expaghetti.matchAll("(?:[a-z])(%d+)(?=[A-Z])", "a123B c45D e6F")
 	assertDeepEqual(#all, 3)
-	
+
 	assertDeepEqual(all[1].value, "a123")
 	assertDeepEqual(all[1].groups[1][1].value, "123")
-	
+
 	assertDeepEqual(all[2].value, "c45")
 	assertDeepEqual(all[3].value, "e6")
 end)
@@ -238,7 +238,7 @@ check("Basic find", function()
 	local start, stop = expaghetti.find("b+", "abbbc")
 	assertDeepEqual(start, 2)
 	assertDeepEqual(stop, 4)
-	
+
 	local s2, f2 = expaghetti.find("b+", "ac")
 	assertDeepEqual(s2, nil)
 	assertDeepEqual(f2, nil)
@@ -248,7 +248,7 @@ check("find with start index", function()
 	local s, f = expaghetti.find("b+", "abbbc", nil, 3)
 	assertDeepEqual(s, 3)
 	assertDeepEqual(f, 4)
-	
+
 	local s2, f2 = expaghetti.find("b+", "abbbc", nil, 5)
 	assertDeepEqual(s2, nil)
 end)
@@ -342,7 +342,7 @@ check("String replacement with function", function()
 	end)
 	assertDeepEqual(rep2, "X 2 X")
 	assertDeepEqual(count2, 2)
-	
+
 	-- Verify that skipped replacements do not consume the limit
 	local rep3, count3 = expaghetti.gsub("%d+", "1 2 3 4", function(match)
 		if match.value == "1" then return nil end
@@ -393,7 +393,7 @@ print("\n--- exp.split ---")
 check("Basic split", function()
 	local parts = expaghetti.split(",", "a,b,c")
 	assertDeepEqual(parts, { "a", "b", "c" })
-	
+
 	local parts2 = expaghetti.split("%s+", "hello   world  test")
 	assertDeepEqual(parts2, { "hello", "world", "test" })
 end)
@@ -425,26 +425,26 @@ print("\n--- exp.compile ---")
 check("Compiled pattern reuse", function()
 	local pat = expaghetti.compile("(?<word>%a+)", "i")
 	assertDeepEqual(pat:test("Hello"), true)
-	
+
 	local match = pat:match("Testing 123")
 	assertDeepEqual(match.value, "Testing")
 	assertDeepEqual(match.groups.word[1].value, "Testing")
-	
+
 	local rep = pat:replace("Testing 123", "X")
 	assertDeepEqual(rep, "X 123")
-	
+
 	local all = pat:matchAll("A B C")
 	assertDeepEqual(#all, 3)
 	assertDeepEqual(all[2].value, "B")
-	
+
 	local start, stop = pat:find("A B C", 3)
 	assertDeepEqual(start, 3)
 	assertDeepEqual(stop, 3)
-	
+
 	local str, count = pat:gsub("A B C", "X", 2)
 	assertDeepEqual(str, "X X C")
 	assertDeepEqual(count, 2)
-	
+
 	local parts = pat:split("A,B,C")
 	assertDeepEqual(parts, { "", ",", ",", "" }) -- splits on letters
 end)
@@ -455,11 +455,11 @@ end)
 print("\n--- Custom Engine ---")
 check("Immutable isolated config", function()
 	local engine = expaghetti.custom({ maxRecursionDepth = 5, maxBacktrackDepth = 100 })
-	
+
 	local result = engine:test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
 	-- Should hit backtrack limit and fail gracefully returning false
 	assertDeepEqual(result, false)
-	
+
 	-- Default engine should not be affected
 	local defaultResult = expaghetti.test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
 	-- Assuming default backtrack depth is much higher, it might take longer or return false eventually
@@ -469,7 +469,7 @@ end)
 check("Module is callable to create custom engines", function()
 	local custom = expaghetti({ maxBacktrackDepth = 10 })
 	assertDeepEqual(custom:test("abc", "abc"), true)
-	
+
 	local result = custom:test("(a+)+b", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaac")
 	assertDeepEqual(result, false)
 end)
@@ -480,24 +480,24 @@ end)
 print("\n--- exp.install and uninstall ---")
 check("Monkey-patching Lua's string library", function()
 	expaghetti.install()
-	
+
 	-- Test native string function override (remember argument swap is handled automatically)
 	local match = string.match("hello", "e(l+)")
 	assertDeepEqual(type(match), "table")
 	assertDeepEqual(match.value, "ell")
 	assertDeepEqual(match.groups[1][1].value, "ll")
-	
+
 	local rep = string.replace("hello", "l+", "L")
 	assertDeepEqual(rep, "heLo")
-	
+
 	local s, f = string.find("hello", "o")
 	assertDeepEqual(s, 5)
-	
+
 	local parts = string.split("a,b", ",")
 	assertDeepEqual(parts, { "a", "b" })
-	
+
 	expaghetti.uninstall()
-	
+
 	-- Test native restored
 	local native = string.match("hello", "e(l+)")
 	assertDeepEqual(native, "ll")
@@ -512,11 +512,11 @@ check("Returns errors gracefully for malformed patterns", function()
 	local result, err = expaghetti.match("[a-", "abc")
 	assertDeepEqual(result, nil)
 	assertDeepEqual(err, "Invalid regular expression: Expected ']' to close character set")
-	
+
 	local result2, err2 = expaghetti.test("+", "abc")
 	assertDeepEqual(result2, nil)
 	assertDeepEqual(err2, "Invalid regular expression: Nothing to repeat")
-	
+
 	local result3, err3 = expaghetti.split("%", "a%b")
 	assertDeepEqual(result3, nil)
 	assertDeepEqual(err3, "Invalid regular expression: Incomplete escape sequence")

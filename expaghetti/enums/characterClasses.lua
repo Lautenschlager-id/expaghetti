@@ -1,9 +1,9 @@
 --[[
-    Precompiled character class definitions used by the parser to expand
-    regular expression character classes (e.g. %a, %d, %w, %s) into set elements.
+	Precompiled character class definitions used by the parser to expand
+	regular expression character classes (e.g. %a, %d, %w, %s) into set elements.
 
-    Each entry is represented as a reusable AST set node that can be shared
-    whenever the corresponding character class is encountered.
+	Each entry is represented as a reusable AST set node that can be shared
+	whenever the corresponding character class is encountered.
 ]]
 
 --[[ Dependencies ]]--
@@ -43,6 +43,15 @@ local alpha = createSet({
 	ranges = {
 		'a', 'z',
 		'A', 'Z'
+	},
+})
+-- [\0-\31\127]
+local control = createSet({
+	ranges = {
+		'\0', '\31'
+	},
+	values = {
+		['\127'] = true
 	},
 })
 -- [0-9]
@@ -104,6 +113,7 @@ local word = createSet({
 
 return {
 	a = alpha,
+	c = control,
 	d = digit,
 	h = hex,
 	x = hex,
@@ -114,6 +124,7 @@ return {
 	w = word,
 
 	A = negateSet(alpha),
+	C = negateSet(control),
 	D = negateSet(digit),
 	H = negateSet(hex),
 	X = negateSet(hex),

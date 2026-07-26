@@ -1,9 +1,9 @@
 --[[
-    Compiled regular expression.
+	Compiled regular expression.
 
-    Represents a reusable compiled pattern created by `Engine:compile()`.
-    Once compiled, the pattern can be matched against multiple target
-    strings without reparsing the original regular expression.
+	Represents a reusable compiled pattern created by `Engine:compile()`.
+	Once compiled, the pattern can be matched against multiple target
+	strings without reparsing the original regular expression.
 ]]
 
 --[[ Globals ]]--

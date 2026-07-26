@@ -1,8 +1,8 @@
 --[[
-    Abstract Syntax Tree (AST) node constructors.
+	Abstract Syntax Tree (AST) node constructors.
 
-    Provides factory functions for creating the AST node types used
-    throughout the parser and matcher.
+	Provides factory functions for creating the AST node types used
+	throughout the parser and matcher.
 ]]
 
 --[[ Dependencies ]]--

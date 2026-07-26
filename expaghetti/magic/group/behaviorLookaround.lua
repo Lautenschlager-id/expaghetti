@@ -1,6 +1,6 @@
 --[[
-    Parser for lookahead and lookbehind group behaviors.
-    Supports `(?=...)`, `(?!...)`, `(?<=...)`, and `(?<!...)`.
+	Parser for lookahead and lookbehind group behaviors.
+	Supports `(?=...)`, `(?!...)`, `(?<=...)`, and `(?<!...)`.
 ]]
 
 --[[ Dependencies ]]--
@@ -40,7 +40,7 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 		node.hasSpecialBehavior = true
 		node.isNegative = isNegativeLookahead
 		return peekIndex, node
-		
+
 	-- Lookbehind: (?<=...), (?<!...)
 	-- Peek at the third character to determine polarity
 	elseif peekChar == ENUM_GROUP_LOOKBEHIND_BEHAVIOR then
@@ -58,6 +58,6 @@ return function(state, peekIndex, peekChar, lookbehindIndex, lookbehindChar)
 			return lookbehindIndex, node
 		end
 	end
-	
+
 	return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 end

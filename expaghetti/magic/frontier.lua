@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for frontier boundary elements (`%f[...]`).
+	Parser and matcher for frontier boundary elements (`%f[...]`).
 
-    Matches positions where the transition between characters crosses
-    the specified character set.
+	Matches positions where the transition between characters crosses
+	the specified character set.
 ]]
 
 --[[ Dependencies ]]--
@@ -49,11 +49,11 @@ Frontier.parse = function(state, index, isNegated)
 
 	local nextIndex = state.index
 	state.index = oldIndex
-	
+
 	if errorMessage then
 		return false, errorMessage
 	end
-	
+
 	return nextIndex, FrontierNode(isNegated, setTree[1])
 end
 

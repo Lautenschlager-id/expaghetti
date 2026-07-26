@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for character sets (`[...]`).
+	Parser and matcher for character sets (`[...]`).
 
-    Supports literal characters, ranges, nested character classes,
-    and negated sets.
+	Supports literal characters, ranges, nested character classes,
+	and negated sets.
 ]]
 
 --[[ Dependencies ]]--
@@ -73,7 +73,7 @@ local addRange = function(set, startChar, endChar)
 	local ranges = set.ranges
 
 	ranges[rangeIndex] = startChar
-	
+
 	rangeIndex = rangeIndex + 1
 	ranges[rangeIndex] = endChar
 
@@ -151,7 +151,7 @@ Set.parse = function(state, tree)
 					) or nil
 				end
 			end
-			
+
 			if rangeInitChar then
 				-- both the last and next characters must be literals
 				if nextTokenValue then
@@ -176,7 +176,7 @@ Set.parse = function(state, tree)
 			end
 		end
 	end
-	
+
 	state:compileSet(set)
 
 	local treeIndex = tree._index + 1
@@ -202,7 +202,7 @@ Set.match = function(currentElement, _, currentCharacter)
 		for rangeIndex = 1, #ranges, 2 do
 			local rangeStart = ranges[rangeIndex]
 			local rangeEnd = ranges[rangeIndex + 1]
-			
+
 			if currentCharacter >= rangeStart and currentCharacter <= rangeEnd then
 				hasMatched = true
 				break

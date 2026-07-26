@@ -1,8 +1,8 @@
 --[[
-    Finds the first occurrence of a pattern in a target string.
+	Finds the first occurrence of a pattern in a target string.
 
-    Implements a lightweight search API that returns only the
-    boundaries of the first match.
+	Implements a lightweight search API that returns only the
+	boundaries of the first match.
 ]]
 
 --[[ Dependencies ]]--
@@ -42,7 +42,7 @@ return function(pattern, targetString, flags, startPosition, config)
 
 	local currentIndex = (startPosition or 1) - 1
 	local hasMatched, matchStart, matchEnd = matcher(tree, targetString, parsedFlags, currentIndex, config)
-	
+
 	if hasMatched then
 		return matchStart, matchEnd
 	elseif matchStart then

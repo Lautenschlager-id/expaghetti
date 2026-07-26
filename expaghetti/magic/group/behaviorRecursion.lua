@@ -1,6 +1,6 @@
 --[[
-    Parser for recursion group behaviors.
-    Supports `(?R)`, `(?0)`, `(?123)`, and `(?&name)`.
+	Parser for recursion group behaviors.
+	Supports `(?R)`, `(?0)`, `(?123)`, and `(?&name)`.
 ]]
 
 --[[ Globals ]]--
@@ -42,20 +42,20 @@ local MAGIC_GROUP_RECURSION_NAMED = Magic.GROUP_RECURSION_NAMED_BEHAVIOR
 return function(state, peekIndex, peekChar, GroupIsClosingToken)
 	local node = GroupRecursionNode()
 	local finalIndex, nextChar, errorToThrow
-	
+
 	-- Handle root recursion e.g. `(?R)` or `(?0)`
 	if peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS then
 		node.isRecursionRoot = true
 		finalIndex, nextChar = state:readElement(peekIndex)
 		errorToThrow = ERROR_INVALID_GROUP_BEHAVIOR
-		
+
 	-- Handle indexed target recursion e.g. `(?1)`, `(?123)`
 	elseif isPositiveIntegerChar(peekChar) then
 		local numStr, afterLoopIndex, afterLoopChar = consumeWhile(state, peekIndex, isPositiveOrZeroIntegerChar)
 		node.targetIndex = tonumber(peekChar .. numStr)
 		finalIndex, nextChar = afterLoopIndex, afterLoopChar
 		errorToThrow = ERROR_INVALID_GROUP_BEHAVIOR
-		
+
 	-- Handle named target recursion e.g. `(?&name)`
 	elseif peekChar == MAGIC_GROUP_RECURSION_NAMED then
 		local nameStr, afterLoopIndex, afterLoopChar = consumeWhile(state, peekIndex, isAlphanumericName)
@@ -66,17 +66,17 @@ return function(state, peekIndex, peekChar, GroupIsClosingToken)
 		end
 
 		node.targetIndex = nameStr
-		
+
 		local stateMetadata = state.metadata
 		local refIndex = stateMetadata.namedReferenceIndex + 1
 		stateMetadata.namedReferenceIndex = refIndex
 		stateMetadata.namedReferences[refIndex] = node
-		
+
 		finalIndex, nextChar = afterLoopIndex, afterLoopChar
 	else
 		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
 	end
-	
+
 	-- Common validation: The recursion declaration must immediately close
 	if finalIndex and not state:isElement(nextChar) and GroupIsClosingToken(nextChar) then
 		return finalIndex, node

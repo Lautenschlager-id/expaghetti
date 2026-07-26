@@ -1,8 +1,8 @@
 --[[
-    Tests whether a pattern matches a target string.
+	Tests whether a pattern matches a target string.
 
-    Implements a boolean matching API for efficiently checking
-    whether a match exists.
+	Implements a boolean matching API for efficiently checking
+	whether a match exists.
 ]]
 
 --[[ Dependencies ]]--

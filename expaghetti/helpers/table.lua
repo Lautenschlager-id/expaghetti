@@ -1,5 +1,5 @@
 --[[
-    Helper functions for table manipulation.
+	Helper functions for table manipulation.
 ]]
 
 --[[ Globals ]]--

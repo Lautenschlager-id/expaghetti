@@ -1,8 +1,8 @@
 --[[
-    AST element type identifiers.
+	AST element type identifiers.
 
-    These values uniquely identify the different kinds of AST nodes produced
-    by the parser and consumed by the matcher.
+	These values uniquely identify the different kinds of AST nodes produced
+	by the parser and consumed by the matcher.
 ]]
 
 --[[ Module ]]--

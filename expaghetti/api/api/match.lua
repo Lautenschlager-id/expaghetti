@@ -1,8 +1,8 @@
 --[[
-    Finds the first occurrence of a pattern in a target string.
+	Finds the first occurrence of a pattern in a target string.
 
-    Returns a match object describing the match and its captures,
-    or nil if no match is found.
+	Returns a match object describing the match and its captures,
+	or nil if no match is found.
 ]]
 
 --[[ Dependencies ]]--

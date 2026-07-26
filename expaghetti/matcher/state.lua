@@ -1,8 +1,8 @@
 --[[
-    Match state used throughout the matching process.
+	Match state used throughout the matching process.
 
-    Tracks the current execution position, shared metadata,
-    recursion state, backtracking state, and capture information.
+	Tracks the current execution position, shared metadata,
+	recursion state, backtracking state, and capture information.
 ]]
 
 --[[ Globals ]]--
@@ -47,19 +47,19 @@ function MatchState.new(rootTree, targetString, flags, config)
 		maxRecursionDepth = config.maxRecursionDepth,
 		maxBacktrackDepth = config.maxBacktrackDepth,
 	}
-	
+
 	local self = setmetatable({
 		flags = flags,
-		
+
 		getTargetCharacter = nil,
 		targetStringLength = nil,
-		
+
 		rootTree = rootTree,
 
 		parsedMetadata = nil,
 		metadata = metadata,
 	}, MatchState)
-	
+
 	if flags[FLAG_UNICODE] then
 		local targetStringChars, targetStringLength = toCharArray(targetString, true)
 		self.getTargetCharacter = function(self, index)
@@ -153,13 +153,13 @@ end
 ---@param endIndex number The last captured string index.
 function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 	if not groupIndex then return end
-	
+
 	local metadata = self.metadata
 
 	local inits = metadata.captureStarts
 	local ends = metadata.captureEnds
 	local counts = metadata.captureCounts
-	
+
 	local groupInits = inits[groupIndex]
 	local groupEnds = ends[groupIndex]
 
@@ -170,7 +170,7 @@ function MatchState:recordCapture(groupIndex, startIndex, endIndex)
 		inits[groupIndex] = groupInits
 		ends[groupIndex] = groupEnds
 	end
-	
+
 	local nextIndex = counts[groupIndex] + 1
 	counts[groupIndex] = nextIndex
 
@@ -182,12 +182,12 @@ end
 ---@param groupIndex number|string The capture group identifier.
 function MatchState:popCapture(groupIndex)
 	if not groupIndex then return end
-	
+
 	local metadata = self.metadata
 
 	local counts = metadata.captureCounts
 	local length = counts[groupIndex] or 0
-	
+
 	if length > 0 then
 		metadata.captureStarts[groupIndex][length] = nil
 		metadata.captureEnds[groupIndex][length] = nil

@@ -31,7 +31,7 @@ return {
 			},
 			_index = 3,
 		},
-		regex = "a[aB%cAc[D]b",
+		regex = "a[aB\1c[D]b",
 	},
 	{
 		parsed = {
@@ -219,7 +219,7 @@ return {
 			},
 			_index = 1,
 		},
-		regex = "[%cA-%cb]",
+		regex = "[\1-\2]",
 	},
 	{
 		parsed = {
@@ -515,7 +515,7 @@ return {
 			},
 			_index = 4,
 		},
-		regex = "%c %[[%^%%w[-%]]%]",
+		regex = "`%[[%^%%w[-%]]%]",
 	},
 	{
 		errorMessage = "Invalid regular expression: Expected ']' to close character set",

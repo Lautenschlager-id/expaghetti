@@ -1,9 +1,9 @@
 --[[
-    Engine configuration.
+	Engine configuration.
 
-    Defines the default engine configuration and provides utilities
-    for resolving user-supplied configuration with the library's
-    default values.
+	Defines the default engine configuration and provides utilities
+	for resolving user-supplied configuration with the library's
+	default values.
 ]]
 
 --[[ Globals ]]--
@@ -56,7 +56,7 @@ local new = function(config)
 
 	local maxBacktrackDepth = config.maxBacktrackDepth
 	AssertionIsNumber(maxBacktrackDepth, "maxBacktrackDepth", true)
-	
+
 	local patternCacheSize = config.patternCacheSize
 	AssertionIsNumber(patternCacheSize, "patternCacheSize", true)
 

@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for alternation (`|`) expressions.
+	Parser and matcher for alternation (`|`) expressions.
 
-    Handles parsing alternate branches into a single AST node and
-    evaluates them sequentially during matching until one succeeds.
+	Handles parsing alternate branches into a single AST node and
+	evaluates them sequentially during matching until one succeeds.
 ]]
 
 --[[ Dependencies ]]--
@@ -61,7 +61,7 @@ Alternate.parse = function(state, tree)
 	-- Parse each subsequent alternate branch
 	repeat
 		state.index = state.index + 1
-		
+
 		-- Branch reset groups reuse capture numbering for every branch
 		if isBranchReset then
 			stateMetadata.groupIndex = initialGroupIndex

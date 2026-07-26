@@ -1,14 +1,12 @@
 --[[
-    Parser and matcher for escaped sequences.
+	Parser and matcher for escaped sequences.
 
-    Supports escaped literals, character classes, backreferences,
-    balanced elements, frontier assertions, control characters,
-    and Unicode escape sequences.
+	Supports escaped literals, character classes, backreferences,
+	balanced elements, frontier assertions, control characters,
+	and Unicode escape sequences.
 ]]
 
 --[[ Globals ]]--
-local pcall = pcall
-local string_char = string.char
 local string_format = string.format
 local tonumber = tonumber
 
@@ -29,11 +27,9 @@ local Magic = require("enums.magic")
 
 local isPositiveIntegerChar = ParserHelpers.isPositiveIntegerChar
 local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar
-local toControlCharacter = require("helpers.string").toControlCharacter
 
 --[[ Aliases ]]--
-local ERROR_INVALID_CONTROL_CHARACTER_PARAMETER = Errors.invalidControlCharacterParameter
-local ERROR_INVALID_UNICODE_PARAMETER = Errors.invalidUnicodeParameter
+
 local ERROR_INCOMPLETE_ESCAPE = Errors.incompleteEscape
 local ERROR_INVALID_ESCAPE = Errors.invalidEscape
 
@@ -59,41 +55,6 @@ local replacementTemplateHandlers = {
 	-- %k<name> -> named backreference
 	k = Backreference.parseByName,
 }
-
--- %cA --> ctrl char A
-escapeHandlers.c = function(state, currentCharacter, index, expression, isInsideSet)
-	local ctrlChar = currentCharacter and toControlCharacter(currentCharacter)
-	if not ctrlChar then
-		return false, ERROR_INVALID_CONTROL_CHARACTER_PARAMETER
-	end
-
-	local value, lowerValue, upperValue = state:getExecutionValues(ctrlChar, isInsideSet)
-	return index + 1, LiteralNode(value, lowerValue, upperValue)
-end
-
--- %e00FF --> Unicode character (0x00FF)
-escapeHandlers.e = function(state, currentCharacter, index, expression, isInsideSet)
-	local hex = ''
-
-	-- Must be exactly 4 characters long
-	for paramIndex = 0, 3 do
-		hex = hex .. (expression[index + paramIndex] or '')
-	end
-
-	hex = #hex == 4 and tonumber("0x" .. hex)
-	if hex then
-		local result
-		result, hex = pcall(string_char, hex)
-		hex = result and hex
-	end
-
-	if not hex then
-		return false, ERROR_INVALID_UNICODE_PARAMETER
-	end
-
-	local value, lowerValue, upperValue = state:getExecutionValues(hex, isInsideSet)
-	return index + 4, LiteralNode(value, lowerValue, upperValue)
-end
 
 -- %f --> frontier boundary
 escapeHandlers.f = function(state, _, index)

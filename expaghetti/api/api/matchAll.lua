@@ -1,8 +1,8 @@
 --[[
-    Finds every occurrence of a pattern in a target string.
+	Finds every occurrence of a pattern in a target string.
 
-    Executes repeated searches and returns every match as a
-    structured match object.
+	Executes repeated searches and returns every match as a
+	structured match object.
 ]]
 
 --[[ Globals ]]--

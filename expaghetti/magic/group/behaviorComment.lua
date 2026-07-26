@@ -1,5 +1,5 @@
 --[[
-    Parser for the comment group behavior `(?#...)`.
+	Parser for the comment group behavior `(?#...)`.
 ]]
 
 --[[ Dependencies ]]--

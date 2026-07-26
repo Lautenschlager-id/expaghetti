@@ -1,5 +1,5 @@
 --[[
-    Reusable error message templates shared by the parser and matcher.
+	Reusable error message templates shared by the parser and matcher.
 ]]
 
 --[[ Globals ]]--
@@ -25,10 +25,7 @@ local errors = {
 		"Invalid backreference: expected '%s'",
 		MAGIC_GROUP_NAME_OPEN
 	),
-	invalidControlCharacterParameter = string_format(
-		"Expected a valid control character after '%sc'",
-		MAGIC_ESCAPE
-	),
+
 	invalidEscape = string_format(
 		"Invalid escape '%s%%%%s'",
 		MAGIC_ESCAPE
@@ -37,10 +34,6 @@ local errors = {
 	invalidGroupBehaviorIndex = "Invalid group behavior index",
 	invalidGroupName = "Invalid group name",
 	invalidGroupRecursionName = "Invalid group recursion name",
-	invalidUnicodeParameter = string_format(
-		"Expected a 4-digit hexadecimal value after '%se'",
-		MAGIC_ESCAPE
-	),
 	missingBalancedDelimiters = "Balanced pattern requires two delimiters",
 	nothingToRepeat = "Nothing to repeat",
 	unexpectedGroupClose = "Unexpected group close",

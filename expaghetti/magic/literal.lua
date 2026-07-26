@@ -1,8 +1,8 @@
 --[[
-    Parser and matcher for literal characters.
+	Parser and matcher for literal characters.
 
-    Matches a single character, optionally supporting case-insensitive
-    comparisons depending on the active flags.
+	Matches a single character, optionally supporting case-insensitive
+	comparisons depending on the active flags.
 ]]
 
 --[[ Dependencies ]]--

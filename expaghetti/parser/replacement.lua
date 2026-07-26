@@ -1,10 +1,10 @@
 --[[
-    Replacement template parser.
+	Replacement template parser.
 
-    Parses a replacement template into an Abstract Syntax Tree (AST)
-    composed of literal and backreference elements.
+	Parses a replacement template into an Abstract Syntax Tree (AST)
+	composed of literal and backreference elements.
 ]]
-	
+
 --[[ Dependencies ]]--
 local LiteralParse = require("magic.literal").parse
 local ParserStateNew = require("parser.state").new
@@ -39,10 +39,10 @@ return function(expr, flags)
 			tree._index = treeIndex
 			tree[treeIndex] = element
 		else
-            errorMessage = LiteralParse(state, element, tree)
+			errorMessage = LiteralParse(state, element, tree)
 		end
 
-        if errorMessage then
+		if errorMessage then
 			return false, errorMessage
 		end
 	end

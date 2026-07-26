@@ -1,8 +1,8 @@
 --[[
-    Installs and removes Expaghetti's optional string library extensions.
+	Installs and removes Expaghetti's optional string library extensions.
 
-    Allows Lua's string library to transparently use Expaghetti's
-    regular expression implementation.
+	Allows Lua's string library to transparently use Expaghetti's
+	regular expression implementation.
 ]]
 
 --[[ Globals ]]--
@@ -23,7 +23,7 @@ local install = function(self)
 		originalString[method] = fn
 	end
 	self._originalString = originalString
-	
+
 	--- Tests whether a pattern matches a target string.
 	--- Extends Lua's string library with support for regular expressions,
 	--- optional flags, and a custom starting position.
@@ -62,7 +62,7 @@ local install = function(self)
 	string.matchAll = function(targetString, pattern, flags, startPosition)
 		return self:matchAll(pattern, targetString, flags, startPosition)
 	end
-		
+
 	--- Iterates over every occurrence of a pattern in a target string.
 	--- Extends Lua's string.gmatch with support for regular expressions,
 	--- optional flags, and a custom starting position.

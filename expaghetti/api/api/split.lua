@@ -1,8 +1,8 @@
 --[[
-    Splits a target string using a pattern as the delimiter.
+	Splits a target string using a pattern as the delimiter.
 
-    Returns the unmatched portions of the string separated by
-    each pattern match.
+	Returns the unmatched portions of the string separated by
+	each pattern match.
 ]]
 
 --[[ Globals ]]--
@@ -47,9 +47,9 @@ return function(pattern, targetString, flags, startPosition, config)
 	local sliceCount = 0
 
 	local currentIndex = (startPosition or 1) - 1
-	
+
 	local lastCopied = 0
-	
+
 	local targetLength = #targetString
 	while currentIndex <= targetLength do
 		local hasMatched, matchStart, matchEnd = matcher(tree, targetString, parsedFlags, currentIndex, config)

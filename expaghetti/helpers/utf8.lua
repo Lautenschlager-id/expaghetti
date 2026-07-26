@@ -1,6 +1,6 @@
 --[[
-    Helper functions for UTF-8 string processing.
-	
+	Helper functions for UTF-8 string processing.
+
 	Based on luvit/ustring.lua
 ]]
 
@@ -20,12 +20,12 @@ if utf8 then
 	utf8.toCharArray = function(str)
 		local characters = {}
 		local index = 0
-		
+
 		for _, codepoint in utf8_codes(str) do
 			index = index + 1
 			characters[index] = utf8_char(codepoint)
 		end
-		
+
 		return characters, index
 	end
 

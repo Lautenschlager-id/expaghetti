@@ -1,7 +1,7 @@
 --[[
-    Parser and matcher for backreferences.
+	Parser and matcher for backreferences.
 
-    Supports numeric (`%1`) and named (`%k<name>`) backreferences.
+	Supports numeric (`%1`) and named (`%k<name>`) backreferences.
 ]]
 
 --[[ Globals ]]--

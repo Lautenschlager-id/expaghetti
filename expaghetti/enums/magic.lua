@@ -1,5 +1,5 @@
 --[[
-    Definitions of all regular expression magic characters and group behavior tokens.
+	Definitions of all regular expression magic characters and group behavior tokens.
 ]]
 
 --[[ Module ]]--
@@ -33,7 +33,7 @@ local Magic = {
 	GROUP_RECURSION_ROOT_BEHAVIOR = 'R', -- (?R)
 	GROUP_RECURSION_ROOT_ALIAS = '0', -- (?0)
 	GROUP_RECURSION_NAMED_BEHAVIOR = '&', -- (?&name)
-	
+
 	GROUP_SCOPED_FLAGS_BEHAVIOR = ':', -- (?i:abc)
 	GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = '-', -- (?-i:abc)
 
