@@ -138,7 +138,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 			local lookupKey = matchValue
 			local matchGroups = match.groups
 			local firstGroup = matchGroups and matchGroups[1]
-			if firstGroup then -- TO DO: Check if #firstGroup > 0 is necessary
+			if firstGroup then
 				lookupKey = firstGroup[#firstGroup].value
 			end
 

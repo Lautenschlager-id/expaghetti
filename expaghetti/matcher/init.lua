@@ -25,9 +25,6 @@ local MatchStateNew = MatchState.new
 ---@return MatcherMetadata|nil matcherMetadata The match metadata.
 local matcher = function(expr, str, flags, stringIndex, config)
 	local tree, errorMessage = expr
-
-	stringIndex = stringIndex or 0 -- TO DO: Check can remove
-
 	local state = MatchStateNew(tree, str, flags, config)
 
 	local hasMatched, iniStr, endStr, matcherMetadata
