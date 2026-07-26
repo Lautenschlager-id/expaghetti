@@ -118,7 +118,7 @@ Expaghetti.find = default.find
 ---@return string|nil result The resulting string.
 ---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
 Expaghetti.replace = default.replace
- 
+
 --- Replaces occurrences of a pattern in a target string.
 --- Supports replacement strings, callback functions, and lookup
 --- tables. Replacements continue until no further matches are found

@@ -13,7 +13,7 @@ local tonumber = tonumber
 --[[ Dependencies ]]--
 local Balanced = require("magic.balanced")
 local Backreference = require("magic.backreference")
-local FrontierParse = require("magic.frontier").parse
+local Frontier = require("magic.frontier")
 local LiteralNode = require("core.ast").Literal
 
 local deepCopy = require("helpers.table").deepCopy
@@ -29,9 +29,11 @@ local isPositiveIntegerChar = ParserHelpers.isPositiveIntegerChar
 local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar
 
 --[[ Aliases ]]--
-
 local ERROR_INCOMPLETE_ESCAPE = Errors.incompleteEscape
 local ERROR_INVALID_ESCAPE = Errors.invalidEscape
+
+local FrontierParse = Frontier.parse
+local FrontierParseNegated = Frontier.parseNegated
 
 local MAGIC_ESCAPE = Magic.ESCAPE
 local MAGIC_HASHMAP = Magic._hashmap
@@ -47,6 +49,10 @@ local escapeHandlers = {
 	k = Backreference.parseByName,
 	-- %bxy -> balanced match between x and y
 	b = Balanced.parse,
+	-- %f --> frontier boundary
+	f = FrontierParse,
+	-- %F --> negated frontier boundary
+	F = FrontierParseNegated,
 }
 
 local replacementTemplateHandlers = {
@@ -55,16 +61,6 @@ local replacementTemplateHandlers = {
 	-- %k<name> -> named backreference
 	k = Backreference.parseByName,
 }
-
--- %f --> frontier boundary
-escapeHandlers.f = function(state, _, index)
-	return FrontierParse(state, index, false)
-end
-
--- %F --> negated frontier boundary
-escapeHandlers.F = function(state, _, index)
-	return FrontierParse(state, index, true)
-end
 
 --- Returns whether a character is the escape token (`%`).
 ---@param currentCharacter string The character to test.

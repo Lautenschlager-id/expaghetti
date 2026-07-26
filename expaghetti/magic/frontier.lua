@@ -29,13 +29,15 @@ end
 
 --- Parses a frontier boundary element.
 ---@param state ParserState The current parser state.
+---@param currentCharacter string The escape character.
 ---@param index number The current pattern index.
+---@param _ any Ignored.
+---@param __ any Ignored.
 ---@param isNegated boolean Whether the frontier is negated.
 ---@return number|false nextIndex The parser index after the frontier boundary, or false on failure.
 ---@return table|string nodeOrError The frontier AST node, or the parser error message on failure.
-Frontier.parse = function(state, index, isNegated)
-	local _, nextElement = state:readElement(index)
-	if not SetIsToken(nextElement) then
+Frontier.parse = function(state, currentCharacter, index, _, __, isNegated)
+	if not SetIsToken(currentCharacter) then
 		return false, ERROR_EXPECTED_FRONTIER_SET
 	end
 
@@ -54,7 +56,17 @@ Frontier.parse = function(state, index, isNegated)
 		return false, errorMessage
 	end
 
-	return nextIndex, FrontierNode(isNegated, setTree[1])
+	return nextIndex, FrontierNode(not not isNegated, setTree[1])
+end
+
+--- Parses a negated frontier boundary element.
+---@param state ParserState The current parser state.
+---@param currentCharacter string The escape character.
+---@param index number The current pattern index.
+---@return number|false nextIndex The parser index after the frontier boundary, or false on failure.
+---@return table|string nodeOrError The frontier AST node, or the parser error message on failure.
+Frontier.parseNegated = function(state, currentCharacter, index)
+	return Frontier.parse(state, currentCharacter, index, nil, nil, true)
 end
 
 --- Matches a frontier boundary element against the target string.
