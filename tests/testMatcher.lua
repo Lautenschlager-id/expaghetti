@@ -1,8 +1,8 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
 local Assertion = require("helpers.assertion")
-local compilePattern = require("helpers.api").compilePattern
 local ConfigNew = require("core.config").new
+local compilePattern = require("helpers.api").compilePattern(ConfigNew())
 local _matcher = require("matcher.init")
 
 local prettyPrint = require("prettyPrint")

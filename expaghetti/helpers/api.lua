@@ -22,71 +22,69 @@ local AssertionIsTable = Assertion.isTable
 
 --[[ Module ]]--
 
+--- Normalizes user-provided flags into the parser's internal representations.
+--- Accepts either a flag string or a table of flags, ignoring unsupported
+--- values while producing a lookup table for fast membership checks and
+--- a canonical flag string suitable for cache key generation.
+---@param flags string|table|nil The flags to normalize.
+---@return FlagTable flagsLookup A lookup table keyed by enabled flag identifiers.
+---@return string flagsKey A sorted, canonical string of enabled flag identifiers.
+local normalizeFlags = function(flags)
+	local flagsLookup, flagsArray = {}, {}
+
+	local flagType, flagCount = type(flags), 0
+	if flagType == "table" then
+		for key, value in next, flags do
+			if type(key) == "number" and type(value) == "string" then
+				if Flag[value] and not flagsLookup[key] then
+					flagsLookup[value] = true
+					flagCount = flagCount + 1
+					flagsArray[flagCount] = value
+				end
+			elseif type(key) == "string" and value then
+				if Flag[key] then
+					flagsLookup[key] = true
+					flagCount = flagCount + 1
+					flagsArray[flagCount] = key
+				end
+			end
+		end
+	elseif flagType == "string" then
+		for charIndex = 1, #flags do
+			local flag = string_sub(flags, charIndex, charIndex)
+			if Flag[flag] and not flagsLookup[flag] then
+				flagsLookup[flag] = true
+				flagCount = flagCount + 1
+				flagsArray[flagCount] = flag
+			end
+		end
+	end
+
+	table_sort(flagsArray)
+	return flagsLookup, table_concat(flagsArray)
+end
+
 --- Compiles or retrieves a compiled pattern.
 --- String patterns are normalized, looked up in the compilation cache,
 --- parsed if necessary, and cached for future use. Precompiled pattern
 --- objects are returned unchanged.
 ---@param pattern string|Pattern The pattern to compile or a precompiled pattern.
 ---@param flags string|table|nil Optional flags used when compiling string patterns.
----@param config EngineConfig The engine configuration.
 ---@return Pattern|nil pattern The compiled pattern, or nil if compilation failed.
 ---@return FlagTable|nil flagsLookup The normalized flag lookup table, or nil if compilation failed.
 ---@return string|nil errorMessage The compilation error message, or nil if compilation succeeded.
-local compilePattern
-do
-	--- Normalizes user-provided flags into the parser's internal representations.
-	--- Accepts either a flag string or a table of flags, ignoring unsupported
-	--- values while producing a lookup table for fast membership checks and
-	--- a canonical flag string suitable for cache key generation.
-	---@param flags string|table|nil The flags to normalize.
-	---@return FlagTable flagsLookup A lookup table keyed by enabled flag identifiers.
-	---@return string flagsKey A sorted, canonical string of enabled flag identifiers.
-	local normalizeFlags = function(flags)
-		local flagsLookup, flagsArray = {}, {}
-
-		local flagType, flagCount = type(flags), 0
-		if flagType == "table" then
-			for key, value in next, flags do
-				if type(key) == "number" and type(value) == "string" then
-					if Flag[value] and not flagsLookup[key] then
-						flagsLookup[value] = true
-						flagCount = flagCount + 1
-						flagsArray[flagCount] = value
-					end
-				elseif type(key) == "string" and value then
-					if Flag[key] then
-						flagsLookup[key] = true
-						flagCount = flagCount + 1
-						flagsArray[flagCount] = key
-					end
-				end
-			end
-		elseif flagType == "string" then
-			for charIndex = 1, #flags do
-				local flag = string_sub(flags, charIndex, charIndex)
-				if Flag[flag] and not flagsLookup[flag] then
-					flagsLookup[flag] = true
-					flagCount = flagCount + 1
-					flagsArray[flagCount] = flag
-				end
-			end
-		end
-
-		table_sort(flagsArray)
-		return flagsLookup, table_concat(flagsArray)
-	end
-
+local compilePattern = function(config)
 	local treeCache, treeCacheCount = {}, 0
 	local parseErrorCache, parseErrorCacheCount = {}, 0
 
 	--- Builds a unique cache key for a compiled pattern.
-	--- Combines the pattern, normalized flags, and engine configuration into
+	--- Combines the pattern, normalized flags, and API configuration into
 	--- a canonical string suitable for cache lookups.
 	---@param pattern string The pattern to compile.
 	---@param flagsKey string The normalized flag string.
-	---@param config EngineConfig The engine configuration.
+	---@param config APIConfig The API configuration.
 	---@return string cacheKey The generated cache key.
-	local buildCacheKey = function(pattern, flagsKey, config)
+	local buildCacheKey = function(pattern, flagsKey)
 		return table_concat({
 			pattern,
 			flagsKey,
@@ -94,7 +92,7 @@ do
 		}, "\0")
 	end
 
-	compilePattern = function(pattern, flags, config)
+	return function(pattern, flags)
 		local patternType = type(pattern)
 
 		-- User input (external)

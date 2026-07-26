@@ -1,16 +1,13 @@
 --[[
 	Compiled regular expression.
 
-	Represents a reusable compiled pattern created by `Engine:compile()`.
+	Represents a reusable compiled pattern.
 	Once compiled, the pattern can be matched against multiple target
 	strings without reparsing the original regular expression.
 ]]
 
 --[[ Globals ]]--
 local setmetatable = setmetatable
-
---[[ Dependencies ]]--
-local Api = require("api.init")
 
 --[[ Module ]]--
 local Pattern = {}
@@ -19,15 +16,15 @@ Pattern.__index = Pattern
 --- Creates a compiled pattern.
 --- Constructs a Pattern from a parsed regular expression and its
 --- associated flags.
+---@param api API The API instance.
 ---@param tree AST The parsed regular expression.
 ---@param flags RegexFlag[] The compiled regular expression flags.
----@param config EngineConfig The engine configuration.
 ---@return Pattern pattern The compiled pattern.
-function Pattern.new(tree, flags, config)
+function Pattern.new(api, tree, flags)
 	return setmetatable({
+		api = api,
 		tree = tree,
 		flags = flags,
-		config = config
 	}, Pattern)
 end
 
@@ -38,7 +35,7 @@ end
 ---@return boolean|nil matched Whether a match was found.
 ---@return string|nil errorMessage The matching error message.
 function Pattern:test(targetString, startPosition)
-	return Api.test(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.test(self.tree, targetString, self.flags, startPosition)
 end
 
 --- Finds the first occurrence of this pattern in a target string.
@@ -49,7 +46,7 @@ end
 ---@return Match|nil match The first match found.
 ---@return string|nil errorMessage The matching error message.
 function Pattern:match(targetString, startPosition)
-	return Api.match(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.match(self.tree, targetString, self.flags, startPosition)
 end
 
 --- Finds every occurrence of this pattern in a target string.
@@ -59,7 +56,7 @@ end
 ---@return Match[]|nil matches All matches found.
 ---@return string|nil errorMessage The matching error message.
 function Pattern:matchAll(targetString, startPosition)
-	return Api.matchAll(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.matchAll(self.tree, targetString, self.flags, startPosition)
 end
 
 --- Iterates over every occurrence of this pattern in a target string.
@@ -70,7 +67,7 @@ end
 ---@return fun(): Match|nil iterator The match iterator.
 ---@return string|nil errorMessage The matching error message.
 function Pattern:gmatch(targetString, startPosition)
-	return Api.gmatch(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.gmatch(self.tree, targetString, self.flags, startPosition)
 end
 
 --- Finds the first occurrence of this pattern in a target string.
@@ -81,7 +78,7 @@ end
 ---@return integer|nil matchStart The starting position of the match.
 ---@return integer|string|nil matchEndOrError The ending position of the match, or an error message.
 function Pattern:find(targetString, startPosition)
-	return Api.find(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.find(self.tree, targetString, self.flags, startPosition)
 end
 
 --- Replaces the first occurrence of this pattern in a target string.
@@ -93,7 +90,7 @@ end
 ---@return string|nil result The resulting string.
 ---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
 function Pattern:replace(targetString, replacement, startPosition)
-	return Api.replace(self.tree, targetString, replacement, self.flags, startPosition, self.config, 1)
+	return self.api.replace(self.tree, targetString, replacement, self.flags, startPosition)
 end
 
 --- Replaces occurrences of this pattern in a target string.
@@ -107,7 +104,7 @@ end
 ---@return string|nil result The resulting string.
 ---@return integer|string|nil replaceCountOrError The number of replacements performed, or an error message.
 function Pattern:gsub(targetString, replacement, limit, startPosition)
-	return Api.replace(self.tree, targetString, replacement, self.flags, startPosition, self.config, limit)
+	return self.api.gsub(self.tree, targetString, replacement, self.flags, startPosition, limit)
 end
 
 --- Splits a target string using this pattern as the delimiter.
@@ -117,7 +114,7 @@ end
 ---@return string[]|nil slices The resulting substrings.
 ---@return string|nil errorMessage The matching error message.
 function Pattern:split(targetString, startPosition)
-	return Api.split(self.tree, targetString, self.flags, startPosition, self.config)
+	return self.api.split(self.tree, targetString, self.flags, startPosition)
 end
 
 return Pattern
