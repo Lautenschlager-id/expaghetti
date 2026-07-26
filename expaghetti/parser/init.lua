@@ -28,7 +28,7 @@ local parser = function(exprOrState, flags)
 	if not tree then
 		return false, errorMessage
 	end
-	
+
 	-- Perform root-level post-processing.
 	-- Attach parser metadata to the root AST and resolve all deferred named
 	-- references once every named capture group has been discovered.

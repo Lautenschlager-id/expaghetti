@@ -49,11 +49,11 @@ Frontier.parse = function(state, index, isNegated)
 
 	local nextIndex = state.index
 	state.index = oldIndex
-	
+
 	if errorMessage then
 		return false, errorMessage
 	end
-	
+
 	return nextIndex, FrontierNode(isNegated, setTree[1])
 end
 

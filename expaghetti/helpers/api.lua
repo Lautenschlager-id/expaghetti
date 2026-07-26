@@ -103,7 +103,7 @@ do
 			flags, flagsKey = normalizeFlags(flags)
 
 			local cacheKey = buildCacheKey(pattern, flagsKey, config)
-			
+
 			local cachedTree = treeCache[cacheKey]
 			if cachedTree then
 				return cachedTree, flags
@@ -141,7 +141,7 @@ do
 			end
 
 			return tree, flags
-		
+
 		-- Pattern input (internal)
 		elseif patternType == "table" and pattern._index then
 			return pattern, flags, nil
@@ -237,7 +237,7 @@ local buildMatchObject = function(targetString, matchStart, matchEnd, matcherMet
 		end
 		return captureOne.start > captureTwo.start
 	end)
-	
+
 	return match
 end
 

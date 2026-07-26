@@ -42,7 +42,7 @@ return function(pattern, targetString, flags, startPosition, config)
 
 	local currentIndex = (startPosition or 1) - 1
 	local hasMatched, matchStart, matchEnd = matcher(tree, targetString, parsedFlags, currentIndex, config)
-	
+
 	if hasMatched then
 		return matchStart, matchEnd
 	elseif matchStart then

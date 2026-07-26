@@ -61,7 +61,7 @@ Alternate.parse = function(state, tree)
 	-- Parse each subsequent alternate branch
 	repeat
 		state.index = state.index + 1
-		
+
 		-- Branch reset groups reuse capture numbering for every branch
 		if isBranchReset then
 			stateMetadata.groupIndex = initialGroupIndex

@@ -3,7 +3,7 @@
 
 	Provides assertion functions for validating function arguments.
 ]]
-		
+
 --[[ Globals ]]--
 local error = error
 local string_format = string.format

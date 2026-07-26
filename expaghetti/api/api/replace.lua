@@ -113,7 +113,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 		if replaceCount >= maxOcurrences then
 			break
 		end
-		
+
 		local hasMatched, matchStart, matchEnd, matcherMetadata = matcher(tree, targetString, parsedFlags, currentIndex, config)
 		if not hasMatched then
 			if matchStart then
@@ -145,7 +145,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 			substitution = replacement[lookupKey]
 			substitution = substitution and tostring(substitution)
 		end
-		
+
 		if substitution then
 			segmentCount = segmentCount + 1
 			segments[segmentCount] = substitution
@@ -154,7 +154,7 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 			segmentCount = segmentCount + 1
 			segments[segmentCount] = matchValue
 		end
-		
+
 		lastCopied = math_max(lastCopied, matchEnd)
 		if matchEnd < matchStart then
 			currentIndex = math_max(currentIndex + 1, matchStart)
@@ -165,6 +165,6 @@ return function(pattern, targetString, replacement, flags, startPosition, config
 
 	segmentCount = segmentCount + 1
 	segments[segmentCount] = string_sub(targetString, lastCopied + 1)
-	
+
 	return table_concat(segments), replaceCount
 end

@@ -25,7 +25,7 @@ coreTreeMatcher = function(state)
 	while treeIndex < tree._index do
 		treeIndex = treeIndex + 1
 		state.treeIndex = treeIndex
-		
+
 		local currentElement = tree[treeIndex]
 
 		state.stringIndex = state.stringIndex + 1

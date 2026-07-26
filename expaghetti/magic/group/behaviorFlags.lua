@@ -34,7 +34,7 @@ return function(state, peekIndex, peekChar)
 	local enableFlags = {}
 	local disableFlags = {}
 	local targetFlags = enableFlags
-	
+
 	-- Parse all inline flags (e.g. `i`, `m`, `s`) and switch target if `-` is encountered
 	while FLAGS_INLINE_TOKENS[peekChar] do
 		if peekChar == ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR then
@@ -42,7 +42,7 @@ return function(state, peekIndex, peekChar)
 		else
 			targetFlags[peekChar] = true
 		end
-		
+
 		local nextPeekIndex, nextChar = state:readElement(peekIndex)
 		if not nextPeekIndex or state:isElement(nextChar) then
 			peekChar = nextChar
@@ -51,7 +51,7 @@ return function(state, peekIndex, peekChar)
 		peekChar = nextChar
 		peekIndex = nextPeekIndex
 	end
-	
+
 	-- Handle scoped flags e.g. `(?i:abc)`
 	if peekChar == ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR then
 		local node = GroupScopedFlagsNode()
@@ -60,7 +60,7 @@ return function(state, peekIndex, peekChar)
 			disable = disableFlags
 		}
 		return peekIndex, node
-		
+
 	-- Handle standard inline flag toggles e.g. `(?i)`
 	elseif peekChar == ENUM_GROUP_CLOSE then
 		local node = GroupInlineFlagsNode()

@@ -56,7 +56,7 @@ local new = function(config)
 
 	local maxBacktrackDepth = config.maxBacktrackDepth
 	AssertionIsNumber(maxBacktrackDepth, "maxBacktrackDepth", true)
-	
+
 	local patternCacheSize = config.patternCacheSize
 	AssertionIsNumber(patternCacheSize, "patternCacheSize", true)
 

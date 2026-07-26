@@ -4,7 +4,7 @@
 	Parses a replacement template into an Abstract Syntax Tree (AST)
 	composed of literal and backreference elements.
 ]]
-	
+
 --[[ Dependencies ]]--
 local LiteralParse = require("magic.literal").parse
 local ParserStateNew = require("parser.state").new

@@ -143,19 +143,19 @@ local parseGroupBehavior = function(state)
 	-- Branch reset groups: (?|...)
 	if peekChar == MAGIC_GROUP_BRANCH_RESET_BEHAVIOR then
 		return BehaviorBranchReset(state, peekIndex)
-	
+
 	-- Non-capturing groups: (?:...)
 	elseif peekChar == MAGIC_GROUP_NON_CAPTURING_BEHAVIOR then
 		return BehaviorCapturing(state, index, peekIndex, peekChar)
-		
+
 	-- Atomic groups: (?>...)
 	elseif peekChar == MAGIC_GROUP_ATOMIC_BEHAVIOR then
 		return BehaviorAtomic(state, peekIndex)
-		
+
 	-- Positive / Negative Lookahead: (?=...), (?!...)
 	elseif peekChar == MAGIC_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR or peekChar == MAGIC_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR then
 		return BehaviorLookaround(state, peekIndex, peekChar)
-		
+
 	-- Positive / Negative Lookbehind: (?<=...), (?<!...)
 	elseif peekChar == MAGIC_GROUP_LOOKBEHIND_BEHAVIOR then
 		local lookbehindIndex, lookbehindChar = state:readElement(peekIndex)
@@ -167,21 +167,21 @@ local parseGroupBehavior = function(state)
 			-- Fallback to Named Capture which also uses `<` i.e. `(?<name>...)`
 			return BehaviorCapturing(state, index, peekIndex, peekChar)
 		end
-		
+
 	-- Comments: (?#...)
 	elseif peekChar == MAGIC_GROUP_COMMENT_BEHAVIOR then
 		return BehaviorComment(state, peekIndex)
-		
+
 	-- Recursion: (?R), (?0), (?123), (?&name)
 	elseif peekChar == MAGIC_GROUP_RECURSION_ROOT_BEHAVIOR or peekChar == MAGIC_GROUP_RECURSION_ROOT_ALIAS
 		or peekChar == MAGIC_GROUP_RECURSION_NAMED_BEHAVIOR or isPositiveIntegerChar(peekChar)
 	then
 		return BehaviorRecursion(state, peekIndex, peekChar, Group.isClosingToken)
-		
+
 	-- Inline and Scoped Flags: (?i), (?i:...)
 	elseif FLAGS_INLINE_TOKENS[peekChar] then
 		return BehaviorFlags(state, peekIndex, peekChar)
-		
+
 	-- Unrecognized behavior token after `(?`
 	else
 		return false, nil, ERROR_INVALID_GROUP_BEHAVIOR
@@ -224,13 +224,13 @@ Group.parse = function(state, tree)
 		return errorMessage
 	end
 	state.index = newIndex
-	
+
 	-- Apply inline toggle flags immediately to state
 	if group.inlineFlags then
 		state:applyInlineFlags(group.inlineFlags)
 		return nil
 	end
-	
+
 	local previousFlags
 	if group.scopedFlags then
 		previousFlags = state:pushScopedFlags(group.scopedFlags)
@@ -270,7 +270,7 @@ Group.parse = function(state, tree)
 			return groupErrorMessage
 		end
 		group.tree = groupTree
-		
+
 		-- Register groups for recursion target lookup
 		local groupIndex, groupTrees = group.index, stateMetadata.groupTrees
 		if groupIndex and groupTrees then
@@ -282,7 +282,7 @@ Group.parse = function(state, tree)
 	else
 		group.tree = { _index = 0 }
 	end
-	
+
 	if previousFlags then
 		state:popScopedFlags(previousFlags)
 	end
@@ -348,7 +348,7 @@ Group.match = function(currentElement, state)
 		elseif elementTargetIndex then
 			groupTree = stateMetadata.parsedMetadata.groupTrees[elementTargetIndex]
 		end
-		
+
 		if not groupTree or state:enterRecursion() then
 			return false, nil, nil, stateMetadata, false
 		end
@@ -361,7 +361,7 @@ Group.match = function(currentElement, state)
 	local outerTreeReference = stateMetadata.outerTreeReference
 	local oldOuterTreeRef = outerTreeReference[groupTree]
 	local isAtomic = currentElement.isAtomic
-	
+
 	if isRecursion then
 		outerTreeReference[groupTree] = nil
 	elseif not isAssertion and not isAtomic and tree then

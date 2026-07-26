@@ -4,7 +4,7 @@
 	Supports the beginning (`^`) and end (`$`) anchors, including
 	multiline matching behavior.
 ]]
-	
+
 --[[ Dependencies ]]--
 local AnchorNode = require("core.ast").Anchor
 

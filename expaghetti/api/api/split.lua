@@ -47,9 +47,9 @@ return function(pattern, targetString, flags, startPosition, config)
 	local sliceCount = 0
 
 	local currentIndex = (startPosition or 1) - 1
-	
+
 	local lastCopied = 0
-	
+
 	local targetLength = #targetString
 	while currentIndex <= targetLength do
 		local hasMatched, matchStart, matchEnd = matcher(tree, targetString, parsedFlags, currentIndex, config)

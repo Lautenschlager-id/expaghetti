@@ -90,7 +90,7 @@ local tryParseQuantifier = function(state, index)
 	if not nextIndex then
 		return index, false
 	end
-	
+
 	if not state:isElement(currentToken) and QUANTIFIER_TOKENS[currentToken] then
 		return nextIndex, QUANTIFIER_TOKENS[currentToken]
 	elseif currentToken == MAGIC_QUANTIFIER_OPEN then

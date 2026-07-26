@@ -44,7 +44,7 @@ return function(state, index, peekIndex, peekChar)
 	if not peekIndex then
 		return index, GroupCaptureNode()
 	end
-	
+
 	-- Non-capturing group: (?:...)
 	if peekChar == MAGIC_GROUP_NON_CAPTURING_BEHAVIOR then
 		return peekIndex, GroupNonCapturingNode()
@@ -70,6 +70,6 @@ return function(state, index, peekIndex, peekChar)
 		groupNames[name] = true
 		return afterLoopIndex, GroupNamedNode(name)
 	end
-	
+
 	return false, nil, ERROR_INVALID_GROUP_BEHAVIOR_INDEX
 end

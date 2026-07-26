@@ -150,7 +150,7 @@ local collectOccurrences = function(
 		then
 			return totalOccurrences, stringIndex
 		end
-		
+
 		lastIniStr, lastEndStr = iniStr, endStr
 		stringIndex = endStr + 1
 	end
@@ -187,9 +187,9 @@ local shortenOccurrenceAt = function(
 
 	-- Erase the previously recorded capture group since we are about to modify its boundaries.
 	state:popCapture(elementCaptureId)
-	
+
 	local currentCharacter = state:getTargetCharacter(occurrenceStart)
-	
+
 	-- Re-execute the element, but artificially restrict its maximum consumption to one character less than before.
 	local hasMatched, iniStr, endStr = executeElement(state, currentElement, currentCharacter, occurrenceStart, occurrenceEnd - 1)
 
@@ -252,9 +252,9 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 		) then
 			break
 		end
-		
+
 		stringIndex = endStringPositions[totalOccurrences] + 1
-		
+
 		totalOccurrences, stringIndex = collectOccurrences(
 			state,
 			currentElement,
@@ -272,7 +272,7 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 	if maximumOccurrencesOfElement < minimumOccurrences then
 		return
 	end
-	
+
 	-- Step 3: Outer Engine Yield Order
 	-- Configure the loop that will yield the collected occurrences to the rest of the matching engine.
 	local startOccurrences, endOccurrences, step
@@ -303,7 +303,7 @@ local quantifierMatcher = function(currentElement, currentCharacter, state)
 		-- Yield the boundary of the current occurrence sequence to the rest of the regular expression engine.
 		local targetStringIndex = endStringPositions[occurrence] or (state.stringIndex - 1)
 		local hasMatched, iniStr, endStr, metadata = continueMatcher(state, targetStringIndex)
-		
+
 		-- If the rest of the engine matched successfully, the entire regular expression is satisfied!
 		if hasMatched then
 			return hasMatched, iniStr, endStr, metadata

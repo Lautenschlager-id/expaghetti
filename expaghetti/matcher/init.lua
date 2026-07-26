@@ -32,7 +32,7 @@ local matcher = function(expr, str, flags, stringIndex, config)
 		state:reset(stringIndex)
 		state.tree = tree
 		state.treeIndex = 0
-		
+
 		hasMatched, iniStr, endStr, matcherMetadata = coreTreeMatcher(state)
 
 		if hasMatched then
