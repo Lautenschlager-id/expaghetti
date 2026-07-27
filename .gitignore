@@ -1,0 +1,10 @@
+# anything else is debug
+!*.lua
+!*.bat
+!*.sh
+
+# wiki
+wiki/
+
+# dists
+dist/
