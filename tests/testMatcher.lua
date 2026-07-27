@@ -5,7 +5,7 @@ local ConfigNew = require("expaghetti.core.config").new
 local compilePattern = require("expaghetti.helpers.api").compilePattern(ConfigNew())
 local _matcher = require("expaghetti.matcher.init")
 
-local prettyPrint = require("expaghetti.helpers.prettyPrint")
+local prettyPrint = require("tests.helpers.prettyPrint")
 
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsString = Assertion.isString
@@ -29,7 +29,7 @@ function matcher(expr, str, flags, startPosition, config)
 	return _matcher(expr, str, flags, startPosition or 0, config)
 end
 
-local performance = require("expaghetti.helpers.performance")
+local performance = require("tests.helpers.performance")
 
 local toCharArray = require("expaghetti.helpers.string").toCharArray
 local ENUM_FLAG_UNICODE = require("expaghetti.enums.flags").UNICODE

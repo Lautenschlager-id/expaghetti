@@ -1,8 +1,8 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
-local prettyPrint = require("expaghetti.helpers.prettyPrint")
+local prettyPrint = require("tests.helpers.prettyPrint")
 
-local expaghetti = require("expaghetti.expaghetti")
+local expaghetti = require("expaghetti")
 
 local function assertDeepEqual(a, b, path)
 	path = path or "root"
@@ -25,7 +25,7 @@ local function assertDeepEqual(a, b, path)
 	end
 end
 
-local performance = require("expaghetti.helpers.performance")
+local performance = require("tests.helpers.performance")
 
 local errorCount = 0
 local function check(name, fn)

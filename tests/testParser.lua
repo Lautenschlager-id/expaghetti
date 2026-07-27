@@ -7,10 +7,10 @@ local tostring = tostring
 ----------------------------------------------------------------------------------------------------
 local parser = require("expaghetti.parser.init")
 ----------------------------------------------------------------------------------------------------
-local compareTables = require("expaghetti.helpers.tableAssertion").compareTables
-local prettyPrint = require("expaghetti.helpers.prettyPrint")
+local compareTables = require("tests.helpers.tableAssertion").compareTables
+local prettyPrint = require("tests.helpers.prettyPrint")
 ----------------------------------------------------------------------------------------------------
-local performance = require("expaghetti.helpers.performance")
+local performance = require("tests.helpers.performance")
 ----------------------------------------------------------------------------------------------------
 local cases = {
 	"literal",
@@ -49,7 +49,7 @@ for case = 1, #cases do
 	case = cases[case]
 
 	print(strformat("\n\n############### Testing cases of %q ###############", case))
-	for caseIndex, caseObj in next, require("expaghetti.parserCases." .. case) do
+	for caseIndex, caseObj in next, require("tests.parserCases." .. case) do
 		caseObj.flags = caseObj.flags or {} 
 
 		local flagKeys = {}
