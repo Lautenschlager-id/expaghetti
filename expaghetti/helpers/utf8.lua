@@ -5,6 +5,7 @@
 ]]
 
 --[[ Globals ]]--
+local bit32 = bit32 or bit
 local bit32_rshift = bit32.rshift
 local string_byte = string.byte
 local string_sub = string.sub
