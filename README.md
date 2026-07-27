@@ -12,8 +12,6 @@ A modern, feature-rich regular expression engine written entirely in Lua.
   <a href="https://github.com/Lautenschlager-id/expaghetti/wiki"><strong>Documentation</strong></a>
 </p>
 
----
-
 ## What is Expaghetti?
 
 Expaghetti is a complete regular expression engine implemented from scratch in pure Lua.
@@ -37,8 +35,6 @@ Some supported features include:
 - Character classes and ranges
 - Position captures
 
----
-
 ## Documentation
 
 The complete documentation is available in the project Wiki.
@@ -59,8 +55,6 @@ The wiki contains detailed documentation for:
 - Matcher internals
 - Examples
 
----
-
 ## Installation
 
 Expaghetti is written entirely in pure Lua and has no external dependencies.
@@ -71,7 +65,10 @@ Clone (or download) the repository and include it in your project.
 git clone https://github.com/Lautenschlager-id/expaghetti.git
 ```
 
-### ... With Standard Lua
+<details>
+  <summary>
+    <h3>With Standard Lua</h3>
+  </summary>
 
 Place the `expaghetti` directory somewhere in your `package.path`.
 
@@ -101,7 +98,12 @@ package.path = "./?/?.lua;" .. package.path
 local exp = require("expaghetti")
 ```
 
-### ... With Luvit
+</details>
+
+<details>
+  <summary>
+    <h3>With Luvit</h3>
+  </summary>
 
 Luvit uses a different module resolution strategy than standard Lua.
 
@@ -152,7 +154,7 @@ local exp = require("expaghetti")
 
 The build process automatically rewrites Expaghetti's internal module imports for Luvit's module loader, so your application code remains identical to the standard Lua version.
 
----
+</details>
 
 ## Quick Example
 
@@ -167,8 +169,6 @@ local result = exp.match(
 print(result.group.user)     --> john
 print(result.group.domain)   --> example.com
 ```
-
----
 
 ## Installing into the String Library
 
@@ -190,8 +190,6 @@ local startPos, endPos =
 >
 > This is intended as a convenience feature for applications and should be used carefully in shared codebases and avoided in libraries.
 
----
-
 ## Why Expaghetti?
 
 Lua patterns are intentionally simple and extremely fast.
@@ -208,15 +206,11 @@ However, many applications eventually need features such as:
 
 Expaghetti brings those capabilities to Lua while remaining entirely self-contained.
 
----
-
 ## Compatibility
 
 Expaghetti is implemented in pure Lua.
 
 It has no native dependencies and is designed to work anywhere a compatible Lua interpreter is available.
-
----
 
 ## Contributing
 
