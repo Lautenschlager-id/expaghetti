@@ -63,21 +63,82 @@ The wiki contains detailed documentation for:
 
 ## Installation
 
-Expaghetti does not require LuaRocks, Luvit, or any similar.
+Expaghetti is written entirely in pure Lua and has no external dependencies.
 
-Simply clone (or download) the repository and include it in your project.
+Clone (or download) the repository and include it in your project.
 
-```
+```sh
 git clone https://github.com/Lautenschlager-id/expaghetti.git
 ```
 
+### ... With Standard Lua
+
+Place the `expaghetti` directory somewhere in your `package.path`.
+
 Project structure example:
 
+```text
+my-project/
+│
+├── expaghetti/
+│   ├── expaghetti.lua
+│   ├── src/
+│   └── ...
+│
+└── main.lua
 ```
+
+Then simply require it:
+
+```lua
+local exp = require("expaghetti")
+```
+
+If necessary, extend `package.path` first:
+
+```lua
+package.path = "./?/?.lua;" .. package.path
+local exp = require("expaghetti")
+```
+
+### ... With Luvit
+
+Luvit uses a different module resolution strategy than standard Lua.
+
+To generate a Luvit-compatible distribution, run the build script:
+
+**Windows**
+
+```bat
+scripts\luvit\build.bat
+```
+
+**Linux / macOS**
+
+```sh
+./scripts/luvit/build.sh
+```
+
+The build creates a `dist/` directory containing a transformed copy of the library.
+
+Copy the generated `expaghetti` directory into your project:
+
+```text
+dist/
+└── expaghetti/
+    ├── init.lua
+    ├── src/
+    └── ...
+```
+
+↓
+
+```text
 my-project/
 │
 ├── expaghetti/
 │   ├── init.lua
+│   ├── src/
 │   └── ...
 │
 └── main.lua
@@ -86,25 +147,19 @@ my-project/
 Then require it normally:
 
 ```lua
-local Expaghetti = require("expaghetti")
+local exp = require("expaghetti")
 ```
 
-If the module is not located inside Lua's module search path, you may need to extend `package.path` before requiring it:
-
-```lua
-package.path = package.path .. ";./?/init.lua;./?.lua"
-
-local Expaghetti = require("expaghetti")
-```
+The build process automatically rewrites Expaghetti's internal module imports for Luvit's module loader, so your application code remains identical to the standard Lua version.
 
 ---
 
 ## Quick Example
 
 ```lua
-local Expaghetti = require("expaghetti")
+local exp = require("expaghetti")
 
-local result = Expaghetti.match(
+local result = exp.match(
     "My email is john@example.com",
     "(?<user>%a+)@(?<domain>[%w.]+)"
 )
@@ -120,9 +175,9 @@ print(result.group.domain)   --> example.com
 Expaghetti can optionally replace Lua's standard pattern-matching functions with regex-powered implementations.
 
 ```lua
-local Expaghetti = require("expaghetti")
+local exp = require("expaghetti")
 
-Expaghetti:install()
+exp:install()
 
 local startPos, endPos =
     string.find("hello world", "(?<=hello )world")
@@ -133,7 +188,7 @@ local startPos, endPos =
 >
 > After installation, the affected functions use Expaghetti's regular expression syntax, parameters, and return values instead of Lua's native pattern matching behavior.
 >
-> This is intended as a convenience feature for applications and should be used carefully in shared codebases or libraries.
+> This is intended as a convenience feature for applications and should be used carefully in shared codebases and avoided in libraries.
 
 ---
 
@@ -168,9 +223,3 @@ It has no native dependencies and is designed to work anywhere a compatible Lua 
 Bug reports, feature requests, documentation improvements, and pull requests are always welcome.
 
 If you've found an issue or have an idea for improvement, feel free to open one.
-
----
-
-## License
-
-See the project's LICENSE file.
