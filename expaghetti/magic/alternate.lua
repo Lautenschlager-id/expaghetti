@@ -6,14 +6,14 @@
 ]]
 
 --[[ Dependencies ]]--
-local AlternateNode = require("core.ast").Alternate
+local AlternateNode = require("expaghetti.core.ast").Alternate
 
 --[[ Aliases ]]--
-local ELEMENT_ALTERNATE = require("enums.elements").ALTERNATE
+local ELEMENT_ALTERNATE = require("expaghetti.enums.elements").ALTERNATE
 
-local GroupIsClosingToken = require("magic.group.group").isClosingToken
+local GroupIsClosingToken = require("expaghetti.magic.group.group").isClosingToken
 
-local MAGIC_ALTERNATE_BRANCH_SEPARATOR = require("enums.magic").ALTERNATE_BRANCH_SEPARATOR
+local MAGIC_ALTERNATE_BRANCH_SEPARATOR = require("expaghetti.enums.magic").ALTERNATE_BRANCH_SEPARATOR
 
 --[[ Module ]]--
 local Alternate = {}

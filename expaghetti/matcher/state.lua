@@ -10,10 +10,10 @@ local setmetatable = setmetatable
 local string_byte = string.byte
 
 --[[ Dependencies ]]--
-local toCharArray = require("helpers.string").toCharArray
+local toCharArray = require("expaghetti.helpers.string").toCharArray
 
 --[[ Aliases ]]--
-local FLAG_UNICODE = require("enums.flags").FLAGS.UNICODE
+local FLAG_UNICODE = require("expaghetti.enums.flags").FLAGS.UNICODE
 
 --[[ Module ]]--
 local MatchState = {

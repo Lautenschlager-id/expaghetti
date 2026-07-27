@@ -1,11 +1,11 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
-local Assertion = require("helpers.assertion")
-local ConfigNew = require("core.config").new
-local compilePattern = require("helpers.api").compilePattern(ConfigNew())
-local _matcher = require("matcher.init")
+local Assertion = require("expaghetti.helpers.assertion")
+local ConfigNew = require("expaghetti.core.config").new
+local compilePattern = require("expaghetti.helpers.api").compilePattern(ConfigNew())
+local _matcher = require("expaghetti.matcher.init")
 
-local prettyPrint = require("helpers.prettyPrint")
+local prettyPrint = require("expaghetti.helpers.prettyPrint")
 
 local AssertionIsStringOrTable = Assertion.isStringOrTable
 local AssertionIsString = Assertion.isString
@@ -29,10 +29,10 @@ function matcher(expr, str, flags, startPosition, config)
 	return _matcher(expr, str, flags, startPosition or 0, config)
 end
 
-local performance = require("helpers.performance")
+local performance = require("expaghetti.helpers.performance")
 
-local toCharArray = require("helpers.string").toCharArray
-local ENUM_FLAG_UNICODE = require("enums.flags").UNICODE
+local toCharArray = require("expaghetti.helpers.string").toCharArray
+local ENUM_FLAG_UNICODE = require("expaghetti.enums.flags").UNICODE
 
 local function getSubstring(str, ini, en, flags)
 	local isUnicode = false
@@ -847,14 +847,14 @@ assertCapture("(?|((a)(b))|(c))%2", "aba", 3, "b", "Branch reset: group3 inner c
 
 print("  [50] Depth Limits...")
 do
-	local config = require("core.config").defaults
+	local config = require("expaghetti.core.config").defaults
 	local savedRecursion = config.maxRecursionDepth
 	config.maxRecursionDepth = 5
 	assertMatch("(?R)", "x", nil, nil, nil, "Recursion depth limit: infinite (?R) fails gracefully")
 	config.maxRecursionDepth = savedRecursion
 end
 do
-	local config = require("core.config").defaults
+	local config = require("expaghetti.core.config").defaults
 	local savedBacktrack = config.maxBacktrackDepth
 	config.maxBacktrackDepth = 10
 	assertMatch("(a+)+b", "aaaaaaaaaaaaac", nil, nil, nil, "Backtrack limit: catastrophic pattern fails gracefully")

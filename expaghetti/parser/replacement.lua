@@ -6,8 +6,8 @@
 ]]
 
 --[[ Dependencies ]]--
-local LiteralParse = require("magic.literal").parse
-local ParserStateNew = require("parser.state").new
+local LiteralParse = require("expaghetti.magic.literal").parse
+local ParserStateNew = require("expaghetti.parser.state").new
 
 --[[ Module ]]--
 

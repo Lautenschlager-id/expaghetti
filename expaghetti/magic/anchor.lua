@@ -6,12 +6,12 @@
 ]]
 
 --[[ Dependencies ]]--
-local AnchorNode = require("core.ast").Anchor
+local AnchorNode = require("expaghetti.core.ast").Anchor
 
 --[[ Enums ]]--
-local Elements = require("enums.elements")
-local LINE_BREAKS = require("enums.lineBreaks")
-local Magic = require("enums.magic")
+local Elements = require("expaghetti.enums.elements")
+local LINE_BREAKS = require("expaghetti.enums.lineBreaks")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local MAGIC_ANCHOR_END = Magic.ANCHOR_END

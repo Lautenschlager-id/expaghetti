@@ -6,11 +6,11 @@
 ]]
 
 --[[ Dependencies ]]--
-local BalancedNode = require("core.ast").Balanced
+local BalancedNode = require("expaghetti.core.ast").Balanced
 
 --[[ Aliases ]]--
-local ELEMENT_BALANCED = require("enums.elements").BALANCED
-local ERROR_MISSING_BALANCED_DELIMITERS = require("enums.errors").missingBalancedDelimiters
+local ELEMENT_BALANCED = require("expaghetti.enums.elements").BALANCED
+local ERROR_MISSING_BALANCED_DELIMITERS = require("expaghetti.enums.errors").missingBalancedDelimiters
 
 --[[ Module ]]--
 local Balanced = {}

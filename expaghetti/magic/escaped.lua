@@ -11,19 +11,19 @@ local string_format = string.format
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local Balanced = require("magic.balanced")
-local Backreference = require("magic.backreference")
-local Frontier = require("magic.frontier")
-local LiteralNode = require("core.ast").Literal
+local Balanced = require("expaghetti.magic.balanced")
+local Backreference = require("expaghetti.magic.backreference")
+local Frontier = require("expaghetti.magic.frontier")
+local LiteralNode = require("expaghetti.core.ast").Literal
 
-local deepCopy = require("helpers.table").deepCopy
+local deepCopy = require("expaghetti.helpers.table").deepCopy
 
-local ParserHelpers = require("helpers.parser")
+local ParserHelpers = require("expaghetti.helpers.parser")
 
 --[[ Enums ]]--
-local CharacterClasses = require("enums.characterClasses")
-local Errors = require("enums.errors")
-local Magic = require("enums.magic")
+local CharacterClasses = require("expaghetti.enums.characterClasses")
+local Errors = require("expaghetti.enums.errors")
+local Magic = require("expaghetti.enums.magic")
 
 local isPositiveIntegerChar = ParserHelpers.isPositiveIntegerChar
 local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar

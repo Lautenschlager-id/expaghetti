@@ -6,12 +6,12 @@
 ]]
 
 --[[ Dependencies ]]--
-local SetNode = require("core.ast").Set
+local SetNode = require("expaghetti.core.ast").Set
 
 --[[ Enums ]]--
-local Elements = require("enums.elements")
-local Errors = require("enums.errors")
-local Magic = require("enums.magic")
+local Elements = require("expaghetti.enums.elements")
+local Errors = require("expaghetti.enums.errors")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local ELEMENT_SET = Elements.SET

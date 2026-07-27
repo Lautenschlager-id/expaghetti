@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local GroupAtomicNode = require("core.ast").GroupAtomic
+local GroupAtomicNode = require("expaghetti.core.ast").GroupAtomic
 
 --[[ Module ]]--
 

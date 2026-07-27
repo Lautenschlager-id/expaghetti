@@ -15,13 +15,13 @@ local tostring = tostring
 local type = type
 
 --[[ Dependencies ]]--
-local Assertion = require("helpers.assertion")
-local buildMatchObject = require("helpers.api").buildMatchObject
-local matcher = require("matcher.init")
-local parserReplacementTemplate = require("parser.replacement")
+local Assertion = require("expaghetti.helpers.assertion")
+local buildMatchObject = require("expaghetti.helpers.api").buildMatchObject
+local matcher = require("expaghetti.matcher.init")
+local parserReplacementTemplate = require("expaghetti.parser.replacement")
 
 --[[ Enums ]]--
-local ELEMENT_LITERAL = require("enums.elements").LITERAL
+local ELEMENT_LITERAL = require("expaghetti.enums.elements").LITERAL
 
 --[[ Aliases ]]--
 local AssertionIsNumber = Assertion.isNumber

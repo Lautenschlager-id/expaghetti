@@ -6,9 +6,9 @@
 ]]
 
 --[[ Dependencies ]]--
-local Assertion = require("helpers.assertion")
-local buildMatchObject = require("helpers.api").buildMatchObject
-local matcher = require("matcher.init")
+local Assertion = require("expaghetti.helpers.assertion")
+local buildMatchObject = require("expaghetti.helpers.api").buildMatchObject
+local matcher = require("expaghetti.matcher.init")
 
 --[[ Aliases ]]--
 local AssertionIsNumber = Assertion.isNumber

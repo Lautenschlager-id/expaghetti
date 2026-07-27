@@ -6,12 +6,12 @@
 local string_format = string.format
 
 --[[ Dependencies ]]--
-local AST = require("core.ast")
-local ParserHelpers = require("helpers.parser")
+local AST = require("expaghetti.core.ast")
+local ParserHelpers = require("expaghetti.helpers.parser")
 
 --[[ Enums ]]--
-local Errors = require("enums.errors")
-local Magic = require("enums.magic")
+local Errors = require("expaghetti.enums.errors")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local consumeWhile = ParserHelpers.consumeWhile

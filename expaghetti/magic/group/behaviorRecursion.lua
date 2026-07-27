@@ -7,12 +7,12 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local AST = require("core.ast")
-local ParserHelper = require("helpers.parser")
+local AST = require("expaghetti.core.ast")
+local ParserHelper = require("expaghetti.helpers.parser")
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
-local Errors = require("enums.errors")
+local Magic = require("expaghetti.enums.magic")
+local Errors = require("expaghetti.enums.errors")
 
 --[[ Aliases ]]--
 local consumeWhile = ParserHelper.consumeWhile

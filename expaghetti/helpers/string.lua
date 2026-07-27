@@ -6,7 +6,7 @@
 local string_sub = string.sub
 
 --[[ Dependencies ]]--
-local utf8ToCharArray = require("helpers.utf8").toCharArray
+local utf8ToCharArray = require("expaghetti.helpers.utf8").toCharArray
 
 --[[ Module ]]--
 

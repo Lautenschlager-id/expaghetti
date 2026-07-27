@@ -5,12 +5,12 @@
 ]]
 
 --[[ Dependencies ]]--
-local Alternate = require("magic.alternate")
-local Anchor = require("magic.anchor")
-local Any = require("magic.any")
-local Group = require("magic.group.group")
-local Quantifier = require("magic.quantifier")
-local Set = require("magic.set")
+local Alternate = require("expaghetti.magic.alternate")
+local Anchor = require("expaghetti.magic.anchor")
+local Any = require("expaghetti.magic.any")
+local Group = require("expaghetti.magic.group.group")
+local Quantifier = require("expaghetti.magic.quantifier")
+local Set = require("expaghetti.magic.set")
 
 --[[ Aliases ]]--
 local AlternateIsToken, AlternateParse = Alternate.isToken, Alternate.parse
@@ -18,11 +18,11 @@ local AnchorIsToken, AnchorParse = Anchor.isToken, Anchor.parse
 local AnyIsToken, AnyParse = Any.isToken, Any.parse
 local GroupIsClosingToken, GroupParseClosing = Group.isClosingToken, Group.parseClosing
 local GroupIsOpeningToken, GroupParse = Group.isOpeningToken, Group.parse
-local LiteralParse = require("magic.literal").parse
+local LiteralParse = require("expaghetti.magic.literal").parse
 local QuantifierLookForElementOperation = Quantifier.lookForElementOperation
 local SetIsToken, SetParse = Set.isToken, Set.parse
 
-local ERROR_UNTERMINATED_GROUP = require("enums.errors").unterminatedGroup
+local ERROR_UNTERMINATED_GROUP = require("expaghetti.enums.errors").unterminatedGroup
 
 --[[ Module ]]--
 

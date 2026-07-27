@@ -3,19 +3,19 @@
 ]]
 
 --[[ Dependencies ]]--
-local AlternateMatch = require("magic.alternate").match
-local AnchorMatch = require("magic.anchor").match
-local AnyMatch = require("magic.any").match
-local BackreferenceMatch = require("magic.backreference").match
-local BalancedMatch = require("magic.balanced").match
-local FrontierMatch = require("magic.frontier").match
-local GroupMatch = require("magic.group.group").match
-local LiteralMatch = require("magic.literal").match
-local PositionCaptureMatch = require("magic.positionCapture").match
-local SetMatch = require("magic.set").match
+local AlternateMatch = require("expaghetti.magic.alternate").match
+local AnchorMatch = require("expaghetti.magic.anchor").match
+local AnyMatch = require("expaghetti.magic.any").match
+local BackreferenceMatch = require("expaghetti.magic.backreference").match
+local BalancedMatch = require("expaghetti.magic.balanced").match
+local FrontierMatch = require("expaghetti.magic.frontier").match
+local GroupMatch = require("expaghetti.magic.group.group").match
+local LiteralMatch = require("expaghetti.magic.literal").match
+local PositionCaptureMatch = require("expaghetti.magic.positionCapture").match
+local SetMatch = require("expaghetti.magic.set").match
 
 --[[ Enums ]]--
-local Elements = require("enums.elements")
+local Elements = require("expaghetti.enums.elements")
 
 --[[ Aliases ]]--
 local ELEMENT_ALTERNATE = Elements.ALTERNATE

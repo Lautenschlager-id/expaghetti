@@ -12,7 +12,7 @@ local next = next
 local setmetatable = setmetatable
 
 --[[ Enums ]]--
-local Flags = require("enums.flags").FLAGS
+local Flags = require("expaghetti.enums.flags").FLAGS
 
 --[[ Module ]]--
 local Flag = {}

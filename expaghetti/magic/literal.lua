@@ -6,13 +6,13 @@
 ]]
 
 --[[ Dependencies ]]--
-local LiteralNode = require("core.ast").Literal
-local QuantifierIsToken = require("magic.Quantifier").isToken
+local LiteralNode = require("expaghetti.core.ast").Literal
+local QuantifierIsToken = require("expaghetti.magic.Quantifier").isToken
 
 --[[ Aliases ]]--
-local ELEMENT_LITERAL = require("enums.elements").LITERAL
+local ELEMENT_LITERAL = require("expaghetti.enums.elements").LITERAL
 
-local ERROR_NOTHING_TO_REPEAT = require("enums.errors").nothingToRepeat
+local ERROR_NOTHING_TO_REPEAT = require("expaghetti.enums.errors").nothingToRepeat
 
 --[[ Module ]]--
 local Literal = { }

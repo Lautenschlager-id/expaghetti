@@ -10,8 +10,8 @@ local math_max = math.max
 local string_sub = string.sub
 
 --[[ Dependencies ]]--
-local Assertion = require("helpers.assertion")
-local matcher = require("matcher.init")
+local Assertion = require("expaghetti.helpers.assertion")
+local matcher = require("expaghetti.matcher.init")
 
 --[[ Aliases ]]--
 local AssertionIsNumber = Assertion.isNumber

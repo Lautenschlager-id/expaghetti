@@ -13,12 +13,12 @@ local string_lower = string.lower
 local string_upper = string.upper
 
 --[[ Dependencies ]]--
-local Escaped = require("magic.escaped")
+local Escaped = require("expaghetti.magic.escaped")
 
-local toCharArray = require("helpers.string").toCharArray
+local toCharArray = require("expaghetti.helpers.string").toCharArray
 
 --[[ Enums ]]--
-local Flags = require("enums.flags").FLAGS
+local Flags = require("expaghetti.enums.flags").FLAGS
 
 --[[ Aliases ]]--
 local EscapedIsToken, EscapedParse, EscapedParseReplacementTemplate = Escaped.isToken, Escaped.parse, Escaped.parseReplacementTemplate

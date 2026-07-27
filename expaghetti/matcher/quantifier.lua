@@ -6,13 +6,13 @@
 ]]
 
 --[[ Dependencies ]]--
-local elementMatcher = require("matcher.element")
+local elementMatcher = require("expaghetti.matcher.element")
 
 --[[ Enums ]]--
-local QUANTIFIER_MODES = require("enums.quantifiers").MODES
+local QUANTIFIER_MODES = require("expaghetti.enums.quantifiers").MODES
 
 --[[ Aliases ]]--
-local ELEMENT_GROUP = require("enums.elements").GROUP
+local ELEMENT_GROUP = require("expaghetti.enums.elements").GROUP
 
 local QUANTIFIER_MODE_GREEDY = QUANTIFIER_MODES.GREEDY
 local QUANTIFIER_MODE_LAZY = QUANTIFIER_MODES.LAZY

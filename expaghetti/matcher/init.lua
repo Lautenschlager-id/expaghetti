@@ -5,9 +5,9 @@
 ]]
 
 --[[ Dependencies ]]--
-local coreTreeMatcher = require("matcher.core")
-local MatchState = require("matcher.state")
-local parser = require("parser.init")
+local coreTreeMatcher = require("expaghetti.matcher.core")
+local MatchState = require("expaghetti.matcher.state")
+local parser = require("expaghetti.parser.init")
 
 --[[ Aliases ]]--
 local MatchStateNew = MatchState.new

@@ -6,7 +6,7 @@
 ]]
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Modules ]]--
 local FLAGS = {

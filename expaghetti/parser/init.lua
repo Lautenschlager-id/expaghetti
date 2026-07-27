@@ -3,8 +3,8 @@
 ]]
 
 --[[ Dependencies ]]--
-local ParserState = require("parser.state")
-local parserCore = require("parser.core")
+local ParserState = require("expaghetti.parser.state")
+local parserCore = require("expaghetti.parser.core")
 
 --[[ Aliases ]]--
 local ParserStateNew = ParserState.new

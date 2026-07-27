@@ -7,7 +7,7 @@ local next = next
 local string_format = string.format
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local MAGIC_ESCAPE = Magic.ESCAPE

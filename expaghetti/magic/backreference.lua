@@ -8,15 +8,15 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local BackreferenceNode = require("core.ast").Backreference
-local ParserHelpers = require("helpers.parser")
+local BackreferenceNode = require("expaghetti.core.ast").Backreference
+local ParserHelpers = require("expaghetti.helpers.parser")
 
 --[[ Enums ]]--
-local ELEMENT_BACKREFERENCE = require("enums.elements").BACKREFERENCE
+local ELEMENT_BACKREFERENCE = require("expaghetti.enums.elements").BACKREFERENCE
 
-local Errors = require("enums.errors")
+local Errors = require("expaghetti.enums.errors")
 
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local consumeWhileArray = ParserHelpers.consumeWhileArray

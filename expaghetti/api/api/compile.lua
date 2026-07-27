@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local PatternNew = require("core.pattern").new
+local PatternNew = require("expaghetti.core.pattern").new
 
 --[[ Module ]]--
 return function(api, compilePattern)

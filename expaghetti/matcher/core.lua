@@ -5,9 +5,9 @@
 ]]
 
 --[[ Dependencies ]]--
-local elementMatcher = require("matcher.element")
-local QuantifierIsElement = require("magic.Quantifier").isElement
-local quantifierMatcher = require("matcher.quantifier")
+local elementMatcher = require("expaghetti.matcher.element")
+local QuantifierIsElement = require("expaghetti.magic.Quantifier").isElement
+local quantifierMatcher = require("expaghetti.matcher.quantifier")
 
 --[[ Module ]]--
 

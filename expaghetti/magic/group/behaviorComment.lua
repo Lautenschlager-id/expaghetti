@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local GroupCommentNode = require("core.ast").GroupComment
+local GroupCommentNode = require("expaghetti.core.ast").GroupComment
 
 --[[ Module ]]--
 

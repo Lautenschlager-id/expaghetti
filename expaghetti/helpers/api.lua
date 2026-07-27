@@ -10,12 +10,12 @@ local table_sort = table.sort
 local type = type
 
 --[[ Dependencies ]]--
-local AssertionIsStringOrTable = require("helpers.assertion").isStringOrTable
+local AssertionIsStringOrTable = require("expaghetti.helpers.assertion").isStringOrTable
 
-local parser = require("parser.init")
+local parser = require("expaghetti.parser.init")
 
 --[[ Enums ]]--
-local Flag = require("api.enums").Flag
+local Flag = require("expaghetti.api.enums").Flag
 
 --[[ Module ]]--
 

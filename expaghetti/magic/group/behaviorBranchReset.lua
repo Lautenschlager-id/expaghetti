@@ -3,7 +3,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local GroupBranchResetNode = require("core.ast").GroupBranchReset
+local GroupBranchResetNode = require("expaghetti.core.ast").GroupBranchReset
 
 --[[ Module ]]--
 

@@ -4,17 +4,17 @@
 ]]
 
 --[[ Dependencies ]]--
-local AST = require("core.ast")
+local AST = require("expaghetti.core.ast")
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local ENUM_GROUP_LOOKAROUND_POSITIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_POSITIVE_BEHAVIOR
 local ENUM_GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR = Magic.GROUP_LOOKAROUND_NEGATIVE_BEHAVIOR
 local ENUM_GROUP_LOOKBEHIND_BEHAVIOR = Magic.GROUP_LOOKBEHIND_BEHAVIOR
 
-local ERROR_INVALID_GROUP_BEHAVIOR = require("enums.errors").invalidGroupBehavior
+local ERROR_INVALID_GROUP_BEHAVIOR = require("expaghetti.enums.errors").invalidGroupBehavior
 
 local GroupLookaheadNode = AST.GroupLookahead
 local GroupLookbehindNode = AST.GroupLookbehind

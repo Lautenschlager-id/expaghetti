@@ -10,15 +10,15 @@
 local setmetatable = setmetatable
 
 --[[ Dependencies ]]--
-local API = require("api.init")
-local ConfigNew = require("core.config").new
-local installHooks = require("api.api.installHooks")
+local API = require("expaghetti.api.init")
+local ConfigNew = require("expaghetti.core.config").new
+local installHooks = require("expaghetti.api.api.installHooks")
 
 --[[ Enums ]]--
-local ApiEnums = require("api.enums")
+local ApiEnums = require("expaghetti.api.enums")
 
 --[[ Aliases ]]--
-local AssertionIsTable = require("helpers.assertion").isTable
+local AssertionIsTable = require("expaghetti.helpers.assertion").isTable
 
 --[[ Module ]]--
 local Expaghetti = {

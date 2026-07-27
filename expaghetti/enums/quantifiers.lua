@@ -3,10 +3,10 @@
 ]]
 
 --[[ Dependencies ]]--
-local QuantifierNode = require("core.ast").Quantifier
+local QuantifierNode = require("expaghetti.core.ast").Quantifier
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local MAGIC_QUANTIFIER_ONE_OR_MORE = Magic.QUANTIFIER_ONE_OR_MORE

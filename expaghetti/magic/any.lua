@@ -6,14 +6,14 @@
 ]]
 
 --[[ Dependencies ]]--
-local AnyNode = require("core.ast").Any
+local AnyNode = require("expaghetti.core.ast").Any
 
 --[[ Enums ]]--
-local LINE_BREAKS = require("enums.lineBreaks")
+local LINE_BREAKS = require("expaghetti.enums.lineBreaks")
 
 --[[ Aliases ]]--
-local MAGIC_ANY = require("enums.magic").ANY
-local ELEMENT_ANY = require("enums.elements").ANY
+local MAGIC_ANY = require("expaghetti.enums.magic").ANY
+local ELEMENT_ANY = require("expaghetti.enums.elements").ANY
 
 --[[ Module ]]--
 local Any = {}

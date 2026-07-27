@@ -4,19 +4,19 @@
 ]]
 
 --[[ Dependencies ]]--
-local AST = require("core.ast")
+local AST = require("expaghetti.core.ast")
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
 local ENUM_GROUP_CLOSE = Magic.GROUP_CLOSE
 local ENUM_GROUP_SCOPED_FLAGS_BEHAVIOR = Magic.GROUP_SCOPED_FLAGS_BEHAVIOR
 local ENUM_GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR = Magic.GROUP_SCOPED_FLAGS_DISABLE_BEHAVIOR
 
-local ERROR_INVALID_GROUP_BEHAVIOR = require("enums.errors").invalidGroupBehavior
+local ERROR_INVALID_GROUP_BEHAVIOR = require("expaghetti.enums.errors").invalidGroupBehavior
 
-local FLAGS_INLINE_TOKENS = require("enums.flags").INLINE_TOKENS
+local FLAGS_INLINE_TOKENS = require("expaghetti.enums.flags").INLINE_TOKENS
 
 local GroupScopedFlagsNode = AST.GroupScopedFlags
 local GroupInlineFlagsNode = AST.GroupInlineFlags

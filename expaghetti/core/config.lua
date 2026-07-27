@@ -12,7 +12,7 @@ local next = next
 local table_concat = table.concat
 
 --[[ Dependencies ]]--
-local AssertionIsNumber = require("helpers.assertion").isNumber
+local AssertionIsNumber = require("expaghetti.helpers.assertion").isNumber
 
 --[[ Module ]]--
 local defaults = {

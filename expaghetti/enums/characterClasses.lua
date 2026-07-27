@@ -7,8 +7,8 @@
 ]]
 
 --[[ Dependencies ]]--
-local SetNode = require("core.ast").Set
-local deepCopy = require("helpers.table").deepCopy
+local SetNode = require("expaghetti.core.ast").Set
+local deepCopy = require("expaghetti.helpers.table").deepCopy
 
 --[[ Module ]]--
 

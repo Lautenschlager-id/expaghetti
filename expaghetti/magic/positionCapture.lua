@@ -6,10 +6,10 @@
 ]]
 
 --[[ Dependencies ]]--
-local PositionCaptureNode = require("core.ast").PositionCapture
+local PositionCaptureNode = require("expaghetti.core.ast").PositionCapture
 
 --[[ Aliases ]]--
-local ELEMENT_POSITION_CAPTURE = require("enums.elements").POSITION_CAPTURE
+local ELEMENT_POSITION_CAPTURE = require("expaghetti.enums.elements").POSITION_CAPTURE
 
 --[[ Module ]]--
 local PositionCapture = { }

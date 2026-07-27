@@ -6,7 +6,7 @@
 ]]
 
 --[[ Dependencies ]]--
-local Elements = require("enums.elements")
+local Elements = require("expaghetti.enums.elements")
 
 --[[ Aliases ]]--
 local ELEMENT_ALTERNATE = Elements.ALTERNATE

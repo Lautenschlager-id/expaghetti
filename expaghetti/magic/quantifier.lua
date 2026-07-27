@@ -9,21 +9,21 @@
 local tonumber = tonumber
 
 --[[ Dependencies ]]--
-local deepCopy = require("helpers.table").deepCopy
-local ParserHelpers = require("helpers.parser")
+local deepCopy = require("expaghetti.helpers.table").deepCopy
+local ParserHelpers = require("expaghetti.helpers.parser")
 
-local QuantifierNode = require("core.ast").Quantifier
+local QuantifierNode = require("expaghetti.core.ast").Quantifier
 
 --[[ Enums ]]--
-local Magic = require("enums.magic")
-local Errors = require("enums.errors")
-local Quantifiers = require("enums.quantifiers")
+local Magic = require("expaghetti.enums.magic")
+local Errors = require("expaghetti.enums.errors")
+local Quantifiers = require("expaghetti.enums.quantifiers")
 
 --[[ Aliases ]]--
 local consumeWhile = ParserHelpers.consumeWhile
 local isPositiveOrZeroIntegerChar = ParserHelpers.isPositiveOrZeroIntegerChar
 
-local ELEMENT_QUANTIFIER = require("enums.elements").QUANTIFIER
+local ELEMENT_QUANTIFIER = require("expaghetti.enums.elements").QUANTIFIER
 
 local ERROR_UNORDERED_QUANTIFIER_RANGE = Errors.unorderedQuantifierRange
 local ERROR_NOTHING_TO_REPEAT = Errors.nothingToRepeat
@@ -35,7 +35,7 @@ local MAGIC_QUANTIFIER_SEPARATOR = Magic.QUANTIFIER_SEPARATOR
 local QUANTIFIER_TOKENS = Quantifiers.TOKENS
 local QUANTIFIER_MODES = Quantifiers.MODES
 
-local ZERO_LENGTH_ELEMENTS = require("enums.elementLengths").ZERO_LENGTH
+local ZERO_LENGTH_ELEMENTS = require("expaghetti.enums.elementLengths").ZERO_LENGTH
 
 --[[ Module ]]--
 local Quantifier = {}

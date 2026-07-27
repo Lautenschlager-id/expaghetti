@@ -6,12 +6,12 @@
 ]]
 
 --[[ Dependencies ]]--
-local FrontierNode = require("core.ast").Frontier
-local Set = require("magic.set")
+local FrontierNode = require("expaghetti.core.ast").Frontier
+local Set = require("expaghetti.magic.set")
 
 --[[ Aliases ]]--
-local ELEMENT_FRONTIER = require("enums.elements").FRONTIER
-local ERROR_EXPECTED_FRONTIER_SET = require("enums.errors").expectedFrontierSet
+local ELEMENT_FRONTIER = require("expaghetti.enums.elements").FRONTIER
+local ERROR_EXPECTED_FRONTIER_SET = require("expaghetti.enums.errors").expectedFrontierSet
 
 local SetIsToken = Set.isToken
 local SetMatch = Set.match

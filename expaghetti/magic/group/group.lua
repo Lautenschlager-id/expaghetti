@@ -10,25 +10,25 @@ local string_format = string.format
 local tostring = tostring
 
 --[[ Dependencies ]]--
-local BehaviorAtomic = require("magic.group.behaviorAtomic")
-local BehaviorBranchReset = require("magic.group.behaviorBranchReset")
-local BehaviorCapturing = require("magic.group.behaviorCapturing")
-local BehaviorComment = require("magic.group.behaviorComment")
-local BehaviorFlags = require("magic.group.behaviorFlags")
-local BehaviorLookaround = require("magic.group.behaviorLookaround")
-local BehaviorRecursion = require("magic.group.behaviorRecursion")
-local PositionCapture = require("magic.positionCapture")
+local BehaviorAtomic = require("expaghetti.magic.group.behaviorAtomic")
+local BehaviorBranchReset = require("expaghetti.magic.group.behaviorBranchReset")
+local BehaviorCapturing = require("expaghetti.magic.group.behaviorCapturing")
+local BehaviorComment = require("expaghetti.magic.group.behaviorComment")
+local BehaviorFlags = require("expaghetti.magic.group.behaviorFlags")
+local BehaviorLookaround = require("expaghetti.magic.group.behaviorLookaround")
+local BehaviorRecursion = require("expaghetti.magic.group.behaviorRecursion")
+local PositionCapture = require("expaghetti.magic.positionCapture")
 
 --[[ Enums ]]--
-local Elements = require("enums.elements")
-local ElementLengths = require("enums.elementLengths")
-local Errors = require("enums.errors")
-local Magic = require("enums.magic")
+local Elements = require("expaghetti.enums.elements")
+local ElementLengths = require("expaghetti.enums.elementLengths")
+local Errors = require("expaghetti.enums.errors")
+local Magic = require("expaghetti.enums.magic")
 
 --[[ Aliases ]]--
-local isPositiveIntegerChar = require("helpers.parser").isPositiveIntegerChar
+local isPositiveIntegerChar = require("expaghetti.helpers.parser").isPositiveIntegerChar
 
-local FLAGS_INLINE_TOKENS = require("enums.flags").INLINE_TOKENS
+local FLAGS_INLINE_TOKENS = require("expaghetti.enums.flags").INLINE_TOKENS
 
 local ELEMENT_GROUP = Elements.GROUP
 local ELEMENT_ALTERNATE = Elements.ALTERNATE
