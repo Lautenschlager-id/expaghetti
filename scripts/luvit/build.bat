@@ -1,6 +1,6 @@
 @echo off
-setlocal
 
+REM Go to the repository root
 cd /d "%~dp0\..\.."
 
 if exist dist rmdir /S /Q dist
