@@ -153,6 +153,12 @@ check("Match with zero-length matches", function()
 	assertDeepEqual(match.value, "")
 end)
 
+check("Match with position captures", function()
+	local match = expaghetti.match("()world", "hello world")
+	assertDeepEqual(match.value, "world")
+	assertDeepEqual(match.positionCaptures[1], 7)
+end)
+
 --------------------------------------------------------------------------------
 -- 3. exp.matchAll
 --------------------------------------------------------------------------------

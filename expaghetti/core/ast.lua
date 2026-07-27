@@ -42,6 +42,7 @@ local baseGroup = function()
 		isLookahead = nil,
 		isLookbehind = nil,
 		isRecursion = nil,
+		fixedLength = nil,
 	}
 end
 

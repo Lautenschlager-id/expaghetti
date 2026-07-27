@@ -168,6 +168,7 @@ local buildMatchObject = function(targetString, matchStart, matchEnd, matcherMet
 		value = string_sub(targetString, matchStart, matchEnd),
 		captures = matchCaptures,
 		groups = matchGroups,
+		positionCaptures = matcherMetadata.positionCaptures,
 	}
 
 	if not matcherMetadata.captureStarts then

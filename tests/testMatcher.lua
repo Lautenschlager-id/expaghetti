@@ -1021,6 +1021,94 @@ assertMatch("(?is)a(?-i:.)b", "A\nB", true, 1, 3, "Disable only i inside is scop
 assertMatch("(?im-s)^abc$", "ABC\nDEF", true, 1, 3, "Enable i,m disable s together")
 assertMatch("(?ims)^a.*c$", "A\nB\nC", true, 1, 5, "Enable i,m,s together")
 ----------------------------------------------------------------------------------------------------
+print("  [54] Wiki regex samples")
+
+-- Alternate
+assertMatch("cat|dog|bird", "I have a dog", true, 10, 12, "Alternate: top-level alternation")
+assertCapture("I love (apples|oranges)", "I love oranges", 1, "oranges", "Alternate: grouped alternation")
+-- Anchor ^$
+assertMatch("^abc$", "abc", true, 1, 3, "Anchor: whole string")
+assertMatch("^abc$", "xabc", nil, nil, nil, "Anchor: start")
+assertMatch("^abc$", "abcx", nil, nil, nil, "Anchor: end")
+-- Character Classes
+assertMatch("%$100%.00", "Cost is $100.00", true, 9, 15, "Character class: escaped magic")
+assertMatch("%d{3}-%d{2}-%d{4}", "123-45-6789", true, 1, 11, "Character class: digits")
+assertMatch("(?<word>%a+)", "hello", true, 1, 5, "Character class: letters")
+assertCapture("(?<word>%a+)", "hello", "word", "hello", "Character class: named capture")
+assertMatch("(%d+)-(%d+)-(%d+)", "2024-05-12", true, 1, 10, "Character class: date")
+-- Flags
+assertMatch("abc(?i)def", "abcDEF", true, 1, 6, "Modifier: enable inline flag")
+assertMatch("abc(?-i)def", "ABCdef", true, 1, 6, "Modifier: disable inline flag", "i")
+assertMatch("(?i:abc)def", "ABCdef", true, 1, 6, "Modifier: scoped enable")
+assertMatch("abc(?-i:def)", "ABCdef", true, 1, 6, "Modifier: scoped disable", "i")
+assertMatch("(?i:abc)def", "ABCDEF", nil, nil, nil, "Modifier: scoped flag boundary")
+-- Standard Groups
+assertMatch("(%d+)-(%d+)-(%d+)", "2024-05-12", true, 1, 10, "Group: captures")
+assertCapture("(%d+)-(%d+)-(%d+)", "2024-05-12", 1, "2024", "Group: capture 1")
+assertCapture("(%d+)-(%d+)-(%d+)", "2024-05-12", 2, "05", "Group: capture 2")
+assertCapture("(%d+)-(%d+)-(%d+)", "2024-05-12", 3, "12", "Group: capture 3")
+assertMatch("(?:apple|orange) juice", "orange juice", true, 1, 12, "Group: non-capturing")
+assertNoCapture("(?:apple|orange) juice", "orange juice", "Group: non-capturing 2")
+assertMatch("([a-z]+) %1", "hello hello", true, 1, 11, "Group: backreference")
+-- Named Groups
+assertMatch("(?<year>%d+)-(?<month>%d+)-(?<day>%d+)", "2024-05-12", true, 1, 10, "Named group")
+assertCapture("(?<year>%d+)-(?<month>%d+)-(?<day>%d+)", "2024-05-12", "year", "2024", "Named group: year")
+assertCapture("(?<year>%d+)-(?<month>%d+)-(?<day>%d+)", "2024-05-12", "month", "05", "Named group: month")
+assertCapture("(?<year>%d+)-(?<month>%d+)-(?<day>%d+)", "2024-05-12", "day", "12", "Named group: day")
+assertMatch("<(?<tag>[a-z]+)>.*?</%k<tag>>", "<body>content</body>", true, 1, 20, "Named backreference")
+assertCapture("<(?<tag>[a-z]+)>.*?</%k<tag>>", "<body>content</body>", "tag", "body", "Named backreference capture")
+-- Lookaround
+assertMatch("%w+(?=,)", "apple, banana", true, 1, 5, "Positive lookahead")
+-- assertMatch("%w+(?!,)", "apple banana", true, 7, 12, "Negative lookahead")
+assertMatch("(?<=USD )%d+", "USD 100", true, 5, 7, "Positive lookbehind")
+assertMatch("(?<!USD )%d+", "EUR 100", true, 5, 7, "Negative lookbehind")
+assertMatch("%w+(?= world) world", "hello world", true, 1, 11, "Lookahead does not consume")
+assertMatch("(?<=Mr%. )%a+", "Mr. Smith", true, 5, 9, "Lookbehind does not consume")
+assertMatch("cat(?!fish)", "catfish", nil, nil, nil, "Negative lookahead failure")
+assertMatch("(?<!Mr%. )Smith", "Mr. Smith", nil, nil, nil, "Negative lookbehind failure")
+-- Advanced Groups
+assertMatch("(?>a+)a", "aaaa", nil, nil, nil, "Atomic group")
+assertCapture("(?|(apple)|(orange))", "orange", 1, "orange", "Branch reset")
+assertMatch("hello(?# this is just a greeting ) world", "hello world", true, 1, 11, "Inline comment")
+-- Recursive Groups
+-- assertMatch("^%((?:[^()]+|(?R))*%)$", "(a(b)c)", true, 1, 7, "Whole-pattern recursion")
+-- assertMatch("^%((?:[^()]+|(?R))*%)$", "(a(bc)", nil, nil, nil, "Whole-pattern recursion imbalance")
+-- assertMatch("(x(?1)?y|A)", "xxAyy", true, 1, 5, "Numbered recursion")
+-- assertMatch("(x(?1)?y|A)", "xAyy", nil, nil, nil, "Numbered recursion failure")
+-- Magic Characters
+assertMatch("%$100%.00", "Cost is $100.00", true, 9, 15, "Magic: escaped characters")
+assertMatch("a.c", "abc and axc", true, 1, 3, "Magic: wildcard")
+assertMatch("(?:cat|dog)", "dog", true, 1, 3, "Magic: non-capturing")
+assertCapture("(?<word>%a+)", "hello", "word", "hello", "Magic: named group")
+assertMatch("<.+?>", "<a><b>", true, 1, 3, "Magic: lazy quantifier")
+assertMatch("[^0-9]+", "abc123", true, 1, 3, "Magic: negated set")
+-- Quantifiers
+assertMatch("ab*c", "abbbc", true, 1, 5, "Quantifier: *")
+assertMatch("ab+c", "abbbc", true, 1, 5, "Quantifier: +")
+assertMatch("colou?r", "color", true, 1, 5, "Quantifier: ?")
+assertMatch("colou?r", "colour", true, 1, 6, "Quantifier: ? present")
+assertMatch("%d{4}", "Year: 2026", true, 7, 10, "Quantifier: exact")
+assertMatch("a{2,}", "aaaa", true, 1, 4, "Quantifier: at least")
+assertMatch("a{,2}", "aaaa", true, 1, 2, "Quantifier: at most")
+assertMatch("%d{2,4}", "123456", true, 1, 4, "Quantifier: range")
+-- Lazy Quantifiers
+assertMatch("<.+>", "<first><second>", true, 1, 15, "Greedy quantifier")
+assertMatch("<.+?>", "<first><second>", true, 1, 7, "Lazy quantifier")
+assertMatch("a{2,5}?", "aaaaaa", true, 1, 2, "Lazy explicit quantifier")
+assertMatch("ba??a", "baa", true, 1, 2, "Lazy zero-or-one")
+-- Possessive Quantifiers
+assertMatch("a+mo", "aaamo", true, 1, 5, "Possessive comparison: greedy")
+assertMatch("a++amo", "aaamo", nil, nil, nil, "Possessive one-or-more")
+assertMatch("a{2,4}+aa", "aaaa", nil, nil, nil, "Possessive explicit quantifier")
+-- Sets
+assertMatch("[abc]", "dog and cat", true, 5, 5, "Set: basic")
+assertMatch("[^abc]+", "xyzabc", true, 1, 3, "Set: negated")
+assertMatch("[0-9]+", "Room 204", true, 6, 8, "Set: numeric range")
+assertMatch("[a-z]+", "Hello", true, 2, 5, "Set: alphabetic range")
+assertMatch("[a-zA-Z0-9]+", "Token123", true, 1, 8, "Set: multiple ranges")
+assertMatch("[abc0-9]+", "9cab", true, 1, 4, "Set: literals and range")
+assertMatch("[%w.-]+", "file-name.txt", true, 1, 13, "Set: character class + literals")
+assertMatch("[%dA-F]+", "ABC123xyz", true, 1, 6, "Set: character class + range")
 
 print("All matcher tests passed!")
 
