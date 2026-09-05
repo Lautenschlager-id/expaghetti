@@ -1,4 +1,4 @@
-[![Donate](https://img.shields.io/badge/Donate-PayPal-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TSTEG3PXK4HJ4&source=url)<p align="center">
+<p align="center">
   <img height="300" alt="Expaghetti Logo" src="https://github.com/user-attachments/assets/2ed8e2f3-fb6e-4be7-8da6-87c6858e641a" />
 </p>
 
@@ -190,7 +190,7 @@ local startPos, endPos =
 ```
 
 > [!WARNING]
-> Installing Expaghetti monkey-patches Lua's global `string` library.
+> Calling `exp:install()` monkey-patches Lua's global `string` library.
 >
 > After installation, the affected functions use Expaghetti's regular expression syntax, parameters, and return values instead of Lua's native pattern matching behavior.
 >
