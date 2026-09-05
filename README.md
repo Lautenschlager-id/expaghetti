@@ -190,7 +190,7 @@ local startPos, endPos =
 ```
 
 > [!WARNING]
-> Installing Expaghetti monkey-patches Lua's global `string` library.
+> Calling `exp:install()` monkey-patches Lua's global `string` library.
 >
 > After installation, the affected functions use Expaghetti's regular expression syntax, parameters, and return values instead of Lua's native pattern matching behavior.
 >
