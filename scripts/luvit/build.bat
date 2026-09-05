@@ -15,3 +15,6 @@ for /R "expaghetti" %%F in (*) do (
         xcopy /Y /I "%%F" "dist\%%~pF%%~nxF" >nul
     )
 )
+
+xcopy /Y "package.lua" "dist\expaghetti\" >nul
+xcopy /Y "README.md" "dist\expaghetti\" >nul

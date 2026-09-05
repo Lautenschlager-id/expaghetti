@@ -14,3 +14,6 @@ find expaghetti -type f ! -name "*.lua" | while IFS= read -r file; do
     mkdir -p "dist/$(dirname "$file")"
     cp "$file" "dist/$file"
 done
+
+cp package.lua dist/expaghetti/
+cp README.md dist/expaghetti/
