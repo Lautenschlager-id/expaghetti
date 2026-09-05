@@ -107,7 +107,13 @@ local exp = require("expaghetti")
 
 Luvit uses a different module resolution strategy than standard Lua.
 
-To generate a Luvit-compatible distribution, run the build script:
+You can easily install Expaghetti using the `lit` package manager:
+
+```sh
+lit install Lautenschlager-id/expaghetti
+```
+
+Alternatively, to generate a Luvit-compatible distribution from source, run the build script:
 
 **Windows**
 
