@@ -1,17 +1,26 @@
 package.path = package.path .. ";../?.lua;../expaghetti/?.lua"
 
+--[[ Globals ]]--
+local error = error
 local next = next
 local pcall = pcall
-local strformat = string.format
+local string_format = string.format
+local table_concat = table.concat
 local tostring = tostring
-----------------------------------------------------------------------------------------------------
+
+--[[ Dependencies ]]--
 local parser = require("expaghetti.parser.init")
-----------------------------------------------------------------------------------------------------
-local compareTables = require("tests.helpers.tableAssertion").compareTables
+local compareTables = require("tests.helpers.compareTables")
 local prettyPrint = require("tests.helpers.prettyPrint")
-----------------------------------------------------------------------------------------------------
 local performance = require("tests.helpers.performance")
-----------------------------------------------------------------------------------------------------
+local testRunner = require("tests.helpers.testRunner")
+
+--[[ Aliases ]]--
+local describe = testRunner.describe
+local it = testRunner.it
+local assert = testRunner.assert
+
+--[[ Module ]]--
 local cases = {
 	"literal",
 	"escaped",
@@ -40,80 +49,51 @@ local cases = {
 	"frontier",
 }
 
-local breakOnFirstError = true
+performance(function()
 
-performance.logPerformanceAtTheEnd(function()
+print("Running parser tests...")
 
-local success, error, stop = 0, 0
 for case = 1, #cases do
-	case = cases[case]
+	local caseName = cases[case]
 
-	print(strformat("\n\n############### Testing cases of %q ###############", case))
-	for caseIndex, caseObj in next, require("tests.parserCases." .. case) do
-		caseObj.flags = caseObj.flags or {} 
+	describe("Testing cases of " .. caseName, function()
+		for caseIndex, caseObj in next, require("tests.parserCases." .. caseName) do
+			caseObj.flags = caseObj.flags or {} 
 
-		local flagKeys = {}
-		for flag in next, caseObj.flags do
-			flagKeys[#flagKeys + 1] = flag
-		end
-		print(strformat("Checking generated tree for the regex %q%s", caseObj.regex, not caseObj.flags and "" or string.format(" with flags %q", table.concat(flagKeys, ", "))))
-
-		local hasParsed, tree, errorMessage = pcall(parser, caseObj.regex, caseObj.flags)
-
-		if not hasParsed then
-			print("\tF", "\t", "Parser crashed: " .. tostring(tree))
-			error = error + 1
-		elseif not tree then
-			if caseObj.errorMessage then
-				if errorMessage ~= caseObj.errorMessage then
-					print("\tF", "\t", strformat(
-						"Expected error message\n\t\t\t\t\t%q,\n\t\t\t\tbut got\n\t\t\t\t\t%q",
-						caseObj.errorMessage, tostring(errorMessage)
-					))
-					error = error + 1
-				else
-					print("\t.", "\t", true)
-					success = success + 1
-				end
-			else
-				print("\tF", "\t", strformat(
-					"Failure to parse regex %q:\n\t\t\t\t\t%s",
-					caseObj.regex, errorMessage
-				))
-				error = error + 1
+			local flagKeys = {}
+			for flag in next, caseObj.flags do
+				flagKeys[#flagKeys + 1] = flag
 			end
-		else
-			if caseObj.errorMessage then
-				print("\tF", "\t", "Error message expected, got valid tree.")
-				error = error + 1
-			else
-				tree._metadata = nil
-				local hasCompared, errorMessage = pcall(compareTables, caseObj.parsed, tree)
-				if hasCompared then
-					print("\t.", "\t", true)
-					success = success + 1
-				else
-					print("\tF", "\t", errorMessage)
-					print(prettyPrint(tree, true))
-					error = error + 1
-				end
+			local flagSuffix = ""
+			if next(caseObj.flags) then
+				flagSuffix = string_format(" with flags %q", table_concat(flagKeys, ", "))
 			end
-		end
+			local name = string_format("Checking generated tree for the regex %q%s", caseObj.regex, flagSuffix)
 
-		if error > 0 and breakOnFirstError then
-			stop = true
-			break
-		end
-	end
+			it(name, function()
+				-- if it crashes, it() catches it natively
+				local tree, errorMessage = parser(caseObj.regex, caseObj.flags)
 
-	if stop then
-		break
-	end
+				if not tree then
+					if caseObj.errorMessage then
+						assert.equal(errorMessage, caseObj.errorMessage, "Expected error message mismatch")
+					else
+						error(string_format("Failure to parse regex %q:\n\t\t\t\t\t%s", caseObj.regex, tostring(errorMessage)))
+					end
+				else
+					if caseObj.errorMessage then
+						error("Error message expected, got valid tree.")
+					else
+						tree._metadata = nil
+						compareTables(caseObj.parsed, tree)
+					end
+				end
+			end)
+		end
+	end)
 end
 
-print("\n\n------------------------------------")
-print(strformat("Success : %03d\nError : %03d", success, error))
-print("------------------------------------")
+testRunner.run()
 
 end, {
 	runs = 1

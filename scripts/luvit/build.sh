@@ -6,13 +6,13 @@ cd "$(dirname "$0")/../.."
 rm -rf dist
 
 find expaghetti -type f -name "*.lua" | while IFS= read -r file; do
-    echo "Processing $file"
-    lua scripts/luvit/build.lua "$file"
+	echo "Processing $file"
+	lua scripts/luvit/build.lua "$file"
 done
 
 find expaghetti -type f ! -name "*.lua" | while IFS= read -r file; do
-    mkdir -p "dist/$(dirname "$file")"
-    cp "$file" "dist/$file"
+	mkdir -p "dist/$(dirname "$file")"
+	cp "$file" "dist/$file"
 done
 
 cp package.lua dist/expaghetti/

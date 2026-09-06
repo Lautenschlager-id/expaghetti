@@ -150,6 +150,7 @@ local uninstall = function()
 	end
 
 	installApi = nil
+	originalStringModule = nil
 end
 
 return {
