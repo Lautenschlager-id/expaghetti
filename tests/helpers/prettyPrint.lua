@@ -1,57 +1,95 @@
---[[
-	Helper function for pretty printing tables.
-]]
-
 --[[ Globals ]]--
-local type = type
-local tostring = tostring
 local next = next
-
-local strformat = string.format
-local strrep = string.rep
-local strfind = string.find
-local tblconcat = table.concat
+local string_find = string.find
+local string_format = string.format
+local string_rep = string.rep
+local table_concat = table.concat
+local tostring = tostring
+local type = type
 
 --[[ Module ]]--
-local PrettyPrint = {}
-
-local tableToString
-tableToString = function(tbl, indent, numIndex, stop, _depth, _ref)
-	if type(tbl) ~= "table" then
-		return tostring(tbl)
+local formatTable
+formatTable = function(target, useIndent, showNumericKeys, maxDepth, currentDepth, seen)
+	local targetType = type(target)
+	if targetType ~= "table" then
+		if targetType == "string" then
+			return string_format("%q", target)
+		end
+		return tostring(target)
 	end
 
-	if _depth and _depth > 1 and _ref == tbl then
-		return tostring(_ref)
+	currentDepth = currentDepth or 1
+	maxDepth = maxDepth or 0
+	seen = seen or {}
+
+	if seen[target] then
+		return "<circular reference: " .. tostring(target) .. ">"
+	end
+	seen[target] = true
+
+	local out = {}
+	local length = 0
+	
+	local indentStr = ""
+	local childIndentStr = ""
+	if useIndent then
+		indentStr = string_rep("\t", currentDepth - 1)
+		childIndentStr = string_rep("\t", currentDepth)
 	end
 
-	_depth = _depth or 1
-	stop = stop or 0
-
-	local out = { }
-	local counter = 0
-
-	local t
-	for k, v in next, tbl do
-		counter = counter + 1
-		out[counter] = (indent and strrep("\t", _depth) or '') .. ((type(k) ~= "number" and (strfind(tostring(k), "^[%w_]") and (tostring(k) .. " = ") or ("[" .. strformat("%q", tostring(k)) .. "] = ")) or numIndex and ("[" .. tostring(k) .. "] = ") or ''))
-
-		t = type(v)
-		if t == "table" and not (stop > 0 and _depth >= stop) then
-			out[counter] = out[counter] .. tableToString(v, indent, numIndex, stop - 1, _depth + 1, (_ref or tbl))
-		elseif t == "number" or t == "boolean" then
-			out[counter] = out[counter] .. tostring(v)
-		elseif t == "string" then
-			out[counter] = out[counter] .. strformat("%q", v)
+	for key, value in next, target do
+		length = length + 1
+		local keyStr = ""
+		
+		local keyType = type(key)
+		if keyType == "string" then
+			if string_find(key, "^[%a_][%w_]*$") then
+				keyStr = key .. " = "
+			else
+				keyStr = "[" .. string_format("%q", key) .. "] = "
+			end
+		elseif keyType == "number" then
+			if showNumericKeys then
+				keyStr = "[" .. tostring(key) .. "] = "
+			end
 		else
-			out[counter] = out[counter] .. tostring(v)
+			keyStr = "[" .. tostring(key) .. "] = "
+		end
+
+		local valueStr = ""
+		local valueType = type(value)
+		if valueType == "table" and not (maxDepth > 0 and currentDepth >= maxDepth) then
+			valueStr = formatTable(value, useIndent, showNumericKeys, maxDepth, currentDepth + 1, seen)
+		elseif valueType == "string" then
+			valueStr = string_format("%q", value)
+		else
+			valueStr = tostring(value)
+		end
+
+		if useIndent then
+			out[length] = childIndentStr .. keyStr .. valueStr
+		else
+			out[length] = keyStr .. valueStr
 		end
 	end
 
-	return "{" .. (indent and ("\n" .. tblconcat(out, ",\n") .. "\n") or tblconcat(out, ',')) .. (indent and strrep("\t", _depth - 1) or '') .. "}"
+	seen[target] = nil -- allow same table to be printed in different branches
+
+	if length == 0 then
+		return "{}"
+	end
+
+	if useIndent then
+		return "{\n" .. table_concat(out, ",\n") .. "\n" .. indentStr .. "}"
+	else
+		return "{" .. table_concat(out, ",") .. "}"
+	end
 end
 
-return function(t, ...)
-	return --"<" .. tostring(t) .. ">" ..
-		tableToString(t, ...)
+return function(target, useIndent, showNumericKeys, maxDepth)
+	local prefix = ""
+	if type(target) == "table" then
+		prefix = "<" .. tostring(target) .. ">"
+	end
+	return prefix .. formatTable(target, useIndent, showNumericKeys, maxDepth, 1, {})
 end
